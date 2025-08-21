@@ -1,0 +1,350 @@
+﻿@model PensionModel
+
+
+<script>
+    window.IdPension = "@Model.IdPension"
+    window.IdDelegacion = "@Model.IdDelegacion"
+
+</script>
+
+
+<div class="panel">
+    <div class="panel-body container-fluid">
+        <div class="row row-lg">
+            <div class="col-md-12">
+                <section id="sectionEditarPension" class=" bg-white rounded">
+                    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                        <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                            <div class="row">
+                                <h5 class="px-4"><b>Datos de la pensión</b></h5>
+                                <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                            <div class="row">
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton">
+                                        <button class="btn-info px-3" href="#" id="btnGeolocalizacion" onclick="modalCargaGeolocalizacion()">
+                                            <h5 class="m-0"><b>Geolocalización</b></h5>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                            <div class="row">
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton">
+                                        <button class="btn-info px-3" id="btnActualizar" onclick="btnEditarPension()">
+                                            <h5 class="m-0"><b>Actualizar datos de pensión</b></h5>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form id="frmEditarPension">
+                        @Html.HiddenFor(m=> m.IdPension)
+                        @Html.HiddenFor(m=> m.strIdGruas)
+                        <div class="row align-items-end">
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Pension)
+                                        .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                                        .Placeholder("Ingresa pensión")
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Permiso)
+                                        .Label(l => l.Content("Permiso:"))
+                                        .Placeholder("Ingresa permiso")
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                                <div class="controlForm my-3">
+                                    <label>Delegación <b>(obligatorio)</b>:</label>
+                                    @(Html.Kendo().DropDownListFor(f => f.IdDelegacion).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                        .BindTo((SelectList)ViewBag.CatDelegaciones)
+                                        .OptionLabel("-- Seleccione --")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Popup(p =>
+                                        {
+                                            p.AppendTo("#sectionEditarPension");
+                                        }))
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <label>Municipio <b>(obligatorio)</b>:</label>
+                                    @(Html.Kendo().DropDownListFor(m => m.IdMunicipio).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                        .DataTextField("Text")
+                                                            .DataValueField("Value")
+                                                            .OptionLabel("Seleccione Municipio...")
+                                                            .HtmlAttributes(new { style = "width:100%;" })
+                                                            .Filter(FilterType.Contains)
+                                                            .DataSource(source =>
+                                                            {
+                                                                source.Read(read =>
+                                                                {
+                                                                    read.Action("Municipios_Guanajuato", "PadronDepositosGruas");
+                                                                });
+                                                            })
+                                        .Popup(p =>
+                                        {
+                                            p.AppendTo("#sectionEditarPension");
+                                        }))
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <label>Responsable  <b>(obligatorio)</b>:</label>
+                                    @(Html.Kendo().DropDownListFor(m => m.IdResponsable).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                        .BindTo((SelectList)ViewBag.CatResponsablesPensiones)
+                                        .OptionLabel("-- Seleccione --")
+                                        .HtmlAttributes(new { style = "width:100%;", id = "idResponsable" })
+                                        .Popup(p =>
+                                        {
+                                            p.AppendTo("#sectionEditarPension");
+                                        }))
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Direccion)
+                                        .Label(l => l.Content("Dirección <b>(obligatorio)</b>:"))
+                                        .Placeholder("Ingresa dirección")
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Telefono)
+                                        .Label(l => l.Content("Teléfono:"))
+                                        .Placeholder("Ingresa teléfono")
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Correo)
+                                        .Label(l => l.Content("Correo electrónico"))
+                                        .Placeholder("Ingresa correo electrónico")
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm">
+                                    @(Html.Kendo().TextBoxFor(t => t.Latitud)
+                                        .Label(l => l.Content("Latitud:"))
+                                        .Placeholder("Ingresa Latitud")
+                                        .HtmlAttributes(new
+                                        {
+                                            style = "width: 100%",
+                                            type = "text",
+                                            pattern = @"^-?\d+(\.\d+)?$",
+                                            title = "Ingrese un número decimal, puede ser negativo.",
+                                            inputmode = "decimal", // Ayuda a los navegadores y dispositivos móviles a mostrar el teclado adecuado
+                                            oninput = "this.value=this.value.replace(/[^0-9.-]/g,'')" // Reemplaza caracteres no permitidos en tiempo real
+                                        })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm">
+                                    @(Html.Kendo().TextBoxFor(t => t.Longitud)
+                                        .Label(l => l.Content("Longitud:"))
+                                        .Placeholder("Ingresa Longitud")
+                                        .HtmlAttributes(new
+                                        {
+                                            style = "width: 100%",
+                                            type = "text",
+                                            pattern = @"^-?\d+(\.\d+)?$",
+                                            title = "Ingrese un número decimal, puede ser negativo.",
+                                            inputmode = "decimal", // Ayuda a los navegadores y dispositivos móviles a mostrar el teclado adecuado
+                                            oninput = "this.value=this.value.replace(/[^0-9.-]/g,'')" // Reemplaza caracteres no permitidos en tiempo real
+                                        })
+                                        )
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row">
+                        <div id="listadoGruasPensiones">
+                            <partial name="_ListadoGruasPensiones"  />
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    //$(document).ready(function () {
+    //    $("#modalEditarPension").on("show.bs.modal shown.bs.modal", function (e) {
+    //        // Remove overlay and enable scrolling of body
+    //        $("body").removeClass("modal-open").find(".modal-backdrop").remove();
+    //    });
+    //    $("#modalEditarPension").on('hide.bs.modal', function () {
+    //        $('#modalBodyEditarPension').html('');
+    //    });
+    //});
+    function btnEditarPension() {
+
+        var grid = $("#gridGruasPensiones").data("kendoGrid");
+        // Get selected rows
+        var sel = $("input:checked", grid.tbody).closest("tr");
+        // Get data item for each and save LineItemId to array
+        var items = [];
+        $.each(sel, function (idx, row) {
+            var item = grid.dataItem(row);
+            items.push(item.idGrua);
+        });
+        var strIdGruas = items.toString();
+        $("#strIdGruas").val(strIdGruas);
+
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'Pension' });
+        controlsValidate.push({ 'controlName': 'Direccion' });
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+        controlsValidate = [];
+        controlsValidate.push({ 'controlName': 'IdMunicipio' });
+        controlsValidate.push({ 'controlName': 'IdDelegacion' });
+        controlsValidate.push({ 'controlName': 'idResponsable' });
+
+        if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+        var formData = $("#frmEditarPension").serialize();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_EditarPension")',
+            type: 'POST',
+            data: formData,
+            dataType: "html",
+            success: function (data) {
+                $('#modalBodyEditarPension').html('');
+                $('#modalEditarPension').modal('hide');
+                sitteg_success('Elemento guardado correctamente');
+                //setTimeout(function () { location.href = '/Pensiones/Index' }, 1000);
+                //$('#listadoPensiones').html(data);
+                $("#btnBucarPension").click(); 
+                hideLoading();            },
+            error: function (xhr, status) {
+                var errmsg = xhr.responseText;
+                console.log(errmsg)
+                sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                hideLoading();
+            }
+        });
+
+        //var Mydata = $("frmCrearGrua").serializeObject();
+        //var formData = $("#frmEditarPension").serialize();
+        ////var formData = new FormData();
+        ////formData.delete('idDelegacion');
+        ////alert(json);
+        //$.ajax({
+        //    url: '@Url.Action("ajax_EditarPension")',
+        //    type: 'POST',
+        //    data: formData,
+        //    success: function (result) {
+        //        $("#tblGruasPensiones").show();
+        //        $("#tblGruasPensiones").html(result);
+        //        //$('#modalCrearPension').modal('hide');
+        //        sitteg_info('Elemento guardado correctamente')
+        //    },
+        //    error: function (xhr, status) {
+        //        var errmsg = xhr.responseText;
+        //        console.log(errmsg)
+        //        sitteg_warning('Lo sentimos, ha ocurrido un error.');
+        //    }
+        //});
+
+        //$('#addDependencia').modal('hide');
+        //$('body').removeClass('model-open');
+        //$('.modal-backdrop').remove();
+    }
+
+    function modalCargaGeolocalizacion() {
+        showLoading();
+        var formData = $("#frmCrearPension").serialize();
+        $.ajax({
+            url: '@Url.Action("ajax_CargaGeolocalizacion")',
+            type: 'POST',
+            data: formData,
+            dataType: "html",
+            success: function (data) {
+                $('#modalBodyCargaGeolocalizacion').html(data);
+                $('#modalCargaGeolocalizacion').modal({ backdrop: 'static', keyboard: false });
+                $('#modalCargaGeolocalizacion').modal('show');
+                $('#modalCargaGeolocalizacion').show();
+                document.getElementById('latitude').innerHTML = $("#Latitud").data("kendoTextBox").value();
+                document.getElementById('longitude').innerHTML = $("#Longitud").data("kendoTextBox").value();
+                if ($("#IdMunicipio").data("kendoDropDownList").value() !== '') {
+                    document.getElementById('municipioGL').innerHTML = $("#IdMunicipio").data("kendoDropDownList").text();
+                } else {
+                    document.getElementById('municipioGL').innerHTML = '';
+                }
+                document.getElementById('address').innerHTML = $("#Direccion").data("kendoTextBox").value();
+                initMap();
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+    function closeModalCargaGeolocalizacion() {
+        $('#modalCargaGeolocalizacion').hide();
+    }
+
+</script>
+
+<div class="modal fade modalCustom" id="modalCargaGeolocalizacion" aria-labelledby="modalCargaGeolocalizacion" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-geolocalizacion h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Geolocalización</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="row">
+                        <div class="col-auto my-4">
+                            <button type="button" class="btn-close" onclick="closeModalCargaGeolocalizacion()" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-body" id="modalBodyCargaGeolocalizacion">
+            </div>
+        </div>
+    </div>
+</div>

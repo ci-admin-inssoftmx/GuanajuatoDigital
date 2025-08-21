@@ -1,0 +1,1885 @@
+﻿
+@model InfraccionesModel
+
+@{
+	@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+	var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+	var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+	var regreso = ViewBag.Regreso;
+	var horaMaxima = "00:01";
+	 DateTime fechaActualServidor = DateTime.Now;
+    string fechaActualISO = fechaActualServidor.ToString("yyyy-MM-ddTHH:mm:ss");
+	var EtiReq = "Folio Emergencia (obligatorio)";
+	int idDependencia = (int)@HttpContextAccessor.HttpContext.Session.GetInt32("IdDependencia");
+
+}
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+<script>
+	function isGoogleMapsScriptLoaded() {
+		const scripts = document.getElementsByTagName('script');
+		for (let i = 0; i < scripts.length; i++) {
+			if (scripts[i].src.includes('https://maps.googleapis.com/maps/api/js')) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	if (!isGoogleMapsScriptLoaded()) {
+		const script = document.createElement('script');
+		script.defer = true;
+		script.src = `https://maps.googleapis.com/maps/api/js?key=@Configuration["AppSettings:GoogleMapsApiKey"]&loading=async&libraries=marker`;
+		document.head.appendChild(script);
+	}
+</script>
+
+<style>
+	#map-canvas {
+		height: 400px;
+	}
+
+	.map-control {
+		position: absolute;
+		top: 30px; /* Separa el botón 20 píxeles desde el borde superior */
+		left: 10px; /* Mantiene el botón 10 píxeles desde el borde izquierdo */
+		z-index: 5;
+		background-color: white;
+		border: 2px solid #ccc;
+		padding: 10px 15px; /* Aumenta el relleno interno para hacer el botón más grande */
+		border-radius: 8px; /* Aumenta el radio del borde para un botón más redondeado */
+		cursor: pointer;
+		font-size: 18px; /* Aumenta el tamaño de la fuente del texto del botón */
+		text-align: center; /* Centra el texto dentro del botón */
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Añade una sombra sutil al botón */
+	}
+</style>
+<script>
+
+	function valid5char(e) {
+
+		var value = e.target.value
+		var reg =/[0-2][0-9][\:][0-5][0-9]/g
+		var can = reg.test(value)
+		if(!can){
+			e.target.value=""
+		}
+	}
+
+
+
+	function validacionHora(event) {
+		var horaIngresada = event.target.value;
+		var key = event.key
+		var keycode = event.keyCode
+		var horalength = horaIngresada.length
+		if ([8, 46, 37, 38, 39, 40, 9].indexOf(keycode) != -1) {
+			return
+		}
+		event.preventDefault();
+
+		if(horalength == 0 ){
+			if("012".indexOf(key)!=-1){
+				event.target.value=key
+			}
+		}
+		if(horalength == 1 ){
+			var lastval =horaIngresada[0]
+			if(":"==key && lastval!="0"){
+				event.target.value=  "0"+ event.target.value+key
+			}
+			else if( lastval=="2"){
+				if("0123".indexOf(key) != -1){
+				event.target.value=  event.target.value+key
+				}
+			}else if("0123456789".indexOf(key)!=-1){
+				event.target.value = event.target.value + key
+			}
+		}
+		if(horalength == 2){
+			if(key==":"){
+				event.target.value = event.target.value + key
+			}
+			else if ("012345".indexOf(key)!= -1){
+				event.target.value = event.target.value + ":" + key
+			} 
+		}
+		if(horalength == 3){
+			if ("012345".indexOf(key) != -1) {
+				event.target.value = event.target.value + key
+			}
+		}
+		if(horalength == 4){
+			var lastval = horaIngresada[3]
+			var hours = parseInt(horaIngresada[0]+horaIngresada[1])
+
+			if(lastval =="0" && hours==0 ){
+				if ("0123456789".indexOf(key) != -1) {
+					event.target.value = event.target.value + key
+					setTimeout(validarFecha,2)
+				}
+			} else{
+				if ("0123456789".indexOf(key) != -1) {
+					event.target.value = event.target.value + key
+					setTimeout(validarFecha, 2)
+				}
+			}
+
+		}
+		//// Permitir números del 0 al 9 y teclas especiales como borrar y arrow keys
+		//if ((isNaN(parseInt(horaIngresada.charAt(horaIngresada.length - 1))) || parseInt(horaIngresada.charAt(horaIngresada.length - 1)) > 9) && !["Backspace", "Delete", "ArrowLeft", "ArrowRight"].includes(event.inputType)) {
+		//	event.preventDefault();
+		//	return;
+		//}
+
+		//// Verificar si ya hay cinco dígitos ingresados o si se intenta borrar
+		//if (horaIngresada.length >= 5 && !["Backspace", "Delete"].includes(event.inputType)) {
+		//	event.preventDefault();
+		//	setTimeout(validarFecha, 0); // Llama a validarFecha después de que el valor del campo se haya actualizado
+		//	return;
+		//}
+
+		//// Agregar ":" después de ingresar los dos primeros dígitos
+		//if (horaIngresada.length === 2 && !["Backspace", "Delete"].includes(event.inputType)) {
+		//	event.target.value += ":";
+		//}
+	}
+
+	function FolioVisible() {
+		$.ajax({
+			url: '/Infracciones/FolioEmergenciaObligatorio',
+			type: 'GET',
+			data: {},
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+			success: function (data) {
+				var Jsonstring = JSON.stringify(data);
+				var content = JSON.parse(Jsonstring);
+				if (content.Requerido == 1) {
+					let labelFolio = document.getElementById("LabFolio");
+					labelFolio.innerText = '@EtiReq';
+				}
+			}
+		})
+	}
+
+
+
+	
+function validarFecha(event) {
+    // Obtener la fecha actual
+
+	console.log("Hola")
+
+var fechaActual = new Date();
+var fechaParseo = new Date( parseInt(fechaActual.getFullYear()) ,parseInt(fechaActual.getMonth()), parseInt(fechaActual.getDate()));
+
+
+    var fechaSeleccionadaString = $("#fechaInfraccion").val();
+	var splitFechaSeleccion = fechaSeleccionadaString.split('/')
+		var objetoFecha = !fechaSeleccionadaString ? fechaParseo: new Date(parseInt(splitFechaSeleccion[2]), parseInt(splitFechaSeleccion[1]) - 1, parseInt(splitFechaSeleccion[0]));
+		console.log("objetoFecha:", objetoFecha)
+		console.log("fechaParseo:", fechaParseo)
+		 var año = parseInt(splitFechaSeleccion[2]);
+
+        // Validar el formato del año
+		if (isNaN(año) || año < 1900 || año > 2099) {
+			$("#fechaInfraccion").val('');
+			event.preventDefault();
+			$("#errorLabel").show();  // Muestra el label
+			return false;
+		} else {
+			$("#errorLabel").hide();  // Oculta el label si la validación es correcta
+		}
+
+    // Comparar la fecha seleccionada con la fecha actual
+if (fechaParseo.getTime() === objetoFecha.getTime()) {        
+	// Si la fecha seleccionada es la fecha actual, verificar la hora ingresada
+		console.log("SI Entra")
+        var horaIngresada = $("#dateTime").val();
+        var horaActual = fechaActual.getHours() * 60 + fechaActual.getMinutes();
+        var horaIngresadaSplit = horaIngresada.split(':');
+        var horaIngresadaEnMinutos = parseInt(horaIngresadaSplit[0]) * 60 + parseInt(horaIngresadaSplit[1]);
+				console.log("horaIngresada", horaIngresada)
+			    console.log("horaActual",horaActual)
+			console.log("horaSplit", horaIngresadaSplit)
+
+	    console.log("horaIngresadaEnMinutos",horaIngresadaEnMinutos)
+
+        if (horaIngresadaEnMinutos > horaActual) {
+
+			$("#dateTime").val('');
+            event.preventDefault();
+        }
+    }
+}
+
+
+	$(document).ready(function () {
+
+		$("#fechaInfraccion").on('paste', function (e) {
+			e.preventDefault();
+			
+		})
+
+		var access = @listaIdsPermitidosJson;
+		var auth = @autorizaciones;
+		var idDependencia=@idDependencia;
+
+		console.log("Dependencia ",idDependencia);
+		if (idDependencia == 0) {
+			console.log("Mov");
+			$("#ddlCarreteras").val(1);
+			$("#idTramo").val(1);
+			$("#kmCarretera").val(0);
+		}
+
+
+		if (access != undefined && access != '') {
+			if (!access.toString().includes(localStorage.getItem("menuId"))) {
+				Swal.fire({
+					icon: "error",
+					title: "¡El usuario no tiene acceso a esta opción!"
+				});
+				setTimeout(() => {
+					window.location.href = "/Principal";
+				}, 200);
+			} else {
+
+			}
+		} else {
+			Swal.fire({
+				icon: "error",
+				title: "¡El usuario no tiene acceso a esta opción!"
+			});
+			setTimeout(() => {
+				window.location.href = "/Principal";
+			}, 200);
+		} setTimeout(() => {
+			modalCargaGeolocalizacion();
+		}, 500);
+	});
+
+	FolioVisible();
+
+
+	function DataFilterCatalogTramo() {
+
+		var value = $("#ddlCarreteras").val()
+		return { idCarretera: value }
+	}
+
+	function OnChangeCarreteras() {
+		var ddl = $("#idTramo").data("kendoDropDownList")
+		ddl.dataSource.read()
+	}
+
+	function testKeyDown(e){
+		var value = e.target.value
+		var key = e.key
+		var keyCode = e.keyCode
+		var pattern = /^[0-3]([0-9](\/([0-1]([0-9](\/([1-2]([0-9]([0-9]([0-9])?)?)?)?)?)?)?)?)?$/
+		var date = value+key
+		var can = pattern.test(date)
+		
+		if ([8, 46, 37, 38, 39, 40, 9].indexOf(keyCode) != -1) {
+			return
+		}
+
+		if(can){
+			if(date.length==10){
+				var splDate = date.split('/')
+				var newDate = new Date(parseInt(splDate[2]), parseInt(splDate[1])-1,parseInt(splDate[0]))
+				var day = newDate.getDate() < 10 ? "0" + newDate.getDate():newDate.getDate()
+				var month = newDate.getMonth() < 9 ? "0" + (parseInt(newDate.getMonth()) + parseInt(1)) : (parseInt(newDate.getMonth()) + parseInt(1))
+				var year = newDate.getFullYear()
+				var newStringDate = `${day}/${month}/${year}`
+				if(day==splDate[0] && month==splDate[1] && year==splDate[2]){					
+					var NowStr = $("#" + e.target.id).data("kendoDatePicker").dateView._current
+					console.log(NowStr)
+					var selectetDay = new Date(parseInt(year),parseInt(month)-1,parseInt(day))
+
+					if(selectetDay>NowStr){
+						$("#fechaInfraccion").val("")
+						e.preventDefault()
+					}					
+				}
+				else{
+					$("#fechaInfraccion").val("")
+					e.preventDefault()
+				}				
+			} else if (date.length > 10) e.preventDefault()
+			return
+		}
+		e.preventDefault()
+	}
+
+
+
+	function OficialChange() {
+
+		var value = $("#idOficial").val()
+		var turno = $("#idTurno").data("kendoDropDownList");
+
+		$.ajax({
+			url: '@Url.Action("ajax_GetTurno","Oficiales")',
+			type: 'POST',
+			data: {idOficial:value},
+			dataType: "json",
+			success: function (result) {
+
+			    
+			turno.select(s => s.Value == result)
+
+			},
+			error: function (xhr, status) {
+				var errmsg = xhr.responseText;
+				console.log(errmsg)
+
+			}
+		});
+
+
+
+	}
+
+</script>
+
+<div class="mainContainer bg-light">
+	<section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+		<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+			<div class="col-12 col-md-auto">
+				<div class="row align-items-center justify-content-center justify-content-md-start">
+					<div class="col-auto">
+						<div class="border border-2 border-dark rounded-circle">
+							<h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+								<b>1</b>
+							</h5>
+						</div>
+					</div>
+					<div class="col-auto p-0">
+						<i class="icon-infracion h1 colorPrimary"></i>
+					</div>
+					<div class="col-auto my-3">
+						<h2 class="m-0 h3"><b>Captura de Infracción</b></h2>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<div class="row">
+			<div class="col-5 pe-0">
+				<div class="bgSuccess py-1"></div>
+			</div>
+			<div class="col-7 ps-0">
+				<div class="bg-light py-1"></div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+				<div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+					<div class="row align-items-center justify-content-center justify-content-md-start">
+						<div class="col-auto">
+							<i class="icon-addInfracion h1 colorPrimary"></i>
+						</div>
+						<div class="col-auto my-3">
+							<h5 class="px-4 my-4"><b>Datos de la infracción</b></h5>
+							<h6 class="px-4 my-4 text-muted">Completa los datos solicitados.</h6>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+					<div class="row">
+						<div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+							<button href="#" id="btnGuardarInfraccion" onclick="btnGuardarInfraccion()">
+								<h6 class="m-0 d-flex align-items-center"><i class="icon-addInfracion h5 mb-0 me-2"></i><b>Guardar infracción</b></h6>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div>
+				<nav class="tabCustom">
+					@*navegador tabs*@
+					<div class="nav nav-tabs row mx-0" id="nav-tab" role="tablist">
+						<button class="nav-link active col" id="informacionInfraccion-tab" data-bs-toggle="tab" data-bs-target="#informacionInfraccion-container" type="button" role="tab" aria-controls="informacionInfraccion-container" aria-selected="true">
+							<div class="row justify-content-center align-items-center px-2 py-1">
+								<div class="col-auto radioCustom p-0">
+									<div class="rounded-circle m-1"></div>
+								</div>
+								<div class="col-auto p-0">
+									<h6 class="m-0"><b>Información</b></h6>
+								</div>
+							</div>
+						</button>
+						<button class="nav-link col" id="lugar-tab" data-bs-toggle="tab" data-bs-target="#lugar-container" type="button" role="tab" aria-controls="lugar-container" aria-selected="false">
+							<div class="row justify-content-center align-items-center px-2 py-1">
+								<div class="col-auto radioCustom p-0">
+									<div class="rounded-circle m-1"></div>
+								</div>
+								<div class="col-auto p-0">
+									<h6 class="m-0"><b>Lugar</b></h6>
+								</div>
+							</div>
+						</button>
+						<button class="nav-link col" id="vehiculo-tab" data-bs-toggle="tab" data-bs-target="#vehiculo-container" type="button" role="tab" aria-controls="vehiculo-container" aria-selected="false">
+							<div class="row justify-content-center align-items-center px-2 py-1">
+								<div class="col-auto radioCustom p-0">
+									<div class="rounded-circle m-1"></div>
+								</div>
+								<div class="col-auto p-0">
+									<h6 class="m-0"><b>Vehículo</b></h6>
+								</div>
+							</div>
+						</button>
+						<button class="nav-link col" id="conductor-tab" data-bs-toggle="tab" data-bs-target="#conductor-container" type="button" role="tab" aria-controls="conductor-container" aria-selected="false">
+							<div class="row justify-content-center align-items-center px-2 py-1">
+								<div class="col-auto radioCustom p-0">
+									<div class="rounded-circle m-1"></div>
+								</div>
+								<div class="col-auto p-0">
+									<h6 class="m-0"><b>Conductor</b></h6>
+								</div>
+							</div>
+						</button>
+
+					</div>
+				</nav>
+				<form id="frmCrearInfraccion" autocomplete="off">
+					@Html.HiddenFor(m=> m.placasVehiculo)
+					@Html.HiddenFor(m=> m.NumTarjetaCirculacion)
+					@*Contenidos de cada tab*@
+					<div class="tab-content" id="nav-tabContent">
+						<div class="tab-pane tabCustomConteiner fade show active" id="informacionInfraccion-container" role="tabpanel" aria-labelledby="informacionInfraccion-tab">
+							<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+								<div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+									<div class="row align-items-center justify-content-center justify-content-md-start">
+										<div class="col-auto">
+											<i class="icon-infracion h1 colorPrimary"></i>
+										</div>
+										<div class="col-auto my-3">
+											<h5 class="px-4"><b>Información de infracción</b></h5>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="row px-4 pb-4 mb-4 align-items-end">
+								
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 my-3 controlForm">
+									<label>Fecha infracción <b>(obligatorio)</b>:</label>
+									@(Html.Kendo().DatePickerFor(t => t.fechaInfraccion).Max(DateTime.Now)
+										.Label(l => l.Content("Fecha: <b>(obligatorio)</b>:"))
+										.Format("dd/MM/yyyy")
+										.Culture("es-ES")
+										.Events(e =>
+										{
+											e.Change("validarFecha");
+										})
+										.Value("")
+										.HtmlAttributes(new { style = "width: 100%", id = "fechaInfraccion", onkeydown = "testKeyDown(event)" })
+										)
+									<label id="errorLabel" style="display:none; color:red;">El año debe ser un valor de 4 dígitos.</label>
+
+								</div>
+								<div class=" col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 my-3 controlForm">
+									<label class="tex">Hora (formato 24 horas):</label>
+									<input autocomplete="off" type="text" id="dateTime" onkeydown="validacionHora(event)" style="height: 3.6em;" />
+								</div>
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 controlForm">
+									<div class="controlForm my-3">
+										<label id="LabFolio">Folio Emergencia</label>
+										<div class="input-group">
+											<input autocomplete="off" type="text" id="FolioEmergencia" name="FolioEmergencia" class="form-control" style="height: 3.5em;" onkeypress="return event.charCode >= 48 && event.charCode <= 57" />
+										</div>
+									</div>
+								</div>
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 controlForm">
+									<div class="controlForm my-3">
+										<label>Folio <b>(obligatorio):</b></label>
+
+
+											@(Html.Kendo().TextBoxFor(t => t.folioInfraccion)
+											.Placeholder("Ingresa folio")
+											.HtmlAttributes(new { style = "width: 100%", required = "required" })
+											)
+
+										
+									</div>
+								</div>								
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 controlForm">
+									<div class="controlForm my-3">
+										<label>Oficial <b>(obligatorio):</b></label>
+										@(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+											.Name("idOficial")
+											.DataTextField("Text")
+											.DataValueField("Value")
+											.DataSource(source =>
+											{
+												source.Read(read =>
+												{
+													read.Action("OficialesDependencia_Drop", "Oficiales");
+												});
+											})
+											.OptionLabel("-- Seleccione --")
+											.Filter(FilterType.Contains)
+											.Events(e=>e.Change("OficialChange"))
+											.HtmlAttributes(new { style = "width:100%;", required = "required" })
+											)
+									</div>
+								</div>
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 controlForm">
+									<div class="controlForm my-3">
+										<label>Municipio <b>(obligatorio):</b></label>
+										@(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+											.Name("idMunicipio")
+											.DataTextField("Text")
+											.DataValueField("Value")
+											.DataSource(source =>
+											{
+												source.Read(read =>
+												{
+													read.Action("Municipios_Por_Delegacion_Drop", "Infracciones");
+												});
+											})
+											.OptionLabel("-- Seleccione --")
+											.Filter(FilterType.Contains)
+
+											.HtmlAttributes(new { style = "width:100%;", required = "required" })
+											//.Events(e => e.Change("onMunicipioChange"))
+											)
+										@Html.HiddenFor(t => t.municipio)
+									</div>
+								</div>
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 controlForm">
+									<div class="controlForm my-3">
+										<label>Turno:</label>
+										@(Html.Kendo().DropDownListFor(t => t.IdTurno).NoDataTemplate("No se encontraron datos")
+											.DataTextField("Text")
+											.DataValueField("Value")
+											.DataSource(source =>
+											{
+												source.Read(read =>
+												{
+													read.Action("GetDropDown", "CatTurnos").Data("getMunicipioIdSelected");
+												});
+											})
+											.Enable(false)
+											.OptionLabel("-- Seleccione --")
+											.Filter(FilterType.Contains)
+											
+											.HtmlAttributes(new { style = "width:100%;", id = "idTurno" })
+											)										
+									</div>
+								</div>
+								<!--CARGAR BOLETA-->
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 controlForm">
+									<div class="controlForm my-3">
+										<label for="boletaFisicaInf">Agregar boleta física:</label>
+										<input type="file" name="boletaInfraccion" id="boletaInfraccion" class="k-input" style="height:57px;" accept="@User.FindFirst(CustomClaims.extencions).Value">
+									</div>
+								</div>
+							</div>
+						
+							<div class="row">
+								<div class="col-12">
+									<div class="tabCustomEnd"></div>
+								</div>
+							</div>
+						</div>
+						<div class="tab-pane tabCustomConteiner fade show" id="lugar-container" role="tabpanel" aria-labelledby="lugar-tab">
+							<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+								<div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+									<div class="row align-items-center justify-content-center justify-content-md-start">
+										<div class="col-auto">
+											<i class="icon-carretera h1 colorPrimary"></i>
+										</div>
+										<div class="col-auto my-3">
+											<h5 class="px-4"><b>Lugar de la infracción</b></h5>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="row px-4 pb-4 mb-4 align-items-end">
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+									<div class="controlForm my-3">
+										<label>Carretera <b>(obligatorio):</b></label>
+										@(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+											.Name("idCarretera")
+											.BindTo((SelectList)ViewBag.CatCarreteras)
+											.Filter(FilterType.Contains)
+											.Events(ev =>
+											{
+												ev.Change("OnChangeCarreteras");
+
+											})
+											.OptionLabel("-- Seleccione --")
+											.HtmlAttributes(new { style = "width:100%;", id = "ddlCarreteras", required = "required" })
+											)
+									</div>
+								</div>
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+									<div class="controlForm my-3">
+										<label>Tramo <b>(obligatorio):</b></label>
+										<div id="divTramo">
+											@(
+												Html.Kendo().DropDownListFor(f => f.idTramo).NoDataTemplate("No se encontraron datos")
+												.Filter(FilterType.Contains)
+												.OptionLabel("-- Seleccione --")
+												.DataTextField("Text")
+												.DataValueField("Id")
+
+												.DataSource(s =>
+												{
+													s.Read(r =>
+													{
+														r.Action("GetCatalogTramoFilter", "infracciones").Data("DataFilterCatalogTramo");
+													});
+
+												})
+
+												.HtmlAttributes(new { style = "width:100%;", required = "required" })
+												)
+										</div>
+									</div>
+								</div>
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+									<div class="controlForm my-3">
+
+										<label>Kilómetro <b>(obligatorio)</b>:</label>
+										<div class="input-group">
+											<input autocomplete="off" type="text" id="kmCarretera" name="kmCarretera" class="form-control" required onkeydown="ValidarKm(event)" style="height: 3.5em;" />
+										</div>
+
+										@*@(Html.Kendo().TextBoxFor(t => t.kmCarretera)
+											.Label(l => l.Content("Kilómetro <b>(obligatorio)</b>:"))
+											.HtmlAttributes(new { style = "width: 100%; height:58px;", required = "required" })
+											)*@
+									</div>
+								</div>
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+									<div class="controlForm my-3">
+										@(Html.Kendo().TextBoxFor(t => t.lugarCalle)
+											.Label(l => l.Content("Calle:"))
+											.Placeholder("Ingresa calle")
+											.HtmlAttributes(new { style = "width: 100%" })
+											)
+									</div>
+								</div>
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+									<div class="controlForm my-3">
+										@(Html.Kendo().TextBoxFor(t => t.lugarNumero)
+											.Label(l => l.Content("Número:"))
+											.Placeholder("Ingresa número")
+											.HtmlAttributes(new { style = "width: 100%" })
+											)
+									</div>
+								</div>
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+									<div class="controlForm my-3">
+										@(Html.Kendo().TextBoxFor(t => t.lugarColonia)
+											.Label(l => l.Content("Colonia:"))
+											.Placeholder("Ingresa colonia")
+											.HtmlAttributes(new { style = "width: 100%" })
+											)
+									</div>
+								</div>
+								<div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+									<div class="controlForm my-3">
+										@(Html.Kendo().TextBoxFor(t => t.lugarEntreCalle)
+											.Label(l => l.Content("Entre calle: "))
+											.Placeholder("Ingresa entre calle")
+											.HtmlAttributes(new { style = "width: 100%" })
+											)
+									</div>
+								</div>
+
+									<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 d-none">
+									<div class="controlForm my-3">
+										@(Html.Kendo().TextBoxFor(t => t.Direccion)
+												.Label(l => l.Content("Direccion:"))
+												.Placeholder("Ingresa Dirección")
+												.HtmlAttributes(new
+												{
+													style = "width: 100%",
+													type = "text",
+													title = "Ingrese una dirección valida."
+												})
+												)
+									</div>
+								</div>
+								<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+									<div class="controlForm my-3">
+										@(Html.Kendo().TextBoxFor(t => t.Latitud)
+												.Label(l => l.Content("Latitud:"))
+												.Placeholder("Ingresa Latitud")
+												.HtmlAttributes(new
+												{
+													style = "width: 100%",
+													type = "text",
+													pattern = @"^-?\d+(\.\d+)?$",
+													title = "Ingrese un número decimal, puede ser negativo.",
+													inputmode = "decimal", // Ayuda a los navegadores y dispositivos móviles a mostrar el teclado adecuado
+													oninput = "this.value=this.value.replace(/[^0-9.-]/g,'')" // Reemplaza caracteres no permitidos en tiempo real
+												})
+												)
+									</div>
+								</div>
+								<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+									<div class="controlForm my-3">
+										@(Html.Kendo().TextBoxFor(t => t.Longitud)
+												.Label(l => l.Content("Longitud:"))
+												.Placeholder("Ingresa Longitud")
+												.HtmlAttributes(new
+												{
+													style = "width: 100%",
+													type = "text",
+													pattern = @"^-?\d+(\.\d+)?$",
+													title = "Ingrese un número decimal, puede ser negativo.",
+													inputmode = "decimal", // Ayuda a los navegadores y dispositivos móviles a mostrar el teclado adecuado
+													oninput = "this.value=this.value.replace(/[^0-9.-]/g,'')" // Reemplaza caracteres no permitidos en tiempo real
+												})
+												)
+									</div>
+								</div>
+								<div class="col-12 btnOutline btnOutlinePrimary col-md-6 col-lg-4 col-xl-3 col-xx-2">
+									<div class="controlButton my-3">
+										<button class="btn-info px-3" id="btnGeolocalizacion" onclick="buscarDireccion(event)">
+											<h5 class="m-0"><b>Buscar</b></h5>
+										</button>
+									</div>
+								</div>
+								<div class="col-12 btnOutline btnOutlinePrimary col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlButton my-3">
+                                        <button class="btn-info px-3" id="btnGeolocalizacion" onclick="getLocation(event)">
+                                            <h5 class="m-0"><b>Gelocate</b></h5>
+                                        </button>
+                                    </div>
+                                </div>
+
+
+								<div class="form-group col-12">
+									<div class="controlForm ">
+										<label>Observaciones:</label>
+										@Html.TextAreaFor(model => model.observacionesLugar, new { @class = "textarea-custom ", @rows = 2, @maxlength = 500, @style = "width: 100%; resize: none;"})
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6">
+										<div class="controlForm ">
+											<label class="d-flex align-items-center">
+												<i class="icon-geolocalizacion h1 colorPrimary me-2"></i>
+												<span>Datos de geolocalización</span>
+											</label>
+										</div>
+									</div>
+								</div>
+							
+								<div class="row">
+									<div class="col-12" id="modalBodyCargaGeolocalizacion">
+										<div class="row  ">
+											<div class="form-group col-md-4">
+												<div class="controlForm" hidden>
+													<label>Dirección: <span id="address"></span>       <br /></label>
+													<label>Municipio: <span id="municipioGL"></span>       <br /></label>
+													<label>Longitude: <span id="longitude"></span></label>
+													<label>Latitude: <span id="latitude"></span>       <br /></label>
+												</div>
+											</div>
+										</div>
+										<div id="map-canvas"></div>
+									</div>
+								</div>
+
+							</div>
+							<div class="row">
+								<div class="col-12">
+									<div class="tabCustomEnd"></div>
+								</div>
+							</div>
+						</div>
+
+						<div class="tab-pane tabCustomConteiner fade show" id="vehiculo-container" role="tabpanel" aria-labelledby="vehiculo-tab">
+							<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+								<div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+									<div class="row align-items-center justify-content-center justify-content-md-start">
+										<div class="col-auto">
+											<i class="icon-edit-car h1 colorPrimary"></i>
+										</div>
+										<div class="col-auto my-3">
+											<h5 class="px-4"><b>Vehículo de la infracción</b></h5>
+											@*<h6 class="px-4 text-muted">Marque el vehículo que desea asociar.</h6>*@
+										</div>
+									</div>
+								</div>
+								<div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+									<div class="row">
+										<div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+											<button id="btnNuevoVehiculo" onclick="mostrarModalAgregarVehiculo()" type="button">
+												<h6 class="m-0 d-flex align-items-center"><i class="icon-addCar h5 mb-0 me-2"></i><b>Agregar nuevo vehículo</b></h6>
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							@Html.HiddenFor(m=> m.idVehiculo)
+
+							<div class="row my-4">
+								<div id="detalleVehiculo">
+								</div>
+
+
+								<div class="row my-4 px-4">
+									<div id="listadoVehiculosPropietario "  class="d-none">
+									</div>
+								</div>
+
+								<div class="row my-4 px-4">
+									<div id="listadoVehiculos">
+										<partial name="_ListadoVehiculos" model="ViewBag.Vehiculos" />
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="col-12">
+										<div class="tabCustomEnd"></div>
+									</div>
+								</div>
+							</div>
+						
+						</div>
+						<div class="tab-pane tabCustomConteiner fade show" id="conductor-container" role="tabpanel" aria-labelledby="conductor-tab">
+							<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+								<div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+									<div class="row align-items-center justify-content-center justify-content-md-start">
+										<div class="col-auto">
+											<i class="icon-conductor h1 colorPrimary"></i>
+										</div>
+										<div class="col-auto my-3">
+											<h5 class="px-4"><b>Conductor de la infracción</b></h5>
+											<h6 class="px-4 text-muted" id="textoConductor"></h6>
+										</div>
+									</div>
+								</div>
+								<div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+									<div class="row">
+										<div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+											<button type="button" href="#" id="btnNuevoConductor" onclick="ProPietarioConductor()">
+												<h6 class="m-0 d-flex align-items-center"><i class="icon-addConductor h5 mb-0 me-2"></i><b>Propietario Como Conductor</b></h6>
+											</button>
+										</div>
+										<div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+											<button type="button" href="#" id="btnNuevoConductor" onclick="OmitirConductor()">
+												<h6 class="m-0 d-flex align-items-center"><i class="icon-addConductor h5 mb-0 me-2"></i><b>Se Ignora</b></h6>
+											</button>
+										</div>
+										<div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+											<button type="button" href="#" id="btnNuevoConductor" onclick="mostrarModalAgregarConductor()">
+												<h6 class="m-0 d-flex align-items-center"><i class="icon-addConductor h5 mb-0 me-2"></i><b>Agregar nuevo conductor</b></h6>
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							@Html.HiddenFor(m=> m.idPersona)
+							<div class="row my-4 px-4">
+								<div id="detallePersonas">
+								</div>
+							</div>
+							<input type="hidden" id="hdnIdPersonaTemp" value="" />
+							<div class="row my-4 px-4">
+								<div id="listadoPersonas">
+
+									<partial name="_ListadoPersonas" model="ViewBag.Personas" />
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-12">
+									<div class="tabCustomEnd"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					</form>
+			</div>
+		</div>
+		<!--Modal agregar conductor-->
+		<div class="modal fade modalCustom" id="agregarConductorModal" aria-labelledby="agregarVehiculoLabel" aria-hidden="true">
+			<div class="modal-dialog modal-xl" role="document">
+				<div class="modal-content">
+					<div class="modal-body" id="ModalBodyAgregarConductor">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade modalCustom" id="agregarVehiculoModal" aria-labelledby="agregarVehiculoLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg" role="document">
+				<div class="modal-content">
+					<div class="modal-body" id="ModalBodyAgregarVehiculo">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade modalCustom" id="foliosDetenidoModal" aria-labelledby="foliosDetenidoLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg" role="document">
+				<div class="modal-content">
+					<div class="modal-body" id="ModalBodyFoliosDetenido">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade modalCustom" id="foliosDetenidoCompletoModal" aria-labelledby="foliosDetenidoCompletoLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg" role="document">
+				<div class="modal-content">
+					<div class="modal-body" id="ModalBodyFoliosDetenidoCompleto">
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</div>
+
+<script>
+	function buttonSi() {
+		sitteg_warning("Click");
+	}
+
+	function OmitirConductor() {
+
+		showLoading();
+
+		$.ajax({
+			url: '@Url.Action("ajax_OmitirConductor")',
+			type: 'POST',
+			data: {},
+			dataType: "json",
+			success: function (result) {
+
+				if (result) {
+
+					sitteg_success('Elemento guardado correctamente')
+					$("#idPersona").val(result)
+					buscarPersona(result);
+
+				}
+				hideLoading();
+				$("#textoConductor").empty().append("Se ignoro el conductor")
+				var grid = $("#gridInfraccionesPersonas").data("kendoGrid");
+				grid.clearSelection();
+
+			},
+			error: function (xhr, status) {
+				var errmsg = xhr.responseText;
+				console.log(errmsg)
+				sitteg_warning('Lo sentimos, ha ocurrido un error.');
+				hideLoading();
+			}
+		});
+
+
+
+	}
+
+	function ProPietarioConductor() {
+
+
+		$("#textoConductor").empty().append("El propietario es el conductor")
+		var grid = $("#gridInfraccionesPersonas").data("kendoGrid");
+		grid.clearSelection();
+		var resultresult = $("#Persona_idPersona").val()
+		buscarPersona(resultresult);
+		if (result) {
+			$("#idPersona").val(result)
+			
+			sitteg_success('Elemento guardado correctamente')
+		}
+		else {
+			sitteg_warning('Debes seleccionar un vehiculo con un propietario asignado');
+		}
+	}
+
+	function onMunicipioChange(e) {
+		var dropdownlist = e.sender;
+		var selectedText = dropdownlist.text();
+		$("input[name='municipio']").val(selectedText);
+
+		var municipioId = this.value();
+		var turnoDropDown = $("#idTurno").data("kendoDropDownList");
+
+		if (municipioId) {
+			turnoDropDown.dataSource.read({ municipioId: municipioId });
+		} else {
+			turnoDropDown.dataSource.data([]);
+		}
+	}
+
+	function getMunicipioIdSelected() {
+		return {			
+			idOficial: $("#idOficial").data("kendoDropDownList").value()
+		};
+	}
+
+
+function btnGuardarInfraccion() {
+    sessionStorage.setItem('redirectTo', '/Infracciones/Crear/');
+    
+    var controlsValidate = [];
+    var isValid = true;
+	var formData = new FormData(document.getElementById('frmCrearInfraccion'));		
+	// ARRAY DE CONTROLES REQUERIDOS PARA QUE SEAN VALIDADOS
+    controlsValidate.push({ 'controlName': 'fechaInfraccion' });
+    controlsValidate.push({ 'controlName': 'dateTime' });
+    controlsValidate.push({ 'controlName': 'folioInfraccion' });
+    if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+    controlsValidate = [];
+    controlsValidate.push({ 'controlName': 'idOficial' });
+    controlsValidate.push({ 'controlName': 'idMunicipio' });
+
+    if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+    if (!isValid) {
+        sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+        $("#informacionInfraccion-tab").click();
+        return;
+    }
+		let labelFolio = document.getElementById("LabFolio");
+		if (labelFolio.innerText == '@EtiReq') {
+			var ValFolio = $("#FolioEmergencia").val();
+			if (ValFolio == 0) {
+
+				sitteg_warning("Favor de ingresar el Folio Emergencias");
+				return;
+			}
+		}
+    isValid = true;
+    controlsValidate = [];
+    controlsValidate.push({ 'controlName': 'kmCarretera' });
+    if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+    controlsValidate = [];
+    controlsValidate.push({ 'controlName': 'ddlCarreteras' });
+    controlsValidate.push({ 'controlName': 'idTramo' });
+
+    if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+    if (!isValid) {
+        sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+        $("#lugar-tab").click();
+        return;
+    }
+
+    if ($("#idVehiculo").val() == '') {
+        sitteg_warning('Debe seleccionar un vehículo');
+        return;
+    }
+
+    if ($("#idPersona").val() == '') {
+        sitteg_warning('Debe seleccionar un conductor.');
+        return;
+    }
+
+    var archivoInput = document.getElementById('boletaInfraccion');
+    var archivo = archivoInput.files[0];
+    console.log("bol", archivo);
+
+
+		if (archivo) {
+			if (archivo.size > 6 * 1024 * 1024) { // 6 MB en bytes
+				sitteg_warning('El archivo de boleta excede el tamaño máximo permitido.');
+				return;
+			}
+			formData.append('boletaInfraccion', archivo);
+		}
+    var horaInfraccion = $("#dateTime").val();
+    formData.append('horaInfraccion', horaInfraccion);
+
+    showLoading();
+
+    $.ajax({
+        url: '@Url.Action("ajax_crearInfraccion")',
+        type: 'POST',
+        data: formData,
+        processData: false, // No procesar los datos como una cadena
+        contentType: false, // No establecer el Content-Type manualmente
+        dataType: 'json',
+			success: function (result) {
+
+				if(result.errorFolio){
+					hideLoading();
+					sitteg_warning(result.message)
+					return
+				}
+
+				if (result.id) {
+
+					//window.setTimeout(function () {
+					//	window.location.href = '/Infracciones/Editar?id=' + result.id + '&regreso=' + @regreso
+					//			}, 500)
+					//return;
+					hideLoading();
+					var data = `
+						<section class="mx-auto my-5 bg-white boxShadow rounded" style="max-width: 600px;">
+							<div class="px-4 py-3">
+								<form id="buscarDetenidoForm">
+									<div class="col-auto p-0">
+										<i class="icon-infracion h1 colorPrimary"></i>
+									</div>
+									<div class="col-auto my-3">
+										<h2 class="m-0 h3"><b>Folio detenidos</b></h2>
+									</div>
+									<div class="form-group mb-4">
+										<label for="tieneDetenidos">¿Existen detenidos asociados con la infracción?</label>
+									</div>
+									<div class="d-flex justify-content-center">
+										<button type="button" class="btn btn-primary mx-2" id="btnSi">Sí</button>
+										<button type="button" class="btn btn-secondary mx-2" id="btnNo">No</button>
+									</div>
+								</form>
+							</div>
+						</section>
+						`;
+
+					$('#ModalBodyFoliosDetenido').html(data);
+
+					$('#foliosDetenidoModal').modal({ backdrop: 'static', keyboard: false });
+					$('#foliosDetenidoModal').modal('show');
+
+					$('#btnSi').off('click').on('click', function () {
+						$('#foliosDetenidoCompletoModal').modal('show');
+						$.ajax({
+							url: 'obtener_ajax_involucrados',
+							data: { idInfraccion: result.id },
+							success: function (data) {
+								var html = `
+									<div class="col-auto my-3">
+										<h2 class="m-0 h3"><b>Folio detenidos</b></h2>
+									</div>
+									<table class="table" data-table-id="tablaDetenidos">
+									<thead>
+										<tr>
+											<th>Persona a Vincular</th>
+											<th>Folio Detenido</th>
+											<th>Acciones</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>
+												<select class="form-control" id="selectedPersonaDetenido">
+													<option value="">Selecciona persona a vincular</option>
+															${data.map(persona => `<option value="${persona.IdPersona}">${persona.Nombre}</option>`).join('')}
+												</select>
+											</td>
+											<td>
+												<input type="text" class="form-control" placeholder="Folio de detenido">
+											</td>
+											<td>
+												<button type="button" class="btn btn-primary btn-sm" id="agregarFila">Agregar Fila</button>
+												<button type="button" class="btn btn-danger btn-sm eliminarFila">Eliminar</button>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+									<div class="d-flex justify-content-center">
+										<button href="#" id="btnCerrarFolioDetenido" onclick="cerrarModalFolioDetenidoCompleto()">
+											<h6 class="m-0 d-flex align-items-center"><i h5 mb-0 me-2"></i><b>Cerrar</b></h6>
+										</button>
+										<button type="button" class="btn btn-danger btn-sm guardarFolioDetenido">Guardar</button>
+									</div>
+							`;
+								$('#ModalBodyFoliosDetenidoCompleto').html(html);
+
+								$(document).on('click', '#agregarFila', function () {
+									var table = $('table[data-table-id="tablaDetenidos"]');
+									var nuevaFila = table.find('tbody tr:first').clone();
+									var allOptions = $('#selectedPersonaDetenido option').clone(); // Clona todas las opciones del select original
+
+									var folioVacío = false;
+									table.find('tbody tr').each(function () {
+										var folioInput = $(this).find('input[placeholder="Folio de detenido"]');
+										if (folioInput.val().trim() === '') {
+											folioVacío = true;
+										}
+									});
+									if (folioVacío) {
+										sitteg_warning('Por favor complete el campo de "Folio de detenido".');
+										return;
+									}
+
+									var seleccionados = table.find('tbody select').map(function () {
+										return $(this).val();
+									}).get();
+
+									nuevaFila.find('#selectedPersonaDetenido').empty();
+
+									var opcionesDisponibles = 0;
+									allOptions.each(function () {
+										if ($.inArray($(this).val(), seleccionados) === -1) {
+											nuevaFila.find('#selectedPersonaDetenido').append($(this).clone());
+											opcionesDisponibles++;
+										}
+									});
+
+									if (opcionesDisponibles <= 1) {
+										return;
+									}
+
+									nuevaFila.find('input[placeholder="Folio de detenido"]').val('');
+
+									table.find('tbody').append(nuevaFila);
+								});
+
+								$(document).on('click', '.eliminarFila', function () {
+									$(this).closest('tr').remove();
+								});
+
+								$(document).on('click', '.guardarFolioDetenido', function () {
+									var table = $('table[data-table-id="tablaDetenidos"]');
+									var datos = [];
+
+									table.find('tbody tr').each(function () {
+										var idPersona = $(this).find('select').val();
+										var folioDetenido = $(this).find('input').val();
+
+										if (idPersona && folioDetenido) {
+											datos.push({
+												IdPersona: idPersona,
+												FolioDetenido: folioDetenido
+											});
+										}
+									});
+
+									$.ajax({
+										url: 'ajax_guardarDetenidos',
+										type: 'POST',
+										contentType: 'application/json',
+										data: JSON.stringify({
+											idInfraccion: result.id,
+											datos: datos
+										}),
+										dataType: 'json',
+										success: function (response) {
+											if (response.success) {
+												$('#foliosDetenidoModal').modal('hide');
+												$('#ModalBodyFoliosDetenido').html("");
+												$('#foliosDetenidoCompletoModal').modal('hide');
+												$('#ModalBodyFoliosDetenidoCompleto').html("");
+											} else {
+												
+											}
+										},
+										error: function (xhr, status, error) {
+											console.log(error);
+											sitteg_warning('Ocurrió un error al enviar los datos');
+										}
+									});
+								});
+							}
+						});
+					});
+
+					$('#btnNo').off('click').on('click', function () {
+						$('#foliosDetenidoModal').modal('hide');
+					});
+
+					$('#foliosDetenidoModal').on('hidden.bs.modal', function () {
+						sitteg_success('Elemento guardado correctamente')
+						window.setTimeout(function () {
+							window.location.href = '/Infracciones/Editar?id=' + result.id + '&regreso=' + @regreso
+							}, 500);
+					});
+				}
+				else {
+					if (result.success == false && result.message != null) {
+						sitteg_warning(result.message);
+					}
+					else {
+						sitteg_warning('El folio ya existe.');
+					}
+					hideLoading();
+				}
+			},
+			error: function (xhr, status) {
+				var errmsg = xhr.responseText;
+				console.log(errmsg)
+				sitteg_warning('Lo sentimos, ha ocurrido un error.');
+				hideLoading();
+			}
+		});
+	}
+
+	function cerrarModalFolioDetenido() {
+		$('#foliosDetenidoModal').modal('hide');
+		$('#ModalBodyFoliosDetenido').html("");
+	}
+
+	function cerrarModalFolioDetenidoCompleto() {
+		$('#foliosDetenidoCompletoModal').modal('hide');
+		$('#ModalBodyFoliosDetenidoCompleto').html("");
+	}
+
+	function isPropietarioOnChange(e) {
+		var isPropietario = e.checked;
+		if (isPropietario) {
+			$("#listadoPersonas").hide();
+			$("#listadoPersonas").html("");
+			$("#detallePersonas").show();
+			idPersona = $("#hdnIdPersonaTemp").val();
+			buscarPersona(idPersona);
+		}
+		else {
+			getListadoPersonasInfracciones();
+			$("#listadoPersonas").show();
+			$("#detallePersonas").hide();
+			$("#idPersona").val('');
+		}
+	}
+	function buscarVehiculo(pidVehiculo) {
+		showLoading();
+		$.ajax({
+			type: "GET",
+			url: '@Url.Action("ajax_detalleVehiculo")',
+			data: {
+				"idVehiculo": pidVehiculo,
+			},
+			success: function (data) {
+
+				$("#detalleVehiculo").html(data);
+				hideLoading();
+			}, error: function () {
+				//sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+
+		});
+	}
+
+	function buscarPersona(pidPersona) {
+		console.log("AQUI SO")
+		showLoading();
+
+		$.ajax({
+			type: "GET",
+			url: '@Url.Action("ajax_detallePersona")',
+			data: {
+				"idPersona": pidPersona,
+			},
+			success: function (data) {
+				$("#detallePersonas").html(data);
+
+				hideLoading();
+			},
+			error: function () {
+				hideLoading();
+			}
+		});
+	}
+
+	function getListadoPersonasInfracciones() {
+		$("#listadoPersonas").show();
+		showLoading();
+		$.ajax({
+			type: "GET",
+			url: '@Url.Action("ajax_listadoPersonasInfracciones")',
+			success: function (data) {
+				$("#listadoPersonas").html(data);
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+
+		});
+	}
+
+	function mostrarModalAgregarConductor() {
+		window.DoUpdate = undefined
+		$('#modalBodyCrearPersona3').html("");
+		$('#modalCrearPersona3').modal('hide');
+		$('#modalBodyCrearPersona2').html("");
+		$.ajax({
+			url: '@Url.Action("ModalAgregarConductor")',
+			data: { x: 1 },
+			type: 'GET',
+			contentType: "application/json; charset=utf-8",
+			dataType: "html",
+			success: function (data) {
+				$('#ModalBodyAgregarConductor2').html('');
+				$('#ModalBodyAgregarConductor').html(data);
+				$('#agregarConductorModal').modal({ backdrop: 'static', keyboard: false });
+				$('#agregarConductorModal').modal('show');
+
+
+
+			}
+		});
+	}
+
+	function mostrarModalAgregarVehiculo() {
+
+		$.ajax({
+			url: '@Url.Action("ModalAgregarVehiculo")',
+			type: 'POST',
+			success: function (data) {
+				$('#ModalBodyAgregarVehiculo').html(data);
+				$('#agregarVehiculoModal').modal('show');
+			}
+		});
+	}
+
+	$(document).ready(function () {
+
+
+		$("#frmCrearInfraccion").on("submit",(e)=>{
+			e.preventDefault()
+		})
+
+
+		$("#kmCarretera").on("input", function () {
+			var value = this.value;
+			if (value !== "") {
+				this.value = value.replace(/[^\d.]/g, "");
+			}
+		});
+
+		$("#kmCarretera").on("paste", function (e) {
+			e.preventDefault();
+			var clipboardData = e.originalEvent.clipboardData.getData('text/plain');
+			if (/^\d+$/.test(clipboardData)) {
+				document.execCommand('insertText', false, clipboardData);
+			}
+		});
+	});
+
+	$(document).ready(function () {
+		$("#placas").prop('disabled', true);
+		$("#idEntidad").prop("disabled", true);
+		$('#tarjeta').prop("disabled", true);
+		$('#Persona_nombreCompleto').prop("disabled", true);
+		$("#motor").prop("disabled", true);
+		$("#motorActual").prop("disabled", true);
+		$("#numeroEconomico").prop("disabled", true);
+		$("#otros").prop("disabled", true);
+		$("#poliza").prop("disabled", true);
+		$("#capacidad").prop("disabled", true);
+		$("#idColor").prop("disabled", true);
+		$("#idColorReal").prop("disabled", true);
+	});
+
+
+
+
+
+	function onRowSelect() {
+
+		var grid = $("#gridPersonasLicencia").data("kendoGrid");
+		var selectedRowData = grid.dataItem(grid.select());
+
+		console.log("EE", selectedRowData);
+
+		const tipoLicenciaMapping = {
+			"TIPO A  CHOFER AUTOMOVILISTA": 1,
+			"TIPO B CHOFER SERVICIO PÚBLICO": 2,
+			"TIPO C  Chofer Servicio de Carga": 3,
+			"TIPO D -MOTOCICLISTA": 4,
+			"PERMISO A -AUTOMOVIL-": 6,
+			"PERMISO D -MOTOCICLETA-": 7,
+			"NO APLICA": 8,
+			"TIPO A": 1,
+			"TIPO B": 2,
+			"TIPO C": 3,
+			"TIPO D": 4,
+			"PERMISO A": 6,
+			"PERMISO D": 7,
+			"A-AUTOMOVILISTA": 1,
+			"B-CHOFER DE SERVICIO PÚBLICO": 2,
+			"C-CHOFER DE SERVICIO DE CARGA": 3,
+			"D-MOTOCICLISTA": 4,
+			"PA-PERMISO AUTOMOVILISTA": 6,
+			"PD-PERMISO MOTOCICLISTA": 7,
+
+		};
+
+		const tipoLicenciaNumero = tipoLicenciaMapping[selectedRowData.tipoLicencia] || 0;
+
+		selectedRowData.idTipoLicencia = tipoLicenciaNumero;
+		console.log("4...")
+		console.log("4.1.." + selectedRowData.nombreCompleto)
+		//   showLoading();
+		var fd = new FormData();
+		fd.append("nombre", selectedRowData.nombre);
+		fd.append("apellidoPaterno", selectedRowData.apellidoPaterno);
+		fd.append("apellidoMaterno", selectedRowData.apellidoMaterno);
+		fd.append("CURP", selectedRowData.CURP);
+		fd.append("RFC", selectedRowData.RFC);
+		fd.append("numeroLicencia", selectedRowData.numeroLicencia);
+		fd.append("tipoLicencia", tipoLicenciaNumero);
+		fd.append("idGenero", selectedRowData.idGenero);
+		fd.append("fechaNacimiento", selectedRowData.fechaNacimiento);
+		fd.append("fechaVigencia", selectedRowData.vigenciaLicencia);
+
+		fd.append("idGenero", selectedRowData.idGenero);
+		fd.append("fechaNacimiento", selectedRowData.fechaNacimiento);
+		fd.append("fechaVigencia", selectedRowData.vigenciaLicencia);
+		fd.append("calle", selectedRowData.calle);
+		fd.append("numero", selectedRowData.numero);
+		fd.append("colonia", selectedRowData.colonia);
+
+		fd.append("idMunicipio", selectedRowData.PersonaDireccion.idMunicipio);
+		fd.append("municipio", selectedRowData.PersonaDireccion.municipio);
+		fd.append("codigoPostal", selectedRowData.PersonaDireccion.codigoPostal);
+		fd.append("entidad", selectedRowData.PersonaDireccion.entidad);
+		fd.append("telefono", selectedRowData.PersonaDireccion.telefono);
+		fd.append("correo", selectedRowData.PersonaDireccion.correo);
+
+		$.ajax({
+			type: 'POST',
+			url: '/Personas/guardaDesdeServicio',
+			contentType: false, // Not to set any content header
+			processData: false, // Not to process data
+			data: fd,
+			success: function (result) {
+				$('#modalLicenciasList').modal('hide');
+				var grid = $("#gridPersonas").data("kendoGrid");
+				if (result && result.data) {
+					var dataArray = [result.data];
+					grid.dataSource.data(dataArray);
+				} else {
+					console.error("La respuesta no tiene la estructura esperada:", result);
+				}
+				sitteg_success('Elemento guardado correctamente')
+				hideLoading();
+			},
+			error: function (error) {
+				sitteg_warning('Error al guardar en la base de datos:');
+				hideLoading();
+			}
+		});
+	}
+
+	document.addEventListener('DOMContentLoaded', function () {
+		document.getElementById('fechaInfraccion').addEventListener('change', validarFecha);
+	});
+
+	/*function validarFecha() {
+		var fechaInput = document.getElementById('fechaInfraccion');
+		var fechaSeleccionada = new Date(fechaInput.value);
+		var fechaActual = new Date();
+
+		if (fechaSeleccionada > fechaActual) {
+		
+			fechaInput.valueAsDate = fechaActual;
+		}
+	}*/
+
+
+	function subMarcaDropDownChange() {
+		var _idMarca = $("#ddlMarcas").data("kendoDropDownList").value();
+		showLoading();
+		$.ajax({
+			url: "/Vehiculos/SubMarcas_ReadPorMarca",
+			type: "POST",
+			data: { idMarca: _idMarca },
+			success: function (data) {
+				var TramosDropDown = $("#idSubmarca").data("kendoDropDownList");
+				TramosDropDown.dataSource.data(data);
+				hideLoading();
+			},
+			error: function (xhr, status, error) {
+				console.log("EE", error)
+				hideLoading();
+			}
+		});
+	}
+
+	function bloquearPegar(event) {
+		event.preventDefault();
+	}
+	var datePicker = $("#fechaInfraccion");
+
+	// Aplicar el evento de bloque de pegado
+	datePicker.on("paste", bloquearPegar);
+
+
+
+	function getLocation(e) {
+
+		e.preventDefault()
+
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(showPosition);
+		} else {
+			console.log("Geolocation is not supported by this browser.");
+		}
+	}
+
+
+	function showPosition(position) {
+		var ltt = position.coords.latitude
+		var lgd = position.coords.longitude
+		var longltt = parseFloat(ltt)
+		var longlgd = parseFloat(lgd)
+		if (!isNaN(ltt) && !isNaN(lgd)) {
+			searchLocation(1, longltt, longlgd, "");
+			placeMarkerLanLng(longltt, longlgd)
+		}
+
+	}
+
+
+
+
+
+
+	var map = null;
+	var geocoder = null;
+	var currentMarker = null;  // Variable global para el marcador
+
+	function modalCargaGeolocalizacion() {
+		showLoading();
+		document.getElementById('municipioGL').innerHTML = 'Guanajuato';
+		initMap();
+		hideLoading();
+	}
+
+	function initMap() {
+		var mapOptions = {
+			center: { lat: 0, lng: 0 },
+			zoom: 1,
+			mapId: "DEMO_MAP_ID"
+		};
+		map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+		geocoder = new google.maps.Geocoder();
+
+		google.maps.event.addListener(map, 'click', function (event) {
+			placeMarker(event.latLng);
+		});
+
+		var direccionCompleta = '';
+		if (document.getElementById('latitude').innerHTML.trim() === '' && document.getElementById('longitude').innerHTML.trim() === '')
+			direccionCompleta = 'Guanajuato';
+		if (document.getElementById('address').innerHTML.trim() !== '' || document.getElementById('municipioGL').innerHTML.trim() !== '') {
+			if (document.getElementById('municipioGL').innerHTML.trim() === 'Guanajuato')
+				direccionCompleta = document.getElementById('address').innerHTML + ' Guanajuato';
+			else
+				direccionCompleta = document.getElementById('address').innerHTML + ' ' + document.getElementById('municipioGL').innerHTML + ' Guanajuato';
+		}
+
+		var locationButton = document.createElement("div");
+		locationButton.classList.add("map-control");
+		locationButton.textContent = "Mi Ubicación";
+		locationButton.style.position = "absolute";
+		locationButton.style.left = "190px";
+		locationButton.style.top = "10px";
+		locationButton.onclick = showLocation;
+
+		map.controls[google.maps.ControlPosition.TOP_LEFT].push(locationButton);
+
+		google.maps.event.addListener(map, 'click', function (event) {
+			placeMarker(event.latLng);
+		});
+
+		searchLocation(0,
+			document.getElementById('latitude').innerHTML,
+			document.getElementById('longitude').innerHTML,
+			direccionCompleta
+		);
+	}
+
+	function buscarDireccion(event) {
+		if (event) {
+			event.preventDefault(); // Evitar el envío del formulario
+		}
+
+
+		var mun = $("#idMunicipio").val()
+		var calle = $("#lugarCalle").val()
+		var numero = $("#lugarNumero").val()
+		var colonia = $("#lugarColonia").val()
+		var textMun =$("#idMunicipio").data("kendoDropDownList").dataSource.data().filter(s=>s.Value ==mun)[0]?.Text??""
+		var ltt = $("#Latitud").val()
+        var lgd = $("#Longitud").val()
+
+        if(ltt && lgd){
+
+            var longltt = parseFloat(ltt)
+            var longlgd = parseFloat(lgd)
+            if(!isNaN(ltt) && !isNaN(lgd))
+            searchLocation(1,longltt,longlgd,direccionCompleta);
+
+        placeMarkerLanLng(longltt,longlgd)
+
+        return
+        }
+
+		var aux = `${calle} ${numero},${colonia},${textMun},Guanajuato`
+
+		aux = aux.replace(",,",",")
+		if(aux.indexOf(",") == 0){
+		aux=aux.substring(1) 
+		}
+		if(aux.indexOf(" ,") == 0){
+		aux=aux.substring(2) 
+		}
+		$("#Direccion").data("kendoTextBox").value(aux)
+
+		var direccionCompleta = '';
+		
+		//document.getElementById('address').innerHTML = $("#Direccion").data("kendoTextBox").value();
+		document.getElementById('address').innerHTML = aux
+		if (document.getElementById('latitude').innerHTML.trim() === '' && document.getElementById('longitude').innerHTML.trim() === '')
+			direccionCompleta = 'Guanajuato';
+		if (document.getElementById('address').innerHTML.trim() !== '' || document.getElementById('municipioGL').innerHTML.trim() !== '') {
+			if (document.getElementById('municipioGL').innerHTML.trim() === 'Guanajuato')
+				direccionCompleta = document.getElementById('address').innerHTML + ' Guanajuato';
+			else
+				direccionCompleta = document.getElementById('address').innerHTML + ' ' + document.getElementById('municipioGL').innerHTML + ' Guanajuato';
+		}
+		console.log(direccionCompleta)
+		searchLocation(1,
+			'',
+			'',
+			direccionCompleta
+		);
+	}
+
+	function showLocation() {
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(callback, errorCallback);
+		} else {
+			sitteg_warning("Geolocalización no es soportada por este navegador.");
+		}
+	}
+
+	function callback(position) {
+		var lat = position.coords.latitude;
+		var lon = position.coords.longitude;
+
+		document.getElementById('latitude').innerHTML = lat;
+		document.getElementById('longitude').innerHTML = lon;
+
+		var latLng = new google.maps.LatLng(lat, lon);
+
+		if (currentMarker) {
+			currentMarker.position = latLng;
+		} else {
+			currentMarker = new google.maps.marker.AdvancedMarkerElement({
+				position: latLng,
+				map: map,
+				title: 'Mi ubicación'
+			});
+		}
+
+		map.setZoom(12);
+		map.setCenter(latLng);
+	}
+
+	function searchLocation(ope, lat, lon, address) {
+		var latNum = parseFloat(lat);
+		var lonNum = parseFloat(lon);
+		var latLng;
+
+		if (!isNaN(latNum) && !isNaN(lonNum)) {
+			latLng = new google.maps.LatLng(latNum, lonNum);
+			if (currentMarker) {
+				currentMarker.position = latLng;
+			} else {
+				currentMarker = new google.maps.marker.AdvancedMarkerElement({
+					position: latLng,
+					map: map,
+					title: 'Ubicación especificada'
+				});
+			}
+			map.setZoom(12);
+			map.setCenter(latLng);
+			return
+		}
+
+		if (address) {
+			geocoder.geocode({ 'address': address }, function (results, status) {
+				if (status === 'OK') {
+					var result = results[0];
+					map.setZoom(12);
+					map.setCenter(result.geometry.location);
+					if (currentMarker) {
+						currentMarker.position = result.geometry.location;
+					} else {
+						currentMarker = new google.maps.marker.AdvancedMarkerElement({
+							position: result.geometry.location,
+							map: map,
+							title: address
+						});
+					}
+					document.getElementById('latitude').innerHTML = result.geometry.location.lat();
+					document.getElementById('longitude').innerHTML = result.geometry.location.lng();
+					if (ope == 1) {
+						$("#Latitud").data("kendoTextBox").value(document.getElementById('latitude').innerHTML);
+						$("#Longitud").data("kendoTextBox").value(document.getElementById('longitude').innerHTML);
+					}
+
+				} else {
+					sitteg_warning('No se pudo encontrar la dirección: ' + status);
+				}
+			});
+		}
+	}
+
+
+	function placeMarkerLanLng(ltt, lgd) {
+		var location = new google.maps.LatLng(ltt, lgd)
+		placeMarker(location)
+	}
+
+	function placeMarker(location) {
+		if (currentMarker) {
+			currentMarker.position = location;
+		} else {
+			currentMarker = new google.maps.marker.AdvancedMarkerElement({
+				position: location,
+				map: map,
+				title: 'Marcador personalizado'
+			});
+		}
+		var lat = location.lat();
+		var lng = location.lng();
+		document.getElementById('latitude').innerHTML = lat;
+		document.getElementById('longitude').innerHTML = lng;
+		$("#Latitud").data("kendoTextBox").value(document.getElementById('latitude').innerHTML);
+		$("#Longitud").data("kendoTextBox").value(document.getElementById('longitude').innerHTML);
+		geocoder.geocode({ 'location': location }, function (results, status) {
+			if (status === 'OK' && results[0]) {
+				console.log(results[0])
+
+				$("#lugarCalle").data("kendoTextBox").value(results[0].address_components[1].long_name)
+				$("#lugarNumero").data("kendoTextBox").value(results[0].address_components[0].long_name)
+				$("#lugarColonia").data("kendoTextBox").value(results[0].address_components[2].long_name)
+
+
+				document.getElementById('address').innerHTML = results[0].formatted_address;
+				$("#Direccion").data("kendoTextBox").value(document.getElementById('address').innerHTML);
+			} else {
+				document.getElementById('address').innerHTML = 'Dirección no encontrada';
+			}
+		});
+	}
+
+	function errorCallback(error) {
+		switch (error.code) {
+			case error.PERMISSION_DENIED:
+				sitteg_warning("El usuario negó la solicitud de geolocalización.");
+				break;
+			case error.POSITION_UNAVAILABLE:
+				sitteg_warning("La información de ubicación no está disponible.");
+				break;
+			case error.TIMEOUT:
+				sitteg_warning("La solicitud de geolocalización ha expirado.");
+				break;
+			case error.UNKNOWN_ERROR:
+				sitteg_warning("Un error desconocido ocurrió.");
+				break;
+		}
+	}
+
+	//window.onload = initMap;
+</script>
+

@@ -1,0 +1,154 @@
+﻿<script>
+    function filtroSalarios() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+
+</script>
+  @if (ViewBag.Admin == true)
+{
+    <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+    <div class="row">
+        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+            <button href="#" id="btnNuevaMarca" onclick="mostrarModalSalarios()">
+                <h6 class="m-0 d-flex align-items-center"><i class="icon-addUdi h5 mb-0 me-2"></i><b>Agregar nueva Unidad Administrativas (UMA)</b></h6>
+            </button>
+        </div>
+    </div>
+</div>
+        }
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+@(
+    Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.SalariosMinimosModel>()
+        .Name("gridCatUmas")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.IdSalario).Title("Id").Hidden();
+            @*columns.Bound(c => c.Area).Title("Area").Width(190);*@
+            columns.Bound(c => c.Salario).Title("Valor").Width(190).Format("{0:###,###,###,###.##}");
+           // columns.Bound(c => c.Anio).Width(190);
+            columns.Bound(c => c.Fecha).Width(190).Format("{0:dd/MM/yyyy}");
+            columns.Bound(c => c.estatusDesc).Title("Estatus").Width(100);
+            columns.Command(c => c.Custom("Editar").Click("editarSalarioMinimo")).Width(100);
+
+        }).HtmlAttributes(new { style = "height:550px" })
+        .Sortable()
+        //.Groupable()
+        .Scrollable()
+        .Pageable()
+
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            .Read(read => read.Action("GetMins", "SalariosMinimos").Data("filtroSalarios"))
+            .PageSize(5).Model(model => model.Id(p => p.IdSalario))
+        )
+     .ToolBar(t => t.Search().Text("Buscar..."))
+        //  .Search(s =>
+        // {
+        // s.Field(c => c.Anio);
+        // s.Field(c => c.Salario);
+
+        // })
+
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+        .Type(GridSelectionType.Row)
+        )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+    @*.Events(ev=>ev.Change("onChange"))*@
+    )
+
+@(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+    </div>
+</div>
+<div class="modal fade modalCustom" id="addUdiSalario" aria-labelledby="addSalarioLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyCreate">
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/lib/Kendo/js/kendo.culture.es-ES.min.js"></script>
+
+<script>
+
+
+    function getId(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdSalario = dataItem.IdSalario;
+        console.log(IdSalario);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarSalarioParcial", "SalariosMinimos")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdSalario: IdSalario }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCreate').html(result);
+                $('#addUdiSalario').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function editarSalarioMinimo(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdSalario = dataItem.IdSalario;
+        console.log(IdSalario);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarSalarioParcial", "SalariosMinimos")',
+            type: 'POST',
+            data: { IdSalario: IdSalario },
+            success: function (result) {
+                $('#ModalBodyCreate').html(result);
+                $('#addUdiSalario').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdSalario = dataItem.IdSalario;
+        console.log(IdSalario);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarSalarioParcial", "SalariosMinimos")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdSalario: IdSalario }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCreate').html(result);
+                $('#addUdiSalario').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

@@ -1,0 +1,106 @@
+﻿<script>
+	function onRowSelect(e) {
+		var selectedRow = this.select();
+		var IdVehiculo, IdInfraccion;
+
+		if (selectedRow.length > 0) {
+			var dataItem = this.dataItem(selectedRow);
+			IdVehiculo = dataItem.IdVehiculo;
+			IdInfraccion = dataItem.IdInfraccion;
+
+			//console.log("dataItem",dataItem);
+
+			showLoading();
+			$.ajax({
+				url: '@Url.Action("VincularInfraccionAccidente2", "CapturaAccidentes")',
+				type: 'POST',
+				data: { IdVehiculo: IdVehiculo, IdInfraccion: IdInfraccion },
+				success: function (result) {
+					if (!result.error) {
+					sitteg_success("Se ha agragado la infracion al registro de accidente")
+					$('#agregarInfraccionModal').modal('hide');
+					actualizarGridPrincipal()
+					hideLoading();
+					window.location.reload();
+					} else {
+						sitteg_warning(result.error);
+					}
+					hideLoading();
+				},
+
+
+				error: function (error) {
+					siteg_warning("Ha sucedido un error inetnte mas tarde");
+					hideLoading();
+				}
+			});
+		}
+	}
+	function actualizarGrid() {
+		var grid = $("#gridInfraccionesPorVehiculo").data("kendoGrid");
+		grid.dataSource.read();
+		grid.refresh();
+	}
+	function actualizarGridPrincipal() {
+		var grid = $("#gridInfraccionesAccidente").data("kendoGrid");
+		grid.dataSource.read();
+		grid.refresh();
+	}
+
+	function recargarGrid() {
+		actualizarGrid();
+	}
+</script>
+<div class="row">
+	<div class="col-12 mb-4 px-4 rounded gridCustom">
+
+		@(
+			Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel>()
+			.Name("gridInfraccionesPorVehiculo")
+			.Events(events => events.Change("onRowSelect"))
+			.Columns(columns =>
+			{
+				columns.Bound(c => c.IdInfraccion).Hidden();
+				columns.Bound(c => c.IdVehiculo).Hidden();
+				columns.Select().Width(50).ClientHeaderTemplate(" ");
+				columns.Bound(c => c.folioInfraccion).Title("Folio").Width(90);
+				columns.Bound(c => c.Fecha).Title("Fecha").Width(90).Format("{0:dd/MM/yyyy HH:mm:ss}");
+				columns.Bound(c => c.Placa).Title("Placas").Width(90);
+				columns.Bound(c => c.ConductorInvolucrado).Title("Conductor").Width(90);
+				columns.Bound(c => c.Propietario).Title("Propietario").Width(90);
+				columns.Bound(c => c.EntidadRegistro).Title("Estado").Width(90);
+				columns.Bound(c => c.Cortesia).Title("Cortesía").Width(90);
+
+
+			}).HtmlAttributes(new { style = "height:300px" })
+			.Sortable()
+			//.Groupable()
+			.Scrollable()
+			.Pageable()
+			.DataSource(dataSource => dataSource
+			.Ajax()
+			.Read(read => read.Action("ObtenerInfraccionesVehiculos", "CapturaAccidentes"))
+			)
+			.ToolBar(t => t.Search().Text("Buscar..."))
+			.Search(s =>
+			{
+				s.Field(c => c.Placa);
+				s.Field(c => c.folioInfraccion);
+				s.Field(c => c.Placa);
+				s.Field(c => c.ConductorInvolucrado);
+				s.Field(c => c.Propietario);
+				s.Field(c => c.EntidadRegistro);
+				s.Field(c => c.Cortesia);
+			})
+
+
+
+			.Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+			.Type(GridSelectionType.Row)
+			)
+			.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+			)
+
+	</div>
+</div>

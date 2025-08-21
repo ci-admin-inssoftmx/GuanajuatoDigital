@@ -1,0 +1,294 @@
+﻿@model PersonaModel
+@{
+    var idMunicipio = Model?.PersonaDireccion?.idMunicipio ?? 0; 
+    var idEntidad = Model?.PersonaDireccion?.idEntidad ?? 0; 
+}
+<script>
+window.idEntidadPersonaMoral = '@idEntidad'
+
+    function getData() {
+
+        var t = {entidadDDlValue: window.idEntidadPersonaMoral}
+        return t
+    }
+
+    function updateMunicipio(){
+        var entidad = $("#PersonaDireccion_idEntidad").val();
+        window.idEntidadPersonaMoral = entidad || "0"
+        var ddl = $("#PersonaDireccion_idMunicipio").data("kendoDropDownList")
+        ddl.dataSource.read()
+    }
+
+</script>
+
+<form id="frmUpdateMoral">
+    <div  class="row px-4 mb-4 align-items-end">
+            @Html.HiddenFor(m=> m.idPersona, new { @id = "hdnIdPersona" })
+            @Html.HiddenFor(m=> m.PersonaDireccion.idPersonasDirecciones, new { @id = "hdnIdPersonasDireccion" })
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.RFC)
+                        .Label(l => l.Content("RFC :"))
+                        .Placeholder("Ingresa RFC")
+                        .HtmlAttributes(new { style = "width: 100%", onkeydown = "validaRfcMoral(event)" })
+                        )
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.nombre)
+                        .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                        .Placeholder("Ingresa Nombre")
+                        .HtmlAttributes(new { style = "width: 100%"})
+                        )
+                </div>
+            </div>
+    </div>
+    <div  class="row px-4 mb-4 align-items-end">
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+
+            <label>Entidad:</label>
+            <span>
+                @(Html.Kendo().DropDownListFor(d => d.PersonaDireccion.idEntidad).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Seleccione Entidad...")
+                    .HtmlAttributes(new { style = "width:100%;" })
+                    .Events(e => e.Change("updateMunicipio"))
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("Entidades_Read", "Vehiculos");
+                        });
+                    })
+                    )
+            </span>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Municipio:</label>
+            <span>
+                @(Html.Kendo().DropDownListFor(d => d.PersonaDireccion.idMunicipio).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Seleccione Municipio...")
+                    .HtmlAttributes(new { style = "width:100%;" })
+                     .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("Municipios_Por_Entidad", "Infracciones").Data("getData");
+                                        });
+                                    })
+                    )
+
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.colonia)
+                .Label(l => l.Content("Colonia <b>(obligatorio)</b>:"))
+                .Placeholder("Ingresa colonia")
+                .HtmlAttributes(new { style = "width: 100%" })
+                )
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.calle)
+                .Label(l => l.Content("Calle <b>(obligatorio)</b>:"))
+                .Placeholder("Ingresa calle")
+                .HtmlAttributes(new { style = "width: 100%" })
+                )
+
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+
+            @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.numero)
+                .Label(l => l.Content("Número <b>(obligatorio)</b>:"))
+                .Placeholder("Ingresa número")
+                .HtmlAttributes(new { style = "width: 100%", required = "required" })
+                )
+        </div>
+    </div>
+    </div>
+    <div  class="row px-4 mb-4 align-items-end">
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.telefono)
+                .Label(l => l.Content("Telefono:"))
+                .Placeholder("Ingresa Telefono")
+                .HtmlAttributes(new { style = "width: 100%", @maxlength = "20", onkeypress = "return validarNumero(event)" })
+                )
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.correo)
+                .Label(l => l.Content("Correo electrónico:"))
+                .Placeholder("Ingresa correo electrónico")
+                .HtmlAttributes(new { style = "width: 100%" })
+                )
+
+        </div>
+    </div>
+    </div>
+</form>
+<div class="row my-4">
+    <div class="col-12 col-md-6 mx-md-auto">
+        <div class="row justify-content-around">
+            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                <button type="button" class="btn btnOutline btn-sm btnClose" onclick="cerrarModalEditar()">
+                    <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                </button>
+            </div>
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <div class="controlButton" onClick="submitUpdateMoral()" aria-label="Close">
+                    @(Html.Kendo().Button()
+                        .Name("UpdateMoral")
+                        .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                        .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="confirmacionModalMor" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Confirmación</h5>
+                <button type="button" onclick="cancelarConfirmacionMor()">X</button>
+            </div>
+            <div class="modal-body">
+                ¿Está seguro de que desea cerrar la ventana y perder la información ingresada?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirmarCerrar" onclick="cerrarModalMor()">Aceptar</button>
+                <button type="button" class="btn btn-secondary" id="cancelarConfirmacion" onclick="cancelarConfirmacionMor()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+
+        $("#PersonaDireccion_telefono").on("paste", (e) => {
+            let paste = (event.clipboardData || window.clipboardData).getData("text");
+            var regex = /^[0-9]{1,20}$/
+
+            if (!regex.test(paste)) {
+                event.preventDefault();
+            }
+        })
+
+    })
+
+    function validarNumero(event) {
+        var charCode = (event.which) ? event.which : event.keyCode;
+
+        // Verificar si la tecla presionada es un punto
+        if (charCode === 46) {
+            mostrarError("No se permite ingresar puntos.");
+            event.preventDefault();
+            return false;
+        }
+
+        // Verificar si la tecla presionada no es un número ni las teclas especiales (excepto retroceso)
+        if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 8) {
+            mostrarError("Solo se permiten números.");
+            event.preventDefault();
+            return false;
+        }
+
+        // Verificar la longitud total después de agregar la tecla presionada
+        if ((event.target.value + event.key).length > 20) {
+            mostrarError("Solo se permiten 20 caracteres.");
+            event.preventDefault();
+            return false;
+        }
+
+        // Permitir la inserción si la tecla presionada es un número y la longitud total es aceptable
+        return true;
+    }
+
+    function submitUpdateMoral() {
+
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'nombre' });
+        controlsValidate.push({ 'controlName': 'PersonaDireccion_colonia' });
+        controlsValidate.push({ 'controlName': 'PersonaDireccion_calle' });
+        controlsValidate.push({ 'controlName': 'PersonaDireccion_numero' });
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+            var formData = $("#frmUpdateMoral").serialize();
+
+            $.ajax({
+                url: '@Url.Action("ajax_UpdatePersonaMoral")',
+                type: 'POST',
+                data: formData,
+                success: function (result) {
+                    console.log("Datos recibidos en el cliente:", result);
+
+                    var grid = $("#gridPersonasMorales").data("kendoGrid");
+
+                    if (result && result.data) {
+                        var dataArray = [result.data]; // Convierte el objeto data en un array
+                        grid.dataSource.data(dataArray);
+                    } else {
+                        console.error("La respuesta no tiene la estructura esperada:", result);
+                    }
+
+                    $('#modalUpdateMoral').modal('hide');
+                    $('#modalUpdateMoral2').modal('hide');
+                $('#ModalBodyUpdateMoral').html("");
+                $('#ModalBodyUpdateMoral2').html("");
+
+
+                    sitteg_success('Elemento guardado correctamente');
+                },
+                error: function (xhr, status) {
+                    var errmsg = xhr.responseText;
+                    console.log(errmsg);
+                    sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                }
+            });      
+    }
+
+    function cerrarModalEditar(){
+        $('#confirmacionModalMor').modal('show');
+
+    }
+    function cerrarModalMor() {
+        $('#confirmacionModalMor').modal('hide');
+        $('#ModalBodyUpdateMoral').html("");
+        $('#modalUpdateMoral').modal('hide');
+       // $('#addMoral').modal('hide');
+        $('#modalUpdateMoral2').modal('hide');
+        $('#ModalBodyUpdateMoral2').html("");
+       // $('#addMoral').html("");
+
+
+
+    }
+    function cancelarConfirmacionMor() {
+        $('#confirmacionModalMor').modal('hide');
+
+    }
+</script>

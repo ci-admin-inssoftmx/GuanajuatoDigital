@@ -1,0 +1,313 @@
+@model List<InfraccionesModel>
+@{
+	@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+	var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+
+	var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+
+	var Consulta = autorizaciones.Contains("461") ? 1 : 0;
+	var Imprimir = autorizaciones.Contains("462") ? 1 : 0;
+	var modificar = autorizaciones.Contains("465")?1:0;
+	var modificarP = autorizaciones.Contains("466")?1:0;
+
+
+	var dependencia = @HttpContextAccessor.HttpContext.Session.GetInt32("IdDependencia");
+	var Oficina = User.FindFirst(CustomClaims.OficinaDelegacion).Value; //@HttpContextAccessor.HttpContext.Session.GetInt32("IdOficina");
+
+	
+
+}
+
+<script>
+
+
+	window.modificar =  "@modificar";
+	window.modificarP =  "@modificarP"
+	window.Consulta = "@Consulta"
+	window.Imprimir = "@Imprimir"
+
+
+
+	window.dependencia = "@dependencia"
+	window.Oficina = "@Oficina"
+
+	$(document).ready(function () {
+		var access = @listaIdsPermitidosJson;
+		var auth = @autorizaciones;
+
+		if (access != undefined && access != '') {
+			if (!access.toString().includes(localStorage.getItem("menuId"))) {
+				Swal.fire({
+					icon: "error",
+					title: "¡El usuario no tiene acceso a esta opción!"
+				});
+				setTimeout(() => {
+					window.location.href = "/Principal";
+				}, 200);
+			} else {
+
+			}
+		} else {
+			Swal.fire({
+				icon: "error",
+				title: "¡El usuario no tiene acceso a esta opción!"
+			});
+			setTimeout(() => {
+				window.location.href = "/Principal";
+			}, 200);
+		}
+	});
+
+	
+
+	function TemplateVer(a) {
+		console.log(a.idDelegacion)
+		if (a.transito == window.dependencia && a.idDelegacion == window.Oficina)
+			return `<button onclick="ConsultarInfraccion('${a.idInfraccion}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-research me-2'></i><b>Mostrar</b></h6></button>`
+		//			return `<button onclick="ConsultarInfraccion('${a.idInfraccion}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-research me-2'></i><b>Mostrar</b></h6></button>`
+		else if (window.Consulta == 1)
+					return `<button onclick="ConsultarInfraccion('${a.idInfraccion}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-research me-2'></i><b>Mostrar</b></h6></button>`
+		else
+			return ''
+	}
+
+	function TemplateEditar(a){
+		if ((a.idEstatusInfraccion == 1 || a.idEstatusInfraccion == 2 || a.idEstatusInfraccion == 7) 
+			&& a.idDelegacion == window.Oficina && a.transito == window.dependencia && (window.modificar == 1 || modificarP == 1))
+			return `<button onclick="ShowUpdate('${a.idInfraccion}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>`
+			else if (modificarP == 1 && a.transito == window.dependencia)
+			return `<button onclick="ShowUpdate('${a.idInfraccion}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>`
+			else
+			return ''
+	}
+
+	function TemplateExcel(a){
+		if (a.transito == window.dependencia && a.idDelegacion == window.Oficina)
+			return `<button onclick="downLoadPdf('${a.idInfraccion}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='h5 icon-pdf me-2'></i><b>Descargar</b></h6></button>`
+		else if (window.Imprimir == 1)
+			return `<button onclick="downLoadPdf('${a.idInfraccion}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='h5 icon-pdf me-2'></i><b>Descargar</b></h6></button>`
+		else
+			return ''
+
+	}
+
+
+
+
+
+	</script>
+
+
+
+
+<div class="row">
+	@if (ViewBag.NoResultsMessage != null)
+	{
+		<div class="alert alert-info">
+			@ViewBag.NoResultsMessage
+		</div>
+	}
+	<div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @*<div class="col-12 mb-4 px-4 rounded gridCustom">*@
+        @(
+            Html.Kendo().Grid(Model)
+            .Name("GridInf")
+			.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+			.Columns(columns =>
+            {                
+                columns.Bound(c => c.idInfraccion).Hidden();
+                columns.Bound(p => p.folioInfraccion).Title("Folio").Width(90);
+                columns.Bound(p => p.NombreConductor).Title("Conductor").Width(90);
+                columns.Bound(p => p.NombrePropietario).Title("Propietario").Width(90);
+				columns.Bound(c => c.fechaInfraccion).Title("Fecha").Width(100).Format("{0:dd/MM/yyyy}");
+				columns.Bound(p => p.aplicacion).Title("Aplicada a").Width(120);
+                columns.Bound(c => c.Garantia.garantia).Title("Garantía").Width(90);
+                columns.Bound(c => c.Vehiculo.fullVehiculo).Title("Vehículo").Width(90);
+				columns.Bound(c => c.placasVehiculo).Title("Placas").Width(90);
+                columns.Bound(c => c.delegacion).Title("Delegación/Oficina").Width(90);
+                columns.Bound(c => c.estatusInfraccion).Title("Estatus").Width(90);
+                columns.Bound(c => c.folioEmergencia).Title("Folio Emergencia").Width(90);
+                @*Columna Vehiculo tampoco se que poner si se relaciona a alguna tabla *@
+                @*Aun no se usa cortesia pro que no saben como se relaciona *@
+                @*columns.Bound(c => c.cortesia).Title("Estatus/Cortesía").Width(120);*@
+
+				@*    columns.Bound(p => p.idInfraccion)
+		.ClientTemplate(
+		"# if (idEstatusInfraccion == 5) { #" +
+		"<input type=\"checkbox\" id=\"checkBox\" class=\"parentCheckBox\" window-call=\"template\" checked/>" +
+		"# } else { #" +
+		"<input type=\"checkbox\" id=\"checkBox\" class=\"parentCheckBox\" window-call=\"template\" />" +
+		"# } #")
+		.Width(90);*@
+
+		@*		columns.Bound(p => p.idInfraccion)
+			.ClientTemplate(
+			"# if (infraccionCortesia == 1) { #" +
+			"<button disabled onclick=\"ShowCortesia('#= idInfraccion #')\" class='w-100 btn'><h6 class='m-0 colorWarning'><i class='icon-edit me-2'></i><b> Cortesía</b></h6></button>" +
+			"# } else { #" +
+			"<button onclick=\"ShowCortesia('#= idInfraccion #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b> Cortesía</b></h6></button>" +
+			"# } #")
+		.Title("Cortesía").Sortable(false).Width(90);*@
+				columns.Bound(c => c.infraccionCortesiaString).Title("Cortesía").Width(90);
+				columns.Bound(p => p.idInfraccion).ClientTemplate("#= TemplateEditar(data) #").Title("Editar").Sortable(false).Width(90);
+				columns.Bound(p => p.idInfraccion).ClientTemplate("#= TemplateVer(data) #").Title("Mostrar").Sortable(false).Width(120);
+
+
+				columns.Bound(p => p.idInfraccion).ClientTemplate("#= TemplateExcel(data) #").Title("Exportar").Sortable(false).Width(90);
+
+			}).HtmlAttributes(new { style = "height:450" })
+			@*.Pageable(p => p.Enabled(true).PageSizes(new[] { 10, 20, 30 }))*@
+			.Pageable(p => p.Enabled(true))
+			.EnableCustomBinding(true)
+			.DataSource(dataSource => dataSource
+			.Ajax()
+			.Read("GetAllBuscarInfraccionesPagination", "Infracciones")
+			.PageSize(10)
+			)
+			.Scrollable(scr => scr.Height(350)
+			)
+			@*.ToolBar(t => t.Search())
+			.Search(s =>
+			{
+				s.Field(c => c.folioInfraccion);
+				s.Field(c => c.PersonaInfraccion.nombreCompleto);
+				s.Field(c => c.Vehiculo.Persona.nombreCompleto);
+				s.Field(c => c.NombreGarantia);
+				s.Field(c => c.Vehiculo.fullVehiculo);
+				s.Field(c => c.Vehiculo.placas);
+				s.Field(c => c.delegacion);
+				s.Field(c => c.estatusInfraccion);
+
+			})*@
+			)
+		@*</div>*@
+
+		@(Html.Kendo().Tooltip()
+			.For("#GridInf")
+			.Filter("th")
+			.Position(TooltipPosition.Top)
+			.ContentHandler("tooltipContent")
+
+			)
+
+
+		<script>
+	
+		</script>
+	</div>
+</div>
+
+
+@*Modal*@
+<div class="modal fade modalCustom" id="modalCortesia" aria-labelledby="editVehiculo" aria-hidden="true">
+	<div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+		<div class="modal-content">
+
+			<section class=" bg-white rounded">
+				<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+					<div class="col-auto pe-0">
+						<div class="row align-items-center justify-content-center justify-content-md-start">
+							<div class="col-auto pe-0">
+								<i class="icon-edit-car h1 colorPrimary"></i>
+							</div>
+							<div class="col-auto my-3">
+								<h2 class="m-0 h3"><b>Cortesías no aplicadas</b></h2>
+							</div>
+						</div>
+					</div>
+					<div class="col-auto">
+						<div class="row">
+							<div class="col-auto my-3">
+								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12">
+						<div class="bg-light py-1"></div>
+					</div>
+
+				</div>
+
+				<div class="row align-items-end">
+					<div class="col-12 col-lg-6 my-4">
+						<h5 class="px-4"><b>Infracción:</b></h5>
+					</div>
+
+				</div>
+
+
+				<div class="modal-body" id="ModalBodyCortesia">
+				</div>
+
+			</section>
+		</div>
+	</div>
+</div>
+
+<script>
+
+	function downLoadPdf(Id) {
+		window.location = '/Infracciones/CreatePdfUnRegistro?IdInfraccion=' + Id;
+	}
+
+	function ShowDetail(Id) {
+		//console.log(Id);
+		window.location = '/Infracciones/Detail?IdInfraccion=' + Id;
+	}
+
+	function ShowUpdate(Id) {
+		//console.log(Id);
+		sessionStorage.setItem('redirectTo', '/Infracciones/Index/');
+		window.location = '/Infracciones/Editar?id=' + Id + '&regreso=1&edit=1';
+	}
+
+	function ShowCortesia(Id) {
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("ajax_CortesiaInfraccion")',
+			type: 'GET',
+			data: { id: Id },
+			contentType: "application/json; charset=utf-8",
+			dataType: "html",
+			success: function (value) {
+				$('#ModalBodyCortesia').html(value);
+				$('#modalCortesia').modal('show');
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+	}
+
+	function tooltipContent(e) {
+		var titulo = e.target.context.dataset.title;
+		return titulo;
+	}
+
+	function ConsultarInfraccion(Id) {
+		
+		showLoading();
+		$.ajax({
+			url: '/Infracciones/MostrarInfraccion',
+			type: 'POST',
+			data: { modoSoloLectura:true, Id: Id },
+			success: function (result) {
+
+				window.location = '/Infracciones/Editar?id=' + Id + '&showE=true'; 
+				hideLoading();
+			},
+			error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+	}
+
+	$(document).ready(function () {
+
+	});
+</script>

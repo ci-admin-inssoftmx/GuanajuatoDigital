@@ -1,0 +1,119 @@
+﻿<script>
+    function quitData() {
+        var grid = $("#gridBusquedaServiciosDeposito").data("kendoGrid");
+
+        grid.bind("dataBound", function () {
+            setTimeout(() => {
+                var t = document.querySelector("span.k-pager-info.k-label");
+                var i = document.querySelector(".k-pager-sizes.k-label");
+
+                if (t.innerHTML == "No items to display") {
+                    t.innerHTML = "";
+                }
+
+                if (i && i.innerHTML.includes("items per page")) {
+                    i.innerHTML = "";
+                }
+
+                // Obtener el texto actual de t
+                var text = t.textContent;
+
+                // Reemplazar "of" por "de" y "items" por "elementos"
+                text = text.replace(/of/g, "de").replace(/items/g, "elementos");
+
+                // Asignar el nuevo texto al elemento t
+                t.textContent = text;
+            }, 500);
+        });
+    }
+
+
+
+
+</script>
+
+<script>
+    function onRowSelect(e) {
+        var selectedRow = this.select();
+        console.log("SJS", selectedRow);
+        if (selectedRow.length > 0) {
+            var dataItem = this.dataItem(selectedRow);
+            var idDeposito = dataItem.idDeposito;
+            var esExterno = dataItem.esExterno;
+            console.log("DAT", dataItem);
+            if (esExterno === false) {
+                // Redireccionar si esExterno es igual a 0
+                window.location.href = '@Url.Action("DatosDeposito", "SalidaVehiculos")' + '?iDp=' + idDeposito;
+            } else if (esExterno === true) {
+                // Redireccionar si esExterno es igual a 1
+                window.location.href = '@Url.Action("DatosServicio", "SalidaVehiculos")' + '?iDp=' + idDeposito;
+            } else {
+                // Manejar otros casos si es necesario
+            }
+        }
+
+    }
+
+</script>
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.SalidaVehiculosModel>()
+            .Name("gridBusquedaServiciosDeposito")
+            .Events(events => events.Change("onRowSelect").DataBound("quitData").DataBinding("quitData"))
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.idDeposito).Hidden();
+                columns.Bound(c => c.esExterno).Hidden();
+                columns.Select().Width(90).ClientHeaderTemplate("Seleccionar");
+                columns.Bound(c => c.placa).Title("Placas").Width(100);
+                columns.Bound(c => c.marca).Title("Marca").Width(100);
+                columns.Bound(c => c.submarca).Title("Submarca").Width(70);
+                columns.Bound(c => c.serie).Title("Serie").Width(100);
+                columns.Bound(c => c.color).Title("Color").Width(100);
+                columns.Bound(c => c.propietario).Title("Propietario").Width(100);
+                columns.Bound(c => c.pension).Title("Pensión").Width(100);
+               // columns.Bound(c => c.fechaIngresoFormateada).Title("Fecha de Ingreso").Width(150);
+                columns.Bound(c => c.fechaIngresoFormateada)
+                .Title("Fecha de ingreso")
+                .Width(150)
+                .ClientTemplate("#= mostrarFecha(fechaIngresoFormateada) #");
+            }).HtmlAttributes(new { style = "height:550px" })
+            @*.Pageable(pager => pager.AlwaysVisible(true).PageSizes(new int[] { 5, 10, 20, 100 }).Position(GridPagerPosition.Bottom))*@
+            .Pageable(p => p.Enabled(true))
+            .Sortable()
+            .Scrollable(scr => scr.Height(350))
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.submarca);
+                s.Field(c => c.marca);
+                s.Field(c => c.placa);
+                s.Field(c => c.modelo);
+                s.Field(c => c.serie);
+                s.Field(c => c.fechaIngresoFormateada);
+                s.Field(c => c.color);
+                s.Field(c => c.propietario);
+                s.Field(c => c.pension);
+
+            })
+            )
+
+
+    </div>
+</div>
+
+<script>
+    function mostrarFecha(fecha) {
+        if (fecha && fecha !== "01/01/0001") {
+            return fecha;
+        } else {
+            return " ";
+        }
+    }
+</script>

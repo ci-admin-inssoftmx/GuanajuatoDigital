@@ -1,0 +1,155 @@
+﻿@model Concesionarios2Model
+
+@{
+}
+
+
+<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+    <div class="col-auto pe-0">
+        <div class="row align-items-center justify-content-center justify-content-md-start">
+            <div class="col-auto pe-0">
+                <i class="icon-addConcesonaria h1 colorPrimary"></i>
+            </div>
+            <div class="col-auto my-3">
+                <h2 class="m-0 h3"><b>Agregar concesionario</b></h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-auto">
+        <div class="row">
+            <div class="col-auto my-3">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="bg-light py-1"></div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 my-4">
+        <h5 class="px-4"><b>Datos de nuevo concesionario</b></h5>
+        <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+    </div>
+</div>
+<form id="frmCrearConcesionario" class="row px-4 mb-4 align-items-end">
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.nombre)
+                .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                .Placeholder("Ingresa un nombre")
+                .HtmlAttributes(new { style = "width: 100%" })
+                )
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label for="shipTo">Delegación <b>(obligatorio):</b> </label>
+            @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+            .Filter(FilterType.Contains)
+            .Name("idDelegacion")
+                .BindTo((SelectList)ViewBag.CatDelegaciones)
+                .OptionLabel("-- Seleccione --")
+                .Events(e => e.Change("municipiosDropDownChangeCrear"))
+                .HtmlAttributes(new { style = "width:100%;", id = "ddlDelegacionesCrear" }))
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label for="shipTo">Municipio <b>(obligatorio):</b> </label>
+            @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                .Name("idMunicipio")
+                .BindTo((SelectList)ViewBag.CatMunicipios)
+                .OptionLabel("-- Seleccione --")
+                .Filter(FilterType.Contains)
+                .HtmlAttributes(new { style = "width:100%;", id = "ddlMunicipio" }))
+
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.alias)
+                .Label(l => l.Content("Alias <b>(obligatorio)</b>:"))
+                .Placeholder("Ingresa un alias")
+                .HtmlAttributes(new { style = "width: 100%" })
+                )
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.razonSocial)
+                .Label(l => l.Content("Razón Social <b>(obligatorio)</b>:"))
+                .Placeholder("Ingresa una razón social")
+                .HtmlAttributes(new { style = "width: 100%" })
+                )
+        </div>
+    </div>
+</form>
+<div class="row my-4">
+    <div class="col-12 col-md-6 mx-md-auto">
+        <div class="row justify-content-around">
+            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                    <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                </button>
+            </div>
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <div class="controlButton">
+                    <button class="btnPrimary px-3" onclick="btnCrearConcesionario()">
+                        <h5 class="m-0"><b>Guardar</b></h5>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function btnCrearConcesionario() {
+        var formData = $("#frmCrearConcesionario").serialize();
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'nombre' });
+        controlsValidate.push({ 'controlName': 'alias' });
+        controlsValidate.push({ 'controlName': 'razonSocial' });
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+
+        // DROP DOWN LIST
+        controlsValidate = [];
+        controlsValidate.push({ 'controlName': 'ddlDelegacionesCrear' });
+        controlsValidate.push({ 'controlName': 'ddlMunicipio' });
+        if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_CrearConcesionario")',
+            type: 'POST',
+            data: formData,
+            success: function (result) {
+                $("#listadoConcesionarios").html(result);
+                $('#modalCrearConcesionario').modal('hide');
+                sitteg_success('Elemento guardado correctamente')
+                hideLoading();
+            },
+            error: function (xhr, status) {
+                var errmsg = xhr.responseText;
+                console.log(errmsg)
+                sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                hideLoading();
+            }
+        });
+    }
+
+   
+</script>

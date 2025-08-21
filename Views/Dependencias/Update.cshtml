@@ -1,0 +1,41 @@
+﻿@model GuanajuatoAdminUsuarios.Models.DependenciasModel
+@{
+}
+
+
+<div class="row">
+    <div class="col-md-10">
+        <h2>Modificar Dependencia</h2>
+    </div>
+    <br />
+   
+</div>
+<hr />
+<br />
+
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("Update", "Dependencias"))
+        {
+            @Html.HiddenFor(m=>m.IdDependencia)
+            ;
+
+
+            @(Html.Kendo().TextBoxFor(t => t.NombreDependencia)
+                .HtmlAttributes(new { placeholder = "Dependencia", required = "required", validationmessage = "Introduce nombre de dependencia" })
+                .Label(l => l.Content("Dependencia <b>(obligatorio)</b>:"))
+                )
+            <br />  <br />
+
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <a href='@Url.Action("Index")' class="btn btn-default">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </div>
+
+        }
+
+    </div>
+</div>

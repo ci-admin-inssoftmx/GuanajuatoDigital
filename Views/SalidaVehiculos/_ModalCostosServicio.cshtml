@@ -1,0 +1,225 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CostosServicioModel
+
+<section class=" bg-white rounded">
+
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+
+        <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto">
+                    <div class="border border-2 border-dark rounded-circle">
+                        <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                            <b>1</b>
+                        </h5>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <i class="icon-accidentes h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Montos editables</b></h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-8 pe-0">
+            <div class="bgSuccess py-1"></div>
+        </div>
+        <div class="col-4 ps-0">
+            <div class="bg-light py-1"></div>
+        </div>
+    </div>
+    <div class="col-12 col-md-auto mt-4 mb-2">
+        <h5 class="px-4"><b>Proporciona los montos correspondientes</b></h5>
+    </div>
+    <form id="costosForm" class="row px-4 mb-4 align-items-end">
+
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @Html.HiddenFor(m=>m.idDeposito)
+                @Html.HiddenFor(m=>m.idGrua)
+
+                @{
+                    var abanderamiento = Model.abanderamiento;
+                    var abamderamientodisabled = (abanderamiento != 1) ? "disabled = true" : "";
+                }
+                @(Html.Kendo().NumericTextBoxFor(t => t.costoAbanderamiento)
+                    .HtmlAttributes((Model.abanderamiento != 1) ? (object)new { style = "width: 80%", disabled = true } : new { style = "width: 80%", autocomplete = "off" })
+                    .Label(l => l.Content("Costo Abanderamiento:"))
+                    .Format("n2")
+                    .Culture("en-US")
+                    .Spinners(false)
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <span>
+                    @{
+                        var salvamento = Model.salvamento;
+                        var salvamentodisabled = (salvamento != 1) ? "disabled = true" : "";
+                    }
+                    @(Html.Kendo().NumericTextBoxFor(t => t.costoSalvamento)
+                        .HtmlAttributes((Model.salvamento != 1) ? (object)new { style = "width: 80%", disabled = true } : new { style = "width: 80%", autocomplete = "off" })
+                        .Label(l => l.Content("Costo Salvamento:"))
+                        .Format("n2")
+                        .Culture("en-US")
+                        .Spinners(false)
+                        )
+                </span>
+            </div>
+        </div>
+
+
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <span>
+                    @{
+                        var banderazo = 1;
+                        var banderazodisabled = (banderazo != 1) ? "disabled" : "";
+                    }
+                    @(Html.Kendo().NumericTextBoxFor(t => t.costoBanderazo)
+                        .HtmlAttributes(new { style = "width: 80%", @banderazodisabled, autocomplete = "off" })
+                        .Label(l => l.Content("Costo Banderazo:"))
+                        .Format("n2")
+                        .Spinners(false)
+                        .Culture("en-US")
+                        )
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <span>
+                    @{
+                        var arrastre = Model.arrastre;
+                        var arrastredisabled = (arrastre != 1) ? "disabled = true" : "";
+                    }
+                    @(Html.Kendo().NumericTextBoxFor(t => t.costoArrastre)
+                        .HtmlAttributes((Model.arrastre != 1) ? (object)new { style = "width: 80%", disabled = true } : new { style = "width: 80%", autocomplete = "off" })
+                        .Label(l => l.Content("Costo Arrastre:"))
+                        .Format("n2")
+                        .Spinners(false)
+                        .Culture("en-US")
+                        )
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().NumericTextBoxFor(t => t.costoTotalPorGrua)
+                    .HtmlAttributes(new { style = "width: 80%" })
+                    .Label(l => l.Content("Costo Total:"))
+                    .Format("n2")
+                    .Spinners(false)
+                    .Culture("en-US")
+                    .HtmlAttributes(new { @readonly = "readonly" })
+                    )
+            </div>
+        </div>
+    </form>
+    
+    <hr />
+
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="agregarCostos()">
+                        @(Html.Kendo().Button()
+                            .Name("guardarCostos")
+                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                            .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+
+
+</section>
+<script>
+    function agregarCostos() {
+        event.preventDefault();
+
+        var Mydata = $("#costosForm").serialize();
+        console.log(Mydata);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("GuardarCostos")',
+            type: 'POST',
+            data: Mydata,
+            success: function (data) {
+                console.log("AA", data)
+                $("#editarCostosModal").modal('hide');
+                sitteg_success('Se ha actualizado la información');
+                var grid = $("#GruasAsignadasGrid").data("kendoGrid");
+                grid.dataSource.read();
+                $("#costoTotalTodasGruas").val(data.costoTotalPorGrua);
+
+                //window.location.reload();
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Sucedió un error, intente mas tarde...');
+                hideLoading();
+            }
+        });
+    }
+    function actualizarValorNumericTextBox(nuevoValor) {
+        var numericTextBox = $("#costoTotalTodasGruas").data("kendoNumericTextBox");
+        if (numericTextBox) {
+            numericTextBox.value(nuevoValor);
+        } else {
+            console.error("El componente kendoNumericTextBox no se ha inicializado correctamente.");
+        }
+    }
+
+    $(document).ready(function () {
+        var costoAbanderamiento = $("#costoAbanderamiento").data("kendoNumericTextBox");
+        var costoSalvamento = $("#costoSalvamento").data("kendoNumericTextBox");
+        var costoBanderazo = $("#costoBanderazo").data("kendoNumericTextBox");
+        var costoArrastre = $("#costoArrastre").data("kendoNumericTextBox");
+
+        var costoTotalPorGrua = $("#costoTotalPorGrua").data("kendoNumericTextBox");
+
+        costoAbanderamiento.bind("change", recalcularCostoTotal);
+        costoSalvamento.bind("change", recalcularCostoTotal);
+        costoBanderazo.bind("change", recalcularCostoTotal);
+        costoArrastre.bind("change", recalcularCostoTotal);
+
+        function recalcularCostoTotal() {
+            var abanderamiento = costoAbanderamiento.value() || 0;
+            var salvamento = costoSalvamento.value() || 0;
+            var arrastre = costoArrastre.value() || 0;
+            var banderazo = costoBanderazo.value() || 0;
+
+            var costoTotal = abanderamiento + salvamento + arrastre + banderazo;
+
+            costoTotalPorGrua.value(costoTotal);
+        }
+    });
+
+    function cerrarMontos() {
+        $('#editarCostosModal').modal('hide');
+
+    }
+
+</script>
+

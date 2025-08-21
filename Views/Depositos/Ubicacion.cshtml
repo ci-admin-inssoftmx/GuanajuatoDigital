@@ -1,0 +1,217 @@
+﻿@model GuanajuatoAdminUsuarios.Models.SolicitudDepositoModel
+<div class="mainContainer bg-light">
+    
+ <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-12 col-md-6 col-lg-5 col-xl-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto">
+                    <div class="border border-2 border-dark rounded-circle">
+                        <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                            <b>1</b>
+                        </h5>
+                    </div>
+                </div>
+                <div class="col-auto p-0">
+                    <i class="icon-deposito h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Registro de solicitud de depósito</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+            <div class="row">
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button data-idSolicitud="@Model.idSolicitud" onclick="editarSolicitud(this)">
+                        <h6 class="m-0"><i class="icon-edit me-2"></i><b>Editar solicitud de depósito</b></h6>
+                    </button>
+                </div>
+             
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bgSuccess py-1"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 my-4">
+            <h5 class="px-4 colorSuccess d-flex align-items-center"><b class="d-flex align-items-center justify-content-center bgSuccess mb-1 me-2 rounded-circle px-1"><i style="font-size: 10px; padding: 7px 2px;" class="icon-correct text-white"></i></b><b>Solicitud de depósito capturado en el Registro de Infracciones y Accidentes de Guanajuato</b></h5>
+            <h6 class="px-4 text-muted">El depósito ya está capturado en la plataforma. Puede actualizar o corregir la información del depósito.</h6>
+        </div>
+    </div>
+    <div class="row px-4 mb-2 align-items-start">
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Folio de depósito:</label>
+                    <label>@(Model.folio != null ? Model.folio : "-")</label>
+                </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Fecha y hora:</label>
+                <label>@Model.fechaSolicitud</label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Tipo de vehículo:</label>
+                <label>@(Model.tipoVehiculo != null ? Model.tipoVehiculo : "-")</label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                    <label class="text-muted">Propietario de grúa:</label>
+                <label>@(Model.propietarioGrua != null ? Model.propietarioGrua : "-")</label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Oficial / Inspector:</label>
+                <label>@(Model.oficial != null ? Model.oficial : "-")</label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Descripción del evento</label>
+                <label>@(Model.descripcionEvento != null ? Model.descripcionEvento : "-")</label>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Tipo de usuario</label>
+                <label>@(Model.tipoUsuario != null ? Model.tipoUsuario : "-")</label>
+            </div>
+        </div>
+        <div class="col-12 mt-2 mb-4">
+            <div class="bg-light pt-1 mx-2"></div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Nombre(s) solicitante</label>
+                <label>@(Model.nombreUsuario != null ? Model.nombreUsuario : "-")</label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Apellido paterno</label>
+                <label>@(Model.apellidoPaternoUsuario != null ? Model.apellidoPaternoUsuario : "-")</label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Apellido materno</label>
+                <label>@(Model.apellidoMaternoUsuario != null ? Model.apellidoMaternoUsuario : "-")</label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Número</label>
+                <label>@(Model.numeroUsuario != null ? Model.numeroUsuario : "-")</label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Colonia / Localidad</label>
+                <label>@(Model.coloniaUsuario != null ? Model.coloniaUsuario : "-")</label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Calle</label>
+                <label>@(Model.calleUsuario != null ? Model.calleUsuario : "-")</label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Entidad</label>
+                <label>@(Model.entidad != null ? Model.entidad : "-")</label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Municipio</label>
+                <label>@(Model.municipio != null ? Model.municipio : "-")</label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-auto">
+            <div class="controlForm my-3">
+                <label class="text-muted">Teléfono</label>
+                <label>@(Model.telefonoUsuario != null ? Model.telefonoUsuario : "-")</label>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+</div>
+<script>
+    function carreteraDropDownChange() {
+        var carreteraDDValue = $("#IdCarretera").data("kendoDropDownList").value();
+
+        showLoading();
+        $.ajax({
+            url: "/Depositos/Tramos_Drop",
+            type: "POST",
+            data: { carreteraDDValue: carreteraDDValue },
+            success: function (data) {
+                var TramosDropDown = $("#IdTramo").data("kendoDropDownList");
+                TramosDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+
+    function EntidadDropDownChange() {
+        var entidadDDlValue = $("#idEntidadUbicacion").data("kendoDropDownList").value();
+
+        showLoading();
+        $.ajax({
+            url: "/Depositos/Municipios_Drop",
+            type: "POST",
+            data: { entidadDDlValue: entidadDDlValue },
+            success: function (data) {
+                var MunicipiosDropDown = $("#idMunicipioUbicacion").data("kendoDropDownList");
+                MunicipiosDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+
+    function editarSolicitud(elementoBoton) {
+        var idSolicitud = elementoBoton.getAttribute('data-idSolicitud');
+
+        window.location.href = "/Depositos/Depositos?Isol=" + idSolicitud;
+    }
+
+     function enviarComplemento(){
+        var Mydata = $("#complementoSolicitudForm").serialize();
+        console.log(Mydata);
+        showLoading();
+        $.ajax({
+            url: '/Depositos/ajax_EnviarComplementoSolicitud',
+            type: 'POST',
+            data: Mydata,
+            success: function (data) {
+                sitteg_success("Datos guardados correctamente");
+                window.location.href = "/AsignacionGruas/Index";
+                hideLoading();
+            },
+            error: function () {
+                sitteg_warning("Ocurrioun error intente mas tarde");
+                hideLoading();
+            }
+        });
+    }
+
+</script>

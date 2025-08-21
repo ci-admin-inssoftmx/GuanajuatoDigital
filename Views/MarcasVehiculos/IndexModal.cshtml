@@ -1,0 +1,105 @@
+﻿@model List<GuanajuatoAdminUsuarios.Models.MarcaVehiculoModel>
+@*RazorCoder*@
+<div class="mainContainer bg-light">
+        <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto">
+                            <i class="icon-marca h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Catálogo de vehiculos</b></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                    <div class="row">
+                        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                            <button href ="#" id="btnNuevaMarca" onclick="mostrarModal()">
+                                <h6 class="m-0 d-flex align-items-center"><i class="icon-addMarca h5 mb-0 me-2"></i><b>Agregar nueva marca</b></h6>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="bg-light py-1"></div>
+                </div>
+            </div>
+            <div class="row justify-content-between mb-1 titleCustom">
+                <div class="col-12 col-md-auto mt-4 mb-2">
+                    <h5 class="px-4"><b>Listado de marcas de vehículos</b></h5>
+                    <h6 class="px-4 text-muted">Edita o elimina las marcas de vehículos.</h6>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mb-4 px-4 rounded gridCustom">
+            <div id="tablaMarcas">
+                <partial name="_ListaMarcasVehiculos" model="Model" />
+        
+    <div class="modal fade modalCustom" id="addMarca"  aria-labelledby="addMarcaLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-body" id="ModalBodyCreate">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<!--UPDATE MODAL-->
+
+<div class="modal fade modalCustom" id="editarMarca"  aria-labelledby="editMarcaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+        
+            <div class="modal-body" id="ModalBodyUpdate">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!--/////////////////////////////////////////////////////////////////////****ELIMINAR****/////////////////////////////////////////////////////////////////////////-->
+<div class="modal fade modalCustom" id="eliminarMarca"  aria-labelledby="editMarcaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyEliminarMarca">
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</div>
+
+<script>
+    function mostrarModal() {
+        $.ajax({
+            url: '@Url.Action("AgregarPacial")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyCreate').html(data);
+                $('#addMarca').modal('show');
+            }
+        });
+    }
+
+
+
+
+
+</script>

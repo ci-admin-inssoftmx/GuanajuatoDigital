@@ -1,0 +1,190 @@
+﻿@model List<Gruas2Model>
+@*<div class="row justify-content-between mb-1 titleCustom">*@
+      <div>
+            <br/>
+                        <br/>
+            <br />
+
+        </div>
+<div class="row">
+ <div class="col-12 mb-4 px-4 rounded gridCustom">
+    @*<column template="<button data-bs-toggle=modal data-bs-target=\#editVehiculo class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>" width="100" />*@
+    
+        @(Html.Kendo().Grid(Model)
+            .Name("Grid")
+            .ToolBar(t => t.Search().Text("Buscar..."))
+
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.idGrua).Width(20).Hidden();
+                columns.Bound(p => p.municipio).Title("Municipio").Width(90);
+                columns.Bound(p => p.concesionario).Title("Concesionario").Width(90);
+                columns.Bound(p => p.noEconomico).Title("No. Económico").Width(90);
+                columns.Bound(c => c.modelo).Title("Modelo").Width(90);
+                columns.Bound(c => c.placas).Title("Placas").Width(90);
+                columns.Bound(c => c.tipoGrua).Title("Tipo").Width(90);
+                columns.Bound(c => c.capacidad)
+                .Title("Capacidad")
+                .Width(90)
+                .ClientTemplate("#= kendo.toString(Math.round(capacidad * 100) / 100, '0.00') #");
+                //columns.Command(c => c.Custom("Editar").Click("editar")).Width(100).Title("Editar");
+                columns.Template(
+                "<button class='w-100 btn colorPrimary " +
+                "<h6 class='m-0' onclick='editar(event)'>" +
+                "<i class='h5 icon-edit me-2'></i><b>Editar</b>" +
+                "</h6></button>"
+                ).Width(80).Title("Editar");
+
+                columns.Template(
+                "<button class='w-100 btn colorDanger" +
+                "<h6 class='m-0' onclick='activar(event)'>" +
+                "<i class='h5'></i><b>Desactivar</b>" +
+                "</h6></button>"
+                ).Width(80).Title("Edo");
+
+               // columns.Command(c => c.Custom("Activo").Click("activar")).Width(100).Title("Estado");
+
+            }).HtmlAttributes(new { style = "height:350" })
+            @*.Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Bottom).PageSizes(true))*@
+            .Pageable()
+            .Sortable()
+            .Scrollable(scr => scr.Height(350))
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            )
+            .NoRecords(noRecords => noRecords.Template("No se encontrarón registros. Realice la búsqueda nuevamente."))
+            .Search(s =>
+            {
+                s.Field(c => c.municipio);
+                s.Field(c => c.concesionario);
+                s.Field(c => c.noEconomico);
+                s.Field(c => c.modelo);
+                s.Field(c => c.placas);
+                s.Field(c => c.tipoGrua);
+                s.Field(c => c.capacidad);
+            })
+            //.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+                        .Events(events => events.DataBinding("replaceLegend"))
+
+            )
+    </div>
+</div>
+@*<div>
+     @(Html.Kendo().Grid(Model)
+        .Name("Grid2")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.idGrua).Width(20).Hidden();
+            columns.Bound(p => p.municipio).Title("Municipio").Width(90);
+            columns.Bound(p => p.concesionario).Title("Concesionario").Width(90);
+            columns.Bound(p => p.noEconomico).Title("No. Economico").Width(90);
+            columns.Bound(c => c.modelo).Title("Modelo").Width(90);
+            columns.Bound(c => c.placas).Title("Placas").Width(90);
+            columns.Bound(c => c.tipoGrua).Title("Tipo Grúa").Width(90);
+            columns.Command(c => c.Custom("Editar").Click("editar")).Width(100);
+        }).HtmlAttributes(new { style = "height:350" })
+        .Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Top).PageSizes(true))
+        .Sortable()
+        .Scrollable(scr => scr.Height(350))
+        .DataSource(dataSource => dataSource
+            .Ajax()
+        .Group(groups => groups.Add(p => p.tipoGrua))))
+</div>*@
+
+<div class="modal fade modalCustom" id="editGrua" aria-labelledby="editGruaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                   
+                </div>
+                @*<h4 class="modal-title">Agregar grúa</h4>*@
+                <div class="col-auto">
+                    <div class="row">
+                        <div class="col-auto my-4">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-body" id="ModalBodyEdit">
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    //$(document).ready(function () {
+    //    var grid = $("#Grid").data("kendoGrid");
+
+    //    var position = "top";
+    //    grid.setOptions({
+    //        pageable: {
+    //            position: position
+    //        }
+    //    });
+    //});
+    $(document).ready(function () {
+        $("#editGrua").on("show.bs.modal shown.bs.modal", function (e) {
+            // Remove overlay and enable scrolling of body
+            $("body").removeClass("modal-open").find(".modal-backdrop").remove();
+        });
+        $("#editGrua").on('hide.bs.modal', function () {
+            $('#ModalBodyEdit').html('');
+        });
+    });
+    function editar(e) {
+       var grid = $("#Grid").data("kendoGrid");
+        var row = $(event.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        var idGrua = dataItem.idGrua;
+        console.log(idGrua);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_edit")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { idGrua: idGrua }, // Datos que se enviarán al controlador
+            success: function (result) {
+                if (result.error) {
+                    sitteg_warning("El usuario no tienen los permisos para esta acción");
+                } else {
+                    $('#ModalBodyCreate').html(result);
+                $('#addGrua').modal('show');
+                }
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function activar(e) {
+       var grid = $("#Grid").data("kendoGrid");
+        var row = $(event.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        var idGrua = dataItem.idGrua;
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_activar")', 
+            type: 'POST',
+            data: { idGrua: idGrua }, 
+            success: function (result) {
+                if (result.error) {
+                    sitteg_warning("El usuario no tienen los permisos para esta acción");
+                } else {
+                    $('#ModalBodyCreate').html(result);
+                    $('#addGrua').modal('show');
+                }
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+</script>

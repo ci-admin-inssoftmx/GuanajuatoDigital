@@ -1,0 +1,542 @@
+﻿@{
+	bool esSoloLectura = ViewBag.EsSoloLectura ?? false;
+	string claseColor = esSoloLectura ? "colorDisabled" : "colorDanger";
+	string claseColorOtroBoton = esSoloLectura ? "colorDisabled" : "colorPrimary";
+
+}
+<style>
+	.photo {
+		width: 140px;
+	}
+
+	.details {
+		width: 400px;
+		color: #898989;
+	}
+
+	.name {
+		display: block;
+		font-size: 1.6em;
+	}
+
+	.title {
+		display: block;
+		padding-top: 1.6em;
+	}
+
+	.employeeID,
+	.country {
+		font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+		font-size: 50px;
+		font-weight: bold;
+		color: #898989;
+	}
+	/* .k-grid-header .k-header {
+				padding: 10px 20px;
+			} */
+
+	#gridInvolucradosTodo td {
+		background: -moz-linear-gradient(top, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.15) 100%);
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.05)), color-stop(100%,rgba(0,0,0,0.15)));
+		background: -webkit-linear-gradient(top, rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.15) 100%);
+		background: -o-linear-gradient(top, rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.15) 100%);
+		background: -ms-linear-gradient(top, rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.15) 100%);
+		background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.15) 100%);
+		padding: 20px;
+	}
+
+	#gridInvolucradosTodo td {
+		background: -moz-linear-gradient(top, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.1) 100%);
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.2)), color-stop(100%,rgba(0,0,0,0.1)));
+		background: -webkit-linear-gradient(top, rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.1) 100%);
+		background: -o-linear-gradient(top, rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.1) 100%);
+		background: -ms-linear-gradient(top, rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.1) 100%);
+		background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.1) 100%);
+	}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.6.172/pdf.min.js"></script>
+
+<script>
+	function FormatDate(date) {
+		var cdate = convertDate(date);
+		cdate = cdate == "01/01/0001" ? "" : cdate;
+		return cdate;
+	}
+</script>
+<div class="row">
+	<div class="col-12 mb-4 px-4 rounded gridCustom">
+
+		@(
+			Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel>()
+
+			.Name("gridInvolucradosTodo")//.Groupable()
+			.Columns(columns =>
+			{
+				columns.Template(" ").Width(140).Title("Detalles");
+				columns.Template(" ").Width(140).Title("Datos persona");
+				columns.Template(" ").Width(140).Title("Domicilio persona");
+				columns.Template(" ").Width(140).Title("Vehículo en que viajaba");
+				columns.Template(" ").Width(140).Title("");
+				columns.Bound(i => i.ConductorInvolucrado).Hidden();
+				columns.Bound(i => i.EstadoVictima).Hidden();
+				columns.Bound(i => i.NombreHospital).Hidden();
+				columns.Bound(i => i.InstitucionTraslado).Hidden();
+				columns.Bound(i => i.Asiento).Hidden();
+				columns.Bound(i => i.Cinturon).Hidden();
+				columns.Bound(i => i.NombreCompleto).Hidden();
+				columns.Bound(i => i.RFC).Hidden();
+				columns.Bound(i => i.CURP).Hidden();
+				columns.Bound(i => i.Sexo).Hidden();
+				columns.Bound(i => i.fechaNacimiento).Hidden();
+				columns.Bound(i => i.TipoLicencia).Hidden();
+				columns.Bound(i => i.Direccion).Hidden();
+				columns.Bound(i => i.Municipio).Hidden();
+				columns.Bound(i => i.Entidad).Hidden();
+				columns.Bound(i => i.Telefono).Hidden();
+				columns.Bound(i => i.Correo).Hidden();
+				columns.Bound(i => i.IdAccidente).Hidden();
+				columns.Bound(i => i.Placa).Hidden();
+				columns.Bound(i => i.Marca).Hidden();
+				columns.Bound(i => i.Submarca).Hidden();
+				columns.Bound(i => i.TipoVehiculo).Hidden();
+				columns.Bound(i => i.Modelo).Hidden();
+			    columns.Bound(i => i.IdInvolucrado).Hidden();
+				columns.Bound(i => i.FechaNacimientoTexto).Hidden();
+				columns.Bound(i => i.IdAsiento).Hidden();
+				columns.Bound(i => i.IdAseguradora).Hidden();
+				columns.Bound(i => i.NombreAseguradora).Hidden();
+				columns.Bound(i => i.FechaExpiracionPoliza).Hidden();
+				columns.Bound(i => i.FechaExpiracionPolizaTexto).Hidden();
+				columns.Bound(i => i.Poliza).Hidden();
+
+
+				@*columns.Command(c => c.Custom("Editar").Click("getId")).Width(100);
+		columns.Command(c => c.Custom("Eliminar").Click("getId")).Width(100); *@
+
+			}).HtmlAttributes(new { style = "height:500px" })
+			.ClientRowTemplate(
+			"<tr data-uid='#: uid #'>" +
+			"<td class='Detalles'>" +
+			"<p><span class='description'>Participacion : #: ConductorInvolucrado# </span></p>" +
+			"<p><span class='description'>Estado : #: EstadoVictima# </span></p>" +
+			"<p><span class='description'>Llevado a : #: NombreHospital# </span></p>" +
+			"<p><span class='description'>Traslado : #: InstitucionTraslado# </span></p>" +
+			"<p><span class='description'>Asiento : #: IdAsiento != null ? IdAsiento : '' # </span></p>" + 
+			"<p><span class='description'>Cinturon : #: Cinturon# </span></p>" +
+			"</td>" +
+			"<td class='DatosPersona'>" +
+			"<p><span class='description'>Nombre : #: NombreCompleto# </span></p>" +
+			"<p><span class='description'>RFC : #: RFC# </span></p>" +
+			"<p><span class='description'>CURP : #: CURP# </span></p>" +
+			"<p><span class='description'>Sexo : #: Sexo# </span></p>" +
+			"<p><span class='description'>Fecha nacimiento : #: FechaNacimientoTexto# </span></p>" +
+			"<p><span class='description'>Licencia : #: numeroLicencia != null ? numeroLicencia : '' # </span></p>" +
+			"<p><span class='description'>Aseguradora : #: NombreAseguradora != null ? NombreAseguradora : ''# </span></p>" +
+			"<p><span class='description'>Póliza : #: Poliza != null ? Poliza : '' # </span></p>" +
+			"<p><span class='description'>Fecha Expiración Poliza: #: FechaExpiracionPolizaTexto != null ? FechaExpiracionPolizaTexto : ''# </span></p>" +
+			"</td>" +
+			"<td class='DomicilioPersona'>" +
+			"<p><span class='description'>Dirección : #: Direccion# </span></p>" +
+			"<p><span class='description'>Municipio : #: Municipio# </span></p>" +
+			"<p><span class='description'>Entidad : #: Entidad# </span></p>" +
+			"<p><span class='description'>Teléfono : #: Telefono# </span></p>" +
+			"<p><span class='description'>Correo : #: Correo# </span></p>" +
+			"</td>" +
+			"<td class='VehiculoViajaba'>" +
+			"<p><span class='description'>No. : #: OrdenVehiculo# </span></p>" +
+			"<p><span class='description'>Placas : #: Placa# </span></p>" +
+			"<p><span class='description'>Marca : #: Marca# </span></p>" +
+			"<p><span class='description'>SubMarca : #: Submarca# </span></p>" +
+			"<p><span class='description'>Tipo : #: TipoVehiculo# </span></p>" +
+			"<p><span class='description'>Modelo : #: Modelo# </span></p>" +
+			"</td>" +
+			"<td class=''>" +
+			"<p><span type='button' class='description'><button onclick='mostrarModalInvolucrados()' class='w-100 btn " + claseColorOtroBoton + "'><i class='icon-edit me-2'></i><b>Editar</b></h6></button></span></p>" +
+			"<p><span type='button' class='description'><button onclick='eliminarRegistroInvolucrado()' class='w-100 btn " + claseColor + "'><i class='h5 icon-delete me-2'></i><b>Eliminar</b></h6></button></span></p>" +
+			"<p><span class='description'>" +
+			"# if (rutaArchivo) { #" +
+			"# if (EsImagen) { #" +
+			"<span onclick='verArchivo()' style='cursor: pointer;'>" +
+			"<img src='#: UrlImagen #' alt='#: nombreArchivo #' class='img-thumbnail' style='max-width: 100px;' />" +
+			"</span>" +
+			"# } else { #" +
+			"<button onclick='verArchivo()' class='w-100 btn " + claseColorOtroBoton + "'><i class='h5 icon-research me-2'></i><b>Ver archivo</b></button>" +
+			"# } #" +
+			    "# } #" +  
+			"</span></p>" +
+			"</td>" +
+			"</tr>"
+			)
+			.ClientAltRowTemplate(
+			"<tr data-uid='#: uid #'>" +
+			"<td class='Detalles'>" +
+			"<p><span class='description'>Participacion : #: ConductorInvolucrado# </span></p>" +
+			"<p><span class='description'>Estado : #: EstadoVictima# </span></p>" +
+			"<p><span class='description'>Llevado a : #: NombreHospital# </span></p>" +
+			"<p><span class='description'>Traslado : #: InstitucionTraslado# </span></p>" +
+			"<p><span class='description'>Asiento : #: IdAsiento != null ? IdAsiento : '' # </span></p>" +
+			"<p><span class='description'>Cinturon : #: Cinturon# </span></p>" +
+			"</td>" +
+			"<td class='DatosPersona'>" +
+			"<p><span class='description'>Nombre : #: NombreCompleto# </span></p>" +
+			"<p><span class='description'>RFC : #: RFC# </span></p>" +
+			"<p><span class='description'>CURP : #: CURP# </span></p>" +
+			"<p><span class='description'>Sexo : #: Sexo# </span></p>" +
+			"<p><span class='description'>Fecha nacimiento : #: FechaNacimientoTexto# </span></p>" +
+			"<p><span class='description'>Licencia : #: numeroLicencia# </span></p>" +
+			"</td>" +
+			"<td class='DomicilioPersona'>" +
+			"<p><span class='description'>Dirección : #: Direccion# </span></p>" +
+			"<p><span class='description'>Municipio : #: Municipio# </span></p>" +
+			"<p><span class='description'>Entidad : #: Entidad# </span></p>" +
+			"<p><span class='description'>Teléfono : #: Telefono# </span></p>" +
+			"<p><span class='description'>Correo : #: Correo# </span></p>" +
+			"</td>" +
+			"<td class='VehiculoViajaba'>" +
+			"<p><span class='description'>No. : #: OrdenVehiculo# </span></p>" +
+			"<p><span class='description'>Placas : #: Placa# </span></p>" +
+			"<p><span class='description'>Marca : #: Marca# </span></p>" +
+			"<p><span class='description'>SubMarca : #: Submarca# </span></p>" +
+			"<p><span class='description'>Tipo : #: TipoVehiculo# </span></p>" +
+			"<p><span class='description'>Modelo : #: Modelo# </span></p>" +
+			"</td>" +
+			"<td class=''>" +
+			"<p><span type='button' class='description'><button onclick='mostrarModalInvolucrados()' class='w-100 btn " + claseColorOtroBoton  +"'><i class='icon-edit me-2'></i><b>Editar</b></h6></button></span></p>" +
+			"<p><span type='button' class='description'><button onclick='eliminarRegistroInvolucrado()' class='w-100 btn " + claseColor + "'><i class='h5 icon-delete me-2'></i><b>Eliminar</b></h6></button></span></p>" +
+			"<p><span class='description'>" +
+			"# if (rutaArchivo) { #" +
+			"# if (EsImagen) { #" +
+			"<span onclick='verArchivo()' style='cursor: pointer;'>" +
+			"<img src='#: UrlImagen #' alt='#: nombreArchivo #' class='img-thumbnail' style='max-width: 100px;' />" +
+			"</span>" +
+			"# } else { #" +
+			"<button onclick='verArchivo()' class='w-100 btn " + claseColorOtroBoton + "'><i class='h5 icon-research me-2'></i><b>Ver archivo</b></button>" +
+			"# } #" +
+		    "# } #" +  
+			"</span></p>" +
+			"</td>" +
+			"</tr>"			
+			)
+			.Sortable()
+			//.Groupable()
+			.Scrollable()
+			.Pageable(p => p.Enabled(true))
+			.DataSource(dataSource => dataSource
+			.Ajax()
+			.Read(read => read.Action("ObtInvolucradosAccidente", "CapturaAccidentes"))
+			@*.PageSize(5).Model(model => model.Id(p => p.nombre))*@
+			)
+			.ToolBar(t => t.Search().Text("Buscar..."))
+			.Search(s =>
+			{
+				s.Field(c => c.ConductorInvolucrado);
+				s.Field(c => c.EstadoVictima);
+				s.Field(c => c.NombreHospital);
+				s.Field(c => c.InstitucionTraslado);
+				s.Field(c => c.Asiento);
+				s.Field(c => c.Cinturon);
+				s.Field(c => c.nombre);
+				s.Field(c => c.RFC);
+				s.Field(c => c.CURP);
+				s.Field(c => c.Sexo);
+				s.Field(c => c.TipoLicencia);
+				s.Field(c => c.Direccion);
+				s.Field(c => c.Municipio);
+				s.Field(c => c.Entidad);
+				s.Field(c => c.Telefono);
+				s.Field(c => c.Correo);
+				s.Field(c => c.Placa);
+				s.Field(c => c.Marca);
+				s.Field(c => c.Submarca);
+				s.Field(c => c.NombreAseguradora);
+				s.Field(c => c.Poliza);
+				s.Field(c => c.FechaExpiracionPolizaTexto);
+			})
+			.Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+			.Type(GridSelectionType.Row)
+			)
+			.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+			)
+	</div>
+</div>
+
+<div class="modal fade modalCustom" id="mostrarEliminarModal" aria-labelledby="eliminarLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-body" id="ModalBodyEliminar">
+			</div>
+		</div>
+	</div>
+</div>
+@*FRAME ARCHIVO*@
+
+<div class="modal fade" id="archivoInvModal" tabindex="-1" aria-labelledby="archivoInvModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl">
+	<div class="modal-content">
+		<div class="modal-header">
+			<h5 class="modal-title" id="archivoModalLabel">Vista Previa del Archivo</h5>
+			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+			<div id="pdfContainerInv" style="display: none; overflow: auto; max-height: 500px;">
+				<canvas id="pdfViewerInv" style="display: block; width: auto; height: auto;"></canvas>
+				<div>
+					<button id="prevPageInv" class="btn btn-primary">Anterior</button>
+					<button id="nextPageInv" class="btn btn-primary">Siguiente</button>
+					<button id="zoomInInv" class="btn btn-primary">Zoom +</button>
+					<button id="zoomOutInv" class="btn btn-primary">Zoom -</button>
+					<span id="pageNumInv"></span> / <span id="pageCountInv"></span>
+				</div>
+			</div>
+			<div id="imageContainerInv" style="display: none;">
+				<img id="imageViewerInv" style="width: 100%; height: auto;" />
+			</div>
+			<p id="archivoErrorInv" style="display: none; color: red;">No se puede cargar el archivo.</p>
+		</div>
+		<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" onclick="cerrarIframeInv()">Cerrar</button>
+		</div>
+	</div>
+</div>
+</div>
+
+
+<script>
+	$(document).ready(function () {
+		$("#gridInvolucradosTodo .k-grid table").addClass("table table-condensed");
+	});
+
+	function eliminarRegistroInvolucrado() {
+		if ('@ViewBag.EsSoloLectura' === 'True') {
+			return;
+		}
+		var grid = $("#gridInvolucradosTodo").data("kendoGrid");
+		var row = $(event.target).closest("tr");
+		var dataItem = grid.dataItem(row);
+		var IdAccidente = dataItem.IdAccidente
+		var IdPersona = dataItem.IdPersona
+	     var IdInvolucrado = dataItem.IdInvolucrado
+
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("ModalBorraRegistroPersona", "CapturaAccidentes")',
+			type: 'POST',
+			data: {
+				IdAccidente: IdAccidente,
+				IdPersona: IdPersona,
+				IdInvolucrado: IdInvolucrado
+			},
+			success: (data) => {
+				$('#ModalBodyEliminar').html(data);
+				$('#mostrarEliminarModal').modal('show');
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+	}
+
+	function mostrarModalInvolucrados() {
+		if ('@ViewBag.EsSoloLectura' === 'True') {
+			return;
+		}
+
+		var grid = $("#gridInvolucradosTodo").data("kendoGrid");
+		var row = $(event.target).closest("tr");
+		var dataItem = grid.dataItem(row);
+		var IdPersona = dataItem.IdPersona
+		var IdAccidente = dataItem.IdAccidente
+		var IdInvolucrado = dataItem.IdInvolucrado
+
+		console.log(dataItem);
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("NuevoInvolucradoPersona", "CapturaAccidentes")',
+			type: 'POST',
+			data: {
+				IdPersona: IdPersona,
+				IdAccidente: IdAccidente,
+				IdInvolucrado: IdInvolucrado
+			},
+			success: (data) => {
+			$('#agregarInvolucradoModal').modal('show');
+				$('#ModalBodyAgregarInvolucrado').html(data);
+				$('#agregarInvolucradoModal').modal({ backdrop: false, keyboard: false });
+
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+	}
+
+	function verArchivo() {
+		if ('@ViewBag.EsSoloLectura' === 'True') {
+			return;
+		}
+
+		var grid = $("#gridInvolucradosTodo").data("kendoGrid");
+		var row = $(event.target).closest("tr");
+		var dataItem = grid.dataItem(row);
+		var IdInvolucrado = dataItem.IdPersona;
+		var IdAccidente = dataItem.IdAccidente;
+
+		showLoading();
+
+		$.ajax({
+			url: '@Url.Action("ObtenerArchivoInvolucrado", "CapturaAccidentes")',
+			type: 'POST',
+			data: {
+				IdInvolucrado: IdInvolucrado
+			},
+			success: function (data) {
+				if (data.file) {
+					var iframe = document.getElementById('archivoInvIframe');
+					iframe.src = 'data:' + data.app + ';base64,' + data.file;
+
+					var myModal = new bootstrap.Modal(document.getElementById('archivoInvModal'));
+					myModal.show();
+					hideLoading();
+
+				} else {
+					sitteg_warning('No se ha agregado archivo.');
+					hideLoading();
+
+				}
+			},
+			error: function (xhr, status, error) {
+				console.error('Error al obtener el archivo:', error);
+				hideLoading();
+
+			}
+		});
+	}
+	function verArchivo() {
+		if ('@ViewBag.EsSoloLectura' === 'True') {
+			return;
+		}
+
+		var grid = $("#gridInvolucradosTodo").data("kendoGrid");
+		var row = $(event.target).closest("tr");
+		var dataItem = grid.dataItem(row);
+		var IdInvolucrado = dataItem.IdPersona;
+		var IdAccidente = dataItem.IdAccidente;
+
+		showLoading();
+
+		$.ajax({
+			url: '@Url.Action("ObtenerArchivoInvolucrado", "CapturaAccidentes")',
+			type: 'POST',
+			data: {
+				IdInvolucrado: IdInvolucrado
+			},
+			success: function (data) {
+				if (data.file) {
+					var fileType = data.app;
+					var src = 'data:' + fileType + ';base64,' + data.file;
+
+					// Muestra el contenedor adecuado dependiendo del tipo de archivo
+					var pdfContainer = document.getElementById('pdfContainerInv');
+					var imageContainer = document.getElementById('imageContainerInv');
+					var imageViewer = document.getElementById('imageViewerInv');
+					var canvas = document.getElementById('pdfViewerInv');
+					var context = canvas.getContext('2d');
+
+					if (fileType === 'application/pdf') {
+						pdfContainer.style.display = 'block';
+						imageContainer.style.display = 'none';
+
+						pdfjsLib.getDocument(src).promise.then(function (pdf) {
+							var pageNum = 1;
+							var scale = 1.0;
+							var pageCount = pdf.numPages;
+
+							function renderPage(num) {
+								pdf.getPage(num).then(function (page) {
+									var viewport = page.getViewport({ scale: scale });
+									canvas.height = viewport.height;
+									canvas.width = viewport.width;
+
+									var renderContext = {
+										canvasContext: context,
+										viewport: viewport
+									};
+									page.render(renderContext);
+									document.getElementById('pageNumInv').textContent = num;
+									document.getElementById('pageCountInv').textContent = pageCount;
+								});
+							}
+
+							document.getElementById('prevPageInv').addEventListener('click', function () {
+								if (pageNum > 1) {
+									pageNum--;
+									renderPage(pageNum);
+								}
+							});
+
+							document.getElementById('nextPageInv').addEventListener('click', function () {
+								if (pageNum < pageCount) {
+									pageNum++;
+									renderPage(pageNum);
+								}
+							});
+
+							document.getElementById('zoomInInv').addEventListener('click', function () {
+								scale += 0.1;
+								renderPage(pageNum);
+							});
+
+							document.getElementById('zoomOutInv').addEventListener('click', function () {
+								if (scale > 0.1) {
+									scale -= 0.1;
+									renderPage(pageNum);
+								}
+							});
+
+							renderPage(pageNum);
+
+							// Mostrar el modal
+							var myModal = new bootstrap.Modal(document.getElementById('archivoInvModal'));
+							myModal.show();
+							hideLoading();
+						}).catch(function (error) {
+							document.getElementById('archivoErrorInv').style.display = 'block';
+							hideLoading();
+						});
+
+					} else if (fileType.startsWith('image/')) {
+						pdfContainer.style.display = 'none';
+						imageContainer.style.display = 'block';
+						imageViewer.src = src;
+
+						// Mostrar el modal
+						var myModal = new bootstrap.Modal(document.getElementById('archivoInvModal'));
+						myModal.show();
+						hideLoading();
+					} else {
+						document.getElementById('archivoErrorInv').style.display = 'block';
+						hideLoading();
+					}
+				} else {
+					hideLoading();
+					sitteg_warning('No se ha guardado un archivo.');
+				}
+			},
+			error: function (xhr, status, error) {
+				hideLoading();
+				console.error('Error al obtener el archivo:', error);
+				document.getElementById('archivoError').style.display = 'block';
+			}
+		});
+	}
+
+
+	function cerrarIframeInv() {
+		$('#archivoInvModal').modal('hide');
+
+	}
+
+</script>

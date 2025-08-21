@@ -1,0 +1,65 @@
+﻿<section class=" bg-white rounded">
+    <div class="row flex-nowrap align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-addCar h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Agregar nuevo vehículo</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-12 text-center mt-4">
+            <h4 class="text-muted"><b class="text-dark">Nuevo vehículo </b>- Anexo 1</h4>
+        </div>
+    </div>
+    <div class="row justify-content-center mb-5">
+        <div class="col-10 text-center">
+            <h5 class="px-4 text-muted">Continuar el registro cargando nuevo vehículo en módulo Anexo 1</h5>
+        </div>
+
+
+    </div>
+
+    <div class="row my-4">
+        <div class="col-12">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>En otro momento</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    @(Html.Kendo().Button()
+                                .Name("EditFisico")
+                                .HtmlAttributes(new { @class = "btnPrimary px-3", onclick = "redirectToVehiculos();" })
+                                .Content("<h5 class=\"m-0 px-3\"><b>Ir Anexo 1</b></h5>")
+                                )
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    function redirectToVehiculos() {
+        window.location.href = "/Vehiculos/Index";
+
+    }
+</script>

@@ -1,0 +1,478 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CatOficinasRentaModel
+@{
+    var delegaciones = (SelectList)ViewBag.Delegaciones;
+    var botones = ViewBag.BotonesDelegacion;
+}
+<div class="mainContainer bg-light">
+
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-ministerio h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Catálogo de agencias de ministerio</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button data-bs-toggle="modal" data-bs-target="#addMinisterio">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addMinisterio h5 mb-0 me-2"></i><b>Agregar nueva agencia del ministerio</b></h6>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="mt-5">
+            <nav class="tabCustom">
+                <div class="nav nav-tabs row mx-0" id="nav-tab" role="tablist">
+                    <button class="nav-link active col" id="all-delegacion-tab" data-bs-toggle="tab" data-bs-target="#all-delegacion" type="button" role="tab" aria-controls="all-delegacion" aria-selected="true">
+                        <div class="row justify-content-center align-items-center px-3 py-2">
+                            <div class="col-auto radioCustom p-0">
+                                <div class="rounded-circle m-2"></div>
+                            </div>
+                            <div class="col-auto p-0">
+                                <h5 class="m-0"><i class="icon-delegacion h4"></i> <b>Todas las delegaciones</b></h5>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button class="nav-link col" id="filter-delegacion-tab" data-bs-toggle="tab" data-bs-target="#filter-delegacion" type="button" role="tab" aria-controls="filter-delegacion" aria-selected="false">
+                        <div class="row justify-content-center align-items-center px-3 py-2">
+                            <div class="col-auto radioCustom p-0">
+                                <div class="rounded-circle m-2"></div>
+                            </div>
+                            <div class="col-auto p-0">
+                                <h5 class="m-0"><i class="icon-filter h5"></i> <b>Filtrar por delegación</b></h5>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </nav>
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane tabCustomConteiner fade show active" id="all-delegacion" role="tabpanel" aria-labelledby="all-delegacion-tab">
+                    <div class="row justify-content-between mb-1 titleCustom">
+                        <div class="col-12 col-md-auto mt-4 mb-2">
+                            <h5 class="px-4"><b>Listado agencias de ministerio</b></h5>
+                            <h6 class="px-4 text-muted">Edita o inactiva las agencias de ministerio.</h6>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mb-4 px-4 rounded gridCustom">
+                            <kendo-grid name="grid" height="450">
+                                <datasource type="DataSourceTagHelperType.Custom" custom-type="odata" page-size="20">
+                                    <transport>
+                                        <read url="https://demos.telerik.com/kendo-ui/service/Northwind.svc/Orders" />
+                                    </transport>
+
+                                </datasource>
+                                <sortable enabled="true" />
+
+                                <pageable button-count="5" refresh="true" page-sizes="new int[] { 5, 10, 20 }">
+                                </pageable>
+                                <columns>
+                                    <column field="OrderDate" title="Nombre" format="{0:dd/MM/yyyy}" width="250" />
+                                    <column field="ShipName" title="Delegación" width="150" />
+                                    <column template="<button data-bs-toggle=modal data-bs-target=\#editMinisterio class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>" width="100" />
+                                </columns>
+                                <toolbar>
+                                    <toolbar-button name="search"></toolbar-button>
+                                </toolbar>
+                            </kendo-grid>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="tabCustomEnd"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="tab-pane tabCustomConteiner fade" id="filter-delegacion" role="tabpanel" aria-labelledby="filter-delegacion-tab">
+                    <div class="row p-4 align-items-center justify-content-around">
+                       
+                        <div class="col-auto btnToggleCustom my-2">
+                           <button type="button" class="btn d-flex justify-content-center align-items-center py-2 px-2" data-bs-toggle="button">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <h5 class="m-0 pe-2">aaa</h5>
+                            </button>
+                        </div>
+                        <div class="col-auto btnToggleCustom my-2">
+                            <button type="button" class="btn d-flex justify-content-center align-items-center py-2 px-2" data-bs-toggle="button">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <h5 class="m-0 pe-2">San Luis de la Paz</h5>
+                            </button>
+                        </div>
+                        <div class="col-auto btnToggleCustom my-2">
+                            <button type="button" class="btn d-flex justify-content-center align-items-center py-2 px-2" data-bs-toggle="button">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <h5 class="m-0 pe-2">León</h5>
+                            </button>
+                        </div>
+                        <div class="col-auto btnToggleCustom my-2">
+                            <button type="button" class="btn d-flex justify-content-center align-items-center py-2 px-2" data-bs-toggle="button">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <h5 class="m-0 pe-2">Irapuato</h5>
+                            </button>
+                        </div>
+                        <div class="col-auto btnToggleCustom my-2">
+                            <button type="button" class="btn d-flex justify-content-center align-items-center py-2 px-2" data-bs-toggle="button">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <h5 class="m-0 pe-2">Celaya</h5>
+                            </button>
+                        </div>
+                        <div class="col-auto btnToggleCustom my-2">
+                            <button type="button" class="btn d-flex justify-content-center align-items-center py-2 px-2" data-bs-toggle="button">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <h5 class="m-0 pe-2">Abasolo</h5>
+                            </button>
+                        </div>
+                        <div class="col-auto btnToggleCustom my-2">
+                            <button type="button" class="btn d-flex justify-content-center align-items-center py-2 px-2" data-bs-toggle="button">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <h5 class="m-0 pe-2">Acámbaro</h5>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row px-4 my-4 py-5 align-items-end">
+                        <div class="col-12 col-md-10 mx-md-auto text-center">
+                            <h3><b>Selecciona una o más delegaciones para continuar</b></h3>
+                            <h4 class="font-weight-normal"> y visualizar el catálogo de oficinas en rentas</h4>
+                            <div class="row ">
+                                <div class="col-12 col-md-8 mx-md-auto col-lg-5 ">
+                                    <div class="controlButton my-3">
+                                        <button class="btnPrimary">
+                                            <h5 class="m-0"><b>Visualizar catálogo</b></h5>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+                    <div class="row p-4 align-items-center justify-content-around">
+                        <div class="col-auto btnToggleCustom my-2">
+                            <button type="button" class="btn d-flex justify-content-center align-items-center py-2 px-2 active">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <h5 class="m-0 pe-2">San Luis de la Paz</h5>
+                            </button>
+                        </div>
+                        <div class="col-auto btnToggleCustom my-2">
+                            <button type="button" class="btn d-flex justify-content-center align-items-center py-2 px-2 active">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <h5 class="m-0 pe-2">León</h5>
+                            </button>
+                        </div>
+                        <div class="col-auto btnToggleCustom my-2">
+                            <button type="button" class="btn d-flex justify-content-center align-items-center py-2 px-2 active">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <h5 class="m-0 pe-2">Irapuato</h5>
+                            </button>
+                        </div>
+                        <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                            @(Html.Kendo().Button()
+                                                    .Name("editBusqueda")
+                                                    .HtmlAttributes(new { @class = "btnPrimary" })
+                                                    .Content("<h6 class=\"m-0\"><i class=\"icon-research me-2\"></i><b>Editar búsqueda</b></h6>"))
+
+                        </div>
+
+                    </div>
+                    <div class="row justify-content-between mb-1 titleCustom">
+                        <div class="col-12 col-md-auto mt-4 mb-2">
+                            <h5 class="px-4"><b>Listado de delegaciones</b></h5>
+                            <h6 class="px-4 text-muted">Edita o inactiva las oficinas en rentas.</h6>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mb-4 px-4 rounded gridCustom">
+                            <kendo-grid name="grid" height="450">
+                                <datasource type="DataSourceTagHelperType.Custom" custom-type="odata" page-size="20">
+                                    <transport>
+                                        <read url="https://demos.telerik.com/kendo-ui/service/Northwind.svc/Orders" />
+                                    </transport>
+
+                                </datasource>
+                                <sortable enabled="true" />
+
+                                <pageable button-count="5" refresh="true" page-sizes="new int[] { 5, 10, 20 }">
+                                </pageable>
+                                <columns>
+                                    <column field="OrderDate" title="Nombre" format="{0:dd/MM/yyyy}" width="250" />
+                                    <column field="ShipName" title="Delegación" width="150" />
+                                    <column template="<button data-bs-toggle=modal data-bs-target=\#editMinisterio class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>" width="100" />
+                                </columns>
+                                <toolbar>
+                                    <toolbar-button name="search"></toolbar-button>
+                                </toolbar>
+                            </kendo-grid>
+
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="tabCustomEnd"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+
+
+</div>
+    </div>
+    <!-- Modal -->
+
+
+
+
+
+    <div class="modal fade modalCustom" id="editMinisterio"  aria-labelledby="editMinisterioLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg boxShadow modal-dialog-centered">
+            <div class="modal-content">
+
+                <section class=" bg-white rounded">
+                    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                        <div class="col-auto pe-0">
+                            <div class="row align-items-center justify-content-center justify-content-md-start">
+                                <div class="col-auto pe-0">
+                                    <i class="icon-editMinisterio h1 colorPrimary"></i>
+                                </div>
+                                <div class="col-auto my-3">
+                                    <h2 class="m-0 h3"><b>Editar agencia del ministerio</b></h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="row">
+                                <div class="col-auto my-3">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="bg-light py-1"></div>
+                        </div>
+
+                    </div>
+                    <div class="row align-items-end">
+                        <div class="col-12 col-lg-6 my-4">
+                            <h5 class="px-4"><b>Datos de la agencia del ministerio</b></h5>
+                            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                        </div>
+                        <div class="col-12 col-lg-6 my-4">
+                            <div class="row justify-content-center">
+                                <div class="btnToggle col-8">
+                                    <div style="z-index:0" class="position-relative d-flex align-items-center">
+                                        <input class="toggle toggle-left" id="activo" name="toggle-state" value="false"
+                                               type="radio" checked="" />
+                                        <label class="btn" for="activo">Activo</label>
+                                        <input class="toggle toggle-right" id="inactivo" name="toggle-state" value="true"
+                                               type="radio" />
+                                        <label class="btn" for="inactivo">Inactivo</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <form class="row px-4 mb-4 align-items-end">
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="controlForm my-3">
+                                <label>Delegación<b>(obligatorio)</b>:</label>
+                                <span>
+                                @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                      .Name("delegaciónEditMinisterio")
+                                      .DataTextField("")
+                                      .DataValueField("")
+                                      .HtmlAttributes(new { style = "width:100%;" })
+                                      .Filter(FilterType.Contains)
+                                      .DataSource(source => source
+                                          .Read(read => read.Action("GetProducts", "Home"))
+                                      )
+                                )
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("nombreEditMinisterio")
+                                .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa el nombre de la agencia del ministerio")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                            )
+
+                            </div>
+                        </div>
+
+                    </form>
+                    <div class="row my-4">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                    <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton">
+                                    @(Html.Kendo().Button()
+                                                .Name("EditMinisterio")
+                                                .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                                .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade modalCustom" id="addMinisterio"  aria-labelledby="addMinisterioLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg boxShadow modal-dialog-centered">
+            <div class="modal-content">
+
+                <section class=" bg-white rounded">
+                    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                        <div class="col-auto pe-0">
+                            <div class="row align-items-center justify-content-center justify-content-md-start">
+                                <div class="col-auto pe-0">
+                                    <i class="icon-addOMinisterio h1 colorPrimary"></i>
+                                </div>
+                                <div class="col-auto my-3">
+                                    <h2 class="m-0 h3"><b>Agregar nueva agencia del ministerio</b></h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="row">
+                                <div class="col-auto my-3">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="bg-light py-1"></div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-12 my-4">
+                            <h5 class="px-4"><b>Datos de oficina en renta</b></h5>
+                            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                        </div>
+                    </div>
+                    <form class="row px-4 mb-4 align-items-end">
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="controlForm my-3">
+                                <label>Delegación<b>(obligatorio)</b>:</label>
+                                <span>
+                                @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                      .Name("delegaciónAddMinisterio")
+                                      .DataTextField("")
+                                      .DataValueField("")
+                                      .HtmlAttributes(new { style = "width:100%;" })
+                                      .Filter(FilterType.Contains)
+                                      .DataSource(source => source
+                                          .Read(read => read.Action("GetProducts", "Home"))
+                                      )
+                                )
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("nombreAddMinisterio")
+                                .Label(l => l.Content("Agencia del ministerio <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa el nombre de la agencia del ministerio")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                            )
+
+                            </div>
+                        </div>
+
+                    </form>
+                    <div class="row my-4">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                    <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton">
+                                    @(Html.Kendo().Button()
+                                                .Name("AddMinisterio")
+                                                .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                                .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+
+
+
+</main>

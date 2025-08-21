@@ -1,0 +1,134 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CatOficialesModel
+@{
+    var delegaciones = (SelectList)ViewBag.Delegaciones;
+
+}
+
+@{
+    Layout = null;
+}
+
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-deleteOficial h1 colorDanger"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Eliminar oficial de tránsito</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-12 text-center my-4">
+            <h3><b>Eliminar registro del catálogo</b></h3>
+        </div>
+    </div>
+    <form id="EliminarOficialForm" class="px-4 mb-4">
+       @* <div class="row align-items-end">
+            <div class="col-12 col-md-4">
+                <div class="controlForm my-3">
+                    <label>Delegación<b>(obligatorio)</b>:</label>
+                    <span>
+                        @Html.HiddenFor(m=>m.IdOficial)
+                        @Html.DropDownListFor(t => t.IdDelegacion,delegaciones)
+
+                    </span>
+                </div>
+            </div>
+        </div>*@
+        <div class="row align-items-end">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.Nombre)
+                        .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                        .Placeholder("Ingresa el nombre del oficial")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.ApellidoPaterno)
+                        .Label(l => l.Content("Apellido paterno <b>(obligatorio)</b>:"))
+                        .Placeholder("Ingresa el apellido paterno del oficial")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.ApellidoMaterno)
+                        .Label(l => l.Content("Apellido materno <b>(obligatorio)</b>:"))
+                        .Placeholder("Ingresa el apellido materno del oficial")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+
+                </div>
+            </div>
+        </div>
+
+    </form>
+    <div class="row my-4">
+        <div class="col-12">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>No eliminar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton">
+                        <button class="btnPrimary px-3" onclick="eliminarOficial()">
+                            <h5 class="m-0"><b>Eliminar</b></h5>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+
+<script>
+    function eliminarOficial() {
+
+        var Mydata = $("#EliminarOficialForm").serialize();
+        console.log(Mydata);
+        $('#agregarOficial').modal('hide');
+        $('body').removeClass('model-open');
+        $('.modal-backdrop').remove();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarOficial")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                $("#gridCatOficiales").data("kendoGrid").dataSource.data(result);
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+</script>

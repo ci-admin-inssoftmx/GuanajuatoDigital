@@ -1,0 +1,116 @@
+@model List<PersonaModel>
+
+<div class="row justify-content-between mb-1">
+    <div class="col-12 col-lg-6 mt-4 mb-2">
+        <h5 class="px-4"><b>Listado de personas</b></h5>
+        <h6 class="px-4 text-muted">Selecciona una persona para completar el registro.</h6>
+    </div>
+    <div class="col-12 col-lg-auto text-center">
+        <div class="btnOutline btnOutlinePrimary px-4 my-3">
+            <button  onclick="abrirModalPersonaFisica()">
+                <h5 class="m-0"><i class="me-2 icon-addFisica"></i><b>Agregar nueva persona física</b></h5>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(Html.Kendo().Grid(Model)
+            .Name("gridPersonasFisicasInf")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.idPersona).Hidden();
+                columns.Bound(c => c.idCatTipoPersona).Hidden();
+                columns.Select().ClientHeaderTemplate(" ");
+                columns.Bound(c => c.nombreCompleto).Title("Nombre");
+                columns.Bound(p => p.CURP).Title("CURP");
+                columns.Bound(p => p.RFC).Title("RFC");
+                columns.Bound(p => p.numeroLicencia).Title("No. Licencia");
+                columns.Bound(c => c.tipoPersona).Title("Tipo persona");
+            }).HtmlAttributes(new { style = "height:250" })
+            @*.Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Bottom).PageSizes(true))*@
+            .Pageable(p => p.Enabled(true))
+            .Sortable()
+            .Scrollable(scr => scr.Enabled(true))
+            .Scrollable(scr => scr.Height(250))
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            .PageSize(5)
+            )
+            .ToolBar(t => t.Custom().Text("Buscar...").Name("search"))
+            .Search(s =>
+            {
+                s.Field(c => c.nombreCompleto);
+                s.Field(c => c.CURP);
+                s.Field(c => c.RFC);
+                s.Field(c => c.numeroLicencia);
+
+            })
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            .Events(events => events.DataBound("onDataBound"))
+
+            )
+    </div>
+
+</div>
+
+            <div id="personaFisicaContainer"></div>
+
+
+<script>
+    $(document).ready(function () {
+        var grid = $("#gridPersonasFisicasInf").data("kendoGrid");
+        grid.tbody.on("click", ".k-checkbox", onClickPersonasFisicas);
+        function onClickPersonasFisicas(e) {
+            var grid = $("#gridPersonasFisicasInf").data("kendoGrid");
+            var row = $(e.target).closest("tr");
+            var dataItem = grid.dataItem(row);
+            var idPersona = dataItem.idPersona;
+            var idCatTipoPersona = dataItem.idCatTipoPersona;
+            $("#ddlIdPersona").val(idPersona);
+            $("#ddlIdCatTipoPersona").val(idCatTipoPersona);
+            console.log("Persona Fisica: ", idPersona);
+            if (row.hasClass("k-selected")) {
+                setTimeout(function (e) {
+                    var grid = $("#gridPersonasFisicasInf").data("kendoGrid");
+                    grid.clearSelection();
+                    var gridMoral = $("#gridPersonasMorales").data("kendoGrid");
+                    gridMoral.clearSelection();
+                })
+            } else {
+                grid.clearSelection();
+            };
+        };
+        //Se agregan los campos requeridos
+
+    })
+
+    function abrirModalPersonaFisica(){
+$.ajax({
+        url: '@Url.Action("MostrarPersonaFisica","BusquedaVehiculoPropietario")',
+        type: 'GET',
+        data: {},
+        success: function (result) {
+            $('#personaFisicaContainer').html(result);
+            $('#addFisico').modal('show');
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.error("Error en la solicitud AJAX:", textStatus, errorThrown);
+        }
+    });
+    }
+
+    function onDataBound() {
+        var grid = $("#gridPersonasFisicasInf").data("kendoGrid");
+		if (grid.dataSource.total() === 1) {
+			setTimeout(function () {
+				var row = grid.tbody.find("tr:first");
+				grid.select(row);
+				row.find(".k-checkbox").trigger("click");
+			}, 50);
+		}
+    }
+
+</script>

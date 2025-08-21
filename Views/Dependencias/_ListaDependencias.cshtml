@@ -1,0 +1,135 @@
+﻿<script>
+    function filtroDependencia() {
+        var idDependencia = $("#idDependenciaFiltro").val();;
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+</script>
+@if (ViewBag.Admin == true)
+{
+      <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                    <div class="row">
+                        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                            <button href ="#" id="btnNuevaDep" onclick="mostrarModalDep()">
+                                <h6 class="m-0 d-flex align-items-center"><i class="icon-addDependencia h5 mb-0 me-2"></i><b>Agregar nueva dependencia</b></h6>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+}
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.DependenciasModel>()
+            .Name("gridCatDependencias")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdDependencia).Width(20).Title("Id");
+                columns.Bound(c => c.NombreDependencia).Width(100);
+                columns.Bound(c => c.estatusDesc).Title("Estatus").Width(50);
+                // columns.Template(c => { }).ClientTemplate("#=calculateField(data)#");
+                columns.Command(c => c.Custom("Editar").Click("getIdDep")).Width(80);
+                // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+                // columns.Command(c => c.Custom("Delete").Click("redirectDelete")).Width(180);
+            })
+            .HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            // .Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetDeps", "Dependencias").Data("filtroDependencia"))
+            .PageSize(5).Model(model => model.Id(p => p.IdDependencia))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.NombreDependencia);
+            })
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events
+            .DataBound("replaceLegend")
+            .DataBinding("replaceLegend")
+            )
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+
+    </div>
+</div>
+<div class="modal fade modalCustom" id="editDependencia" aria-labelledby="editDependenciaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyUpdateDep">
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    function getIdDep(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        console.log(dataItem);
+
+        var IdDependencia = dataItem.IdDependencia;
+        console.log(IdDependencia);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcial", "Dependencias")', 
+            type: 'POST', 
+            data: { IdDependencia: IdDependencia }, 
+            success: function (result) {
+                $('#ModalBodyUpdateDep').html(result);
+                $('#editDependencia').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdDependencia = dataItem.IdDependencia;
+        console.log(IdDependencia);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarParcial", "Dependencias")',
+            type: 'POST', 
+            data: { IdDependencia: IdDependencia }, 
+            success: function (result) {
+                $('#ModalBodyCreate').html(result);
+                $('#addDependencia').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+
+    function calculateField(data) { 
+
+        let respuesta = data.Estatus == 1 ? "Activo" : "Inactivo";
+        return respuesta;
+    }
+</script>

@@ -1,0 +1,149 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CatFactoresOpcionesAccidentesModel
+@{
+    var factores = (SelectList)ViewBag.Factores;
+}
+<script>
+    function delegacion() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+</script>
+            <section class=" bg-white rounded">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-addOpciones h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                    <h2 class="m-0 h3">
+                        <b> Agregar factor opción accidente</b>
+                    </h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="row">
+                            <div class="col-auto my-3">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bg-light py-1"></div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-12 my-4">
+            <h5 class="px-4"><b>Datos de Factor opción accidente</b></h5>
+                        <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                    </div>
+                </div>
+                 <form id="agregarFactorOpcion" class="row px-4 mb-4 align-items-end justify-content-center">
+                    <div class="col-12 col-md-6">
+                        <div class="controlForm my-3">
+                            <label>Factor <b>(obligatorio)</b>:</label>
+                            <span>
+                    @Html.HiddenFor(model => model.Corp, new { id = "idDependenciaFiltro" })
+                    @(Html.Kendo().DropDownListFor(t => t.IdFactorAccidente).NoDataTemplate("No se encontraron datos")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("Selecciona un Factor de Accidente").Filter(FilterType.Contains)
+                        .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                 read.Action("Factores_Drop", "CatFactoresOpcionesAccidentes").Data("delegacion");                           
+                            });
+                        }))
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBoxFor(t=>t.FactorOpcionAccidente)
+                                .Label(l => l.Content("Factor opción de accidente <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa un nuevo factor opcion de accidente")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+
+                </form>
+                <div class="row my-4">
+                    <div class="col-12 col-md-6 mx-md-auto">
+                        <div class="row justify-content-around">
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                                    <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                </button>
+                            </div>
+                            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="agregarFactorOpcion()">
+                                    @(Html.Kendo().Button()
+                                        .Name("AddTraslado")
+                                        .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                        .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </section>
+
+
+<script>
+    function agregarFactorOpcion() {
+        var controlsValidate = [];
+        var isValid = true;
+         var CORP = $("#idDependenciaFiltro").val();
+        CORP = CORP ? CORP : null;
+
+        $("#agregarFactorOpcion").find('input[name="Corp"]').val(CORP);
+        controlsValidate.push({ 'controlName': 'FactorOpcionAccidente' });
+
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+        controlsValidate = [];
+        controlsValidate.push({ 'controlName': 'IdFactorAccidente' });
+
+        if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+        var Mydata = $("#agregarFactorOpcion").serialize();
+        console.log(Mydata);
+        $('#agregarFactorOpcAccidente').modal('hide');
+        $('body').removeClass('model-open');
+        $('.modal-backdrop').remove();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarFactorOpcionAccidente")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                var grid = $("#gridCatFactoresopcion").data("kendoGrid");
+                grid.dataSource.read();
+                sitteg_success('Elemento guardado correctamente')
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+</script>

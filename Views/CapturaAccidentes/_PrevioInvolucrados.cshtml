@@ -1,0 +1,32 @@
+﻿<div class="col-12 mb-4 px-4 rounded gridCustom">
+    @(
+        Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel>()
+        .Name("gridPrevioInvolucrado")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.IdVehiculo).Title("Id").Width(100);
+            columns.Bound(c => c.Marca).Title("Marca").Width(100);
+            columns.Bound(c => c.Marca).Title("Submarca").Width(100);
+
+            columns.Template("<button data-bs-toggle='modal' class='w-100 btn' onclick='editarCausa()'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Seleccionar</b></h6></button>").Width(40);
+            
+        })
+        .HtmlAttributes(new { style = "height:250px" })
+        .Sortable()
+        //.Groupable()
+        .Scrollable()
+        .Pageable()
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .Read(read => read.Action("AgregarCausaNuevo", "CapturaAccidentes"))
+        .PageSize(5).Model(model => model.Id(p => p.IdCausaAccidente))
+        )
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+        .Type(GridSelectionType.Row)
+        )
+        .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+        )
+</div>
+
+

@@ -1,0 +1,37 @@
+﻿@model GuanajuatoAdminUsuarios.Models.MarcaVehiculoModel
+@{
+}
+
+
+<div class="row">
+    <div class="col-md-10">
+        <h2>Crear Marca</h2>
+    </div>
+    <br />
+   
+</div>
+<hr />
+<br />
+
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("Create", "MarcasVehiculos"))
+        {
+            @(Html.Kendo().TextBoxFor(t => t.MarcaVehiculo)
+                .HtmlAttributes(new { placeholder = "Marca", required = "required", validationmessage = "Enter Category Name" })
+                .Label(l => l.Content("Marca de Vehiculo <b>(obligatorio)</b>:"))
+                )
+            <br />  <br />
+
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <a href='@Url.Action("Index")' class="btn btn-default">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </div>
+
+        }
+
+    </div>
+</div>

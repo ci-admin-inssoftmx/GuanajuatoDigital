@@ -1,0 +1,301 @@
+﻿@model List<Concesionarios2Model>
+
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        var auth = @autorizaciones;
+        console.log(auth);
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡El usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(function () {
+                    window.location.href = "/Principal";
+                }, 200);
+            } else {
+                // BUSQUEA
+                //if (!auth.toString().includes("291")) {
+                //    $("#btnBuscarConcesionario").prop('disabled', true).css({ "opacity": "0.3" });
+                //}
+                ////AGREGAR
+                //if (!auth.toString().includes("293")) {
+                //    $("#btnCrearConcesionario").prop('disabled', true).css({ "opacity": "0.3" });
+                //}
+
+
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡El usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(function () {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+</script>
+
+<div class="mainContainer bg-light">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-concesonaria h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Concesionarios</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnCrearConcesionario" onclick="btnModalCrearConcesionario()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addConcesonaria h2 mb-0 me-2"></i><b> Agregar nuevo concesionario</b></h6>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+     
+        <br/>
+        <div id="concesionarioForm">
+            <div class="row align-items-end px-4">
+
+                <div class="controlForm  my-3 col-12 col-md-6 col-lg-3 col-xl-2">
+                    <label>Delegación:</label>
+                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                        .Name("idDelegacion")
+                        .BindTo((SelectList)ViewBag.CatDelegaciones)
+                        .OptionLabel("-- Seleccione --")
+                        .Events(e => e.Change("municipiosDropDownChange"))
+                        .HtmlAttributes(new { style = "width:100%;", id = "ddlDelegaciones" })
+                        .Filter(FilterType.Contains))
+
+                </div>
+
+                <div class="controlForm my-3 col-12 col-md-6 col-lg-3 col-xl-2">
+                    <label>Municipio</label>
+                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                        .Name("idMunicipio")
+                        .BindTo((SelectList)ViewBag.CatMunicipios)
+                        .OptionLabel("-- Seleccione --")
+                        .HtmlAttributes(new { style = "width:100%;", id = "ddlMunicipios" })
+                        .Filter(FilterType.Contains))
+                </div>
+
+                <div class="controlForm  my-3 col-12 col-md-6 col-lg-3 col-xl-2">
+                    <label>Concesionario:</label>
+                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                        .Name("idConcesionario")
+                        .BindTo((SelectList)ViewBag.CatConcesionario)
+                        .OptionLabel("-- Seleccione --")
+
+                        .HtmlAttributes(new { style = "width:100%;", id = "ddlConcesionario" })
+                        .Filter(FilterType.Contains))
+                </div>
+
+                <div class="my-3 col-12 col-md-6 col-lg-3 col-xl-2">
+                    <div class="controlButton">
+                        <button id="btnBuscarConcesionario" class="btnPrimary" type="button" onclick="ajax_Busqueda()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+             
+        <div class="row justify-content-between mb-1 titleCustom">
+            <div class="col-12 col-md-auto mt-4 mb-2">
+                <h5 class="px-4"><b>Listado de concesionarios</b></h5>
+                <h6 class="px-4 text-muted">Edita los concesionarios que lo requieran.</h6>
+            </div>
+        </div>
+        @*Table*@
+        <div id="listadoConcesionarios">
+            <partial name="_ListadoConcesionarios" model="Model" />
+        </div>
+    </section>
+</div>
+
+
+<div class="modal fade modalCustom" id="modalCrearConcesionario" aria-labelledby="modalCrearConcesionario" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body" id="modalBodyCrearConcesionario">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modalCustom" id="modalEditarConcesionario" aria-labelledby="modalEditarConcesionario" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body" id="modalBodyEditarConcesionario">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+     $(document).ready(function () {
+        var auth = @autorizaciones;
+        var grid = $("#GridCon").data("kendoGrid");
+
+        //if (!auth.toString().includes("295")) {
+        //    grid.hideColumn(5); 
+
+        //}
+
+    });
+
+    $(document).ready(function () {
+        $("#modalCrearConcesionario").on("show.bs.modal shown.bs.modal", function (e) {
+            $("body").removeClass("modal-open").find(".modal-backdrop").remove();
+        });
+        $("#modalCrearConcesionario").on('hide.bs.modal', function () {
+            $('#modalBodyCrearConcesionario').html('');
+        });
+
+
+    });
+
+    function btnModalCrearConcesionario() {
+        $.ajax({
+            url: '@Url.Action("ajax_ModalCrearConcesionario")',
+            type: 'GET',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (response) {
+                if (response.includes("no tiene permisos")) {
+                    sitteg_warning("El usuario no tiene permisos suficientes para esta acción.");
+                    hideLoading();
+                } else {
+                    $('#modalBodyCrearConcesionario').html(response);
+                $('#modalCrearConcesionario').modal('show');
+                }
+            }
+        });
+    }
+     function btnModalEditarConcesionario(idConcesionario) {
+        $.ajax({
+            url: '@Url.Action("ajax_ModalEditarConcesionario")',
+            type: 'GET',
+            data: { idConcesionario: idConcesionario },
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (response) {
+                if (response.includes("no tiene permisos")) {
+                    sitteg_warning("El usuario no tienen los permisos para esta acción");
+                    hideLoading();
+                } else {
+                    $('#modalBodyCrearConcesionario').html(response);
+                    $('#modalCrearConcesionario').modal('show');
+                }
+            },
+            error: function () {
+                alert('Ocurrió un error en la solicitud AJAX.');
+            }
+        });
+    }
+     function ajax_Busqueda(){
+            var idMunicipio = $("#ddlMunicipios").val();
+            var idDelegacion = $("#ddlDelegaciones").val();
+            var idConcesionario = $("#ddlConcesionario").val();
+            showLoading();
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ajax_BuscarConcesionario")',
+                data: {
+
+                    "idMunicipio": idMunicipio,
+                    "idDelegacion": idDelegacion,
+                    "idConcesionario": idConcesionario
+                },
+                success: function (data) {
+                $("#listadoConcesionarios").html(data);
+                    hideLoading();
+                },
+                error: function (xhr, status) {
+                    hideLoading();
+                }
+            });
+        }
+
+
+    function municipiosDropDownChange() {
+        var carreteraDDValue = $("#ddlDelegaciones").data("kendoDropDownList").value();
+        console.log("IDK", carreteraDDValue)
+        showLoading();
+        $.ajax({
+            url: "/Concesionarios/Municipios_Drop",
+            type: "POST",
+            data: { idDelegacion: carreteraDDValue },
+            success: function (data) {
+                var TramosDropDown = $("#ddlMunicipios").data("kendoDropDownList");
+                TramosDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.log("EE", error)
+                hideLoading();
+            }
+        });
+    }
+
+    function municipiosDropDownChangeCrear() {
+        var carreteraDDValue = $("#ddlDelegacionesCrear").data("kendoDropDownList").value();
+        console.log("IDK", carreteraDDValue)
+        showLoading();
+        $.ajax({
+            url: "/Concesionarios/Municipios_Drop",
+            type: "POST",
+            data: { idDelegacion: carreteraDDValue },
+            success: function (data) {
+                var TramosDropDown = $("#ddlMunicipio").data("kendoDropDownList");
+                TramosDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.log("EE", error)
+                hideLoading();
+            }
+        });
+    }
+
+    function municipiosDropDownChangeEditar() {
+        var carreteraDDValue = $("#ddlDelegacionesEditar").data("kendoDropDownList").value();
+        console.log("IDK", carreteraDDValue)
+        showLoading();
+        $.ajax({
+            url: "/Concesionarios/Municipios_Drop",
+            type: "POST",
+            data: { idDelegacion: carreteraDDValue },
+            success: function (data) {
+                var TramosDropDown = $("#ddlMunicipiosEditar").data("kendoDropDownList");
+                TramosDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.log("EE", error)
+                hideLoading();
+            }
+        });
+    }
+</script>

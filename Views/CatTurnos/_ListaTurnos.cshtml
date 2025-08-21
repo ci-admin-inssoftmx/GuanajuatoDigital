@@ -1,0 +1,147 @@
+﻿@using GuanajuatoAdminUsuarios.Models.Catalogos.Turnos
+@model List<TurnoDetailsModel>
+@{
+
+}
+ @if (ViewBag.Admin == true)
+        {
+    <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+        <div class="row">
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <button href="#" id="btnCrear" onclick="mostrarCrearTurnoModal()">
+                    <h6 class="m-0 d-flex align-items-center"><i class="icon-turnos h5 mb-0 me-2"></i><b>Agendar turno</b></h6>
+                </button>
+            </div>
+        </div>
+    </div>
+    }
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(Html.Kendo().Grid<TurnoDetailsModel>(Model)
+            .Name("turnosGrid")
+            .Columns(columns =>
+            {
+                columns.Bound(t => t.IdTurno).Title("Id");
+                columns.Bound(t => t.Nombre).Title("Nombre del turno");
+                columns.Bound(t => t.HoraInicio).Title("Hora de inicio").ClientTemplate("#= kendo.toString(kendo.parseDate(HoraInicio, 'HH:mm:ss'), 'HH:mm') #");
+                columns.Bound(t => t.HoraFin).Title("Hora de finalización").ClientTemplate("#= kendo.toString(kendo.parseDate(HoraFin, 'HH:mm:ss'), 'HH:mm') #");
+                columns.Bound(t => t.Delegacion).Title("Corporación");
+                columns.Command(c =>
+                    {
+                        c.Custom("Editar").Click("mostrarEditarModal");
+                        c.Custom("Eliminar").Click("mostrarEliminarModal").HtmlAttributes( new { @class = "text-danger" });
+                    }).Width(200);                
+            })
+            .HtmlAttributes(new { style = "height:550px" })
+            .Pageable()
+            .Sortable()
+            .DataSource(dataSource => dataSource
+			    .Ajax()
+			    .Read(read => read.Action("Search", "CatTurnos").Data("applyFilter"))
+                .PageSize(5)
+                .Model(model => model.Id(p => p.IdTurno))
+		    )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.Nombre);                
+                s.Field(c => c.Delegacion);
+            })
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+                .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+        )  
+        
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+    </div>
+</div>
+<!-- create modal -->
+<div class="modal fade modalCustom" id="crearTurnoModal" aria-labelledby="crearTurnoModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="crearTurnoModalBody">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modalCustom" id="editarTurnoModal" aria-labelledby="editarTurnoModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="editarTurnoModalBody">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- delete modal -->
+<div class="modal fade modalCustom" id="eliminarTurnoModal" aria-labelledby="eliminarTurnoModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="eliminarTurnoModalBody">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function mostrarEditarModal(e) {
+        let dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        let turnoId= dataItem.IdTurno;
+                
+        showLoading();
+        $.ajax({
+            url: `@Url.Action("LoadEditarPartial","CatTurnos")/${turnoId}`,
+            type: 'GET',
+            success: function (data) {
+                $('#editarTurnoModalBody').html(data);
+                $('#editarTurnoModal').modal('show');
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+
+    function mostrarEliminarModal(e) {
+        let dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        let turnoId = dataItem.IdTurno;
+
+        let formData = new FormData();
+        formData.append('IdTurno', turnoId);
+        formData.append('Nombre', dataItem.Nombre);
+        formData.append('HoraInicio', dataItem.HoraInicio);
+        formData.append('HoraFin', dataItem.HoraFin);
+        formData.append('Delegacion', dataItem.Delegacion);
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("LoadEliminarPartial", "CatTurnos")',
+            type: 'POST',
+            data: formData,
+            processData: false, // Necesario para enviar FormData
+            contentType: false,
+            success: function (data) {
+                $('#eliminarTurnoModalBody').html(data);
+                $('#eliminarTurnoModal').modal('show');
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

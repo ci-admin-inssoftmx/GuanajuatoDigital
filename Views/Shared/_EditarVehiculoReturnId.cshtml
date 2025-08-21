@@ -1,0 +1,600 @@
+﻿@using static GuanajuatoAdminUsuarios.Utils.CatalogosEnums;
+@model GuanajuatoAdminUsuarios.Models.VehiculoModel
+
+@{
+    var canMarca = !(Model.idMarcaVehiculo >0);
+    var submarca = (Model.idSubmarca);
+
+
+    var canSubmarca = !(Model.idSubmarca > 0);
+
+    if (!canSubmarca)
+    {
+        var array = new int[]{ 1304,1291,1284};
+        canSubmarca = (array.Contains(submarca));
+    }
+
+    var canserie = String.IsNullOrEmpty(Model.serie);
+
+}
+
+<script>
+
+    function TestCapacidad(e){
+
+        if([37,38,39,40,8,9,17].indexOf(e.keyCode)>-1){
+            return
+        }
+
+        var input = e.key
+        var array = "0123456789"
+        var can = array.indexOf(input)>-1
+
+        if(!can){
+            e.preventDefault()
+        }
+
+        console.log(e)
+    }
+
+
+    function ChangeSubTipoServicio() {
+        var idTipoServicio = $("#ddlCatTipoServicio").data("kendoDropDownList").value();
+        var DivSubTipoServicio = $("#DivSubTipoServicio");
+
+        if (idTipoServicio == 1 || idTipoServicio == 5)
+            DivSubTipoServicio.css('display', 'block');
+        else
+            DivSubTipoServicio.css('display', 'none');
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("GetSubtipoPorTipo_Drop","BusquedaVehiculoPropietario")',
+            type: "POST",
+            data: { idTipoServicio: idTipoServicio },
+            success: function (data) {
+                var SubTipoServicio = $("#ddlCatSubTipoServicio").data("kendoDropDownList");
+                if (SubTipoServicio)
+                    SubTipoServicio.dataSource.data(data);
+                console.log(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+
+    $("#ddlCatSubTipoServicio").on("change", function () {
+        var value = $(this).val();
+        console.log(value);
+        $('#hdnidSubtipoServicio').val(value);
+    });
+
+
+
+    function UpdateSubMArca(){
+        var Dll = $("#idSubmarca").data("kendoDropDownList")
+        Dll.dataSource.read()
+    }
+
+
+    function DataMarca(){
+
+        var Marca = $("#ddlMarcas").val()
+
+        return {
+            idMarca:Marca??"0"
+        }
+    }
+
+
+</script>
+
+
+<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+    <div class="col-auto pe-0">
+        <div class="row align-items-center justify-content-center justify-content-md-start">
+            <div class="col-auto pe-0">
+                <i class="icon-car h1 colorPrimary"></i>
+            </div>
+            <div class="col-auto my-3">
+                <h2 class="m-0 h3"><b>Captura de vehículo</b></h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-auto">
+        <div class="row">
+            <div class="col-auto my-3">
+                <button class="btn-close" type="button" onclick="ModalCerraVeh()"></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="bg-light py-1"></div>
+    </div>
+</div>
+<form id="frmEditarPersona" class="row px-4 mb-4 align-items-end">
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Entidad de registro <b>(obligatorio):</b></label>
+            <input type="hidden" id="idInfraccion" name="idInfraccion" value="@Model.idInfraccion" />
+            <input type="hidden" id="idAccidente" name="idAccidente" value="@Model.IdAccidente" />
+
+            @(Html.Kendo().DropDownListFor(model => model.idEntidad).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel("Seleccione Entidad...")
+                .HtmlAttributes(new { style = "width:100%;", data_Vehiculo = "Vehiculo", isMAndatory = "true" })
+                .Filter(FilterType.Contains)
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("Entidades_Drop", "BusquedaVehiculoPropietario");
+                    });
+                })
+                )
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Placas:</label>
+            <span class="k-widget k-textbox" style="width:100%;">
+                <input type="text" style="width:100%;" value="@(Model.placas?.ToUpper())" name="placas" id="placas" class="k-input" data-vehiculo="Vehiculo" />
+            </span>
+            
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Serie:</label>
+
+                <span class="k-widget k-textbox" style="width:100%;">
+                <input type="text" style="width:100%;" value="@(Model.serie?.ToUpper())" name="serie" id="serie" class="k-input" data-vehiculo="Vehiculo"  readonly="@(canserie?"true":"false")" />
+                </span>
+
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(m => m.tarjeta)
+                .Label(l => l.Content("Tarjeta:"))
+                .Placeholder("Ingresa el número de la tarjeta")
+                .HtmlAttributes(new { style = "width: 100%;text-transform:uppercase;", data_Vehiculo = "Vehiculo" })
+                )
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Color:</label>
+            @(Html.Kendo().DropDownListFor(m => m.idColor).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel("Seleccione Color...")
+                .HtmlAttributes(new { style = "width:100%;", data_Vehiculo = "Vehiculo" })
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("Colores_Drop", "BusquedaVehiculoPropietario");
+                    });
+                })
+                )
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Color Real:</label>
+            @(Html.Kendo().DropDownListFor(m => m.idColorReal).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel("Seleccione Color...")
+                .HtmlAttributes(new { style = "width:100%;", data_Vehiculo = "Vehiculo" })
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("Colores_Drop", "BusquedaVehiculoPropietario");
+                    });
+                })
+                )
+        </div>
+    </div>
+
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Vigencia de tarjeta:</label>
+
+                @(Html.Kendo().DatePickerFor(m => m.vigenciaTarjeta).Format("dd/MM/yyyy")
+                    //.Value("")
+                    // .DateInput()
+                    .Culture("es-ES")
+                .HtmlAttributes(new { style = "width: 100%", title = "datetimepicker", data_Vehiculo = "Vehiculo" })
+                    )
+            
+
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Marca <b>(obligatorio):</b></label>
+
+            @(Html.Kendo().DropDownListFor(d => d.idMarcaVehiculo).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Seleccione Marca...")
+                    .Enable(canMarca)
+                .Events(e => e.Change("UpdateSubMArca"))
+                    .HtmlAttributes(new { style = "width:100%;", id = "ddlMarcas", data_Vehiculo = "Vehiculo", isMAndatory = "true" })
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("Marcas_Drop", "BusquedaVehiculoPropietario");
+                        });
+                    })
+                    )
+            
+
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Sub-Marca <b>(obligatorio):</b></label>
+
+            @Html.HiddenFor(m=> m.idSubmarcaUpdated, new { @id = "hdnIdSubmarca" })
+
+            @(Html.Kendo().DropDownListFor(d => d.idSubmarca).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel("Seleccione Sub-Marca...")
+                .Enable(canSubmarca)
+                .HtmlAttributes(new { style = "width:100%;", id = "idSubmarca", data_Vehiculo = "Vehiculo", isMAndatory = "true" })
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("SubMarcasActive_ReadPorMarca", "Vehiculos").Data("DataMarca");
+                    });
+                })
+                )
+
+
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Tipo de vehículo <b>(obligatorio):</b></label>
+
+
+            @(Html.Kendo().DropDownListFor(d => d.idTipoVehiculo).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Seleccione Tipo de vehículo...:")
+                .HtmlAttributes(new { style = "width:100%;", data_Vehiculo = "Vehiculo", isMAndatory = "true", disabled = "true" })
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("TiposVehiculo_Drop", "BusquedaVehiculoPropietario");
+                        });
+                    })
+                    )
+            
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Modelo:</label>
+
+            <span class="k-widget k-textbox" style="width:100%;">
+                <input type="text" style="width:100%;" value="@(Model.modelo?.ToUpper())" name="modelo" id="modelo" class="k-input" data-vehiculo="Vehiculo" readonly="true" />
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.numeroEconomico)
+                .Label(l => l.Content("No. económico:"))
+                .Placeholder("Ingresa el número económico")
+                .HtmlAttributes(new { style = "width: 100%;text-transform:uppercase;", data_Vehiculo = "Vehiculo" })
+                )
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.paisManufactura)
+                .Label(l => l.Content("Manufactura:"))
+                .Placeholder("Ingresa Manufactura")
+                .HtmlAttributes(new { style = "width: 100%;text-transform:uppercase;", data_Vehiculo = "Vehiculo" })
+                )
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.motor)
+                .Label(l => l.Content("Motor:"))
+                .Placeholder("Ingresa Motor")
+                .HtmlAttributes(new { style = "width: 100%;text-transform:uppercase;", data_Vehiculo = "Vehiculo" })
+                )
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.motorActual)
+                .Label(l => l.Content("Motor Actual:"))
+                .Placeholder("Ingresa Motor")
+                .HtmlAttributes(new { style = "width: 100%;text-transform:uppercase;", data_Vehiculo = "Vehiculo" })
+                )
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+
+            <label>Capacidad:</label>
+            <div class="input-group">
+                <input autocomplete="off" type="text" data-vehiculo=Vehiculo name="capacidad" id="capacidad" value="@Model.capacidad" onkeydown="TestCapacidad(event)" style="height: 3.5em;" />
+            </div>
+
+            @*@(Html.Kendo().NumericTextBoxFor(t => t.capacidad)
+                .Label(l => l.Content("Capacidad:"))
+                .Format("#")
+                
+                .Placeholder("Ingresa Capacidad")
+                .HtmlAttributes(new { style = "width: 100%", data_Vehiculo = "Vehiculo",keyDown="testKeyDown" })
+                )*@
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.poliza)
+                .Label(l => l.Content("Póliza:"))
+                .Placeholder("Ingresa Póliza")
+                .HtmlAttributes(new { style = "width: 100%;text-transform:uppercase;", data_Vehiculo = "Vehiculo" })
+                )
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.otros)
+                .Label(l => l.Content("Otros:"))
+                .Placeholder("Ingresa Otros")
+                .HtmlAttributes(new { style = "width: 100%;text-transform:uppercase;", data_Vehiculo = "Vehiculo" })
+                )
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Carga:</label>
+            <div class="btnToggleActive">
+                @Html.HiddenFor(m => m.cargaInt, new { id = "idCarga" })
+                @(Html.Kendo().SwitchFor(m => m.carga)                
+                    .Messages(c => c.Checked("SI").Unchecked("NO"))
+                    .HtmlAttributes(new { id = "cargaSwitch", data_Vehiculo = "Vehiculo" })
+
+                    )
+
+            </div>
+        </div>
+    </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Tipo de Servicio:</label>
+                @(Html.Kendo().DropDownListFor(d => d.idCatTipoServicio)
+                .Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel("Seleccione Tipo de Servicio...:")
+                .HtmlAttributes(new { style = "width:100%;", id = "ddlCatTipoServicio", data_Vehiculo = "Vehiculo" })
+                .Events(e => e.Change("ChangeSubTipoServicio"))
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("TipoServicios_Drop", "BusquedaVehiculoPropietario");
+                    });
+                })
+                )
+            </div>
+        </div>
+        @if (Model.showSubTipo == true)
+        {<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+    <div class="controlForm my-3" id="DivSubTipoServicio" style="display:block">
+        <label>Subtipo de Servicio:</label>
+        @(
+                    Html.Kendo().DropDownListFor(d => d.idSubtipoServicio).NoDataTemplate("No se encontraron datos")
+                    .Filter(FilterType.Contains)
+
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Seleccione Subtipo de Servicio...:")
+                    .HtmlAttributes(new { style = "width:100%;", id = "ddlCatSubTipoServicio", data_Vehiculo = "Vehiculo" })
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetSubtipoPorTipo_Drop", "BusquedaVehiculoPropietario");
+                        });
+                    })
+                    )
+    </div>
+</div>
+        }
+        else
+        {
+   <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+    <div class="controlForm my-3" id="DivSubTipoServicio" style="display:none">
+        <label>Subtipo de Servicio:</label>
+        @(
+                    Html.Kendo().DropDownListFor(d => d.idSubtipoServicio).NoDataTemplate("No se encontraron datos")
+                    .Filter(FilterType.Contains)
+
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Seleccione Subtipo de Servicio...:")
+                    .HtmlAttributes(new { style = "width:100%;", id = "ddlCatSubTipoServicio", data_Vehiculo = "Vehiculo" })
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetSubtipoPorTipo_Drop", "BusquedaVehiculoPropietario");
+                        });
+                    })
+                    )
+    </div>
+</div>
+        }
+
+
+
+
+</form>
+<div class="row my-4">
+    <div class="col-12 col-md-6 mx-md-auto">
+        <div class="row justify-content-around">
+            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                <button type="button" class="btn btnOutline btn-sm btnClose" onclick="ModalCerraVeh()">
+                    <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                </button>
+            </div>
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <div class="controlButton">
+                    <button type="button" class="btnPrimary px-3" onclick="btnEditarVehiculoReturnId()">
+                        <h5 class="m-0"><b>Guardar</b></h5>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmacionCerrarVehiculo" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Confirmación</h5>
+                                <button type="button" onclick="cerrarMsj()">X</button>
+                            </div>
+                            <div class="modal-body">
+                                ¿Está seguro de que desea cerrar la ventana y perder la información ingresada?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" onclick="AceptarCerrar()">Aceptar</button>
+                                <button type="button" class="btn btn-secondary" id="cancelarConfirmacion" onclick="cerrarMsj()">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+<script>
+
+
+    function btnEditarVehiculoReturnId(){
+        var Elements = document.querySelectorAll("input[data-vehiculo=Vehiculo]")
+
+        var obj = {}
+        var arr = []
+
+        for(var i = 0 ; i< Elements.length ; i++ ){
+            var element = $(Elements[i])
+
+            obj[element.prop("id")] = { id: element.prop("id"), name: element.prop("id"), ismandatory: element.attr("isMAndatory"), value: element.val() }
+            arr.push(obj[element.prop("id")])
+        }
+
+        var can = arr.filter(s => Boolean(s.ismandatory)).every(s=>  Boolean(s.value))
+
+        if (!can) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }       
+
+        var idVehiculo = $("#idVehiculo").val() ?? $("#IdVehiculoAsignado").val();
+        let idInfraccion = $("#idInfraccion").val();
+        let idAccidente = $("#idAccidente").val();
+
+        let url = '';
+        if (idInfraccion) {
+            url = '@Url.Action("ajax_EditarVehiculoInf", "Infracciones")';
+        } else if (idAccidente) {
+            url = '@Url.Action("ajax_EditarVehiculoAcc", "CapturaAccidentes")';
+        }
+
+        var Sendsvalues = Object.keys(obj).reduce((pv, cv) => { pv[cv] = obj[cv].value; return pv }, {});
+        Sendsvalues["cargaSwitch"] = $("#cargaSwitch").data("kendoSwitch").check();
+        Sendsvalues["id"] = idVehiculo;
+        Sendsvalues["idInfraccion"] = $("#idInfraccion").val();
+        Sendsvalues["idAccidente"] = idAccidente
+        
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: Sendsvalues,
+            success: function (result) {
+                console.log("DFDF", result)
+                //var grid = $("#gridConductores").data("kendoGrid");
+
+                if (result && result.data) {
+
+                    if (window.DoUpdate) {
+                        window.DoUpdate(result.id)
+                    }
+                    $('#divGarantiaTarjeta').find('span').text(result.id.tarjeta);
+
+                    sitteg_success("Información actualizada correctamente")
+                } else {
+                    console.error("La respuesta no tiene la estructura esperada:", result);
+                }
+
+                $('#modalCrearPersona2').modal('hide');
+                sitteg_success('Elemento guardado correctamente')
+                hideLoading();
+            },
+            error: function (xhr, status) {
+                var errmsg = xhr.responseText;
+                console.log(errmsg)
+                sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                hideLoading();
+            }
+        });
+
+
+
+    }
+
+
+    function ModalCerraVeh() {
+        $('#confirmacionCerrarVehiculo').modal('show');        
+    }
+      
+    function cerrarMsj(){
+        $('#confirmacionCerrarVehiculo').modal('hide');
+    }
+    function AceptarCerrar(){
+        $('#modalCrearVehiculo').modal('hide');
+        $('#confirmacionCerrarVehiculo').modal('hide');
+        $('#modalBodyCrearVehiculo').html("");
+
+    }
+</script>

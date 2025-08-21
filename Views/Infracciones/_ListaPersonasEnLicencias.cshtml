@@ -1,0 +1,68 @@
+﻿@model IEnumerable<PersonaModel>
+
+    <div class="modal-header">
+        <h5 class="modal-title">Datos encontrados en el sistema de licencias</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="cerrarModalBtnlistPerLicHeader"">
+          <span aria-hidden="true">&times;</span>
+    </button>
+    </div>
+    
+<div col-12 mb-4 px-4 rounded gridCustom>
+@(
+        Html.Kendo().Grid(Model)
+        .Name("gridPersonasLicencia")
+        .Events(events => events.Change("onRowSelect"))
+        .Columns(columns =>
+        {
+            columns.Select().Width(50).ClientHeaderTemplate(" ");
+            columns.Bound(c => c.idPersona).Hidden();
+            columns.Bound(c => c.nombreCompleto).Title("Nombre");
+            columns.Bound(p => p.CURP).Title("CURP");
+            columns.Bound(p => p.RFC).Title("RFC");
+            columns.Bound(p => p.numeroLicencia).Title("No. Licencia");
+            columns.Bound(p => p.tipoLicencia).Title("Tipo de Licencia");
+
+            columns.Bound(p => p.calle).Hidden();
+            columns.Bound(p => p.numero).Hidden();
+            columns.Bound(p => p.colonia).Hidden();
+            columns.Bound(p => p.idGenero).Hidden();
+            columns.Bound(p => p.PersonaDireccion.idMunicipio).Hidden();
+            columns.Bound(p => p.PersonaDireccion.municipio).Hidden();
+            columns.Bound(p => p.PersonaDireccion.codigoPostal).Hidden();
+            columns.Bound(p => p.PersonaDireccion.entidad).Hidden();
+            columns.Bound(p => p.PersonaDireccion.telefono).Hidden();
+            columns.Bound(p => p.PersonaDireccion.correo).Hidden();
+
+
+         //   columns.Bound(c => c.tipoPersona).Title("Tipo persona");
+        })
+        .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+
+        )
+
+
+        </div>
+
+            <div class="modal-footer">
+                            <button type="button" id="cerrarModalBtnlistPerLic" class="btn btn-secondary controlButton" data-dismiss="modal"  onclick="btnCerrar()">Cerrar</button>
+                           
+             </div>
+
+
+           <script>
+               const cerrarModalBtn = document.getElementById('cerrarModalBtnlistPerLic');
+        cerrarModalBtn.addEventListener('click', () => {
+            $('#modalLicenciasList').modal('hide');
+        });
+
+
+        const cerrarModalBtnHeader = document.getElementById('cerrarModalBtnlistPerLicHeader');
+        cerrarModalBtnHeader.addEventListener('click', () => {
+            $('#modalLicenciasList').modal('hide');
+        });
+        
+
+        
+           </script>

@@ -1,0 +1,140 @@
+﻿
+<script>
+    function SelectedRow(){
+        var selectedRow = this.select();
+
+        if (selectedRow.length > 0) {
+            var dataItem = this.dataItem(selectedRow);
+            var idPersona = dataItem.idPersona;
+            var idCatTipoPersona = dataItem.idCatTipoPersona;
+
+
+            $("#ddlIdPersona").val(idPersona);
+            $("#ddlIdCatTipoPersona").val(idCatTipoPersona);
+        }
+
+    }
+
+    function DataPersonaFisica(){
+        return {id:5}
+    }
+
+    </script>
+
+<div class="row justify-content-between mb-1">
+    <div class="col-12 col-lg-6 mt-4 mb-2">
+        <h5 class="px-4"><b>Listado de personas</b></h5>
+        <h6 class="px-4 text-muted">Selecciona una persona para completar el registro.</h6>
+    </div>
+    <div class="col-12 col-lg-auto text-center">
+        <div class="btnOutline btnOutlinePrimary px-4 my-3">
+            <button data-bs-toggle="modal" data-bs-target="#addFisico">
+                <h5 class="m-0"><i class="me-2 icon-addFisica"></i><b>Agregar nueva persona física</b></h5>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row my-4 px-4">
+    <div class="col-12 rounded gridCustom">
+        @(Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.PersonaModel>()
+            .Name("gridPersonasFisicasAc")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.idPersona).Hidden();
+                columns.Bound(c => c.idCatTipoPersona).Hidden();                
+                columns.Bound(c => c.nombreCompleto).Title("Nombre");
+                columns.Bound(p => p.CURP).Title("CURP");
+                columns.Bound(p => p.RFC).Title("RFC");
+                columns.Bound(p => p.numeroLicencia).Title("No. Licencia");
+                columns.Bound(c => c.tipoPersona).Title("Tipo persona");
+            }).HtmlAttributes(new { style = "height:250" })
+            .Events(events => events
+            .DataBound("onDataBound")
+            .Change("SelectedRow").DataBinding("replaceLegend").DataBinding("replaceLegend"))
+
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            .Events(events => events.DataBound("onDataBound"))
+
+
+            
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single).Type(GridSelectionType.Row))
+            @*.Pageable(p => p.Enabled(true).PageSizes(new[] { 10, 20, 30 }))*@
+            .Pageable(p => p.Enabled(true))
+            .EnableCustomBinding(false)
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(ev=>ev.Action("ajax_BuscarPersonasFiscasPagination", "CapturaAccidentes").Data("DataPersonaFisica"))
+            .PageSize(10)
+            )
+            .Scrollable(scr => scr.Height(350)
+            )
+            .ToolBar(t => t.Custom().Text("Buscar...").Name("search"))
+            )
+        )
+    </div>
+
+</div>
+
+<div class="row my-5">
+    <div class="col-12 col-md-6 mx-md-auto">
+        <div class="row justify-content-around">
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <div class="controlButton" onclick="submitCreateVehiculo()">
+                    @(Html.Kendo().Button()
+                        .Name("saveFisicoAC")
+                        .HtmlAttributes(new { @class = "btnPrimary px-5" })
+                        .Content("<h5 class=\"m-0\"><b>Finalizar captura</b></h5>"))
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+
+    function onClickPersonasFisicas(e) {
+        var grid = $("#gridPersonasFisicasAc").data("kendoGrid");
+        var row = $(e.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        var idPersona = dataItem.idPersona;
+        var idCatTipoPersona = dataItem.idCatTipoPersona;
+        
+        
+        $("#ddlIdPersona").val(idPersona);
+        $("#ddlIdCatTipoPersona").val(idCatTipoPersona);
+        if (row.hasClass("k-selected")) {
+            setTimeout(function (e) {
+                var grid = $("#gridPersonasFisicasAc").data("kendoGrid");
+                grid.clearSelection();
+                var gridMoral = $("#gridPersonasMorales").data("kendoGrid");
+                gridMoral.clearSelection();
+            })
+        } else {
+            grid.clearSelection();
+        };
+    };
+
+    function onDataBound() {
+        var grid = $("#gridPersonasFisicasAc").data("kendoGrid");
+
+        if (grid.dataSource.total() === 1) {
+            setTimeout(function () {
+                var row = grid.tbody.find("tr:first");
+                grid.select(row);
+                row.find(".k-checkbox").trigger("click");
+            }, 50);
+        }
+    }
+
+
+
+
+    $(document).ready(function () {
+    //    var grid = $("#gridPersonasFisicasAc").data("kendoGrid");
+    //    grid.tbody.on("click", ".k-checkbox", onClickPersonasFisicas);        
+    })
+
+</script>

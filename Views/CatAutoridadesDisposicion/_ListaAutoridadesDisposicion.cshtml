@@ -1,0 +1,115 @@
+﻿<script>
+    function filtroDisposicion() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+
+</script>
+  @if (ViewBag.Admin == true)
+{
+     <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnNuevaAutoridadDisp" onclick="mostrarModalAutDisp()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addAutoridad h5 mb-0 me-2"></i><b>Agregar nueva autoridad de disposición</b></h6>
+                        </button>
+                    </div>
+                </div>
+            </div>
+}
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatAutoridadesDisposicionModel>()
+            .Name("gridAutoridadesDisp")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdAutoridadDisposicion).Width(20).Title("Id");
+                columns.Bound(c => c.NombreAutoridadDisposicion).Title("Autoridad Disposición").Width(100);
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(100);
+                columns.Command(c => c.Custom("Editar").Click("getIdAutDis")).Width(100);
+               // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetAutDisp", "CatAutoridadesDisposicion").Data("filtroDisposicion"))
+            .PageSize(5)
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.NombreAutoridadDisposicion);
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+            )
+
+
+    </div>
+</div>
+<div class="modal fade modalCustom" id="agregarAutoridadDisp" aria-labelledby="agregarAutoridadDisplLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyCrearAutoridadDisp">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getIdAutDis(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdAutoridadDisposicion = dataItem.IdAutoridadDisposicion;
+        console.log(IdAutoridadDisposicion);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarAutoridadDisposicionParcial", "CatAutoridadesDisposicion")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdAutoridadDisposicion: IdAutoridadDisposicion }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCrearAutoridadDisp').html(result);
+                $('#agregarAutoridadDisp').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdAutoridadDisposicion = dataItem.IdAutoridadDisposicion;
+        console.log(IdAutoridadDisposicion);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarAutoridadDisposicionParcial", "CatAutoridadesDisposicion")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdAutoridadDisposicion: IdAutoridadDisposicion }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCrearAutoridadDisp').html(result);
+                $('#agregarAutoridadDisp').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+</script>

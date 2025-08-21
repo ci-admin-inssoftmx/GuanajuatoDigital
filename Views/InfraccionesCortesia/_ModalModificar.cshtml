@@ -1,0 +1,140 @@
+﻿@model GuanajuatoAdminUsuarios.Models.InfraccionesCortesiaModel
+@{
+    var fechaVencimineto = Model.FechaVencimiento; 
+}
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class=" h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Editar fecha de vencimiento</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+<form id="editarFechaVenciminetoForm" class="row px-4 mb-4 align-items-end justify-content-center">
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <div class="row align-items-end btnToggleActive">
+        <div class="col-12 col-lg-6 my-4">
+            <h6 class="px-4 text-muted">Modifica la fecha de vencimiento y agrega comentarios.</h6>
+        </div>
+    </div>
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                @Html.HiddenFor(m => m.IdInfraccion)
+                @Html.HiddenFor(m => m.FechaVencimiento)
+                @Html.HiddenFor(m => m.FechaInfraccionDt)
+                @Html.HiddenFor(m => m.folioInfraccion)
+                <label>Nueva fecha de vencimiento <b>(obligatorio)</b>:</label>
+                @(Html.Kendo().DatePickerFor(t => t.NuevaFechaVencimiento)
+                    .Label(l => l.Content("Fecha <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new
+                    {
+                        style = "width: 100%",                       
+                    })
+                  	.Value("")
+                      .Min(DateTime.Now)
+                    )
+
+
+            </div>
+        </div>
+         <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.ObervacionesVencimiento)
+                    .Label(l => l.Content("Observaciones:"))
+                    .HtmlAttributes(new
+                    {
+                        style = "width: 100%",                       
+                    })
+                    )
+
+            </div>
+        </div>
+
+</form>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="editarFecha()">
+                        @(Html.Kendo().Button()
+                            .Name("EditDate")
+                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                            .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+
+<script>
+    function editarFecha() {
+       var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'NuevaFechaVencimiento' });
+ 
+        
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+   
+        var Mydata = $("#editarFechaVenciminetoForm").serialize();
+        console.log(Mydata);
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarFechaVencimiento")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                if (result.success) {
+                    var grid = $("#gridInfraccionesCortesia").data("kendoGrid");
+                    grid.dataSource.read();
+                    $('#modalModificar').modal('hide');
+                    $('body').removeClass('model-open');
+                    $('.modal-backdrop').remove();
+                    sitteg_success("Información actualizada correctamente.");
+                } else {
+                    sitteg_warning(result.message);
+                }
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : 'Sucedió un error, intente más tarde...';
+                sitteg_warning(errorMessage);
+                hideLoading();
+            }
+        });
+        }
+
+
+</script>

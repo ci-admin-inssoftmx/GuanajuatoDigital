@@ -1,0 +1,144 @@
+﻿@using GuanajuatoAdminUsuarios.Models.Catalogos.Aseguradoras
+@model List<AseguradoraDetailsModel>
+@{
+
+}
+ @if (ViewBag.Admin == true)
+        {
+<div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+    <div class="row">
+        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+            <button href="#" id="btnCrear" onclick="mostrarCrearModalAseuradora()">
+                <h6 class="m-0 d-flex align-items-center"><i class="icon-aseguradoras h5 mb-0 me-2"></i><b>Agregar aseguradora</b></h6>
+            </button>
+        </div>
+    </div>
+</div>
+        }
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(Html.Kendo().Grid<AseguradoraDetailsModel>(Model)
+            .Name("AseguradorasGrid")
+            .Columns(columns =>
+            {
+                columns.Bound(t => t.IdAseguradora).Title("Id");
+                columns.Bound(t => t.NombreAseguradora).Title("Nombre de la aseguradora");
+                columns.Bound(t => t.Estatus).ClientTemplate("<p> #= Estatus == 1 ? 'Activo':'Inactivo' # </p>").Title("Estatus");
+                columns.Command(c =>
+                    {
+                        c.Custom("Editar").Click("mostrarEditarModal");                        
+                    }).Width(200);                
+            })
+            .HtmlAttributes(new { style = "height:550px" })
+            .Pageable()
+            .Sortable()
+            .DataSource(dataSource => dataSource
+			    .Ajax()
+			    .Read(read => read.Action("Search", "CatAseguradoras").Data("applyFilter"))
+                .PageSize(10)
+                .Model(model => model.Id(p => p.IdAseguradora))
+		    )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.NombreAseguradora);                
+                s.Field(c => c.Estatus);
+            })
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+                .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+        )  
+        
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+    </div>
+</div>
+
+<div class="modal fade modalCustom" id="crearAseguradoraModal" aria-labelledby="crearAseguradoraModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="crearAseguradoraModalBody">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- edit modal -->
+<div class="modal fade modalCustom" id="editarAseguradoraModal" aria-labelledby="editarAseguradoraModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="editarAseguradoraModalBody">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- delete modal -->
+<div class="modal fade modalCustom" id="eliminarAseguradoraModal" aria-labelledby="eliminarAseguradoraModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="eliminarAseguradoraModalBody">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function mostrarEditarModalAse(e) {
+        console.log("AB")
+        let dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        let AseguradoraId= dataItem.IdAseguradora;
+                
+        showLoading();
+        $.ajax({
+            url: `@Url.Action("LoadEditarPartial","CatAseguradoras")/${AseguradoraId}`,
+            type: 'GET',
+            success: function (data) {
+                $('#editarAseguradoraModalBody').html(data);
+                $('#editarAseguradoraModal').modal('show');
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+
+    function mostrarEliminarModalAse(e) {
+        let dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        let AseguradoraId = dataItem.IdAseguradora;
+
+        let formData = new FormData();
+        formData.append('IdAseguradora', AseguradoraId);
+        formData.append('NombreAseguradora', dataItem.NombreAseguradora);
+        formData.append('Estatus', dataItem.Estatus);
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("LoadEliminarPartial", "CatAseguradoras")',
+            type: 'POST',
+            data: formData,
+            processData: false, // Necesario para enviar FormData
+            contentType: false,
+            success: function (data) {
+                $('#eliminarAseguradoraModalBody').html(data);
+                $('#eliminarAseguradoraModal').modal('show');
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

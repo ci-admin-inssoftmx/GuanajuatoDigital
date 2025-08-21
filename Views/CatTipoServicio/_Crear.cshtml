@@ -1,0 +1,106 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CatTipoServicioModel
+
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-addTipoServicio h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Agregar tipo de Servicio</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-12 my-4">
+            <h5 class="px-4"><b>Datos de tipo de servicio</b></h5>
+            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+        </div>
+    </div>
+    <form id="agregarTipoServicioForm" class="row px-4 mb-4 align-items-end justify-content-center">
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.tipoServicio)
+                    .Label(l => l.Content("Tipo de servicio <b>(obligatorio)</b>:"))
+                    .Placeholder("Ingresa el nombre de la causa de accidente")
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+
+            </div>
+        </div>
+
+    </form>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="agregarTipoServicio()">
+                        @(Html.Kendo().Button()
+                            .Name("AddTipoServicio")
+                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                            .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+
+<script>
+    function agregarTipoServicio() {
+
+        var Mydata = $("#agregarTipoServicioForm").serialize();
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'tipoServicio' });
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+     
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarTipoServicio")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                var grid = $("#gridCatTipoServicio").data("kendoGrid");
+                grid.dataSource.read();
+                $('#agregarTipoServicio').modal('hide');
+                sitteg_success("Información guardada correctamente.");
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+</script>

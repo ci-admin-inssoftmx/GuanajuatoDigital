@@ -1,0 +1,94 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel
+
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-deleteOpciones h1 colorDanger"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Eliminar Infracción</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-12 text-center my-4">
+            <h3><b>Eliminar esta infracción del registro del accidente</b></h3>
+        </div>
+    </div>
+    <form id="eliminaInfraccionForm">
+        <div class="row justify-content-center mb-5">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 mt-1">
+                <h6 class="px-4 text-muted">Folio Infracción:</h6>
+                @Html.HiddenFor(t => t.IdInfraccion)
+                <h5 class="px-4"><b>@ViewBag.FolioInfraccion</b></h5>
+            </div>
+           
+        </div>
+    </form>
+    <div class="row my-4">
+        <div class="col-12">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="EliminarInfraccionBD()">
+                        @(Html.Kendo().Button()
+                            .Name("deletCausa")
+                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                            .Content("<h5 class=\"m-0 px-3\"><b>Eliminar</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+<script>
+
+    function EliminarInfraccionBD() {
+        event.preventDefault();
+
+        var Mydata = $("#eliminaInfraccionForm").serialize();
+        console.log("ASAS", Mydata)
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_EliminarRegistroInfraccion")',
+            type: 'POST',
+            data: Mydata,
+            success: function (data) {
+                $("#gridInfraccionesAccidente").data("kendoGrid").dataSource.data(data);
+                sitteg_success("Se ha modificado la información");
+                $('#infraccionModal').modal('hide');
+                $('modal-body').removeClass('model-open');
+                $('.modal-backdrop').remove();
+
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning("!Sucedio un error, intente mas tarde...");
+                hideLoading();
+            }
+        });
+    }
+
+</script>

@@ -1,0 +1,77 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel
+
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-addClasificacionAccidente h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Eliminar clasificación</b></h2>
+                    <h4>¿Esta seguro que quiere eliminar esta clasificación para el accidente?</h4>
+                    <form id="idForm">
+                        @Html.HiddenFor(m => m.IdAccidente)
+                        @Html.HiddenFor(m => m.IdClasificacionAccidente)
+
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="row my-4">
+            <div class="col-12 col-md-6 mx-md-auto">
+                <div class="row justify-content-around">
+                    <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                        <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                            <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                        </button>
+                    </div>
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <div class="controlButton" onclick="eliminarClasBD()">
+                            @(Html.Kendo().Button()
+                                        .Name("DelClasificacion")
+                                        .HtmlAttributes(new { @class = "btn-danger px-3" })
+                                        .Content("<h5 class=\"m-0\"><b>Eliminar</b></h5>"))
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</section>
+<script>
+    function eliminarClasBD(IdAccidente) {
+        
+        var Mydata = {
+            IdAccidente : window.IdAccidente ,
+            IdClasificacionAccidente: window.idClasif
+
+        }
+
+
+        showLoading();
+        $.ajax({
+            url: "/CapturaAccidentes/EliminaClasificacion",
+            type: "POST",
+            data: Mydata,
+            success: function (response) {
+                sitteg_info("Se ha eliminado una clasificación de accidente");
+                var gridData = response.length > 0 ? response : [];
+                $("#gridClasificacion").data("kendoGrid").dataSource.data(gridData);
+                $('.modal-body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+                $('#eliminarClasificacionModal').modal('hide');
+                hideLoading();
+            },
+            error: function (error) {
+                // Maneja el error en caso de que ocurra
+                console.log("Error: " + error);
+                hideLoading();
+            }
+        });
+    }
+
+
+</script>

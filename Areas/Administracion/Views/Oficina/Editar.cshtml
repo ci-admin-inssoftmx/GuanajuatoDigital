@@ -1,0 +1,66 @@
+@model GuanajuatoAdminUsuarios.Models.Oficina
+
+@{
+    ViewData["Title"] = "Editar";
+}
+
+<h1>Editar Oficina</h1>
+
+      <div class="row gy-3 gx-4">
+            <div class="col-md-6">
+    <form asp-action="EditarOficina" method="post">
+  
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <div class="form-group">
+                    <label asp-for="Descripcion" class="control-label"></label>
+                    <input asp-for="Descripcion" class="form-control" />
+                    <span asp-validation-for="Descripcion" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Entidad</label>
+                    @(Html.Kendo().ComboBoxFor(model => model.IdEntidad)
+                    .Filter(FilterType.Contains)
+                    .Placeholder("Selecciona una entidad...")
+                    .DataTextField("Descripcion")
+                    .DataValueField("Id")
+                    .DataSource(source =>
+                                          {
+                                            source.Read(read =>
+                                                           {
+                                                            read.Action("GetEntidadesAjax", "Oficina");
+                                                           })
+                      .ServerFiltering(false);
+                     })
+                    .Suggest(true)
+                    .HtmlAttributes(new { style = "width:100%;" })
+                    )
+
+                </div>
+                <div class="form-group">
+                    <label asp-for="Estatus" class="control-label"></label>
+                    <select asp-for="Estatus"
+                            class="form-control"
+                            asp-items="Html.GetEnumSelectList<GuanajuatoAdminUsuarios.Models.EstatusEnum>()">
+                    </select>
+                    <span asp-validation-for="Estatus" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <a asp-action="Inicio">Regresar</a>
+                    @(Html.Kendo()
+             .Button()
+             .Name("guardar")
+             .Content("Guardar")
+               .Size(ComponentSize.Large)
+              .ThemeColor(ThemeColor.Dark)
+             .HtmlAttributes(new { type="submit" })
+ )
+                </div>
+</form>
+        </div>
+            </div>
+    <script>
+    $(function () {
+            $("form").kendoValidator();
+    });
+    </script>

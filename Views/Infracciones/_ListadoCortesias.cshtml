@@ -1,0 +1,133 @@
+﻿@model List<InfraccionesCortesiaModel>
+<script>
+    function modificarFechaTemplate(data) {
+        if ((data.IdEstatusInfraccion == 1 || data.IdEstatusInfraccion == 2))
+            return `<button onclick="modificarFecha('${data.IdInfraccion}','${data.FechaInfraccion}','${data.FechaVencimientoStr}','${data.folioInfraccion}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i></h6></button>`;
+        else
+            return ""
+    }
+
+    function enviarTemplate(data) {
+        if ((data.IdEstatusInfraccion == 1 || data.IdEstatusInfraccion == 2))
+            return `<button onclick="enviarInfraccion('${data.IdInfraccion}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i></i></h6>Enviar</button>`;
+        else
+            return ""
+    }
+
+</script>
+<div class="row">
+
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid(Model)
+            .Name("gridInfraccionesCortesia")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdInfraccion).Hidden();
+                columns.Bound(c => c.IdEstatusInfraccion).Hidden();
+                columns.Bound(c => c.FechaVencimiento).Hidden();
+                columns.Bound(c => c.folioInfraccion).Title("Folio infracción").Width(80);
+                columns.Bound(c => c.FechaInfraccion).Title("Fecha infracción").Width(80);
+                columns.Bound(c => c.FechaVencimientoStr).Title("Fecha vencimiento").Width(90);
+                columns.Bound(c => c.DiferenciaDias).Title("Diferencia de días").Width(90);
+                columns.Bound(c => c.ObervacionesVencimiento).Title("Movimientos").Width(200).ClientTemplate("#= formatObservaciones(ObervacionesVencimiento) #"); ;
+                //columns.Bound(c => c.Placas).Width(90);
+                // columns.Bound(c => c.Serie).Width(100);
+                columns.Bound(c => c.Estatus).Title("Estatus infracción").Width(90);
+                // columns.Command(c => c.Custom("Modificar").Click("modificarFecha")).Width(80);
+                columns.Bound(p => p.IdInfraccion).ClientTemplate("#= modificarFechaTemplate(data) #").Title("Modificar").Sortable(false).Width(100);
+                // columns.Bound(p => p.IdInfraccion).ClientTemplate("#= enviarTemplate(data) #").Title("Enviar").Sortable(false).Width(100);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            // //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read("ObtieneInfracciones", "InfraccionesCortesia")
+            .ServerOperation(false)
+            .PageSize(5).Model(model => model.Id(p => p.IdInfraccion))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.folioInfraccion);
+                s.Field(c => c.FechaInfraccion);
+                s.Field(c => c.Conductor);
+                s.Field(c => c.Placas);
+                s.Field(c => c.Serie);
+                s.Field(c => c.Propietario);
+                s.Field(c => c.Estatus);
+
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+
+    </div>
+</div>
+
+<script>
+    function modificarFecha(IdInfraccion, FechaInfraccion, FechaVencimientoStr, folioInfraccion) {
+        var fecha = FechaVencimientoStr
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ModalModificar", "InfraccionesCortesia")',
+            type: 'POST',
+            data: { IdInfraccion: IdInfraccion, FechaInfraccion: FechaInfraccion, fecha: fecha, folioInfraccion: folioInfraccion },
+            success: function (result) {
+                $("#modificar").html(result);
+                $("#modalModificar").modal('show');;
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function formatObservaciones(text) {
+        if (!text) {
+            return '';
+        }
+        // Divide el texto por ';' y une cada parte con un <br> para nuevas líneas
+        return text.split(';').map(line => line.trim()).filter(line => line.length > 0).join('<br/>');
+    }
+
+    function enviarInfraccion(IdInfraccion) {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EnviarFinanzas", "InfraccionesCortesia")',
+            type: 'POST',
+            data: { IdInfraccion: IdInfraccion },
+            success: function (result) {
+                hideLoading();
+
+                if (response.success) {
+                    sitteg_success("Infracción actualizada en secretaría de finanzas.");
+                } else if (response.success === false && response.message === "Error en la busuqeda de infracción") {
+                    sitteg_info("Error en la busuqeda de infracción.");
+                } else if (response.success === false && response.message === "Infraccion Guardada, no enviada") {
+                    sitteg_warning("La infracción no se envió a finanzas, Por favor intente mas tarde o contacte al administrador");
+                    shouldGoBack = true;
+                } else if (response.success === false && response.message === "Infraccion no enviada") {
+                    sitteg_warning("La infracción no fue enviada a Secretaría de Finanzas.");
+                } else {
+                    sitteg_warning(response.message);
+                }
+
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+</script>

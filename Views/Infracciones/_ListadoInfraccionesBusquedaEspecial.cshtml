@@ -1,0 +1,179 @@
+﻿@model List<InfraccionesModel>
+
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+
+    var modificarP = autorizaciones.Contains("486") ? 1 : 0;
+    var Consulta = autorizaciones.Contains("481") ? 1 : 0;
+
+    var delegacion = User.FindFirst(CustomClaims.OficinaDelegacion).Value;
+
+
+}
+
+
+
+<script>
+
+    window.modificarP = "@modificarP"
+    window.delegacion = "@delegacion"
+    window.Consulta = "@Consulta"
+
+    function TemplateEliminar(data) {
+
+
+        if (window.modificarP == 1)
+        return `<button class='btn btn - danger'>
+                <h6 class='m-0 colorDanger' onclick='eliminarInfraccion(event)'>
+                <i class='h5 icon-delete me-2'></i><b>Eliminar</b>
+                </h6></button>`    
+         else
+         return ""
+    }
+
+
+    function TemplateCortecia(data){
+        console.log(data)
+        var element = `<div> ${data.infraccionCortesiaString == null ? "" : data.infraccionCortesiaString} </div>`
+
+        if (data.infraccionCortesiaString !== null && data.infraccionCortesiaString === 'Cortesía' && data.idDelegacion== window.delegacion)//window.modificarP==1   )
+        {
+            element=`    ${element}                
+            <button id = 'btnCortesia' onclick ="ModalEditarCortesia('${data.idInfraccion}','${data.folioInfraccion}')" class='w-100 btn'>
+                    <h6 class='m-0 colorPrimary' > <i class='icon-edit me-2' > </i><b></b > </h6>
+                        </button>`
+        }
+        return `<div style='display: flex; align - items: center; '> ${element} </div>`
+    }
+
+
+
+
+    </script>
+
+
+
+<div class="row justify-content-between align-items-end mb-1">
+    <div class="col-12 col-md-auto mt-4 mb-2">
+        <h5 class="px-4"><b>Listado de infracción</b></h5>
+        <h6 class="px-4 text-muted">Edita los datos de infracción. </h6>
+    </div>
+    <div class="col-12 me-md-4 col-md-6 col-lg-7 col-xl-auto">
+        <div class="row">
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                @* <button>
+                <h6 class="m-0 d-flex align-items-center"><i class="icon-pdf h5 mb-0 me-2"></i><b>PDF de reporte de infracción</b></h6>
+                </button>*@
+                <button type="button" onclick="downLoadPdfFiltered()" id="btnPDFReporteBusquedaEspecial">
+                    <h6 class="m-0 d-flex align-items-center"><i class="icon-pdf h5 mb-0 me-2"></i><b>PDF de reporte de infracción</b></h6>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+  
+        @(
+            Html.Kendo().Grid(Model)
+            .Name("GridInf")
+            .Columns(columns =>
+            {
+                 columns.Bound(c => c.idInfraccion).Hidden();
+                columns.Bound(p => p.folioInfraccion).ClientTemplate("#= TemplateFolio(data)#").Title("Folio").Width(180);
+                columns.Bound(p => p.PersonaInfraccion2.nombreCompleto).Title("Conductor").Width(150);
+                columns.Bound(p => p.Vehiculo.Persona.nombreCompleto).Title("Propietario").Width(150);
+                columns.Bound(c => c.Vehiculo.placas).Title("Placas").Width(90);
+                columns.Bound(c => c.fechaInfraccion).Title("Fecha Aplicada a").Width(100).Format("{0:dd/MM/yyyy}");
+                columns.Bound(c => c.estatusInfraccion).Title("Estatus").Width(90);
+                columns.Bound(c => c.folioEmergencia).Title("Folio Emergencia").Width(120);
+                columns.Bound(c => c.delegacion).Title("Delegación/Oficina").Width(150);
+                columns.Bound(c => c.delegacion).Title("Cortesía").Width(150).ClientTemplate("#= TemplateCortecia(data) #");
+
+                //columns.Bound(p => p.idInfraccion).ClientTemplate("#= TemplateCortecia(data) #").Title("Cortesía").Sortable(false).Width(90);
+                columns.Bound(p => p.idInfraccion).ClientTemplate("#= TemplateEditar(data) #").Title("Ver Registro").Sortable(false).Width(100);
+                columns.Bound(p => p.idInfraccion).ClientTemplate("#= TemplateMostrar(data)  #").Title("Mostrar").Sortable(false).Width(100);
+                columns.Bound(r=>r.actualizadoPor).ClientTemplate("#= TemplateEliminar(data)  #" ).Width(150).Title("Eliminar");
+            }).HtmlAttributes(new { style = "height:450" })
+            @*.Pageable(p => p.Enabled(true).PageSizes(new[] { 10, 20, 30 }))*@
+            .Pageable(p => p.Enabled(true))
+
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(ev => ev.Action("test", "Infracciones").Data("DataRequestFilter"))
+            )
+
+            .Sortable()
+            .Scrollable(scr => scr.Height(350))
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+
+
+        <script>
+
+            $(document).ready(function () {
+                var auth = @autorizaciones;
+                var grid = $("#GridInf").data("kendoGrid");
+
+                // IMPRIMIR
+                //if (!auth.toString().includes("482")) {
+                //    $("#btnPDFReporteBusquedaEspecial").prop('disabled', true).css({ "opacity": "0.3" });
+        
+                //}
+                //if (!auth.toString().includes("484")) {
+                //    grid.hideColumn(11);
+                //}
+                //if (!auth.toString().includes("462")) {
+                //    grid.hideColumn(14);
+                //}
+            });
+
+        </script>
+    </div>
+</div>
+<div class="modal fade modalCustom" id="editarCortesiaModal" aria-labelledby="editaCortesiaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-m" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyEditarCortesia">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function eliminarInfraccion(){
+        var grid = $("#GridInf").data("kendoGrid");
+        var row = $(event.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        var idInfraccion = dataItem.idInfraccion
+        console.log("INFO", dataItem)
+        SetIdInfraccion(idInfraccion);
+        $('#modalEliminar').modal('show');
+}
+
+    function ModalEditarCortesia(idInfraccion) {
+
+        showLoading();
+        $.ajax({
+            url: '/Infracciones/ModalEditarCortesia',
+            type: 'POST',
+            data: {
+                idInfraccion: idInfraccion,
+            },
+            success: function (result) {
+                $('#ModalBodyEditarCortesia').html(result);
+                $('#editarCortesiaModal').modal('show');
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.log("Error al realizar la solicitud AJAX: " + error);
+                hideLoading();
+            }
+        });
+    }
+</script>

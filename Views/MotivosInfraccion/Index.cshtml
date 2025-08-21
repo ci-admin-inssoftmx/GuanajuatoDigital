@@ -1,0 +1,204 @@
+﻿@model CatMotivosInfraccionModel
+@*RazorCoder*@
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡EL usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡EL usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+</script>
+<div class="mainContainer bg-light">
+
+    <div class="px-0">
+
+        <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto">
+                            <i class="icon-infracion h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                            <h2 class="m-0 h3"><b>Catálogo de motivos de infracción</b></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                    <div class="row">
+                        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                            <button href="#" id="btnNuevoMotivo" onclick="mostrarModalMotivos()">
+                                <h6 class="m-0 d-flex align-items-center"><i class="icon-addInfracion h5 mb-0 me-2"></i><b>Agregar nuevo motivo de infracción</b></h6>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="bg-light py-1"></div>
+                </div>
+            </div>
+            <form id="formBuscarMotivo" class="row px-4 mb-4 align-items-end" method="post">
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <span>
+                            @(Html.Kendo().TextBoxFor(t => t.Nombre)
+                                .Label(l => l.Content("Nombre:"))
+                                .Placeholder("Ingresa el nombre")
+                                .HtmlAttributes(new { style = "width: 100%", Id = "txtPlacas" })
+                                )
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.Fundamento)
+                            .Label(l => l.Content("Fundamento:"))
+                            .Placeholder("Ingresa fundamento")
+                            .HtmlAttributes(new { style = "width: 100%", Id = "txtFundamento" })
+                            )
+
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Inicio de vigencia desde:</label>
+                        @(Html.Kendo().DatePickerFor(t => t.InicioVigenciaDesde)
+                            .Format("dd/MM/yyyy")
+                            .Culture("es-ES")
+                            .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "inicioVigenciaDesde" })
+                            )
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                     <label>Inicio de vigencia hasta:</label>
+                        @(Html.Kendo().DatePickerFor(t => t.InicioVigenciaHasta)
+                            .Format("dd/MM/yyyy")
+                            .Culture("es-ES")
+                            .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "inicioVigenciaHasta" })
+                            )
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Fin de vigencia desde:</label>
+                        @(Html.Kendo().DatePickerFor(t => t.FinVigenciaDesde)
+                            .Format("dd/MM/yyyy")
+                            .Culture("es-ES")
+                            .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "inicioVigenciaHasta" })
+                            )
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                       <label>Fin de vigencia hasta:</label>
+                        @(Html.Kendo().DatePickerFor(t => t.FinVigenciaHasta)
+                            .Format("dd/MM/yyyy")
+                            .Culture("es-ES")
+                            .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "inicioVigenciaHasta" })
+                            )
+                    </div>
+                </div>
+            </form>
+            <div class="row justify-content-between mb-1 titleCustom">
+                <div class="col-12 col-md-auto mt-4 mb-2">
+                    <h5 class="px-4"><b>Listado de motivos infracción</b></h5>
+                    <h6 class="px-4 text-muted">Edita o inactiva los motivos de infracción.</h6>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+                    <div class="row">
+                        <div id="tablaMotivosInfraccion">
+                            <partial name="_ListaMotivosInfraccion" model="Model.ListMotivosInfraccion" />
+
+                            <div class="modal fade modalCustom" id="addMotivo" aria-labelledby="addMotivoLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-body" id="addMotivoBody">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!--////////////////////////////////////////////////////////////////////////////////////EDITAAR/////////////////////////////////////////////////////////////////////////////////////
+                                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            -->
+
+                            <div class="modal fade modalCustom" id="editMotivoInfracion" aria-labelledby="addMotivoLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg boxShadow modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-body" id="editarMotivoBody">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!--////////////////////////////////////////////////////////////////////////////////////ELIMINAR/////////////////////////////////////////////////////////////////////////////////////
+                                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            -->
+
+                            <div class="modal fade modalCustom" id="eliminarMotivoInfraccion" aria-labelledby="addMotivoLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg boxShadow modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-body" id="ModalBodyEliminarMotivo">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                </section>
+    </div>
+</div>
+
+
+@*<script src="~/jquery-ajax-unobtrusive/dist/jquery.unobtrusive-ajax.min.js"></script>*@
+<script>
+    function mostrarModalMotivos() {
+        $.ajax({
+            url: '@Url.Action("AgregarMotivoParcial")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#addMotivoBody').html(data);
+                $('#addMotivo').modal('show');
+            }
+        });
+    }
+
+
+</script>

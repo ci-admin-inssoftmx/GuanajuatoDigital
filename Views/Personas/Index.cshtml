@@ -1,0 +1,805 @@
+@model BusquedaPersonaModel
+
+
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        var auth = @autorizaciones;
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡El usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            } else {
+                //if (access.toString().includes){}
+                //$("#btnCrearPersona").prop('disabled', true)
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡El usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+</script>
+
+
+<div class="mainContainer bg-light">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto p-0">
+                        <i class="icon-fisica h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Personas</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnCrearPersona" onclick="btnModalCrearPersona()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addFisica h3 mb-0 me-2"></i><b>Agregar nueva persona</b></h6>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <form id="buscarConductorForm">
+
+
+
+            <div class="row px-4 mt-4 align-items-end justify-content-start">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2" id="dataDep">
+                    <div class="controlForm my-3">
+                        <label>Tipo Persona:</label>
+                        <span>
+                            @(Html.Kendo().DropDownListFor(t => t.PersonaModel.tipoPersona).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .Events(e => e.Change("tipoPersona"))
+                                .SelectedIndex(0)
+                                .HtmlAttributes(new { style = "width:100%;", Id = "ddlTipoPersona" })
+                                .Filter(FilterType.Contains)
+                                .BindTo(new List<SelectListItem>
+                            {
+                            new SelectListItem { Text = "Física", Value = "1" },
+                            new SelectListItem { Text = "Moral", Value = "2" }
+                            })
+                                )
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="row px-4 mt-4 align-items-end">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.PersonaModel.numeroLicenciaBusqueda)
+                            .Label(l => l.Content("No. de licencia:"))
+                            .Placeholder("Ingresa el número de licencia válido")
+                            .HtmlAttributes(new { @class = "trimmable", style = "width: 100%" })
+                            )
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.PersonaModel.CURPBusqueda)
+                            .Label(l => l.Content("CURP:"))
+                            .Placeholder("Ingresa el CURP del propietario")
+                            .HtmlAttributes(new { @class = "trimmable", style = "width: 100%", minlength = 10 }))
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.PersonaModel.RFCBusqueda)
+                            .Label(l => l.Content("RFC:"))
+                            .Placeholder("Ingresa el RFC del propietario")
+                            .HtmlAttributes(new { @class = "trimmable", style = "width: 100%" })
+                            )
+
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label class="control-label" id="nombreP">Nombre(s): </label>
+                        @(Html.Kendo().TextBoxFor(t => t.PersonaModel.nombreBusqueda)
+
+                            .Placeholder("Ingresa el nombre(s) del propietario")
+                            .HtmlAttributes(new { @class = "trimmable", style = "width: 100%" })
+                            )
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2" id="ap">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.PersonaModel.apellidoPaternoBusqueda)
+                            .Label(l => l.Content("Apellido paterno:"))
+                            .Placeholder("Ingresa el apellido paterno")
+                            .HtmlAttributes(new { @class = "trimmable", style = "width: 100%" })
+                            )
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2" id="am">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.PersonaModel.apellidoMaternoBusqueda)
+                            .Label(l => l.Content("Apellido materno:"))
+                            .Placeholder("Ingresa el apellido materno")
+                            .HtmlAttributes(new { @class = "trimmable", style = "width: 100%" })
+                            )
+
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlButton my-3">
+                        <div type="button" class="controlButton my-3" onclick="buscarConductor(event)">
+                            @(Html.Kendo().Button()
+                            .Name("buscarOtroConductor")
+                            .HtmlAttributes(new { @class = "btnPrimary" })
+                            .Content("<h5 class=\"m-0\"><b>Buscar</b></h5>"))
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div id="resultadoLicencia" style="display: none;">
+            <p>Nombre: <span id="nombreSpan"></span></p>
+            <label for="tipoLicenciaDropdown">Tipo de Licencia:</label>
+            <select id="tipoLicenciaDropdown">
+                <!-- Aquí se agregarán las opciones del dropdown -->
+            </select>
+            <br>
+            <p>Fecha de Expedición: <span id="fechaExpedicionSpan"></span></p>
+            <p>Fecha de Vigencia: <span id="fechaVigenciaSpan"></span></p>
+            <div class="col-12 col-md-6 mx-md-auto col-lg-3 mx-lg-0">
+                <div class="controlButton my-3">
+                    <div class="controlButton my-3" onclick="guardarRegistro()">
+                        @(Html.Kendo().Button()
+                            .Name("seleccionarLicencia")
+                            .HtmlAttributes(new { @class = "btnPrimary" })
+                            .Content("<h5 class=\"m-0\"><b>Seleccionar</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @*Table*@
+        <div id="listadoPersonas">
+            <partial name="_ListadoPersonas" model="Model.ListadoPersonas" />
+        </div>
+
+        @if (Model.ListadoPersonas.Count() > 0)
+        {
+            <div>
+                SE ENCONTRARON PERSONAS
+            </div>
+
+        }
+        @*<script>
+        $(document).ready(function () {
+
+        $("#gridPersonas").on("change", function () {
+        alert("Handler for `change` called.");
+        });
+        });
+
+        $("#gridPersonas").on("change", function () {
+        alert("Handler for `change` called.");
+        });
+        </script>*@
+    </section>
+</div>
+
+<div class="modal fade modalCustom" id="modalCrearPersona" aria-labelledby="modalCrearPersona" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered ">
+        <div class="modal-content">
+
+            <div class="modal-body" id="modalBodyCrearPersona">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modalCustom" id="modalEditarPersona" aria-labelledby="modalEditarPersona" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered ">
+        <div class="modal-content">
+
+            <div class="modal-body" id="modalBodyCrearPersona">
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalLicencias" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Contenido del modal se llenará con la función mostrarModal -->
+        </div>
+    </div>
+</div>
+<div id="modalLicenciasList" class="modal">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+        <div class="modal-content">
+
+            <partial name="_ListaPersonasEnLicencias" model="Model.PersonaModel" />
+
+            <!-- Contenido del modal se llenará con la función mostrarModal -->
+        </div>
+    </div>
+</div>
+<div class="modal fade modalCustom" id="modalEditarPersona" aria-labelledby="modalEditarPersona" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body" id="modalBodyEditarPersona">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modalCustom" id="detalleLicencias" aria-labelledby="detalleLicenciasLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyDetalleLicencias">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<script>
+
+    $(document).ready(function () {
+        $("#modalCrearPersona").on("show.bs.modal shown.bs.modal", function (e) {
+            $("body").removeClass("modal-open").find(".modal-backdrop").remove();
+        });
+        $("#modalCrearPersona").on('hide.bs.modal', function () {
+            $('#modalBodyEditarPersona').html('');
+        });
+
+        $("#modalEditarPersona").on("show.bs.modal shown.bs.modal", function (e) {
+            $("body").removeClass("modal-open").find(".modal-backdrop").remove();
+        });
+        $("#modalEditarPersona").on('hide.bs.modal', function () {
+            $('#modalBodyEditarPersona').html('');
+        });
+
+        $("gridPersonas").on("change", function () {
+            alert("Handler for `change` called.");
+        });
+    });
+
+    function btnModalCrearPersona() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_ModalCrearPersona")',
+            type: 'GET',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#modalBodyCrearPersona').html(data);
+                $('#modalCrearPersona').modal({ backdrop: 'static', keyboard: false });
+                $('#modalCrearPersona').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+    function btnModalEditarPersona(id) {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_ModalEditarPersona")',
+            type: 'GET',
+            data: { id: id },
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (value) {
+                $('#modalBodyCrearPersona').html(value);
+                $('#modalCrearPersona').modal({ backdrop: 'static', keyboard: false });
+                $('#modalCrearPersona').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+
+
+
+    function buscarConductor(event) {
+        // HMG: Se cambian funcionalidades por lentitud en la carga y se hace el paginado.
+        event.preventDefault(event);
+        var licenciaBusqueda = $("#PersonaModel_numeroLicenciaBusqueda").val().trim();
+        var rfcBusqueda = $("#PersonaModel_RFCBusqueda").val().trim();
+        var curpBusqueda = $("#PersonaModel_CURPBusqueda").val().trim();
+        var nombreBusqueda = $("#PersonaModel_nombreBusqueda").val().trim();
+        var apellidoPaternoBusqueda = $("#PersonaModel_apellidoPaternoBusqueda").val().trim();
+
+        if (licenciaBusqueda !== "") {
+            if (licenciaBusqueda.length < 10) {
+                sitteg_warning("El número de licencia debe tener al menos 10 caracteres.");
+                return;
+            }
+        }
+        if (rfcBusqueda !== "") {
+            if (rfcBusqueda.length < 10) {
+                sitteg_warning("El RFC debe tener al menos 10 caracteres.");
+                return;
+            }
+        }
+
+        if (curpBusqueda !== "") {
+            if (curpBusqueda.length < 10) {
+                sitteg_warning("El CURP debe tener al menos 10 caracteres.");
+                return;
+            }
+        }
+
+
+        if ($("#ddlTipoPersona").data("kendoDropDownList").value() == 2) {
+            if ((nombreBusqueda !== "") &&
+                (nombreBusqueda.length < 3)) {
+                sitteg_warning("La razón social debe tener al menos 3 caracteres.");
+                return;
+            }
+        } else {
+            if ((nombreBusqueda !== "" || apellidoPaternoBusqueda !== "") &&
+                (nombreBusqueda.length < 3 || apellidoPaternoBusqueda.length < 3)) {
+                sitteg_warning("El nombre y el apellido paterno deben tener al menos 3 caracteres.");
+                return;
+            }
+        }
+
+
+        var formData = $("#buscarConductorForm").serializeArray();
+        console.log("busqueda: " + formData);
+
+        // Aplica Trim a cada valor en formData
+        $.each(formData, function (index, field) {
+            field.value = $.trim(field.value);
+        });
+
+        // Convierte de nuevo a objeto
+        var trimmedData = {};
+        var findData = false;
+        $.each(formData, function (index, field) {
+            trimmedData[field.name] = field.value;
+            if (!findData) {
+                if (field.value != '' && field.value != undefined) {
+                    findData = true;
+                }
+            }
+        });
+
+
+        // Refrescar en caso de no existir busqueda.
+        var grid = $("#gridPersonas").data("kendoGrid");
+        if (!findData) {
+            grid.dataSource.read();
+            grid.dataSource.refresh();
+            return;
+        }
+
+        showLoading();
+        console.log(trimmedData);
+        $.ajax({
+            url: '@Url.Action("BuscarPorParametroPaginado")',
+            type: 'POST',
+            data: trimmedData,
+            success: function (response) {
+                console.log("encontrado: " + response.tipo);
+                if (response.tipo === "success") {
+                    //   mostrarModal(response.Data);
+                    hideLoading();
+                    return;
+                }
+                console.log("encontrado: " + response.Data);
+                if (response.Data == "1") {
+                    hideLoading();
+                    buscaEnLicencias()
+                    return;
+                }
+                if (response.Data == "2") {
+                    sitteg_warning("La búsqueda no arrojó resultados.");
+                    console.log("no arrojo resultados 2");
+                    setTimeout(function () {
+                        console.log("timeout");
+                        window.location.href = "/Personas/Index"; //will redirect to your blog page (an ex: blog.html)
+                    }, 1200);
+                }
+                var personasList = response.Data;
+                if (personasList != null) {
+
+                    var grid = $("#gridPersonas").data("kendoGrid");
+                    grid.dataSource.data(response.Data);
+                    grid.dataSource._total = response.Total;
+                    grid.dataSource.page(0);
+
+                }
+                else {
+                    sitteg_warning("La búsqueda no arrojó resultados.");
+                    console.log("no arrojo resultados");
+                    var grid = $("#gridPersonas").data("kendoGrid");
+                    grid.dataSource.data([]);
+                    grid.dataSource.refresh();
+                    setTimeout(function () {
+                        console.log("timeout");
+                        window.location.href = "/Personas/Index"; //will redirect to your blog page (an ex: blog.html)
+                    }, 1500);
+                }
+
+                hideLoading();
+            },
+            error: function (error) {
+                console.log("error", error);
+                sitteg_warning('Ocurrió un error en la búsqueda.');
+                hideLoading();
+            }
+        });
+    }
+
+
+
+    function mostrarModal(jsonData) {
+
+        const modal = document.getElementById('modalLicencias');
+        const mostrarFecha = (fechaCompleta) => {
+            if (fechaCompleta) {
+                const fecha = new Date(fechaCompleta);
+                if (!isNaN(fecha.getTime())) {
+                    const dia = fecha.getDate().toString().padStart(2, '0');
+                    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+                    const anio = fecha.getFullYear();
+                    return `${dia}-${mes}-${anio}`;
+                }
+            }
+            return '';
+        };
+
+        const modalContent = `
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Datos encontrados en el sistema de licencias</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p><strong>Nombre:</strong> ${jsonData.nombre}</p>
+                                    <p><strong>Apellido Paterno:</strong> ${jsonData.primer_apellido}</p>
+                                    <p><strong>Apellido Materno:</strong> ${jsonData.segundo_apellido}</p>
+                                    <p><strong>Tipo de Licencia:</strong> ${jsonData.tipolicencia}</p>
+                                    <p><strong>Número de Licencia:</strong> ${jsonData.num_licencia}</p>
+                                    <p><strong>Fecha de Expedición:</strong> ${mostrarFecha(jsonData.fecha_inicio_vigencia)}</p>
+                                    <p><strong>Fecha de Vigencia:</strong> ${mostrarFecha(jsonData.fecha_termino_vigencia)}</p>
+                                </div>
+                              <div class="modal-footer">
+                                <button type="button" id="cerrarModalBtn" class="btn btn-secondary controlButton" data-dismiss="modal">Cerrar</button>
+                                <button type="button" id="guardarEnBaseDeDatosBtn" class="btn btn-primary controlButton">Guardar en Base de Datos</button>
+                              </div>
+                            `;
+
+        modal.querySelector('.modal-content').innerHTML = modalContent;
+        const cerrarModalBtn = document.getElementById('cerrarModalBtn');
+        cerrarModalBtn.addEventListener('click', () => {
+            $('#modalLicencias').modal('hide');
+        });
+
+        const guardarEnBaseDeDatosBtn = document.getElementById('guardarEnBaseDeDatosBtn');
+        guardarEnBaseDeDatosBtn.addEventListener('click', () => {
+            const tipoLicenciaMapping = {
+                "TIPO A  CHOFER AUTOMOVILISTA": 1,
+                "TIPO B CHOFER SERVICIO PÚBLICO": 2,
+                "TIPO C  Chofer Servicio de Carga": 3,
+                "TIPO D -MOTOCICLISTA": 4,
+                "PERMISO A -AUTOMOVIL-": 6,
+                "PERMISO D -MOTOCICLETA-": 7,
+                "NO APLICA": 8,
+                "TIPO A": 1,
+                "TIPO B": 2,
+                "TIPO C": 3,
+                "TIPO D": 4,
+                "PERMISO A": 6,
+                "PERMISO D": 7,
+                "A-AUTOMOVILISTA": 1,
+                "B-CHOFER DE SERVICIO PÚBLICO": 2,
+                "C-CHOFER DE SERVICIO DE CARGA": 3,
+                "D-MOTOCICLISTA": 4,
+                "PA-PERMISO AUTOMOVILISTA": 6,
+                "PD-PERMISO MOTOCICLISTA": 7,
+
+            };
+            const tipoLicenciaNumero = tipoLicenciaMapping[jsonData.tipolicencia] || 0;
+            jsonData.id_tipo_licencia = tipoLicenciaNumero;
+            showLoading();
+            $.ajax({
+                type: 'POST',
+                url: '/Personas/guardaDesdeServicio',
+                data: jsonData,
+                success: function (result) {
+                    $('#modalLicencias').modal('hide');
+                    var grid = $("#gridPersonas").data("kendoGrid");
+                    if (result && result.data) {
+                        var dataArray = [result.data];
+                        grid.dataSource.data(dataArray);
+                    } else {
+                        console.error("La respuesta no tiene la estructura esperada:", result);
+                    }
+                    sitteg_success('Elemento guardado correctamente')
+                    hideLoading();
+                },
+                error: function (error) {
+                    sitteg_warning('Error al guardar en la base de datos:');
+                    hideLoading();
+                }
+            });
+        });
+
+        $('#modalLicencias').modal('show');
+    }
+
+    function EntidadDropDownChange() {
+        var entidadDDlValue = $("#idEntidad").data("kendoDropDownList").value();
+
+        showLoading();
+        $.ajax({
+            url: "/Personas/Municipios_Drop",
+            type: "POST",
+            data: { entidadDDlValue: entidadDDlValue },
+            success: function (data) {
+                var MunicipiosDropDown = $("#idMunicipio").data("kendoDropDownList");
+                MunicipiosDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+
+    function buscaEnLicencias() {
+
+        var formData = $("#buscarConductorForm").serializeArray();
+
+        // Aplica Trim a cada valor en formData
+        $.each(formData, function (index, field) {
+            field.value = $.trim(field.value);
+        });
+
+        // Convierte de nuevo a objeto
+        var trimmedData = {};
+        var findData = false;
+        $.each(formData, function (index, field) {
+            trimmedData[field.name] = field.value;
+            if (!findData) {
+                if (field.value != '' && field.value != undefined) {
+                    findData = true;
+                }
+            }
+        });
+        showLoading();
+        console.log("se envian parametros de busqueda: " + trimmedData);
+        $.ajax({
+            url: '@Url.Action("PersonasEnLicencias")',
+            type: 'POST',
+            data: trimmedData,
+            success: function (response) {
+
+                console.log("encontrado length: " + response.length);
+                console.log("encontrado: " + response);
+
+                //   alert("regreso de resultado")
+                //   var ListaPersonaLicencias = JSON.parse(response);
+
+
+                if (response.length > 0) {
+
+                    hideLoading();
+
+                    var grid = $("#gridPersonasLicencia").data("kendoGrid");
+                    grid.dataSource.data(response);
+                    grid.dataSource._total = response.length;
+
+
+
+                    $('#modalLicenciasList').modal('show');
+
+
+
+                }
+                else {
+                    sitteg_warning("La búsqueda no arrojó resultados.");
+                    hideLoading();
+                    setTimeout(function () {
+                        console.log("timeout");
+                        window.location.href = "/Personas/Index"; //will redirect to your blog page (an ex: blog.html)
+                    }, 1500);
+                    return;
+                }
+
+
+
+                hideLoading();
+            },
+            error: function (error) {
+                console.log("buscaEnLicencias error", error)
+                sitteg_warning('Ocurrió un error en la búsqueda.');
+                hideLoading();
+            }
+        });
+
+    }
+
+    function mostrarModalGrid(jsonData) {
+
+        //alert("muestra grid 1")
+        var grid = $("#gridPersonasLicencia").data("kendoGrid");
+        grid.dataSource.data(jsonData);
+        grid.dataSource._total = jsonData.length;
+        $('#modalLicenciasList').modal('show');
+
+
+
+        return;
+
+
+        const modal = document.getElementById('modalLicenciasList');
+        /* const mostrarFecha = (fechaCompleta) => {
+             if (fechaCompleta) {
+                 const fecha = new Date(fechaCompleta);
+                 if (!isNaN(fecha.getTime())) {
+                     const dia = fecha.getDate().toString().padStart(2, '0');
+                     const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+                     const anio = fecha.getFullYear();
+                     return `${dia}-${mes}-${anio}`;
+                 }
+             }
+             return '';
+         };
+         */
+        const modalContent = `
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Datos encontrados en el sistema de licencias</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                     <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+                                                <div id="gridPL"></div>
+
+
+
+
+
+                                     </div>
+                                </div>
+
+                            `;
+        mustraGridPersonasLicencias();
+        modal.querySelector('.modal-content').innerHTML = modalContent;
+        //   const cerrarModalBtn = document.getElementById('cerrarModalBtn');
+        //  cerrarModalBtn.addEventListener('click', () => {
+        //    $('#modalLicenciasList').modal('hide');
+        // });
+        $('#modalLicenciasList').modal('show');
+        /* const guardarEnBaseDeDatosBtn = document.getElementById('guardarEnBaseDeDatosBtn');
+         guardarEnBaseDeDatosBtn.addEventListener('click', () => {
+             const tipoLicenciaMapping = {
+                 "TIPO A  CHOFER AUTOMOVILISTA": 1,
+                 "TIPO B CHOFER SERVICIO PÚBLICO": 2,
+                 "TIPO C  Chofer Servicio de Carga": 3,
+                 "TIPO D -MOTOCICLISTA": 4,
+                 "PERMISO A -AUTOMOVIL-": 6,
+                 "PERMISO D -MOTOCICLETA-": 7,
+                 "NO APLICA": 8,
+                 "TIPO A": 1,
+                 "TIPO B": 2,
+                 "TIPO C": 3,
+                 "TIPO D": 4,
+                 "PERMISO A": 6,
+                 "PERMISO D": 7,
+                 "A-AUTOMOVILISTA": 1,
+                 "B-CHOFER DE SERVICIO PÚBLICO": 2,
+                 "C-CHOFER DE SERVICIO DE CARGA": 3,
+                 "D-MOTOCICLISTA": 4,
+                 "PA-PERMISO AUTOMOVILISTA": 6,
+                 "PD-PERMISO MOTOCICLISTA": 7,
+
+             };
+             const tipoLicenciaNumero = tipoLicenciaMapping[jsonData.tipolicencia] || 0;
+             jsonData.id_tipo_licencia = tipoLicenciaNumero;
+             showLoading();
+             $.ajax({
+                 type: 'POST',
+                 url: '/Personas/guardaDesdeServicio',
+                 data: jsonData,
+                 success: function (result) {
+                     $('#modalLicencias').modal('hide');
+                     var grid = $("#gridPersonas").data("kendoGrid");
+                     if (result && result.data) {
+                         var dataArray = [result.data];
+                         grid.dataSource.data(dataArray);
+                     } else {
+                         console.error("La respuesta no tiene la estructura esperada:", result);
+                     }
+                     sitteg_success('Elemento guardado correctamente')
+                     hideLoading();
+                 },
+                 error: function (error) {
+                     sitteg_warning('Error al guardar en la base de datos:');
+                     hideLoading();
+                 }
+             });
+         });
+
+         $('#modalLicencias').modal('show');
+         */
+    }
+
+
+    function mustraGridPersonasLicencias() {
+        //alert("muestra grid")
+        var grid = $("#gridPersonasLicencia").data("kendoGrid");
+        grid.dataSource.data(response.Data);
+        grid.dataSource._total = response.Total;
+        $('#modalLicenciasList').modal('show');
+
+    }
+
+
+    function tipoPersona() {
+        var tipoPersonaValue = $("#ddlTipoPersona").data("kendoDropDownList").value() || 1;
+        console.log("tipoPersonaValue", tipoPersonaValue);
+
+
+        if (tipoPersonaValue == 1) {
+            $("#nombreP").html("Nombre(s): ");
+            $('#ap').show();
+            $('#am').show();
+        } else {
+            $("#nombreP").html("Razón Social: ");
+            $('#ap').hide();
+            $('#am').hide();
+        }
+
+
+        //showLoading();
+
+    }
+
+</script>

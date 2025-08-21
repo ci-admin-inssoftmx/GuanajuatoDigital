@@ -1,0 +1,177 @@
+﻿
+
+
+
+<script>
+
+        function Getdata(){
+
+
+                return {idDEl:window.IdDelegacion}
+
+        }
+
+
+
+
+    function InsertarAsociado(){
+
+        
+        var asociado = $("#dataasociados").val()
+        var data={}
+
+
+        if (!asociado){
+            sitteg_warning('Debes seleccionar un asociado.');
+            return
+        }
+
+
+
+        data.idPEncion = window.IdPension
+        data.idAsociado= asociado
+
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_InserAsociado")',
+            type: 'POST',
+            data: data,
+            dataType: "html",
+            success: function (data) {
+
+                if(data){
+                    sitteg_info('Elemento guardado correctamente');
+                    var grd = $("#gridGruasPensiones").data("kendoGrid").dataSource
+                    grd.read()
+                }
+                
+                else
+                    sitteg_warning('Lo sentimos, ha ocurrido un error.');
+
+                hideLoading();
+            },
+            error: function (xhr, status) {
+                var errmsg = xhr.responseText;
+                console.log(errmsg)
+                sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                hideLoading();
+            }
+        });
+
+
+    }
+
+
+    </script>
+
+
+<div class="row">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-12">
+            <div class="row">
+                <h5 class="px-4"><b>Asociados</b></h5>
+                <h6 class="px-4 text-muted">Seleccione Asociados</h6>
+
+            </div>
+
+            <div class="row">
+                <form id="UpdateAsociado">
+
+                    <div class="form-group col-12 col-md-6 col-lg-4">
+                        <div class="controlForm">
+                            @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos").Filter(FilterType.Contains)
+                                .Name("dataasociados")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Seleccione Asociado...")
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                .Filter(FilterType.Contains)
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("Consesionarios", "pensiones").Data("Getdata");
+                                    });
+                                })
+                                .Popup(p =>
+                                {
+                                    p.AppendTo("#sectionEditarPension");
+                                }))
+                        </div>
+                    </div>
+
+                </form>
+
+                <div class="row justify-content-center">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <div class="controlButton">
+                            <button class="btn-info px-3" id="btnActualizar" onclick="InsertarAsociado()">
+                                <h5 class="m-0"><b>Actualizar Asociado</b></h5>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+    @*  headerTemplate: `<input type="checkbox" id="header-chb" class="k-checkbox">
+    <label class="k-checkbox-label" for="header-chb"></label>`,
+    template: function(dataItem){
+    return `<input type="checkbox" id="${dataItem.ProductID}" class="k-checkbox">
+    <label class="k-checkbox-label" for="${dataItem.ProductID}"></label>`*@
+
+
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(Html.Kendo().Grid<Gruas2Model>()
+            .Name("gridGruasPensiones")
+            .Columns(columns =>
+            {
+//                columns.Bound(c => c.isPension).Hidden();
+//                columns.Bound(p => p.municipio).Title("Municipio").Width(90);
+                columns.Bound(p => p.concesionario).Title("Concesionario").Width(90);
+//                columns.Bound(p => p.noEconomico).Title("No. Económico").Width(90);
+//                columns.Bound(c => c.modelo).Title("Modelo").Width(90);
+//                columns.Bound(c => c.placas).Title("Placas").Width(90);
+//                columns.Bound(c => c.tipoGrua).Title("Tipo Grúa").Width(90);
+//                columns.Bound(p => p.isPension)
+//                .ClientTemplate("<input type='checkbox' #= isPension ? checked='checked':'' # class='controlForm input chkbx' />").Title("Seleccionar Grúa").Width(90);
+            @*.ClientTemplate("<input type='checkbox' id='${dataItem.idGrua}' class='k-checkbox'> <label class='k-checkbox-label' for='${dataItem.idGrua}'></label>").Title("Seleccionar Grúa").Width(90);*@
+        @*"<button onclick=\"ShowUpdatePopUp('#=isPension#')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i></h6></button>"*@
+
+                @*columns.Template(@<text></text>).ClientTemplate("<input type='checkbox' #= IsAdmin ? checked='checked':'' # class='chkbx' />");*@
+                @*columns.Command(c => c.Custom("Editar").Click("editar")).Width(100);*@
+            }).HtmlAttributes(new { style = "height:350" })
+            @*.Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Bottom).PageSizes(true))*@
+            .Pageable()
+            .Sortable()
+            .Scrollable(scr => scr.Height(350))
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(r => r.Action("ajax_GetListAsociadosPenciones", "Pensiones"))
+            .Model(model => model.Id(id => id.idGrua))
+            .ServerOperation(false)
+            )
+            //.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            .Events(events => events.DataBinding("replaceLegend"))
+
+
+        )
+    </div>
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#modalEditarPension").on("show.bs.modal shown.bs.modal", function (e) {
+            // Remove overlay and enable scrolling of body
+            $("body").removeClass("modal-open").find(".modal-backdrop").remove();
+        });
+        $("#modalEditarPension").on('hide.bs.modal', function () {
+            $('#modalBodyEditarPension').html('');
+        });
+    });
+</script>

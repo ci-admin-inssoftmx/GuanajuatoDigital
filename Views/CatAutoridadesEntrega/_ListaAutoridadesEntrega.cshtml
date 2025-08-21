@@ -1,0 +1,113 @@
+﻿<script>
+    function filtroEntrega() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+
+</script>
+  @if (ViewBag.Admin == true)
+        {
+<div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+    <div class="row">
+        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+            <button href="#" id="btnNuevaDep" onclick="mostrarModalAutEnt()">
+                <h6 class="m-0 d-flex align-items-center"><i class="icon-addEntrega h5 mb-0 me-2"></i><b>Agregar nueva autoridad de entrega</b></h6>
+            </button>
+        </div>
+    </div>
+</div>
+        }
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatAutoridadesEntregaModel>()
+            .Name("gridAutoridadesEntrega")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdAutoridadEntrega).Width(80).Title("Id");
+                columns.Bound(c => c.AutoridadEntrega).Width(100);
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(100);
+                columns.Command(c => c.Custom("Editar").Click("getIdAutEnt")).Width(100);
+               // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(100);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetAutEntrega", "CatAutoridadesEntrega").Data("filtroEntrega"))
+            .PageSize(5).Model(model => model.Id(p => p.IdAutoridadEntrega))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.AutoridadEntrega);
+     
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+    </div>
+</div>
+<div class="modal fade modalCustom" id="agregarAutEntrega" aria-labelledby="agregarAutEntregaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyaAgregarAutEntrega">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function getIdAutEnt(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdAutoridadEntrega = dataItem.IdAutoridadEntrega;
+        console.log(IdAutoridadEntrega);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarAutoridadEntregaModal", "CatAutoridadesEntrega")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdAutoridadEntrega: IdAutoridadEntrega }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyaAgregarAutEntrega').html(result);
+                $('#agregarAutEntrega').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdAutoridadEntrega = dataItem.IdAutoridadEntrega;
+        console.log(IdAutoridadEntrega);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarAutoridadEntregaModal", "CatAutoridadesEntrega")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdAutoridadEntrega: IdAutoridadEntrega }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyaAgregarAutEntrega').html(result);
+                $('#agregarAutEntrega').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+</script>

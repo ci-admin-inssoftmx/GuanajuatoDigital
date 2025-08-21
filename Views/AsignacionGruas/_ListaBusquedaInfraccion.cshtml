@@ -1,0 +1,158 @@
+﻿<script>
+    function onRowSelect() {
+        var grid = $("#gridInfraccionesDeposito").data("kendoGrid");
+        var selectedRowData = grid.dataItem(grid.select());
+
+        document.getElementById("datosVehiculo").style.display = "block";
+        $('#modalInfracciones').modal('hide');
+
+        var jsonData = JSON.stringify(selectedRowData);
+            showLoading();
+        $.ajax({
+            type: 'POST',
+            url: '/AsignacionGruas/ActualizarDatosVehiculo',
+            contentType: 'application/json',
+            data: jsonData,
+            success: function (result) {
+                console.log("Actualización exitosa", result);
+                var idVehiculo = result.IdVehiculo;
+                console.log(" idV", idVehiculo);
+
+                document.getElementById("PlacaSpan").textContent = selectedRowData.Placa;
+                document.getElementById("SerieSpan").textContent = selectedRowData.Serie;
+                document.getElementById("TarjetaSpan").textContent = selectedRowData.Tarjeta;
+                document.getElementById("MarcaSpan").textContent = selectedRowData.Marca;
+                document.getElementById("SubmarcaSpan").textContent = selectedRowData.Submarca;
+                document.getElementById("ModeloSpan").textContent = selectedRowData.Modelo;
+                document.getElementById("PropietarioSpan").textContent = selectedRowData.Propietario;
+                document.getElementById("CurpSpan").textContent = selectedRowData.CURP;
+                document.getElementById("RfcSpan").textContent = selectedRowData.RFC;
+                document.getElementById("FolioInfraccion").textContent = result.folioInfraccion;
+                document.getElementById("IdVehiculoAsignado").textContent = result.idVehiculo;
+                $("#IdVehiculoAsignado").val(idVehiculo);
+
+                var pathArchivo = result.PathArchivo
+                var nombreArchivo = result.NombreArchivo
+
+                if (pathArchivo){
+                    $("#NameFile").empty().append(nombreArchivo)
+                    document.getElementById("svgImagent").classList.add("active")
+                }
+ 
+                if (result.PathArchivo){
+                    $("#NameFile").empty().append(result.NombreArchivo)
+                    document.getElementById("svgImagent").classList.add("active")
+                }
+                if ($('#vehiculoPropietarioDatosContainer').length) {
+                    $('#datosVehiculo').hide();
+                    buscarVehiculo(idVehiculo);
+                    $('#vehiculoPropietarioDatosContainer').show();
+                }
+                hideLoading();
+
+            },
+            error: function (error) {
+                // Ocurrió un error al procesar la solicitud
+                    hideLoading();
+                console.error("Error en la actualización", error);
+            }
+        });
+    }
+
+    function buscarVehiculo(pidVehiculo) {
+		showLoading();
+		$.ajax({
+			type: "GET",
+            url: '@Url.Action("MostrarDatosVehiculo", "DepositosOtraDependencia")',
+			data: {
+				"idVehiculo": pidVehiculo,
+			},
+			success: function (data) {
+				console.log("DATVE", data)
+                $("#vehiculoPropietarioDatos").html(data);
+				hideLoading();
+			}, error: function () {
+				//sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+
+		});
+	}
+
+    function subMarcaDropDownChange() {
+        var _idMarca = $("#ddlMarcas").data("kendoDropDownList").value();
+        showLoading();
+        $.ajax({
+            url: "/Vehiculos/SubMarcas_ReadPorMarca",
+            type: "POST",
+            data: { idMarca: _idMarca },
+            success: function (data) {
+                var TramosDropDown = $("#idSubmarca").data("kendoDropDownList");
+                TramosDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.log("EE", error)
+                hideLoading();
+            }
+        });
+    }
+
+
+</script>
+
+<div class="col-12 mb-4 px-4 rounded gridCustom">
+    @(
+        Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.AsignacionGruaModel>()
+        .Name("gridInfraccionesDeposito")
+        .Events(events => events.Change("onRowSelect").DataBinding("replaceLegend").DataBinding("replaceLegend"))
+
+        .Columns(columns =>
+        {
+            columns.Select().Width(50).ClientHeaderTemplate(" ");
+            columns.Bound(c => c.IdPersona).Hidden();
+            columns.Bound(c => c.IdVehiculo).Hidden();
+            columns.Bound(c => c.CURP).Hidden();
+            columns.Bound(c => c.RFC).Hidden();
+            columns.Bound(c => c.Placa).Hidden();
+            columns.Bound(c => c.Modelo).Hidden();
+            columns.Bound(c => c.Serie).Hidden();
+            columns.Bound(c => c.Tarjeta).Hidden();
+            columns.Bound(c => c.Motor).Hidden();
+            columns.Bound(c => c.NombreArchivo).Hidden();
+            columns.Bound(c => c.PathArchivo).Hidden();
+            columns.Bound(c => c.NumeroEconomico).Hidden();
+            columns.Bound(c => c.NombreArchivo).Hidden();
+            columns.Bound(c => c.PathArchivo).Hidden();
+            columns.Bound(c => c.folioInfraccion).Title("Folio de Infracción").Width(80);
+            columns.Bound(c => c.Propietario).Title("Propietario del vehículo").Width(150);
+            columns.Template("#= kendo.toString(new Date(fechaYHoraInfraccion), 'dd/MM/yyyy HH:mm') #")
+            .Title("Fecha de Infracción")
+            .Width(100);
+
+
+        })
+        .HtmlAttributes(new { style = "height:400px" })
+        .Sortable()
+        ////.Groupable()
+        .Scrollable()
+        .Pageable()
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .Read(read => read.Action("BuscarVehiculo", "AsignarGruas"))
+        .PageSize(5).Model(model => model.Id(p => p.IdMarcaVehiculo))
+        )
+        .ToolBar(t => t.Search().Text("Buscar..."))
+         .Search(s =>
+            {
+            s.Field(c => c.folioInfraccion);
+            s.Field(c => c.Propietario);
+            s.Field(c => c.fechaInfraccion);
+
+             
+            })
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Multiple).Type(GridSelectionType.Row))
+        )
+</div>
+
+

@@ -1,0 +1,1090 @@
+@inject IHttpContextAccessor Accessor
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+
+@{
+    var nombreOficina = User.FindFirst(CustomClaims.Oficina);
+    var nombrePension = User.FindFirst(CustomClaims.Pension);
+    var tipoOficina = User.FindFirst(CustomClaims.TipoOficina);
+
+    var can = @HttpContextAccessor.HttpContext.Session.Keys.Any(s=>s=="IdsPermitidos");
+    var autorizaciones =can? @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString():"";
+    var nombreUsuario = User.FindFirst(CustomClaims.Nombre);
+    var isDEp = autorizaciones.Contains("300");
+
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]RIAG Registro Infracciones y Accidentes de Guanajuato</title>
+
+
+    <environment names="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.css" />
+    </environment>
+    <environment names="Staging,Production">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+    <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+    </environment>
+    <link href="https://cdn.kendostatic.com/2021.3.914/styles/kendo.classic-opal.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="~/css/main.css" />
+    <link href="~/css/plugins/toastr.min.css" rel="stylesheet" />
+    <script src="https://cdn.kendostatic.com/2021.3.914/js/jquery.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2021.3.914/js/jszip.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2021.3.914/js/kendo.all.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2021.3.914/js/kendo.aspnetmvc.min.js"></script>
+    <script src="~/js/toastr.min.js"></script>
+    <globalization culture="es-MX" uiCulture="es" />
+    <!--  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/kendo-ui-core/2014.1.416/js/cultures/kendo.culture.es-ES.min.js"></script>-->
+    <script src="https://kendo.cdn.telerik.com/2023.3.1114/js/cultures/kendo.culture.es-ES.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+    @using System.Globalization
+
+    <script type="text/javascript">
+        //set culture of the Kendo UI
+        kendo.culture("es-ES");
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            var _Generales = [250];
+            var _vehiculos = [230, 201, 260, 220, 280, 210, 240, 300, 310, 320, 270, 290];
+            var _infracciones = [460, 401, 410, 420, 440, 490, 430, 480, 450];
+            var _infraccionesInvisibles = [1600, 1610];
+            var _accidentes = [630, 601, 610, 620];
+            var _catalogos = [1140, 1160, 1170, 1001, 1210, 1190, 1090, 1220, 1020, 1120, 1040, 1200, 1240, 1230, 1180, 1060, 1110, 1030, 1050, 1130, 1100, 1070, 1150, 1080, 1010];
+            var _blocs = [1400, 1410, 1420];
+            var _configParametro = [1500,1520];
+            var _firmas = [1300,1310, 1320];
+
+
+            $.ajax({
+                url: '@Url.Action("GetIdsPermitidos", "Login")',
+                type: 'GET',
+                success: function (data) {
+                    var idsPermitidos = data;
+
+                    // Mostrar solo los elementos que tienen un ID permitido o la clase 'always-visible'
+                    $(".nav-item").each(function () {
+                        var id = parseInt($(this).data("id"));
+                        if (idsPermitidos.includes(id) || $(this).hasClass("always-visible")) {
+                            $(this).prop('hidden', false);//.show();
+                        }
+                    });
+
+                    let _vehiculoEncontrado = _vehiculos.some(id => idsPermitidos.includes(id));
+                    let _infraccionEncontrada = _infracciones.some(id => idsPermitidos.includes(id));
+                    let _infraccionInvisibleEncontrada = _infraccionesInvisibles.some(id => idsPermitidos.includes(id));;
+                    let _accidenteEncontrado = _accidentes.some(id => idsPermitidos.includes(id));
+                    let _catalogoEncontrado = _catalogos.some(id => idsPermitidos.includes(id));
+                    let _GeneralesEncontrado = _Generales.some(id => idsPermitidos.includes(id));
+                    let _BlocsEncontrado = _blocs.some(id => idsPermitidos.includes(id));
+                    let _FirmasEncontrado = _firmas.some(id => idsPermitidos.includes(id));
+                    let _DatosConfEncontrado = _configParametro.some(id => idsPermitidos.includes(id));
+
+                    // Mostrar solo los tabs que correspondan a los IDs permitidos
+                    if (_vehiculoEncontrado)
+                        $("#nav-vehiculo-tab").prop('hidden', false);
+                    if (_infraccionEncontrada)
+                        $("#nav-infraccion-tab").prop('hidden', false);
+                    if (_infraccionInvisibleEncontrada)
+                        $("#nav-infraccion-invisible-tab").prop('hidden', false);
+                    if (_accidenteEncontrado)
+                        $("#nav-accidentes-tab").prop('hidden', false);
+                    if (_catalogoEncontrado)
+                        $("#nav-catalogo-tab").prop('hidden', false);
+                    if (_GeneralesEncontrado)
+                        $("#nav-General-tab").prop('hidden', false);
+                    if (_BlocsEncontrado)
+                        $("#nav-blocs-tab").prop('hidden', false);
+                    if (_FirmasEncontrado)
+                        $("#nav-firmas-tab").prop('hidden', false);
+                    if (_DatosConfEncontrado)
+                        $("#nav-config-param-tab").prop('hidden', false);
+
+                    hideLoading();
+                },
+                error: function (error) {
+                    console.log('Error al obtener los IDs permitidos.');
+                    hideLoading();
+                }
+            });
+        });
+    </script>
+    <!--<script>
+
+        $(document).ready(function () {
+            var _Generales = [250]
+            var _vehiculos = [230, 201, 260, 220, 280, 210, 240, 300, 310, 320, 270, 290];
+            var _infracciones = [460, 401, 410, 420, 440, 490, 430, 480, 450, 450,450];
+            var _infraccionesInvisibles = [1600,1610]; 
+            var _accidentes = [630, 601, 610, 620]
+            var _catalogos = [1140, 1160, 1170, 1001, 1210, 1190, 1090, 1220, 1020, 1120, 1040, 1200, 1240, 1230, 1180, 1060, 1110, 1030, 1050, 1130, 1100, 1070, 1150, 1080, 1010, 1010, 1250];
+            var _configParametro = [1500,1520];
+            var _firmas = [1300,1310, 1320];
+            var _blocs = [1400, 1410, 1420];
+            var _bi =  [1420];
+            $.ajax({
+                url: '@Url.Action("GetIdsPermitidos", "Login")',
+                type: 'GET',
+                success: function (data) {
+                    var idsPermitidos = data;
+                    $(".nav-item").each(function () {
+                        var id = parseInt($(this).data("id"));
+                        if ((idsPermitidos.includes(id) || $(this).hasClass("always-visible"))) {
+                            $(this).show();
+                        }
+                    });
+
+                    /*let _vehiculoEncontrado = false;
+                    let _infraccionEncontrada = false;
+                    let _infraccionInvisibleEncontrada = false;
+                    let _accidenteEncontrado = false;
+                    let _catalogoEncontrado = false;
+                    let _configParametroEncontrado = false;
+                    let _GeneralesEncontrado = false;
+                    let _firmasEncontrado = false;
+                    let _BlocsEncontrado = false;
+                    let _BiEncontrado = false;
+
+                    if (idsPermitidos.length <= 0) {
+                        $("#nav-vehiculo-tab").prop('hidden', true);
+                        $("#nav-infraccion-tab").prop('hidden', true);
+                        $("#nav-infraccion-invisible-tab").prop('hidden', true);
+                        $("#nav-accidentes-tab").prop('hidden', true);
+                        $("#nav-catalogo-tab").prop('hidden', true);
+                        $("#nav-config-param-tab").prop('hidden', true);
+                        $("#nav-firmas-tab").prop('hidden', true);
+                        $("#nav-blocs-tab").prop('hidden', true);
+                        $("#nav-bi-tab").prop('hidden', true);
+                    } else {
+                        for (let i = 0; i < _vehiculos.length; i++) {
+                            if (idsPermitidos.includes(_vehiculos[i])) {
+                                _vehiculoEncontrado = true;
+                                break;
+                            }
+                        }
+                        for (let i = 0; i < _infracciones.length; i++) {
+                            if (idsPermitidos.includes(_infracciones[i])) {
+                                _infraccionEncontrada = true;
+                                break;
+                            }
+                        }
+                        for (let i = 0; i < _infraccionesInvisibles.length; i++) {
+                            if (idsPermitidos.includes(_infraccionesInvisibles[i])) {
+                                _infraccionInvisibleEncontrada = true;
+                                break;
+                            }
+                        }
+
+
+                        for (let i = 0; i < _accidentes.length; i++) {
+                            if (idsPermitidos.includes(_accidentes[i])) {
+                                _accidenteEncontrado = true;
+                                break;
+                            }
+                        }
+                        for (let i = 0; i < _catalogos.length; i++) {
+                            if (idsPermitidos.includes(_catalogos[i])) {
+                                _catalogoEncontrado = true;
+                                break;
+                            }
+                        }
+                        for (let i = 0; i < _configParametro.length; i++) {
+                            if (idsPermitidos.includes(_configParametro[i])) {
+                                _configParametroEncontrado = true;
+                                break;
+                            }
+                        }
+                        for (let i = 0; i < _Generales.length; i++) {
+                            if (idsPermitidos.includes(_Generales[i])) {
+                                _GeneralesEncontrado = true;
+                                break;
+                            }
+                        }
+                        for (let i = 0; i < _firmas.length; i++) {
+                            if (idsPermitidos.includes(_firmas[i])) {
+                                _firmasEncontrado = true;
+                                break;
+                            }
+                        }
+
+                        for (let i = 0; i < _blocs.length; i++) {
+                            if (idsPermitidos.includes(_blocs[i])) {
+                                _BlocsEncontrado = true;
+                                break;
+                            }
+                        }
+                         for (let i = 0; i < _bi.length; i++) {
+                            if (idsPermitidos.includes(_bi[i])) {
+                                _BiEncontrado = true;
+                                break;
+                            }
+                        }
+
+                        if (!_vehiculoEncontrado)
+                            $("#nav-vehiculo-tab").prop('hidden', true);
+                        if (!_infraccionEncontrada)
+                            $("#nav-infraccion-tab").prop('hidden', true);
+                        if (!_infraccionInvisibleEncontrada)
+                            $("#nav-infraccion-invisible-tab").prop('hidden', true);
+                        if (!_accidenteEncontrado)
+                            $("#nav-accidentes-tab").prop('hidden', true);
+                        if (!_catalogoEncontrado)
+                            $("#nav-catalogo-tab").prop('hidden', true);
+                        if (!_configParametroEncontrado)
+                            $("#nav-config-param-tab").prop('hidden', true);
+                        if (!_GeneralesEncontrado)
+                            $("#nav-General-tab").prop('hidden', true);
+                        if (!_BlocsEncontrado)
+                            $("#nav-blocs-tab").prop('hidden', true);
+                        if (!_firmasEncontrado)
+                            $("#nav-firmas-tab").prop('hidden', true);
+                        if (!_BiEncontrado)
+                            $("#nav-bi-tab").prop('hidden', true);
+                    }
+                    hideLoading();
+                },
+                error: function (error) {
+                    console.log('Error al obtener los IDs permitidos.');
+                    hideLoading();
+                }
+            });
+        });
+    </script>-->
+
+</head>
+<body>
+    <main class="container-fluid">
+        <div style="background: #000f9f;" class="row justify-content-center rounded-0 card-header">
+            <div class="col-auto">
+                <h6 class="m-0 text-light fw-bold">@nombreUsuario</h6>
+            </div>
+            <div class="col-auto">
+                @if (tipoOficina?.Value != "3")
+                {
+                    <h6 class="m-0 text-light fw-bold">@nombreOficina</h6>
+                }
+            </div>
+            <div class="col-auto">
+                @if (tipoOficina?.Value == "3")
+                {
+                    <h6 class="m-0 text-light fw-bold">@nombrePension</h6>
+                }
+            </div>
+        </div>
+        <div class="row minH100">
+            <nav id="nav" class="navPrincipal">
+                <div class="row h-100">
+                    <div class="col-auto mx-0 px-0 pt-1 pt-md-5 navPrincipal-content">
+                        <button class="iconMenu mt-3" id="toggle">
+                            <div class="line line1"></div>
+                            <div class="line line2"></div>
+                        </button>
+                        <div class="nav nav-tabs border-0 col-auto d-flex flex-column mt-5" id="nav-tab" role="tablist">
+                            <button class="position-relative nav-link @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Depósitos") ? "active" : "") d-flex justify-content-center align-items-center" id="nav-vehiculo-tab" data-bs-toggle="tab" data-bs-target="#nav-vehiculo" type="button" role="tab" aria-controls="nav-vehiculo" aria-selected="true" hidden>
+                                <i class="icon icon-car h5 m-0"></i>
+                                <div class="tooltipNav rounded-pill position-absolute">
+                                    <p class="m-0">
+                                        <b>Depósitos</b>
+                                    </p>
+                                </div>
+                            </button>
+                            <button class="position-relative nav-link @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Infracciones") ? "active" : "") d-flex justify-content-center align-items-center" id="nav-infraccion-tab" data-bs-toggle="tab" data-bs-target="#nav-infraccion" type="button" role="tab" aria-controls="nav-infraccion" aria-selected="false" hidden>
+                                <i class="icon icon-infracion h3 m-0"></i>
+                                <div class="tooltipNav rounded-pill position-absolute">
+                                    <p class="m-0">
+                                        <b>Infracciones</b>
+                                    </p>
+                                </div>
+                            </button>
+                            <button class="position-relative nav-link @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "InfraccionesInvisibles") ? "active" : "") d-flex justify-content-center align-items-center" id="nav-infraccion-invisible-tab" data-bs-toggle="tab" data-bs-target="#nav-infraccion-invisible" type="button" role="tab" aria-controls="nav-infraccion-invisible" aria-selected="false" hidden>
+                                <i class="icon icon-infracion h3 m-0"></i>
+                                <div class="tooltipNav rounded-pill position-absolute">
+                                    <p class="m-0">
+                                        <b>Infracciones Invisibles</b>
+                                    </p>
+                                </div>
+                            </button>
+                            <button class="position-relative nav-link  @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Accidentes") ? "active" : "") d-flex justify-content-center align-items-center" id="nav-accidentes-tab" data-bs-toggle="tab" data-bs-target="#nav-accidentes" type="button" role="tab" aria-controls="nav-accidentes" aria-selected="false" hidden>
+                                <i class="icon icon-accidente h4 m-0"></i>
+                                <div class="tooltipNav rounded-pill position-absolute">
+                                    <p class="m-0">
+                                        <b>Accidentes</b>
+                                    </p>
+                                </div>
+                            </button>
+                            <button class="position-relative nav-link @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Catálogos") ? "active" : "") d-flex justify-content-center align-items-center" id="nav-catalogo-tab" data-bs-toggle="tab" data-bs-target="#nav-catalogo" type="button" role="tab" aria-controls="nav-catalogo" aria-selected="false" hidden>
+                                <i class="icon icon-data h4 m-0"></i>
+                                <div class="tooltipNav rounded-pill position-absolute">
+                                    <p class="m-0">
+                                        <b>Catálogos</b>
+                                    </p>
+                                </div>
+                            </button>
+
+                            <button class="position-relative nav-link @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Generales") ? "active" : "") d-flex justify-content-center align-items-center" id="nav-General-tab" data-bs-toggle="tab" data-bs-target="#nav-Generales" type="button" role="tab" aria-controls="nav-Generales" aria-selected="true" hidden>
+                                <i class="icon icon-car h5 m-0"></i>
+                                <div class="tooltipNav rounded-pill position-absolute">
+                                    <p class="m-0">
+                                        <b>Generales</b>
+                                    </p>
+                                </div>
+                            </button>
+                            <button class="position-relative nav-link @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "CatCamposObligatorios") ? "active" : "") d-flex justify-content-center align-items-center" id="nav-config-param-tab" data-bs-toggle="tab" data-bs-target="#nav-config-param" type="button" role="tab" aria-controls="nav-config-param" aria-selected="false" hidden>
+                                <i class="icon icon-configuracionPatrones h4 m-0"></i>
+                                <div class="tooltipNav rounded-pill position-absolute">
+                                    <p class="m-0">
+                                        <b>Configuración de Parámetros</b>
+                                    </p>
+                                </div>
+                            </button>
+
+                            <button class="position-relative nav-link @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Firmas") ? "active" : "") d-flex justify-content-center align-items-center" id="nav-firmas-tab" data-bs-toggle="tab" data-bs-target="#nav-firmas" type="button" role="tab" aria-controls="nav-firmas" aria-selected="false" hidden>
+                                <i class="icon icon-firma h4 m-0"></i>
+                                <div class="tooltipNav rounded-pill position-absolute">
+                                    <p class="m-0">
+                                        <b>Firmas</b>
+                                    </p>
+                                </div>
+                            </button>
+
+                            <button class="position-relative nav-link @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Blocs") ? "active" : "") d-flex justify-content-center align-items-center" id="nav-blocs-tab" data-bs-toggle="tab" data-bs-target="#nav-blocs" type="button" role="tab" aria-controls="nav-blocs" aria-selected="false" hidden>
+                                <i class="icon icon-bloc h4 m-0"></i>
+                                <div class="tooltipNav rounded-pill position-absolute">
+                                    <p class="m-0">
+                                        <b>Blocs</b>
+                                    </p>
+                                </div>
+                            </button>
+                            <button class="position-relative nav-link @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Reportes") ? "active" : "") d-flex justify-content-center align-items-center" id="nav-bi-tab" data-bs-toggle="tab" data-bs-target="#nav-bi" type="button" role="tab" aria-controls="nav-bi" aria-selected="false">
+                                <i class="icon icon-camposOpcionales h4 m-0"></i>
+                                <div class="tooltipNav rounded-pill position-absolute">
+                                    <p class="m-0">
+                                        <b>Reportes</b>
+                                    </p>
+                                </div>
+                            </button>
+                            
+                            <button class="position-relative nav-link @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Configuraciones") ? "active" : "") d-flex justify-content-center align-items-center" id="nav-admin-tab" data-bs-toggle="tab" data-bs-target="#nav-admin" type="button" role="tab" aria-controls="nav-admin" aria-selected="false" >
+                                <i class="icon icon-fisica h4 m-0"></i>
+                                <div class="tooltipNav rounded-pill position-absolute">
+                                    <p class="m-0">
+                                        <b>Configuraciones</b>
+                                    </p>
+                                </div>
+                            </button>
+                            
+                        </div>
+                    </div>
+                    <!-- CATALGOS -->
+                    <div class="col text-center pt-3 pt-md-5 pb-3">
+                        <img width="90%" src="~/img/logo-gto.svg" />
+                        <div class="tab-content col" id="nav-tabContent">
+                            <!-- ***************** -->
+                            
+                            <div class="tab-pane fade @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Generales") ? "show active" : "")" id="nav-Generales" role="tabpanel" aria-labelledby="nav-Generales-tab" >
+                                <ul class="navbar-nav mt-4">
+                                    <li class="nav-item active" data-id="250" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Vehiculos/Index">
+                                            <i class="icon icon-transito h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Vehículos</p>
+                                        </a>
+                                    </li>
+                                    <!--Falta id-->
+                                    <li class="nav-item active" data-id="250" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Vehiculos/Editar">
+                                            <i class="icon icon-edit-car h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Modificar vehículos</p>
+                                        </a>
+                                    </li>
+                                    <!--falta id-->
+                                    <li class="nav-item active" data-id="250" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Personas/Index">
+                                            <i class="icon icon-fisica h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Personas</p>
+                                        </a>
+                                    </li>                                   
+                                </ul>
+                            </div>
+                            <div class="tab-pane fade @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Depósitos") ? "show active" : "")" id="nav-vehiculo" role="tabpanel" aria-labelledby="nav-vehiculo-tab" >
+                                <ul class="navbar-nav mt-4">
+
+                                    <li class="nav-item" data-id="230" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/LiberacionVehiculo/Index">
+                                            <i class="icon icon-entrega h5 m-0 mt-1 me-2"></i>
+                                            <p class="m-0 text-start text-break">Liberación de vehículo</p>
+                                        </a>
+                                    </li>
+
+
+                                    <li data-id="201" class="nav-item @Html.IsSelected(controller: "TransitoTransporte,Index")" hidden>
+
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="@Url.Action("Index", "TransitoTransporte")">
+                                            <i class="icon icon-research h5 m-0 mt-1 me-2"></i>
+                                            <p class="m-0 text-start text-break">Búsqueda </p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item" data-id="260" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-start" href="/Depositos/Depositos">
+                                            <i class="icon icon-addDeposito h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Solicitud de depósito</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item" data-id="220" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/AsignacionGruas/Index">
+                                            <i class="icon icon-addGrua h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Captura grúas</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item" data-id="280" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/PadronGruas/Index">
+                                            <i class="icon icon-grua h4 m-0 mt-1 me-2"></i>
+                                            <p class="m-0 text-start text-break">Padrón de grúas</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="210" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/PadronDepositosGruas/Index">
+                                            <i class="icon icon-inventario h5 m-0 mt-1 me-2"></i>
+                                            <p class="m-0 text-start text-break">Padrón de depósitos y grúas</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="240" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/ReporteAsignacionServicios/Index">
+                                            <i class="icon icon-deposito h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Reporte de asignación de servicios</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="300" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/IngresarVehiculo/Index">
+                                            <i class="icon icon-deposito h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Ingresar vehículo (Pensión)</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="310" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/SalidaVehiculos/Index">
+                                            <i class="icon icon-deposito h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Salida de vehículo (Pensión)</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="320" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/BusquedaDeposito/Index">
+                                            <i class="icon icon-deposito h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Búsqueda depósito (Pensión)</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item active" data-id="270" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Pensiones/Index">
+                                            <i class="icon icon-pension h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Pensiones</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="290" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Concesionarios/Index">
+                                            <i class="icon icon-concesonaria h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Concesionarios</p>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                            <!-- ***************** -->
+                            <div class="tab-pane fade @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Infracciones") ? "show active" : "")" id="nav-infraccion" role="tabpanel" aria-labelledby="nav-infraccion-tab" >
+                                <ul class="navbar-nav mt-4">
+
+                                    <li class="nav-item active" data-id="460" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Infracciones/Index">
+                                            <i class="icon icon-infracion h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Búsqueda de infracciones</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item active" data-id="401" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/infracciones/crear">
+                                            <i class="icon icon-infracion h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Captura de infracciones</p>
+                                        </a>
+                                    </li>
+
+
+                                    <li class="nav-item active" data-id="410" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CancelarInfraccion/Index">
+                                            <i class="icon icon-cancelInfracion h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Cancelar infracción</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="420" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/RegistroReciboPago/Index">
+                                            <i class="icon icon-editRecibo h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Registro de recibo de pago</p>
+                                        </a>
+                                    </li>
+                                    @*                                    <li class="nav-item active" data-id="440">
+                                    <a class="nav-link d-flex justify-content-start align-items-center" href="/EnvioInfracciones/Index">
+                                        <i class="icon icon-enviar h6 m-0 me-2"></i>
+                                        <p class="m-0 text-start text-break">Envío de infracciones</p>
+                                    </a>
+                                </li>*@
+                                    <li class="nav-item active" data-id="490" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/ComparativoInfracciones/Index">
+                                            <i class="icon icon-filter h6 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Comparativo de infracciones</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="430" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Estadisticas/Index">
+                                            <i class="icon icon-estadisticas h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Estadísticas de infracciones</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="480" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Infracciones/BusquedaEspecial">
+                                            <i class="icon icon-research h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Búsqueda especial</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item active" data-id="450" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CortesiasNoAplicadas/Index">
+                                            <i class="icon icon-infracion h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Cortesías no aplicadas</p>
+                                        </a>
+                                    </li>
+
+                                       <li class="nav-item active" data-id="450" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/InfraccionesCortesia/Index">
+                                            <i class="icon icon-infracion h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Infracciones cortesía </p>
+                                        </a>
+                                    </li>
+
+
+                                </ul>
+                            </div>
+                            <!-- ***************** -->
+                            <div class="tab-pane fade @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "InfraccionesInvisibles") ? "show active" : "")" id="nav-infraccion-invisible" role="tabpanel" aria-labelledby="nav-infraccion-invisible-tab">
+                                <ul class="navbar-nav mt-4">
+                                    <li class="nav-item active" data-id="1610" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Infracciones/InfraccionesInvisibles">
+                                            <i class="icon icon-infracion h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Búsqueda de infracciones Invisibles</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- ***************** -->
+                            <!-- ***************** -->
+                            <div class="tab-pane fade @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Accidentes") ? "show active" : "")" id="nav-accidentes" role="tabpanel" aria-labelledby="nav-accidentes-tab">
+                                <ul class="navbar-nav mt-4">
+                                    <li class="nav-item active" data-id="630" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CapturaAccidentes/Index">
+                                            <i class="icon icon-accidentes h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Captura de accidentes</p>
+                                        </a>
+                                    </li>
+
+
+                                    <li class="nav-item active" data-id="601" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/BusquedaAccidentes/Index">
+                                            <i class="icon icon-research h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Búsqueda de accidentes</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="610" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/BusquedaEspecialAccidentes/Index">
+                                            <i class="icon icon-research h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Búsqueda especial de accidentes</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item active" data-id="620" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/EstadisticasAccidentes/Index">
+                                            <i class="icon icon-estadisticas h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Estadísticas de accidentes</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- ***************** -->
+                            <div class="tab-pane fade @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Catálogos") ? "show active" : "")" id="nav-catalogo" role="tabpanel" aria-labelledby="nav-catalogo-tab" >
+                                <ul class="navbar-nav mt-4">
+                                    <li class="nav-item active" data-id="1140" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatAgenciasMinisterio/Index">
+                                            <i class="icon icon-ministerio h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Agencias ministerio</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1160" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatAutoridadesDisposicion/Index">
+                                            <i class="icon icon-autoridad h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Autoridades disposición</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1170" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatAutoridadesEntrega/Index">
+                                            <i class="icon icon-entrega h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Autoridades entrega</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1001" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatCarreteras/Index">
+                                            <i class="icon icon-carretera h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Carreteras</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1210" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatCausasAccidentes/Index">
+                                            <i class="icon icon-causas h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Causas accidentes</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1190" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatClasificacionAccidentes/Index">
+                                            <i class="icon icon-clasificacionAccidente h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Clasificación accidentes</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1090" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Colores/Index">
+                                            <i class="icon icon-color h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Colores</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1220" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatDelegacionesOficinasTransporte/Index">
+                                            <i class="icon icon-oficinas h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break"> Delegaciones / Oficinas-Transporte</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1020" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Dependencias/Index">
+                                            <i class="icon icon-dependencia h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Dependencias</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1120" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/DiasInhabiles/Index">
+                                            <i class="icon icon-date h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Días inhabiles</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1040" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatEntidades/Index">
+                                            <i class="icon icon-entidad h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Entidades</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1200" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatFactoresAccidentes/Index">
+                                            <i class="icon icon-factores h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Factores accidentes</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1240" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatFactoresOpcionesAccidentes/Index">
+                                            <i class="icon icon-opciones h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Factores opciones accidentes</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1230" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatHospitales/Index">
+                                            <i class="icon icon-hospital h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Hospitales</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item active" data-id="1180" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatInstitucionesTraslado/Index">
+                                            <i class="icon icon-traslado h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Instituciones traslado</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item active" data-id="1060" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatMarcasVehiculos/Index">
+                                            <i class="icon icon-marca h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Marcas vehículos</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1110" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/MotivosInfraccion/IndexModal">
+                                            <i class="icon icon-infracion h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Motivos infracción</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1030" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatMunicipios/Index">
+                                            <i class="icon icon-municipio h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Municipios</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1050" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Oficiales/IndexModal">
+                                            <i class="icon icon-oficial h4 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Oficiales</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item active" data-id="1130" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatOficinasRenta/Index">
+                                            <i class="icon icon-oficina h6 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Oficinas renta</p>
+                                        </a>
+                                    </li>
+                                    
+                                    <li class="nav-item active" data-id="1270">
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatPuestos/Index">
+                                            <i class="icon icon-puestos h3 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Puestos</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item active" data-id="1100" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/SalariosMinimos/IndexModal">
+                                            <i class="icon icon-udi h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">UMAS</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item active" data-id="1070" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatSubmarcasVehiculos/Index">
+                                            <i class="icon icon-subMarcar h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Submarcas vehículos</p>
+                                        </a>
+                                    </li>
+
+
+
+                                    <li class="nav-item active" data-id="1150" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/TiposCarga/IndexModal">
+                                            <i class="icon icon-carga h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Tipo de carga</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item active" data-id="1080" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/TiposVehiculos/Index">
+                                            <i class="icon icon-tipoVehiculo h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Tipo vehículo</p>
+                                        </a>
+                                    </li>
+
+                                    @*Nuevos catalogos 24/06*@
+
+                                      <li class="nav-item active" data-id="1080" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatTipoServicio/Index">
+                                            <i class="icon icon-tipoServicio h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Tipo de servicio</p>
+                                        </a>
+                                    </li>
+
+                                      <li class="nav-item active" data-id="1080" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatSubtipoServicio/Index">
+                                            <i class="icon icon-subtipoServicio h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Subtipo de servicio</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item active" data-id="1010" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatTramos/Index">
+                                            <i class="icon icon-tramo h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Tramos</p>
+                                        </a>
+                                    </li>
+
+                                    <!-- turnos -->
+                                    <li class="nav-item active" data-id="1010" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatTurnos/Index">
+                                            <i class="icon icon-turnos h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Turnos</p>
+                                        </a>
+                                    </li>
+                                     <!--****Catalogo administrar WS****-->
+                                      <li class="nav-item active" data-id="1010" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatAdminWS/Index">
+                                            <i class="icon icon-aws h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Administrador WS</p>
+                                        </a>
+                                    </li>  
+                                    <!--***Administrador de catálogos-->
+                                     <li class="nav-item active" data-id="1250">
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/AdminCatalogos/Index">
+                                            <i class="icon icon-adminData h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Administrador de catálogos</p>
+                                         </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1260">
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Relaciones/Index">
+                                            <i class="icon icon-addRelacionData h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Relaciones de catálogos</p>
+                                        </a>
+                                    </li>
+                                    <!-- Catalogo de aseguradoras -->
+                                    <li class="nav-item active" data-id="1010" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatAseguradoras/Index">
+                                            <i class="icon icon-aseguradoras h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Aseguradoras</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- *******Configuración de parámetros********** -->
+                            <div class="tab-pane fade @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "CatCamposObligatorios") ? "show active" : "")" id="nav-config-param" role="tabpanel" aria-labelledby="nav-config-param-tab">
+                                <ul class="navbar-nav mt-4">
+                                    <li class="nav-item active" data-id="1500" hidden>
+
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatCamposObligatorios/Index">
+                                            <i class="icon icon-camposOpcionales h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Campos opcionales</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1520" hidden>
+
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/CatAlertamiento/Index">
+                                            <i class="icon icon-aws h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Alertamientos</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1500" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/AdministradorBlocks/Index">
+                                            <i class="icon icon-bloc h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Adminitracion de Blocs</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- ***************** -->
+                            <div class="tab-pane fade @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Firmas") ? "show active" : "")" id="nav-firmas" role="tabpanel" aria-labelledby="nav-firmas-tab">
+                                <ul class="navbar-nav mt-4">
+
+                                    <li class="nav-item active" data-id="1310" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Firmas/Index">
+                                            <i class="icon icon-firma h5 m-0 mt-1 me-2"></i>
+                                            <p class="m-0 text-start text-break">Administración de firmas</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item active" data-id="1320" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Firmas/Alta">
+                                            <i class="icon icon-addFirma h5 m-0 mt-1 me-2"></i>
+                                            <p class="m-0 text-start text-break">Alta de nueva firma</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- *******Blocs********** -->
+                            <div class="tab-pane fade @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Blocs") ? "show active" : "")" id="nav-blocs" role="tabpanel" aria-labelledby="nav-blocs-tab">
+                                <ul class="navbar-nav mt-4">
+                                    <li class="nav-item active" data-id="1400" hidden>
+
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Blocs/Index">
+                                            <i class="icon icon-bloc h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Administración de Blocs</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1410" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Blocs/AltaBlocs">
+                                            <i class="icon icon-addBloc h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Alta de nuevo Bloc</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1420" hidden>
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Blocs/Inventario">
+                                            <i class="icon icon-bloc h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Inventario Blocs</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="tab-pane fade @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Reportes") ? "show active" : "")" id="nav-bi" role="tabpanel" aria-labelledby="nav-bi-tab">
+                                <ul class="navbar-nav mt-4">
+                                    <li class="nav-item active" data-id="1420">
+
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Reportes/Index">
+                                            <i class="icon icon-infracion h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Reportes de infracciones</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1420">
+
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Reportes/Accidentes">
+                                            <i class="icon icon-infracion h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Reportes de accidentes</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active" data-id="1420">
+
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Reportes/Otros">
+                                            <i class="icon icon-infracion h5 m-0 me-2"></i>
+                                            <p class="m-0 text-start text-break">Otros Reportes</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+
+                            <!-- ***************** -->
+                            <div class="tab-pane fade @((Accessor.HttpContext.Session.GetString("SelectedModulo") == "Configuraciones") ? "show active" : "")" id="nav-admin" role="tabpanel" aria-labelledby="nav-admin-tab">
+                                <ul class="navbar-nav mt-4">
+
+                                    <li class="nav-item always-visible" >
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Login/Logout">
+                                            <i class="icon icon-salir h5 m-0 mt-1 me-2"></i>
+                                            <p class="m-0 text-start text-break">Cerrar sesión</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item always-visible">
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="/Configuraciones/Index">
+                                            <i class="icon icon-fisica h5 m-0 mt-1 me-2"></i>
+                                            <p class="m-0 text-start text-break">Actualizar contraseña</p>
+                                        </a>
+                                    </li>
+
+                                    @{
+
+                                        if (isDEp)
+                                        {
+
+                                                <li class="nav-item always-visible">
+                                                    <a download href="~/files/Manual_de_Usuario_Pensiones.pdf" class="nav-link d-flex justify-content-start align-items-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" style="fill: #0d6efd;" width="30" height="20" viewBox="0 0 24 24">
+                                                            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z" />
+                                                        </svg>
+                                                        <h5 class="my-0 ms-2">Manual</h5>
+                                                    </a>
+                                                </li>
+
+                                        }
+
+                                        else if (User.FindFirst(CustomClaims.TipoOficina).Value == "1")
+                                        {
+                                                <li class="nav-item always-visible">
+                                                    <a download href="~/files/Manual_de_Usuario_Tto.pdf" class="nav-link d-flex justify-content-start align-items-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" style="fill: #0d6efd;" width="30" height="20" viewBox="0 0 24 24">
+                                                            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z" />
+                                                        </svg>
+                                                        <h5 class="my-0 ms-2">Manual</h5>
+                                                    </a>
+                                                </li>
+                                        }
+                                        else if (User.FindFirst(CustomClaims.TipoOficina).Value == "0" || User.FindFirst(CustomClaims.TipoOficina).Value == "2")
+                                        {
+                                                <li class="nav-item always-visible">
+                                                    <a download href="~/files/Manual_de_Usuario_Tte.pdf" class="nav-link d-flex justify-content-start align-items-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" style="fill: #0d6efd;" width="30" height="20" viewBox="0 0 24 24">
+                                                            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z" />
+                                                        </svg>
+                                                        <h5 class="my-0 ms-2">Manual</h5>
+                                                    </a>
+                                                </li>
+                                        }
+                                    }
+
+
+
+                                    <li class="nav-item always-visible">
+                                        <a class="nav-link d-flex justify-content-start align-items-center" href="#">
+                                            
+                                            <p class="m-0 text-start text-break">Riag v1.0.170</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+
+                            
+
+
+                        </div>
+                    </div>
+                </div>
+
+
+            </nav>
+            <script>const toggle = document.getElementById('toggle')
+                const nav = document.getElementById('nav')
+
+                toggle.addEventListener('click', () => nav.classList.toggle('active'))</script>
+
+
+            @RenderBody()
+
+            <footer class="text-center py-3">
+                <h5>©️ 2023 - Secretaría de Seguridad Pública</h5>
+            </footer>
+            <script src="~/js/genericcomponents.js"></script>
+            <script src="~/js/site.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.2/js/bootstrap.bundle.min.js"></script>
+
+            <script src="~/js/sweetalert2.all.min.js"></script>
+            <script>(function ($, kendo) {
+                    $.extend(true, kendo.ui.validator, {
+                        messages: {
+                            required: "Campo requerido",
+                        }
+                    });
+                })(jQuery, kendo);</script>
+            @await RenderSectionAsync("Scripts", required: false)
+        </div>
+    </main>
+
+
+    <div id="loading" style="display: none">
+        <div class="container-fluid">
+            <main role="main" class="pb-3">
+                <div class="loadingGif" id="loadingx">
+                    <div class="row text-center">
+                        <div class="col-md-12 loading-spinner">
+                            <div class="spinner-grow text-primary" style="color:#366777!important" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="spinner-grow text-secondary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="spinner-grow text-success" style="color:#6AB438!important" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+</body>
+
+</html>
+
+
+<script>
+
+
+    $(document).on("click", function (e) {
+        
+        $.ajax({
+            url: "/Personas/TestSesion",
+            type: "POST",
+            data: "",
+            success: function (data) {
+
+            },
+            error: function (error) {
+                if (error.status === 401)
+                    window.location.href = '/';
+                    
+            }
+        });
+
+
+
+
+    });
+
+
+
+</script>

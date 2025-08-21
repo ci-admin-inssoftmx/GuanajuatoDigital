@@ -1,0 +1,139 @@
+﻿@{
+    bool esSoloLectura = ViewBag.EsSoloLectura ?? false;
+    string claseColorEliminar = esSoloLectura ? "colorDisabled" : "colorDanger";
+    string claseColorOtroBoton = esSoloLectura ? "colorDisabled" : "colorPrimary";
+}
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel>()
+            .Name("gridFactoresA")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdAccidenteFactorOpcion).Hidden();
+                columns.Bound(c => c.FactorAccidente).Title("Factor accidente").Width(80);
+                columns.Bound(c => c.FactorOpcionAccidente).Title("Factor opción accidente").Width(100);
+                //columns.Command(c => c.Custom("Editar").Click("editarFactorA")).Width(100);
+                //columns.Command(c => c.Custom("Eliminar").Click("eliminarFactorA")).Width(100);
+                columns.Template(
+                "<button class='w-100 btn " + claseColorOtroBoton + "'>" +
+                "<h6 class='m-0' onclick='editarFactorA(event)'>" +
+                "<i class='h5 icon-edit me-2'></i><b>Editar</b>" +
+                "</h6></button>"
+                ).Width(150);
+               // columns.Template("<button data-bs-toggle='modal' class='w-100 btn'><h6 class='m-0 colorPrimary' onclick='editarFactorA(event)'><i class='h5 icon-edit me-2'></i><b>Editar</b></h6></button>").Width(150);
+               // columns.Template("<button class='w-100 btn'><h6 class='m-0 colorDanger' onclick='eliminarFactorA(event)'><i class='h5 icon-delete me-2'></i><b>Eliminar</b></h6></button>").Width(150);
+                columns.Template(
+                "<button class='w-100 btn " + claseColorEliminar + "'>" +
+                "<h6 class='m-0' onclick='eliminarFactorA(event)'>" +
+                "<i class='h5 icon-delete me-2'></i><b>Eliminar</b>" +
+                "</h6></button>"
+                ).Width(150);
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("ObtFactorOpcionAccidente", "CapturaAccidentes"))
+            .PageSize(5).Model(model => model.Id(p => p.IdAccidenteFactorOpcion))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.FactorAccidente);
+                s.Field(c => c.FactorOpcionAccidente);
+              
+
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+    </div>
+</div>
+<!--Modal editar factor accidente-->
+<div class="modal fade modalCustom" id="editarFactorAccidenteModal" aria-labelledby="agregarVehiculoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyEditarFactorAccidente">
+            </div>
+        </div>
+    </div>
+</div>
+<!--Modal eliminar factor accidente-->
+<div class="modal fade modalCustom" id="eliminarFactorAccidenteModal" aria-labelledby="agregarVehiculoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-s" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyEliminarFactorAccidente">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function editarFactorA(event) {
+        if ('@ViewBag.EsSoloLectura' === 'True') {
+            return;
+        }
+        var grid = $("#gridFactoresA").data("kendoGrid");
+        var row = $(event.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        var IdFactorAccidente = dataItem.IdFactorAccidente;
+        var IdFactorOpcionAccidente = dataItem.IdFactorOpcionAccidente;
+        var IdAccidenteFactorOpcion = dataItem.IdAccidenteFactorOpcion;
+
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ModalEditarFactorAccidente", "CapturaAccidentes")',
+            type: 'POST',
+            data: { IdFactorAccidente: IdFactorAccidente, IdFactorOpcionAccidente: IdFactorOpcionAccidente, IdAccidenteFactorOpcion : IdAccidenteFactorOpcion },
+            success: function (result) {
+                $('#ModalBodyFactorAccidente').html(result);
+                $('#factorAccidenteModal').modal({ backdrop: 'static', keyboard: false });
+                $('#factorAccidenteModal').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    function eliminarFactorA(event) {
+        if ('@ViewBag.EsSoloLectura' === 'True') {
+            return;
+        }
+        var grid = $("#gridFactoresA").data("kendoGrid");
+        var row = $(event.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        var FactorAccidente = dataItem.FactorAccidente;
+        var FactorOpcionAccidente = dataItem.FactorOpcionAccidente;
+        var IdAccidenteFactorOpcion = dataItem.IdAccidenteFactorOpcion;
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ModalEliminarFactorAccidente", "CapturaAccidentes")',
+            type: 'POST',
+            data: { FactorAccidente: FactorAccidente, FactorOpcionAccidente: FactorOpcionAccidente, IdAccidenteFactorOpcion : IdAccidenteFactorOpcion },
+            success: function (data) {
+                $('#ModalBodyFactorAccidente').html(data);
+                $('#factorAccidenteModal').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+
+</script>
+
+

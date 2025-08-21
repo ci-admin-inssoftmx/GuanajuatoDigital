@@ -1,0 +1,156 @@
+﻿<script>
+    function onRowSelect(e) {
+        var selectedRow = this.select();
+    console.log("SJS",selectedRow)
+        if (selectedRow.length > 0) {
+            var dataItem = this.dataItem(selectedRow);
+            idDeposito = dataItem.idDeposito;
+            showLoading();
+            $.ajax({
+                url: '@Url.Action("GuardarRegistroSeleccionado", "IngresarVehiculo")',
+                type: 'POST',
+                data: { idDeposito: idDeposito },
+                success: function (result) {
+                    var datosContainer = $("#datosContainer");
+                    var fechaSolicitud = new Date(result.fechaSolicitud);
+
+                    var hora = fechaSolicitud.getHours();
+                    var minutos = fechaSolicitud.getMinutes();
+                    var segundos = fechaSolicitud.getSeconds();
+
+                    var horaFormateada = hora.toString().padStart(2, '0') + ":" + minutos.toString().padStart(2, '0');
+
+                    datosContainer.find("p:contains('Hora Solicitud')").html("<b>Hora Solicitud:</b> " + horaFormateada);
+
+                    var fechaFinal = new Date(result.fechaFinal);
+
+                    var horaFinal = fechaFinal.getHours();
+                    var minutosFinal = fechaFinal.getMinutes();
+                    var segundosFinal = fechaFinal.getSeconds();
+
+                    var horaFormateadaFinal = horaFinal.toString().padStart(2, '0') + ":" + minutosFinal.toString().padStart(2, '0');
+
+                    datosContainer.find("p:contains('Hora de término')").html("<b>Hora de término:</b> " + horaFormateadaFinal);
+
+                    datosContainer.find("p:contains('Folio Inventario')").html("<b>Folio Inventario:</b> " + (result.folioInventario || "-"));
+                    datosContainer.find("p:contains('Modelo')").html("<b>Modelo:</b> " + (result.modelo || "-"));
+                    datosContainer.find("p:contains('Marca')").html("<b>Marca:</b> " + (result.marca || "-"));
+                    datosContainer.find("p:contains('Tipo de Vehículo')").html("<b>Tipo de Vehículo:</b> " + (result.tipoVehiculo || "-"));
+                    datosContainer.find("p:contains('Color')").html("<b>Color:</b> " + (result.color || "-"));
+
+                    datosContainer.find("p:contains('Nombre:')").html("<b>Nombre:</b> " + (result.Propietario || "-"));
+                    datosContainer.find("p:contains('Nombre solicitante')").html("<b>Nombre solicitante:</b> " + (result.Solicitante || "-"));
+
+                    datosContainer.find("p:contains('Servicio:')").html("<b>Servicio:</b> " + (result.evento || "-"));
+                    datosContainer.find("p:contains('Propietario Grúa')").html("<b>Propietario Grúa:</b> " + (result.propietarioGrua || "-"));
+                    //datosContainer.find("p:contains('Hora Solicitud')").html("<b>Hora Solicitud:</b> " + (result.fechaSolicitud || "-"));
+
+                   // datosContainer.find("p:contains('Hora de término')").html("<b>Hora de término:</b> " + (result.fechaFinal || "-"));
+
+                    datosContainer.find("p:contains('Tramo')").html("<b>Tramo:</b> " + (result.tramo || "-"));
+                    datosContainer.find("p:contains('Carretera')").html("<b>Carretera:</b> " + (result.carretera || "-"));
+                    datosContainer.find("p:contains('Kilómetro')").html("<b>Kilómetro:</b> " + (result.kilometro || "-"));
+                    datosContainer.find("p:contains('Colonia')").html("<b>Colonia:</b> " + (result.colonia || "-"));
+                    datosContainer.find("p:contains('Calle')").html("<b>Calle:</b> " + (result.calle || "-"));
+                    datosContainer.find("p:contains('Número')").html("<b>Número:</b> " + (result.numero || "-"));
+                    datosContainer.find("p:contains('Municipio')").html("<b>Municipio:</b> " + (result.municipio || "-"));
+                    datosContainer.find("p:contains('Intersección')").html("<b>Intersección:</b> " + (result.interseccion || "-"));
+                    $("#idDepositoContainer").html("<b></b> " + (result.idDeposito || "-"));
+                    sitteg_success("Registro seleccionado correctamente");
+                    $("#datosContainer").css("display", "block");
+                    $("#fechaForm").css("display", "block");
+
+                    hideLoading();
+                },
+
+
+
+                error: function (error) {
+                    sitteg_warning("Ha sucedido un error intente mas tarde");
+                    hideLoading();
+                }
+            });
+        }
+    }
+
+
+    function quitData() {
+        setTimeout(()=>{
+            var t = document.querySelector("span.k-pager-info.k-label")
+
+            if (t.innerHTML == "No items to display") {
+                t.innerHTML = ""
+            }
+        },500)
+        
+    }
+
+    </script>
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.IngresoVehiculosModel>()
+            .Name("gridBusquedIngresos")
+            .Events(events => events.Change("onRowSelect").DataBound("quitData").DataBinding("quitData"))
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.idDeposito).Hidden();
+                columns.Select().Width(50).ClientHeaderTemplate(" ");
+                columns.Bound(c => c.folioInventario).Title("Folio de inventario").Width(180);
+                columns.Bound(c => c.marca).Title("Marca").Width(100);
+                columns.Bound(c => c.placa).Title("Placas").Width(100);
+                columns.Bound(c => c.modelo).Title("Modelo").Width(100);
+                columns.Bound(c => c.serie).Title("Serie").Width(100);
+                columns.Bound(c => c.motor).Title("Motor").Width(100);
+                columns.Bound(c => c.numeroEconomicoVehiculo).Title("No. Económico(vehículo)").Width(130);
+                columns.Bound(c => c.tipoVehiculo).Title("Tipo de vehículo").Width(100);
+                columns.Bound(c => c.color).Title("Color").Width(100);
+                columns.Bound(c => c.FechaServicioFormateada)
+                    .Title("Fecha de servicio")
+                    .Width(150)
+                    .ClientTemplate("#= mostrarFecha(FechaServicioFormateada) #");
+                columns.Bound(c => c.HoraServicioFormateada).Title("Hora de servicio").Width(150).Format("{0:HH:mm}"); 
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            @*.Pageable(pager => pager.AlwaysVisible(true).PageSizes(new int[] { 5, 10, 20, 100 }).Position(GridPagerPosition.Bottom))*@
+            .Pageable(p => p.Enabled(true))
+            .Sortable()
+            .Scrollable(scr => scr.Height(350))
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.folioInventario);
+                s.Field(c => c.marca);
+                s.Field(c => c.placa);
+                s.Field(c => c.modelo);
+                s.Field(c => c.serie);
+                s.Field(c => c.motor);
+                s.Field(c => c.numeroEconomicoVehiculo);
+                s.Field(c => c.tipoVehiculo);
+                s.Field(c => c.color);
+                s.Field(c => c.FechaServicioFormateada);
+                s.Field(c => c.HoraServicioFormateada);
+
+            })
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+
+
+    </div>
+</div>
+
+<script>
+    function mostrarFecha(fecha) {
+        if (fecha && fecha !== "01/01/0001") {
+            return fecha;
+        } else {
+            return " ";
+        }
+    }
+</script>

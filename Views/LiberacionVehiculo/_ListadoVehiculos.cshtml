@@ -1,0 +1,205 @@
+﻿@model List<LiberacionVehiculoModel>
+
+<script>
+    //function submitSearch() {
+
+    //    var Mydata = $("#frmSearch").serialize();
+    //    //console.log(Mydata);
+    //    $.ajax({
+    //        url: '@Url.Action("ajax_BuscarVehiculo")',
+    //        type: 'POST',
+    //        data: Mydata,
+    //        success: function (result) {
+    //            $("#listadoLiberacionVehiculos").html(result);
+    //        }
+    //    });
+    //}
+
+    function ShowDetailPopUp(id) {
+        $.ajax({
+            url: '@Url.Action("ajax_UpdateLiberacion")',
+            type: 'GET',
+            data: { id: id },
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (value) {
+                $('#ModalBodyUpdate').html(value);
+                $('#modalUpdateLiberacion').modal('show');
+            }
+        });
+    }
+
+    //$("#Grid").on("click", "#btnShowDetailPopUp", function (e) {
+    //    alert("caigo")
+    //    //var grid = $("#Grid").getKendoGrid();
+    //    //var dataItem = grid.dataItem($(this).closest("tr"));
+    //    //var id = dataItem.IdDeposito;
+    //    //console.log(id);
+    //    //$.ajax({
+    //    //    url: "@Url.Action("buttonPrompt", "Home")",
+    //    //    type: "GET",
+    //    //    data: { id: id },
+    //    //    dataType: 'json',
+    //    //    cache: false,
+    //    //    error: function (XMLHttpRequest, textStatus, errorThrown) {
+    //    //        alert("Error" + errorThrown);
+    //    //        console.log(errorThrown);
+    //    //    },
+    //    //    success: function (data) {
+    //    //        console.log("yay");
+    //    //    }
+    //    //});
+    //});
+
+</script>
+
+@*<div class="row justify-content-between mb-1 titleCustom">*@
+    <div class="row">
+    @if (ViewBag.NoResultsMessage != null)
+    {
+        <div class="alert alert-info">
+            @ViewBag.NoResultsMessage
+        </div>
+    }
+    </div>
+<div class="row mb-2 mt-4 titleCustom">
+    <div class="col-12">
+        <h5 class="px-4"><b>Listado de vehículos</b></h5>
+        <h6 class="px-4 text-muted">Ver los datos de vehículo.</h6>
+    </div>
+</div>
+<div>
+    <br />
+    <br />
+    <br />
+
+</div>
+<div class="row">
+   
+    @*<column template="<button data-bs-toggle=modal data-bs-target=\#editVehiculo class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>" width="100" />*@
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(Html.Kendo().Grid(Model)
+            .Name("Grid")
+           
+            .Columns(columns =>
+            {
+                columns.Bound(p => p.marcaVehiculo).Title("Marcas").Width(90);
+                columns.Bound(p => p.Serie).Title("Serie").Width(90);
+                columns.Bound(c => c.FechaIngreso).Format("{0:dd/MM/yyyy}").Title("Fecha de ingreso").Width(90);
+                columns.Bound(c => c.Folio).Title("Folio").Width(90);
+                columns.Bound(c => c.Placa).Title("Placas").Width(90);
+                columns.Bound(c => c.Color).Title("Color").Width(90);
+                columns.Bound(c => c.fullPropietario).Title("Propietario").Width(120);
+                columns.Bound(c => c.pension).Title("Pensión").Width(90);
+                columns.Bound(c => c.carretera).Title("Carretera").Width(130);
+                columns.Bound(c => c.tramo).Title("Tramo").Width(120);
+                columns.Bound(c => c.Km).Title("Kilómetro").Width(110);
+                columns.Bound(c => c.nombreSubmarca).Title("SubMarca").Width(110);
+                columns.Bound(p => p.IdDeposito).ClientTemplate(
+                "<button onclick=\"ShowDetailPopUp('#= IdDeposito #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Detalle</b></h6></button>"
+                ).Title("Acciones").Sortable(false).Width(100);
+            }).HtmlAttributes(new { style = "height:350" })
+            
+            .Pageable()
+            .Sortable()
+            .Scrollable(scr => scr.Height(350))
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.marcaVehiculo);
+                s.Field(c => c.Serie);
+                s.Field(c => c.Folio);
+                s.Field(c => c.FechaIngreso);
+                s.Field(c => c.Placa);
+                s.Field(c => c.Color);
+                s.Field(c => c.fullPropietario);
+                s.Field(c => c.pension);
+                s.Field(c => c.carretera);
+                s.Field(c => c.tramo);
+                s.Field(c => c.Km);
+                s.Field(c => c.nombreSubmarca);
+            })
+            .Events(events => events.DataBound("replaceLegend"))
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#Grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+    </div>
+    </div>
+
+@*Modal*@
+<div class="modal fade modalCustom" id="modalUpdateLiberacion"  aria-labelledby="editVehiculo" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+        <div class="modal-content">
+
+            <section class=" bg-white rounded">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-edit-car h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Liberación de vehículo</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="row">
+                            <div class="col-auto my-3">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bg-light py-1"></div>
+                    </div>
+
+                </div>
+
+                <div class="row align-items-end">
+                    <div class="col-12 col-lg-6 mt-4">
+                        <h5 class="px-4"><b>Propietario:</b></h5>
+                        @*<h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>*@
+                    </div>
+                   @* <div class="col-12 col-lg-6 my-4">
+                        <div class="row justify-content-center">
+                            <div class="btnToggle col-8">
+                                <div style="z-index:0" class="position-relative d-flex align-items-center">
+                                    <input class="toggle toggle-left" id="activo" name="toggle-state" value="false"
+                                           type="radio" checked="" />
+                                    <label class="btn" for="activo">Activo</label>
+                                    <input class="toggle toggle-right" id="inactivo" name="toggle-state" value="true"
+                                           type="radio" />
+                                    <label class="btn" for="inactivo">Inactivo</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>*@    
+                </div>
+
+
+                <div class="modal-body" id="ModalBodyUpdate">
+                </div>
+
+            </section>
+        </div>
+    </div>
+</div>
+<script>
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

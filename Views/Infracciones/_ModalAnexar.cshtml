@@ -1,0 +1,37 @@
+﻿    <div class="row px-4 mt-4 py-5 align-items-end">
+        <div class="col-12 col-md-10 mx-md-auto text-center">
+            <h3><b>Adjunta una imagen del inventario del vehículo</b></h3>
+            <div class="row justify-content-center">
+                <div class="drop-zone">
+                    <div class="drop-zone__prompt">
+                        <svg id="tsvgImg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="106.791" height="87.148" viewBox="0 0 106.791 87.148">
+                            <defs>
+                                <clipPath id="clip-path">
+                                    <rect id="Rectángulo_2602" data-name="Rectángulo 2602" width="106.791" height="87.148" fill="none" />
+                                </clipPath>
+                            </defs>
+                            <g id="Grupo_1206" data-name="Grupo 1206" clip-path="url(#clip-path)">
+                                <path id="Trazado_720" data-name="Trazado 720" d="M44.9,0C28.864,0,17.567,13.843,18.165,28.177A20.889,20.889,0,0,0,0,48.541C0,61.113,9.68,70.385,20.63,70.385H35.192a2.427,2.427,0,1,0,0-4.854H20.63c-8.224,0-15.776-6.878-15.776-16.99,0-8.142,7.119-15.776,15.776-15.776A2.427,2.427,0,0,0,23.018,30C21.3,17.739,30.906,4.856,44.9,4.856A21.8,21.8,0,0,1,58.022,9.065,2.427,2.427,0,1,0,60.9,5.159,26.783,26.783,0,0,0,44.9,0ZM73.419,11.718a18.018,18.018,0,0,0-7.774,1.859,2.442,2.442,0,0,0,2.2,4.361,13.4,13.4,0,0,1,12.817.493c3.844,2.306,6.713,6.581,6.713,13.121a2.426,2.426,0,0,0,2.01,2.389c7.292,1.224,12.553,8.5,12.553,15.814,0,8.781-6.924,15.776-18.2,15.776H71.6a2.427,2.427,0,1,0,0,4.854H83.734c13.4,0,23.057-9.195,23.057-20.63,0-8.993-5.879-17.7-14.79-20.137-.58-7.025-4.028-12.436-8.835-15.32a18.263,18.263,0,0,0-8.609-2.579c-.377-.016-.758-.006-1.138,0ZM53.112,41.42a2.587,2.587,0,0,0-1.539.729L41.2,52.521a2.593,2.593,0,1,0,3.646,3.687L50.8,50.252V84.518a2.593,2.593,0,1,0,5.186,0V50.252l5.956,5.956a2.593,2.593,0,1,0,3.647-3.687L55.219,42.149a2.592,2.592,0,0,0-2.107-.729Z" />
+                            </g>
+                        </svg>
+
+                    <h2 id="NameFile"></h2>
+                        <h5>Arrastra o adjunta el</h5>
+                        <h5 class="fw-bold">Archivo</h5>
+                    </div>
+                    <input type="file" name="myFile" class="drop-zone__input">
+                </div>
+
+            </div>
+            <div class="row ">
+                <div class="col-12 col-md-8 mx-md-auto col-lg-5 ">
+                    <div class="controlButton my-3">
+                        @(Html.Kendo().Button()
+                            .Name("vehiculoBtn")
+                            .HtmlAttributes(new { @class = "btnPrimary" })
+                            .Content("<h5 class=\"m-0\"><b>Finalizar registro</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

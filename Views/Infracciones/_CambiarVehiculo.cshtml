@@ -1,0 +1,133 @@
+﻿@model InfraccionesModel
+
+<script>
+function cerrarModalV()
+{
+		$('#ModalBodyCambiarVehiculo').html("");
+		$('#ModalCambiarVehiculo').modal('hide');
+}
+</script>
+
+
+
+<section>
+
+	<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+
+		<div class="col-12 col-md-auto pe-0">
+			<div class="row align-items-center justify-content-center justify-content-md-start">
+				<div class="col-auto p-0">
+					<i class="icon-oficial h1 colorPrimary"></i>
+				</div>
+				<div class="col-auto my-3">
+					<h2 class="m-0 h3"><b>Captura de conductor</b></h2>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+			<div class="row">
+				<div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0" onclick="cerrarModalV()">
+					@(Html.Kendo().Button()
+						.Name("editBusqueda")
+						.HtmlAttributes(new { @class = "btnPrimary" })
+						.Content("<h6 class=\"m-0\"><b>Cerrar</b></h6>"))
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+		<div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+			<div class="row align-items-center justify-content-center justify-content-md-start">
+				<div class="col-auto">
+					<i class="icon-edit-car h1 colorPrimary"></i>
+				</div>
+				<div class="col-auto my-3">
+					<h5 class="px-4"><b>Vehículo de la infracción</b></h5>
+					@*<h6 class="px-4 text-muted">Marque el vehículo que desea asociar.</h6>*@
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+			<div class="row">
+				<div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+					<button id="btnNuevoVehiculo" onclick="mostrarModalAgregarVehiculo()" type="button">
+						<h6 class="m-0 d-flex align-items-center"><i class="icon-addCar h5 mb-0 me-2"></i><b>Agregar nuevo vehículo</b></h6>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	@Html.HiddenFor(m=> m.idVehiculo)
+
+	<div class="row my-4 px-4">
+		<div id="detalleVehiculo">
+		</div>
+
+		<div class="row my-4 px-4">
+			<div id="listadoVehiculos">
+				<partial name="_ListadoVehiculos" model="ViewBag.Vehiculos" />
+			</div>
+		</div>
+
+
+	</div>
+
+
+
+	<!--  *********************************** -->
+	<div class="modal fade modalCustom" id="agregarVehiculoModal" aria-labelledby="agregarVehiculoLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-body" id="ModalBodyAgregarVehiculo">
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+</section>
+
+<script>
+
+
+	$(document).ready(()=>{
+		
+	})
+
+
+
+
+	function mostrarModalAgregarVehiculo() {
+
+		$.ajax({
+			url: '@Url.Action("ModalAgregarVehiculo")',
+			type: 'POST',
+			success: function (data) {
+				$('#ModalBodyAgregarVehiculo').html(data);
+				$('#agregarVehiculoModal').modal('show');
+			}
+		});
+	}
+
+
+
+	function getListadoPersonasInfracciones() {
+		$("#listadoPersonas").show();
+		showLoading();
+		$.ajax({
+			type: "GET",
+			url: '@Url.Action("ajax_listadoPersonasInfracciones")',
+			success: function (data) {
+				$("#listadoPersonas").html(data);
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+
+		});
+	}
+</script>

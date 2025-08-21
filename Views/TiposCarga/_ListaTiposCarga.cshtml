@@ -1,0 +1,130 @@
+﻿<script>
+    function delegacionCarga() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+
+</script>
+
+        @if (ViewBag.Admin == true)
+        {
+    <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+        <div class="row">
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <button href="#" id="btnNuevoTipoCarga" onclick="mostrarModalTCarga()">
+                    <h6 class="m-0 d-flex align-items-center"><i class="icon-addCarga h5 mb-0 me-2"></i><b>Agregar nuevo tipo de carga</b></h6>
+                </button>
+            </div>
+        </div>
+    </div>
+        }
+        <div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.TiposCargaModel>()
+            .Name("gridCatTiposCarga")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdTipoCarga).Width(20).Title("Id");
+                columns.Bound(c => c.TipoCarga).Title("Tipo de carga").Width(100);
+                columns.Bound(c => c.EstatusDesc).Title("Estatus").Width(90);
+                columns.Command(c => c.Custom("Editar").Click("getIdCarga")).Width(80);
+                //columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+
+                //columns.Command(c => c.Custom("Delete").Click("redirectDelete")).Width(180);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetTipos", "TiposCarga").Data("delegacionCarga"))
+            .PageSize(5).Model(model => model.Id(p => p.IdTipoCarga))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.TipoCarga);
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+    </div>
+</div>
+<div class="modal fade modalCustom" id="addTipoCarga" aria-labelledby="addTipoCargaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyCreateTipo">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getIdCarga(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdTipoCarga = dataItem.IdTipoCarga;
+        console.log(IdTipoCarga);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcial", "TiposCarga")',
+            type: 'POST',
+            data: { IdTipoCarga: IdTipoCarga },
+            success: function (result) {
+                $('#ModalBodyCreateTipo').html(result);
+                $('#addTipoCarga').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdTipoCarga = dataItem.IdTipoCarga;
+        console.log(IdTipoCarga);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarTipoCargaParcial", "TiposCarga")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdTipoCarga: IdTipoCarga }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCreateTipo').html(result);
+                $('#addTipoCarga').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

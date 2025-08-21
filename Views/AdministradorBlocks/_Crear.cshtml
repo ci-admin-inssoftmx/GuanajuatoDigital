@@ -1,0 +1,160 @@
+﻿
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-addBloc h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Crear Alertamiento</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <form id="crearWsForm" class="row px-4 mb-4 align-items-end justify-content-center">
+        <div class="col-12 col-md-4">
+            <div class="controlForm my-3">
+                <label for="switch2">Corporaciones:</label>
+                @(Html.Kendo().DropDownList()
+                    .BindTo((List<CatalogModel>)ViewBag.corpsBlocks)
+                    .Name("corporacion")
+                    .DataTextField("text")
+                    .DataValueField("value")
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBox()
+                    .Name("prefijoInfracciones")
+                    .Label(label => label.Content("Prefijo Infracciones:"))
+                    .Placeholder("Escribe el prefijo para folios")
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+        <div class="row col-12">
+            <div class="col-12 col-md-4">
+                <div class="controlForm my-3">
+                    <label for="switch2">Infracciones:</label>
+                    <div class="btnToggleActive">
+                        @(Html.Kendo().Switch()
+                            .Name("infracciones")
+                            .Checked(false)
+                            .Messages(c => c.Checked("Activo").Unchecked("Inactivo"))
+                            .HtmlAttributes(new { data_checked = "true" })
+                            )
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="controlForm my-3">
+                    <label for="switch2">Accidentes:</label>
+                    <div class="btnToggleActive">
+                        @(Html.Kendo().Switch()
+                            .Name("accidente")
+                            .Checked(false)
+                            .Messages(c => c.Checked("Activo").Unchecked("Inactivo"))
+                            .HtmlAttributes(new { data_checked = "true" })
+                            )
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="controlForm my-3">
+                    <label for="switch2">Depósitos:</label>
+                    <div class="btnToggleActive">
+                        @(Html.Kendo().Switch()
+                            .Name("deposito")
+                            .Checked(false)
+                            .Messages(c => c.Checked("Activo").Unchecked("Inactivo"))
+                            .HtmlAttributes(new { data_checked = "true" })
+                            )
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+
+
+    </form>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton">
+                        <button class="btnPrimary px-3" onclick="crearService()">
+                            <h5 class="m-0"><b>Guardar</b></h5>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+
+<script>
+    function crearService() {
+
+        var Mydata = $("#crearWsForm").serialize();
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'corporacion' });
+
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("Ajax_CrearService")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                var grid = $("#gridCatWS").data("kendoGrid");
+                grid.dataSource.read();
+                $('#modalWS').modal('hide');
+                $('#ModalBodyWS').empty();
+
+                sitteg_success("Información guardada correctamente.");
+
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Sucedió un error, intente mas tarde...');
+                hideLoading();
+            }
+        });
+    }
+
+</script>

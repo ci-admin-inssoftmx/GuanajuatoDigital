@@ -1,0 +1,159 @@
+﻿@model List<CatMotivosInfraccionModel>
+<script>
+        function filtrosBusqueda() {
+             var idDep = $("#idDependenciaFiltro").val();
+
+        idDep = idDep ? idDep : null;
+            return {
+            Nombre: $("#txtPlacas").val(),
+                Fundamento: $("#txtFundamento").val(),
+                IdVigencia: $("#ddlVigencia").val(),
+                InicioVigenciaDesde: $("#inicioVigenciaDesde").val(),
+                InicioVigenciaHasta: $("#inicioVigenciaHasta").val(),
+                FinVigenciaDesde: $("#FinVigenciaDesde").val(),
+                FinVigenciaHasta: $("#FinVigenciaHasta").val(),
+            idDep: idDep
+            };
+        }
+</script>
+  @if (ViewBag.Admin == true)
+{
+    <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+        <div class="row">
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <button href="#" id="btnNuevoMotivo" onclick="mostrarModalMotivos()">
+                    <h6 class="m-0 d-flex align-items-center"><i class="icon-addInfracion h5 mb-0 me-2"></i><b>Agregar nuevo motivo de infracción</b></h6>
+                </button>
+            </div>
+        </div>
+    </div>
+}
+<div class="row">
+    
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid(Model)
+            .Name("gridCatMotivos")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdCatMotivoInfraccion).Width(40).Title("Id");
+                columns.Bound(c => c.Nombre).Width(100);
+                columns.Bound(c => c.Fundamento).Width(100);
+                columns.Bound(c => c.CalificacionMinima).Title("Calificación Minima").Width(100);
+                columns.Bound(c => c.CalificacionMaxima).Title("Calificación Máxima").Width(100);
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(80);
+                columns.Bound(c => c.fechaInicioVigencia)
+            .Title("Inicio vigencia")
+            .Width(80)
+                .ClientTemplate("# if (fechaInicioVigencia.getFullYear() == 1) { #" +
+            "<span>-</span>" +
+            "# } else { #" +
+                "#= kendo.toString(fechaInicioVigencia, 'dd/MM/yyyy') #" +
+            "# } #");
+                
+                columns.Bound(c => c.fechaFinVigencia)
+                .Title("Fin vigencia")
+                .Width(80)
+                .ClientTemplate("# if (fechaFinVigencia.getFullYear() == 1) { #" +
+                "<span>-</span>" +
+                "# } else { #" +
+                "#= kendo.toString(fechaFinVigencia, 'dd/MM/yyyy') #" +
+                "# } #");
+
+                columns.Command(c => c.Custom("Editar").Click("getIdMotivo")).Width(80);
+               // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+
+                //columns.Command(c => c.Custom("Delete").Click("redirectDelete")).Width(180);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetMotInf", "MotivosInfraccion").Data("filtrosBusqueda"))
+            .PageSize(5).Model(model => model.Id(p => p.IdCatMotivoInfraccion))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.Nombre);
+                s.Field(c => c.Fundamento);
+              
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+    </div>
+</div>
+<div class="modal fade modalCustom" id="addMotivo" aria-labelledby="addMotivoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body" id="addMotivoBody">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function getIdMotivo(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); 
+        var IdCatMotivoInfraccion = dataItem.IdCatMotivoInfraccion;
+        var Corp = dataItem.Corp;
+
+        console.log("DAT",dataItem)
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcial", "MotivosInfraccion")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdCatMotivoInfraccion: IdCatMotivoInfraccion, Corp: Corp }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#addMotivoBody').html(result);
+                $('#addMotivo').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdMotivoInfraccion = dataItem.IdMotivoInfraccion;
+        console.log(IdMotivoInfraccion);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarMotivoParcial", "MotivosInfraccion")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdMotivoInfraccion: IdMotivoInfraccion }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#addMotivoBody').html(result);
+                $('#addMotivo').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

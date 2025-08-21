@@ -1,0 +1,55 @@
+﻿<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-bloc h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Eliminar bloc</b></h2>
+                    <h4>¿Está seguro que quiere eliminar el bloc No. de Serie @ViewBag.BlocSerie?</h4>
+                </div>
+            </div>
+        </div>
+        <div class="row my-4">
+            <div class="col-12 col-md-6 mx-md-auto">
+                <div class="row justify-content-around">
+                    <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                        <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                            <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                        </button>
+                    </div>
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <div class="controlButton" onclick="eliminarBloc()">
+                            @(Html.Kendo().Button()
+                                .Name("DelClasificacion")
+                                .HtmlAttributes(new { @class = "btn-danger px-3" })
+                                .Content("<h5 class=\"m-0\"><b>Eliminar</b></h5>"))
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    function eliminarBloc() {
+        showLoading();
+        var blocId = '@ViewBag.BlocId';
+        $.ajax({
+            url: '@Url.Action("ElimBloc", "Blocs")',
+            type: 'POST',
+            data: { NumBloc: blocId },
+            success: function (result) {
+                sitteg_success('Bloc eliminado correctamente');
+                var grid = $("#gridBlocs").data("kendoGrid");
+                grid.dataSource.read();
+                $('#eliminarBlocModal').modal('hide');
+            },
+            error: function () {
+                sitteg_warning("Registro eliminado con errores");
+            }
+        })
+        hideLoading();
+    }
+</script>

@@ -1,0 +1,264 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel
+@{
+    var deFolio = ViewBag.deFolio;
+    var idPension = deFolio == "1" ? "PensionesTodas_Drop" : "Pensiones_Drop";
+
+}
+<script>
+    $(document).ready(function () {
+        $("#Poliza").on("input", function () {
+            var input = $(this);
+            var value = input.val();
+
+            var newValue = value.replace(/^\./, '');
+
+            newValue = newValue.replace(/[^0-9.]+/, '');
+
+            if (newValue.length > 1 && newValue.charAt(0) === '0') {
+                newValue = newValue.slice(1);
+            }
+
+            var decimalCount = (newValue.match(/\./g) || []).length;
+            if (decimalCount > 1) {
+                newValue = newValue.replace(/\./g, function (match, index) {
+                    return index === newValue.indexOf('.') ? '.' : '';
+                });
+            }
+
+            newValue = newValue.replace(/[^0-9.]/g, '');
+
+            input.val(newValue);
+        });
+    });
+</script>
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto">
+                    <div class="border border-2 border-dark rounded-circle">
+                        <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                            <b>4</b>
+                        </h5>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <i class="icon-infoAdicional h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Información complementaria del vehículo</b></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-8 pe-0">
+            <div class="bgSuccess py-1"></div>
+        </div>
+        <div class="col-4 ps-0">
+            <div class="bg-light py-1"></div>
+        </div>
+    </div>
+    <div class="col-12 col-md-auto mt-4 mb-2">
+        <h5 class="px-4"><b>Captura de información complementaria</b></h5>
+        <h6 class="px-4 text-muted">Captura información necesaria para el alta del accidente.</h6>
+    </div>
+    <form id="complementoVehiculoForm" class="row px-4 pb-4 align-items-end">
+        <div class="col-12">
+            <div class="row align-items-end">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Tipo de carga <b>(obligatorio):</b></label>
+                        <span>
+                            @(Html.Kendo().DropDownListFor(t => t.IdTipoCarga).NoDataTemplate("No se encontraron datos")
+                            .Label(l => l.Content("Tipo de carga:"))
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona el tipo de carga")
+                                .Filter(FilterType.Contains)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                        read.Action("Drop_CargaActivos", "Catalogos");
+                                });
+                            })
+                         .HtmlAttributes(new { style = "width:100%;" })
+                            )
+                        </span>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <!--/*(Html.Kendo().TextBoxFor(t => t.Poliza)
+                        .Label(l => l.Content("Póliza de carga:"))
+                        .Placeholder("Ingresa la póliza de carga")
+                            .HtmlAttributes(new { style = "width: 100%", id = "montoPoliza", pattern = "[0-9]*" })
+                            )*/-->
+
+                         <label>Póliza de carga:</label>
+                        <div class="input-group">
+                            <input autocomplete="off" placeholder="Ingresa la póliza de carga" type="text" id="Poliza" name="Poliza" class="form-control" onkeydown="ValidarMonto(event)" style="height: 3.5em;" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Delegación:</label>
+                <span>
+                    @(Html.Kendo().DropDownListFor(t => t.IdDelegacion).NoDataTemplate("No se encontraron datos")
+                    .Label(l => l.Content("Delegación:"))
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Selecciona la Delegación")
+                   @*  .Events(e => e.Change("pensionDropDownChange"))   *@
+
+                        .Filter(FilterType.Contains)
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            @*read.Action("Delegaciones_Drop", "CapturaAccidentes");*@
+                                read.Action("DelegacionesOficinas_Drop", "CatTramos");
+                        });
+                    })
+                    .HtmlAttributes(new { style = "width:100%;"})
+                        .Value(ViewData["idDelegacionPension"] != null && (int)ViewData["idDelegacionPension"] != 0 ? ViewData["idDelegacionPension"].ToString() : null)
+
+                    )
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Pensión:</label>
+                <span>
+                    @(Html.Kendo().DropDownListFor(t => t.IdPension)
+                        .NoDataTemplate("No se encontraron datos")
+                        .Label(l => l.Content("Pensión:"))
+                        .Filter(FilterType.Contains)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("Selecciona la Pensión")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("PensionesTodas_Drop", "CapturaAccidentes");
+                            });
+                        })
+                        .HtmlAttributes(new { style = "width:100%;" })
+                        .Value(ViewData["IdPension"] != null && (int)ViewData["IdPension"] != 0 ? ViewData["IdPension"].ToString() : null)
+                        )
+
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Forma de traslado:</label>
+                <span>
+                    @(Html.Kendo().DropDownListFor(t => t.IdFormaTraslado).NoDataTemplate("No se encontraron datos")
+                                .Label(l => l.Content("Forma de traslado:"))
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona la forma de traslado")
+                        .Filter(FilterType.Contains)
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("Traslados_Drop", "CapturaAccidentes");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                )
+                </span>
+            </div>
+        </div>
+    </form>
+    <div class="row px-4">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlButton my-3" onclick="guardarComplementoVehiculo()">
+                @(Html.Kendo().Button()
+                .Name("AltaComplemento")
+                .HtmlAttributes(new { @class = "btnPrimary" })
+                .Content("<h5 class=\"m-0\"><b>Finalizar captura</b></h5>"))
+            </div>
+        </div>
+    </div>
+</section>
+   
+<script>
+    function guardarComplementoVehiculo() {
+        var controlsValidate = [];
+        var IdTipoCarga = $("#IdTipoCarga").val();
+        var isValid = true;
+        //var validator = $("#complementoVehiculoForm").kendoValidator().data('kendoValidator');
+        /*$("#IdDelegacion").prop("disabled", true);
+        $("#IdPension").prop("disabled", true);
+        $("#IdFormaTraslado").prop("disabled", true);*/
+        controlsValidate.push({ 'controlName': 'IdTipoCarga' });
+        if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+        if (isValid) {
+            var Mydata = $("#complementoVehiculoForm").serialize();
+            showLoading();
+            $.ajax({
+                url: '/CapturaAccidentes/GuardarComplementoVehiculo',
+                type: 'POST',
+                data: Mydata,
+                success: function (result) {
+                    console.log("RESMOD",result)
+                    if (result != 0) {
+                        console.log("1");
+                        
+                        console.log("2");
+                        $('#modalComplementoVehiculo').modal('hide');
+                        console.log("3");
+                        $('#agregarVehiculoModal').modal('hide');
+                        $("#agregarVehiculoModal").css("display", "none");
+                        console.log("4");
+                        sitteg_success("Se ha actualizado la información del vehículo");
+
+                        $('#modalComplementoVehiculo').on('hidden.bs.modal', function (e) {
+                            $(this).modal('dispose');
+                        });
+                        console.log("5");
+                        $('#agregarVehiculoModal').on('hidden.bs.modal', function (e) {
+                            $(this).modal('dispose');
+                        });
+                        $('.modal-backdrop').remove();
+                        $('#ClasificacionAccidente').show();
+
+                        var event = new CustomEvent('vehiculoActualizado', null );
+                        window.dispatchEvent(event);
+
+                    } else {
+                        alert("Sucedió un error");
+                    }
+                    hideLoading();
+                },
+                error: function (error) {
+                    console.error("Error en la solicitud AJAX:", error);
+                    hideLoading();
+                }
+            });
+        } else {
+            $("#IdDelegacion").prop("disabled", false);
+            $("#IdPension").prop("disabled", false);
+            $("#IdFormaTraslado").prop("disabled", false);
+
+            sitteg_info('Debe llenar los campos requeridos');
+            return;
+        }
+    }    
+
+</script>

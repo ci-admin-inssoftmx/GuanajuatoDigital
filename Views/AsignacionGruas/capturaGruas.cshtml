@@ -1,0 +1,795 @@
+﻿@model GuanajuatoAdminUsuarios.Models.AsignacionGruaModel
+@{
+    var vehiculoCargadoNoInfraccion = Model.idInfraccion == 0 && Model.IdVehiculo > 0;
+}
+
+<div class="mainContainer bg-light">
+
+    <!--1 GRUA -->
+    <section id="grua1" class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded" style="display:block">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto pe-0">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <div class="border border-2 border-dark rounded-circle">
+                            <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                <b>1</b>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-auto p-0">
+                        <i class="icon-grua h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Registro de Grúa</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+
+                    <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0" onclick="SolictudDeposito()">
+                        @(Html.Kendo().Button()
+                            .Name("backDeposito")
+                            .HtmlAttributes(new { @class = "btnPrimary" })
+                            .Content("<h6 class=\"m-0\"><i class=\"icon-back me-2\"></i><b>Regresar a captura de solicitud de depósito</b></h6>"))
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-4 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 my-4">
+                <h5 class="px-4 colorSuccess d-flex align-items-center"><b class="d-flex align-items-center justify-content-center bgSuccess mb-1 me-2 rounded-circle px-1"><i style="font-size: 10px; padding: 7px 2px;" class="icon-correct text-white"></i></b><b>Alta de servicio para grúa</b></h5>
+                <h6 class="px-4 text-muted">El vehículo ya cuenta con una solicitud de depósito en la plataforma. Completa los datos solicitados.</h6>
+            </div>
+        </div>
+        <div class="row px-4 mb-2 align-items-end">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label class="text-muted">Folio de servicio de grúa:</label>
+                    <label>@(Model.FolioSolicitud != null ? Model.FolioSolicitud : "-")</label>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label class="text-muted">Folio de infracción vinculado:</label>
+                    <label id="FolioInfraccion">@(Model.folioInfraccion != null ? Model.folioInfraccion : "-")</label>
+                </div>
+            </div>
+            @if (Model.IdVehiculo == 0)
+            {
+                <div class="col-12 col-md-6 col-lg-4" id="botonesComplemento">
+                    <div class="controlForm my-3">
+                        <label>Se realizó Infracción:</label>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-6">
+                            <div class="controlButton my-3" onclick="modalInfraccion()">
+                                @(
+                                    Html.Kendo().Button()
+                                .Name("infraccion")
+                                .HtmlAttributes(new { @class = "btnPrimary" })
+                                .Content("<h5 class=\"m-0\"><b>SI</b></h5>")
+                                    )
+                            </div>
+                        </div>
+                            <div class="col-6">
+                                <div class="controlButton my-3" onclick="goToCargarVehiculo()">
+                                    @(
+                                        Html.Kendo().Button()
+                                .Name("noInfraccion")
+                                .HtmlAttributes(new { @class = "btnPrimary" })
+                                .Content("<h5 class=\"m-0\"><b>No</b></h5>")
+                                        )
+                                </div>
+                            </div>
+                        </div>
+                </div>
+
+            } else if (string.IsNullOrWhiteSpace(Model.folioInfraccion))
+            {
+                <div class="col-12 col-lg-4 my-2">
+                    <div class="row">
+                        <div class="col-auto btnOutline btnOutlinePrimary my-2 p-0">
+                            <button id="btnNuevoVehiculo" onclick="goToCargarVehiculo()" type="button">
+                                <h6 class="m-0 d-flex align-items-center"><i class="icon-addCar h5 mb-0 me-2"></i><b>Agregar nuevo vehículo</b></h6>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+
+        <!-- *************************** -->
+        <div class="row" id="vehiculoPropietarioDatosContainer" style="display:none">
+            <div class="col-12 my-4 mx-4">
+                <div id="vehiculoPropietarioDatos"> </div>
+            </div>
+        </div>
+        <!-- ************************ -->
+
+
+        <div class="row px-4 mb-2 align-items-start" id="datosVehiculo">
+            <div class="col-12 col-md-6 col-lg-4">
+                <h4 class="colorPrimary"><b>Vehículo</b></h4>
+                <p><b>Placa del vehículo:</b> <span id="PlacaSpan">@(Model.Placa != null ? Model.Placa : "-")</span></p>
+                <p><b>Serie:</b> <span id="SerieSpan">@(Model.Serie != null ? Model.Serie : "-")</span></p>
+                <p><b>Tarjeta:</b> <span id="TarjetaSpan">@(Model.Tarjeta != null ? Model.Tarjeta : "-")</span></p>
+                <p><b>Marca:</b> <span id="MarcaSpan">@(Model.Marca != null ? Model.Marca : "-")</span></p>
+                <p><b>Submarca:</b> <span id="SubmarcaSpan">@(Model.Submarca != null ? Model.Submarca : "-")</span></p>
+                <p><b>Modelo:</b> <span id="ModeloSpan">@(Model.Modelo != null ? Model.Modelo : "-")</span></p>
+
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <h4 class="colorPrimary"><b>Propietario</b></h4>
+                <p><b>Nombre:</b> <span id="PropietarioSpan">@(Model.Propietario != null ? Model.Propietario : "-")</span></p>
+                <p><b>CURP:</b> <span id="CurpSpan">@(Model.CURP != null ? Model.CURP : "-")</span></p>
+                <p><b>RFC:</b> <span id="RfcSpan">@(Model.RFC != null ? Model.RFC : "-")</span></p>
+
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+        @if (Model.idPropietarioGrua != 0)
+        {
+            <div class="row justify-content-between mb-1">
+                <div class="col-12 col-md-auto mt-4 mb-2">
+                </div>
+
+                <div class="col">
+                    <div class="row justify-content-around justify-content-md-end  align-items-center my-2">
+                        <div class="col-auto btnOutline btnOutlinePrimary">
+                        </div>
+
+                        <div class="col-auto btnOutline btnOutlinePrimary mx-4">
+                            <button onclick="agregarGrua()">
+                                <h6 class="m-0"><i class="icon-addGrua me-2"></i><b>Agregar grúa</b></h6>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="row titleCustom mb-1">
+                <div class="col-12 col-md-auto mt-4 mb-2">
+                    <h5 class="px-4"><b>Listado de Grúas utilizadas</b></h5>
+                    <h6 class="px-4 text-muted">Captura las grúas utlizadas y sus servicios</h6>
+                </div>
+            </div>
+            <div class="row gridCustom">
+                <div id="tablaGruas">
+                    <partial name="_ListaGruas" model="Model" />
+                </div>
+
+            </div>
+        }
+        <form id="observacionesForm">
+            <div class="row px-4 align-items-end">
+                <div class="col-12">
+                    <div class="controlForm my-3">
+                        @Html.HiddenFor(m => m.IdVehiculo, new { @id = "IdVehiculoAsignado" })
+
+                        <input type="hidden" id="placaHidden" name="placa" value="" />
+
+                        @(Html.Kendo().TextAreaFor(t => t.observaciones)
+                            .Label(label => label.Content("Observaciones:"))
+                            .Placeholder("Puede agregar o no observaciones referentes al servicio.")
+                            .Rows(3)
+                            .MaxLength(200)
+                            .HtmlAttributes(new { style = "width: 100%", required = true, data_required_msg = "Please enter a text.", data_max_msg = "Enter value between 1 and 200" })
+                            )
+                    </div>
+                </div>
+            </div>
+        </form>
+    </section>
+
+
+    <!--section class="opacity-50 mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <div class="border border-2 border-dark rounded-circle">
+                            <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                <b>2</b>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-auto p-0">
+                        <i class="icon-inventario h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Inventario de vehículo</b></h2>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section-->
+    <!--INVENTARIO -->
+    <section id="grua2" class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded" style="display:block">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <div class="border border-2 border-dark rounded-circle">
+                            <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                <b>2</b>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-auto p-0">
+                        <i class="icon-inventario h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Inventario de vehículo</b></h2>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-8 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-4 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 my-4">
+                <h5 class="px-4"><b>Anexar inventario</b></h5>
+                <h6 class="px-4 text-muted">Completa los datos solicitados como ingresar un archivo de inventario.</h6>
+            </div>
+        </div>
+            <div class="row justify-content-center px-4">
+                <div class="col-12 col-md-6 col-lg-4 mb-2">
+                    <div class="controlForm">
+                        @(Html.Kendo().TextBoxFor(t => t.numeroInventario)
+                            .Label(l => l.Content("Número de inventario:"))
+                            .Placeholder("Ingresa el número del inventario del vehículo")
+                            .HtmlAttributes(new { style = "width: 100%", id = "numeroInventario" })
+                            )
+
+                    </div>
+                </div>
+            </div>
+        
+                <div class="row px-4 mt-4 pb-5 align-items-end">
+                    <div class="col-12 col-md-10 mx-md-auto text-center">
+                    
+
+                        <h3><b>Adjunta una imagen del inventario del vehículo</b></h3>
+                   
+                        <div class="row justify-content-center">
+                           <div class="drop-zone" style="width:250px">
+                        <div class="drop-zone__prompt" style="width:200px; height:200px;overflow: visible">
+                            <svg id="svgImagent" class="@(!String.IsNullOrEmpty(Model.inventarios) ? "active" : "")" xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet">
+                              
+                                <g id="Grupo_1206" data-name="Grupo 1206" clip-path="url(#clip-path)">
+                                    <path id="Trazado_720" data-name="Trazado 720" d="M44.9,0C28.864,0,17.567,13.843,18.165,28.177A20.889,20.889,0,0,0,0,48.541C0,61.113,9.68,70.385,20.63,70.385H35.192a2.427,2.427,0,1,0,0-4.854H20.63c-8.224,0-15.776-6.878-15.776-16.99,0-8.142,7.119-15.776,15.776-15.776A2.427,2.427,0,0,0,23.018,30C21.3,17.739,30.906,4.856,44.9,4.856A21.8,21.8,0,0,1,58.022,9.065,2.427,2.427,0,1,0,60.9,5.159,26.783,26.783,0,0,0,44.9,0ZM73.419,11.718a18.018,18.018,0,0,0-7.774,1.859,2.442,2.442,0,0,0,2.2,4.361,13.4,13.4,0,0,1,12.817.493c3.844,2.306,6.713,6.581,6.713,13.121a2.426,2.426,0,0,0,2.01,2.389c7.292,1.224,12.553,8.5,12.553,15.814,0,8.781-6.924,15.776-18.2,15.776H71.6a2.427,2.427,0,1,0,0,4.854H83.734c13.4,0,23.057-9.195,23.057-20.63,0-8.993-5.879-17.7-14.79-20.137-.58-7.025-4.028-12.436-8.835-15.32a18.263,18.263,0,0,0-8.609-2.579c-.377-.016-.758-.006-1.138,0ZM53.112,41.42a2.587,2.587,0,0,0-1.539.729L41.2,52.521a2.593,2.593,0,1,0,3.646,3.687L50.8,50.252V84.518a2.593,2.593,0,1,0,5.186,0V50.252l5.956,5.956a2.593,2.593,0,1,0,3.647-3.687L55.219,42.149a2.592,2.592,0,0,0-2.107-.729Z" />
+                                </g>
+                            </svg>
+
+                                    <h4 id="NameFile">
+                                    @(!String.IsNullOrEmpty(Model.inventarios) ? Model.Nombreinventarios : "Nombre no encontrado")
+                                </h4>
+                                    <h5>Arrastra o adjunta el</h5>
+                                    <h5 class="fw-bold">Archivo</h5>
+                                            <input type="file" id="MyFile" name="MyFile" class="drop-zone__input">
+                                            @if (Model.MyFile != null && Model.MyFile.Length > 0)
+                                            {
+                                                <div class="file-info">@Model.MyFile.FileName</div>
+                                                <input type="hidden" name="MyFile" value="@Model.MyFile.FileName">
+                                            }
+                                 </div>
+                        </div>
+
+
+
+
+                        <div class="row ">
+                            <div class="col-12 col-md-8 mx-md-auto col-lg-5 ">
+                                <div class="btnOutline btnOutlinePrimary my-3">
+                                    @(
+                                    Html.Kendo().Button()
+                        .Name("vehiculoBtn")
+                                    .HtmlAttributes(new { @class = "btnPrimary", onclick = "enviarImagen()" })
+                        .Content("<h5 class=\"m-0\"><b>Agregar Inventario</b></h5>")
+                                    )
+                                </div>
+                            </div>
+
+
+                            @if (!String.IsNullOrEmpty(Model.inventarios))
+                            {
+                                <div class="col-12 col-md-8 mx-md-auto col-lg-5 btnOutline btnOutlinePrimary">
+                                    <button type="button" class="btnPrimary px-3" id="btnNuevoMotivo" onclick="Descargar('@Model.IdDeposito')" >
+                                        <h5><b>Descargar</b></h5>
+                                    </button>
+                                </div>
+                            }
+
+                        </div>
+                        <section class=" mt-4">
+                            <div class="row mt-4">
+                                <div class="col-md-4 col-lg-5 col-md-auto">
+                                    <div class="row">
+                                        <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0" onclick="backBusquedaSolicitud()">
+                                            @(Html.Kendo().Button()
+                                                .Name("backDeposito")
+                                                .HtmlAttributes(new { @class = "btnPrimary" })
+                                                .Content("<h6 class=\"m-0\"><i class=\"icon-back me-2\"></i><b>Ir a búsqueda de solicitudes</b></h6>"))
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mx-md-auto col-lg-5">
+                                    <div class="controlButton mb-5" onclick="finalizar()">
+                                        @(Html.Kendo().Button()
+                                            .Name("registroGruaBtn")
+                                            .HtmlAttributes(new { @class = "btnPrimary" })
+                                            .Content("<h5 class=\"m-0\"><b>Finalizar registro</b></h5>"))
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+            
+       
+        
+        
+        </div>
+
+    </section>
+    <div class="modal fade modalCustom" id="modalInfracciones" aria-labelledby="infraccionLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="ModalBodyInfracciones">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade modalCustom" id="modalVehiculos" aria-labelledby="vehiculosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="ModalBodyVehiculos">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modalCustom" id="modalAgregarGrua" aria-labelledby="AgregarGruaLabel" aria-hidden="true">
+        <div class="modal-body" id="ModalBodyAgregarGrua">
+        </div>
+    </div>
+</div>
+<script>
+
+    function Descargar(e) {
+        showLoading();
+        $.ajax({
+            url: './DescargarItem',
+            type: 'POST',
+            data: {
+                IdInfraccion: e
+            },
+            success: function (result) {
+
+                hideLoading();
+                if (result.file) {
+
+                    var a = document.createElement("a"); //Create <a>
+                    a.href = `data:${result.app};base64,${result.file}`; //Image Base64 Goes here
+                    a.download = result.name; //File name Here
+                    a.click(); //Downloaded file
+
+
+                }
+                window.location.href = `data:${result.app};base64,${result.file}`//'data:application/octet-stream;base64,' + result.file;
+            },
+            error: function (xhr, status, error) {
+                console.log("Error al realizar la solicitud AJAX: " + error);
+                hideLoading();
+            }
+        });
+    }
+
+
+    function finalizar() {
+
+        var Mydata = $("#observacionesForm").serialize();
+        var inputFile = document.getElementById("MyFile");
+        var numeroInventario = $("#numeroInventario").val();
+         var name = $("#NameFile").text().trim();
+        console.log("nom", name)
+
+        var hasServerFile = name !== "Nombre no encontrado" && name !== "";
+        console.log("ser", hasServerFile)
+        if (inputFile.files.length > 0 || hasServerFile === true ) {
+            if (!numeroInventario.trim()) {
+                sitteg_warning("Es obligatorio ingresar un número de inventario cuando se ha agregado un archivo.");
+                return;
+            }
+        }
+       if (numeroInventario.trim()) {
+            if (inputFile.files.length === 0 && hasServerFile === false) {
+                sitteg_warning("Es obligatorio adjuntar un archivo cuando se ha ingresado un número de inventario.");
+        return;
+    }
+}
+        console.log("Mydata",Mydata);
+        showLoading();
+        $.ajax({
+            url: '/AsignacionGruas/AgregarObservaciones',
+            type: 'GET',
+            data: Mydata,
+            success: function (data) {
+                sitteg_success("Información guardada con éxito");
+                document.getElementById("grua2").style.display = "block";
+                setTimeout(function(){
+                    window.location.href = '@Url.Action("Index", "AsignacionGruas")';
+                }, 500);
+               
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning("!Sucedió un error, inténtalo de nuevo más tarde...");
+                hideLoading();
+            }
+        });
+    }
+
+
+    function finalizar2() {
+        console.log("finalizar2");
+
+        document.getElementById("sec1").style.display = "none";
+        document.getElementById("sec2").style.display = "none";
+        document.getElementById("sec3").style.display = "none";
+        document.getElementById("grua1").style.display = "block";
+    }
+
+    function finalizar3() {
+        console.log("finalizar3");
+
+        document.getElementById("sec1").style.display = "none";
+        document.getElementById("sec2").style.display = "none";
+        document.getElementById("sec3").style.display = "none";
+        document.getElementById("grua1").style.display = "none";
+        document.getElementById("grua2").style.display = "block";
+    }
+
+   document.querySelectorAll(".drop-zone__input").forEach((inputElement) => {
+    const dropZoneElement = inputElement.closest(".drop-zone");
+
+    dropZoneElement.addEventListener("click", (e) => {
+        inputElement.click();
+    });
+
+    inputElement.addEventListener("change", (e) => {
+        if (inputElement.files.length) {
+            updateFileName(dropZoneElement, inputElement.files[0]);
+        } else {
+            clearComponent(dropZoneElement);
+        }
+    });
+
+    dropZoneElement.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZoneElement.classList.add("drop-zone--over");
+    });
+
+    ["dragleave", "dragend"].forEach((type) => {
+        dropZoneElement.addEventListener(type, (e) => {
+            dropZoneElement.classList.remove("drop-zone--over");
+        });
+    });
+
+    dropZoneElement.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZoneElement.classList.remove("drop-zone--over");
+
+        if (e.dataTransfer.files.length) {
+            inputElement.files = e.dataTransfer.files;
+            updateFileName(dropZoneElement, e.dataTransfer.files[0]);
+        }
+    });
+});
+
+var dnamefale = document.getElementById("NameFile");
+
+function clearComponent(dropZoneElement) {
+    // Limpia el nombre del archivo
+    $(dnamefale).empty();
+
+    // Elimina o desactiva el SVG o cualquier otro elemento relacionado
+    const svgImage = document.getElementById("svgImagent");
+    if (svgImage) {
+        svgImage.classList.remove("active");
+    }
+
+    // Opcional: Puedes agregar más lógica aquí para restablecer otros elementos
+}
+
+function updateFileName(dropZoneElement, file) {
+    // Actualiza el nombre del archivo en el componente
+    $(dnamefale).empty().append(file.name);
+
+    // Activa el SVG o cualquier otro elemento relacionado
+    const svgImage = document.getElementById("svgImagent");
+    if (svgImage) {
+        svgImage.classList.add("active");
+    }
+}
+
+    function modalInfraccion() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ModalInfracciones", "AsignacionGruas")',
+            type: 'POST',
+            success: function (result) {
+                $('#ModalBodyInfracciones').html(result);
+                $('#modalInfracciones').modal('show');
+                hideLoading();
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    /***************** */
+    function modalVehiculos() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ModalVehiculos", "AsignacionGruas")',
+            type: 'POST',
+            success: function (result) {
+                $('#ModalBodyVehiculos').html(result);
+                $('#modalVehiculos').modal('show');
+                hideLoading();
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function mostrarBusquedaVehiculo() {
+        showLoading();
+        var folioSolicitud = "@ViewBag.folio"
+        if (folioSolicitud) {
+            window.location.href = `/Depositos/CargarVehiculo?folio=${folioSolicitud}`;
+            return
+        }
+
+
+        $.ajax({
+            url: '@Url.Action("MostrarBusquedaVehiculo","BusquedaVehiculoPropietario")',
+            type: "POST",
+            data: {},
+            success: function (result) {
+                $('#ModalBodyVehiculos').html(result);
+                $('#modalVehiculos').modal('show');
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+                sitteg_error("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+    /******************* */
+    function agregarGrua() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ModalAgregarGrua", "AsignacionGruas")',
+            type: 'POST',
+            success: function (result) {
+                $('#ModalBodyAgregarGrua').html(result);
+                $('#modalAgregarGrua').modal('show');
+                hideLoading();
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+function enviarImagen() {
+    var inputFile = document.getElementById("MyFile");
+    var numeroInventario = $("#numeroInventario").val().trim();
+    var name = $("#NameFile").text().trim();
+    var hasServerFile = name && name !== "Nombre no encontrado";
+
+    console.log(name);
+    console.log("LEN", inputFile.files.length);
+    console.log(hasServerFile);
+
+    var hasFile = inputFile.files.length > 0 || hasServerFile;
+        console.log(hasFile);
+
+    // 1. Si no hay archivo cargado ni en el input file ni en el servidor
+    if (!hasFile) {
+        sitteg_warning("No se ha proporcionado un archivo para el inventario.");
+        return;
+    }
+
+    // 2. Si hay un número de inventario, debe haber un archivo
+    if (numeroInventario && !hasFile) {
+        sitteg_warning("Es obligatorio un archivo si se proporciona un número de inventario.");
+        return;
+    }
+
+    // 3. Si hay un archivo debe habernúmero de inventario
+    if (hasFile && !numeroInventario) {
+        sitteg_warning("Es obligatorio ingresar un número de inventario cuando se ha agregado un archivo.");
+        return;
+    }
+
+    var formData = new FormData();
+
+    if (inputFile.files.length > 0) {
+        formData.append("MyFile", inputFile.files[0]);
+    }
+
+    formData.append("numeroInventario", numeroInventario);
+    formData.append("NombreArchivo", name);
+
+    showLoading();
+
+    $.ajax({
+        url: '/AsignacionGruas/AgregarInventario',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+            if (data.success) {
+                sitteg_success(data.message);
+            } else {
+                sitteg_warning(data.message);
+            }
+            hideLoading();
+        },
+        error: function (error) {
+            console.error("Error al enviar la imagen:", error);
+            hideLoading();
+        }
+    });
+}
+
+
+
+    function SolictudDeposito() {
+        window.location.href = '@Url.Action("Depositos", "Depositos")';
+
+    }
+    function backBusquedaSolicitud() {
+        window.location.href = '@Url.Action("Index", "AsignacionGruas")';
+
+    }
+
+
+    function mostrarInfoVehiculo(){
+
+        var idVehiculo =$('#IdVehiculoAsignado').val();
+        console.log("mostrarInfoVehiculo idVehiculo",idVehiculo);
+
+
+        $.ajax({
+            url: '@Url.Action("MostrarDatosVehiculo","DepositosOtraDependencia")',
+            type: "GET",
+            data: { 'idVehiculo': idVehiculo },
+            success: function (result) {
+                datosVehiculo
+                $('#datosVehiculo').hide();
+                $('#vehiculoPropietarioDatosContainer').show();
+                $("#vehiculoPropietarioDatos").html(result);
+                hideLoading();
+
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+                console.log(error);
+            }
+        });
+    }
+
+    function subMarcaDropDownChange() {
+        var _idMarca = $("#ddlMarcas").data("kendoDropDownList").value();
+        showLoading();
+        $.ajax({
+            url: "/Vehiculos/SubMarcas_ReadPorMarca",
+            type: "POST",
+            data: { idMarca: _idMarca },
+            success: function (data) {
+                var TramosDropDown = $("#idSubmarca").data("kendoDropDownList");
+                TramosDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.log("EE", error)
+                hideLoading();
+            }
+        });
+    }
+
+    function goToCargarVehiculo() {
+        showLoading();
+        window.location.href = "/Depositos/CargarVehiculo?folio=@Model.FolioSolicitud";
+	}
+
+    </script>
+
+    <script>
+
+    $(document).ready(function () {
+        if (@Html.Raw(Json.Serialize(vehiculoCargadoNoInfraccion))) {
+             mostrarInfoVehiculo();
+        }
+
+
+        //Si hay un cambio en el id de vehiculo se muestra los datos
+        $("#IdVehiculoAsignado").bind("change", function () {
+
+            console.log("entra al onchange");
+
+            $('#modalVehiculos').hide();
+            console.log("cierra modales 2");
+
+                  
+                $.ajax({
+                    url: '@Url.Action("MostrarDatosVehiculo","DepositosOtraDependencia")',
+                    type: "GET",
+                    data: { 'idVehiculo': $(this).val() }, //$('#IdVehiculoAsignado').val(
+                    success: function (result) {
+                        $('#vehiculoPropietarioDatosContainer').show();
+                        $("#vehiculoPropietarioDatos").html(result);
+                        hideLoading();
+
+                    },
+                    error: function (xhr, status, error) {
+                        hideLoading();
+                        console.log(error);
+                    }
+                });
+
+            
+        });
+
+    });
+
+
+</script>
+<style>
+    #svgImagent {
+        transition: fill ease-out 0.5s;
+    }
+
+        #svgImagent.active {
+            fill: green
+        }
+</style>
+
+
+

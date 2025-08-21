@@ -1,0 +1,115 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CatEntidadesModel
+
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-addEntidad h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Agregar entidad</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-12 my-4">
+            <h5 class="px-4"><b>Datos de la entidad</b></h5>
+            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+        </div>
+    </div>
+    <form id="agregarEntidadForm" class="row px-4 mb-4 align-items-end justify-content-center">
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                @Html.HiddenFor(model => model.Corp, new { id = "idDependenciaFiltro" })
+                @(Html.Kendo().TextBoxFor(t=>t.nombreEntidad)
+                    .Label(l => l.Content("Entidad <b>(obligatorio)</b>:"))
+                    .Placeholder("Ingresa una nueva entidad")
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+
+            </div>
+        </div>
+
+    </form>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="agregarEntidad()">
+                        @(Html.Kendo().Button()
+                            .Name("AddEntidad")
+                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                            .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+
+<script>
+    function agregarEntidad() {
+        var CORP = $("#idDependenciaFiltro").val();
+        CORP = CORP ? CORP : null;
+
+        $("#agregarEntidadForm").find('input[name="Corp"]').val(CORP);
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'nombreEntidad' });
+
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+        var Mydata = $("#agregarEntidadForm").serialize();
+        console.log(Mydata);
+        $('#agregarEntidad').modal('hide');
+        $('#catalogosModal').modal('hide');
+
+        $('body').removeClass('model-open');
+        $('.modal-backdrop').remove();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarEntidad")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                var grid = $("#gridCatEntidades").data("kendoGrid");
+                grid.dataSource.read();
+                sitteg_success('Se ha actualizado la información');
+
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+</script>

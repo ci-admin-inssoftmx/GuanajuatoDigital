@@ -1,0 +1,380 @@
+@model GuanajuatoAdminUsuarios.Models.VehiculoPropietarioBusquedaModel
+
+<!-- ** Busqueda ** -->
+<div id="busquedaVehiculoContainer">
+    <section id="sectionCap" class="bg-white mb-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-auto pe-0">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <div class="border border-2 border-dark rounded-circle">
+                            <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                <b>1</b>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-auto p-0">
+                        <i class="icon-car h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Búsqueda de vehículo</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-auto">
+                <div class="col-auto">
+                    <div class="row">
+                        <div class="col-auto my-3">
+                            <button class="btn-close" type="button" onclick="goBack()"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-6 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <form id="busquedaVehiculoForm">
+            <div class="row align-items-end px-4 mb-4">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+
+                        <label>Entidad:</label>
+                        <span>
+                            @(Html.Kendo().DropDownListFor(m => m.IdEntidadBusqueda).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Seleccione Entidad...")
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                .Filter(FilterType.Contains)
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetEntidades_Drop", "BusquedaVehiculoPropietario");
+                                    });
+                                })
+                                .Popup(p =>
+                                {
+                                    p.AppendTo("#busquedaVehiculoContainer");
+                                }))
+                        </span>
+
+                    </div>
+                </div>
+
+
+                <!-- *********************************************************** -->
+                <div class="row px-4 align-items-end">
+                    <div class="col-12 mt-4 controlForm">
+                        <label>Tipo de búsqueda:</label>
+                    </div>
+                </div>
+                <nav class="tabCustom">
+                    <div class="nav nav-tabs row mx-0" id="nav-tab" role="tablist">
+                        <button class="nav-link active col" id="placa-vehiculo-tab" data-bs-toggle="tab" data-bs-target="#placa-vehiculo" type="button" role="tab" aria-controls="placa-vehiculo" aria-selected="true">
+                            <div class="row justify-content-center align-items-center px-3 py-2">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <div class="col-auto p-0">
+                                    <h5 class="m-0"><i class="icon-placa h4"></i> <b>Placa del vehículo</b></h5>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="nav-link col" id="serie-vehiculo-tab" data-bs-toggle="tab" data-bs-target="#serie-vehiculo" type="button" role="tab" aria-controls="serie-vehiculo" aria-selected="false">
+                            <div class="row justify-content-center align-items-center px-3 py-2">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <div class="col-auto p-0">
+                                    <h5 class="m-0"><i class="icon-fisica h4"></i> <b>No. de serie del vehículo</b></h5>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="nav-link col" id="serie-vehiculo-tab" data-bs-toggle="tab" data-bs-target="#splaca-vehiculo" type="button" role="tab" aria-controls="splaca-vehiculo" aria-selected="false"
+                                onclick="buscarVehiculoEnPlataformas()">
+                            <div class="row justify-content-center align-items-center px-3 py-2">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <div class="col-auto p-0">
+                                    <h5 class="m-0"><i class="icon-fisica h4"></i> <b>Sin serie o placa</b></h5>
+                                </div>
+                            </div>
+                        </button>
+
+                    </div>
+                </nav>
+
+                <!-- TAB ************************************ -->
+                <div class="tab-content" id="nav-tabContent">
+
+                    <div class="tab-pane tabCustomConteiner fade show active" id="placa-vehiculo" role="tabpanel" aria-labelledby="placa-vehiculo-tab">
+                        <div class="row px-4 mt-4 pb-4 align-items-end">
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(m => m.PlacaBusqueda)
+                                        .Label(l => l.Content("Placa del vehículo:"))
+                                        .Placeholder("Ingresa la placa del vehículo")
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                </div>
+                                <div id="ErrorMessage" class="error-container"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="tab-pane tabCustomConteiner fade" id="serie-vehiculo" role="tabpanel" aria-labelledby="serie-vehiculo-tab">
+                        <div class="row px-4 mt-4 pb-4 align-items-end">
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(m => m.SerieBusqueda)
+                                        .Label(l => l.Content("Número de serie del vehículo:"))
+                                        .Placeholder("Ingresa el número de serie del vehículo")
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="tab-pane tabCustomConteiner fade" id="splaca-vehiculo" role="tabpanel" aria-labelledby="splaca-vehiculo-tab">
+                        <div class="row px-4 mt-4 pb-4 align-items-end">
+                            <div class="col-12">
+                                <div class="controlForm my-3">
+                                    <div class="col-12 col-md-6 mx-md-auto col-lg-4 mx-lg-0 ">
+                                        <div class="controlButton my-3" onclick="buscarVehiculoEnPlataformas(0)">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="tabCustomEnd"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- **************************************** -->
+
+
+
+
+                <div class="col-12 col-md-6 col-lg-3 col-xl-auto">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-3">
+                        <button id="btnBuscarVehiculo" onclick="buscarVehiculoEnPlataformas(1)" type="button">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addCar h5 mb-0 me-2"></i><b>Buscar vehículo</b></h6>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+        <div id="resultadoContainer">
+            <div class="row" id="listaVehiculosContainer"> </div>
+            <div class="row">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="controlButton my-3" onclick="continuar()">
+                        @(Html.Kendo().Button()
+                            .Name("addVehiculoBtn")
+                            .HtmlAttributes(new { @class = "btnPrimary" })
+                            .Content("<h5 class=\"m-0\"><b>Continuar</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</div>
+<div class="modal fade modalCustom" id="vehiculoModal" aria-labelledby="VehiculoServiceLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-body bg-light" id="vehiculoModalContainer">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var busquedaVehiculoValidate = [];
+    $(document).ready(function () {
+        //Se agrega la entidad de busqueda como campo requerido
+        busquedaVehiculoValidate.push({ 'controlName': 'IdEntidadBusqueda', 'isDropDown': true });
+        addOnLostFocusRequiredControls(busquedaVehiculoValidate);
+        $('#PlacaBusqueda').focus();
+        $('#resultadoContainer').fadeOut();
+    });
+    function continuar() {
+        var idVehiculo = $("#IdVehiculoAsignado").val();
+        if (idVehiculo === '' || idVehiculo === undefined) {
+            sitteg_warning("Debes seleccionar un vehiculo");
+            return;
+        }
+        $('#agregarVehiculoModal').modal('hide');
+        $("#IdVehiculoAsignado").change();
+    }
+    function buscarVehiculoEnPlataformas(bandera) {
+        $('#resultadoContainer').fadeOut();
+        if (!isControlsValidWithFocus(busquedaVehiculoValidate).isValid) {
+            sitteg_warning('Debes seleccionar una entidad.');
+            return;
+        }
+        var placaValue = $("#PlacaBusqueda").val().trim();
+        var serieValue = $("#SerieBusqueda").val().trim();
+
+        console.log("Placa Busqueda", placaValue);
+
+        /*if (!placaValue && !serieValue) {
+            $('#PlacaBusqueda').focus();
+            sitteg_warning('Debes ingresar una placa o serie.');
+            return;
+        }*/
+
+        var modeloBusqueda = $("#busquedaVehiculoForm").serialize();
+        console.log("busquedaVehiculoForm modeloBusqueda", modeloBusqueda);
+        showLoading();        
+        $.ajax({
+            url: '@Url.Action("BuscarVehiculoEnPlataformas", "BusquedaVehiculoPropietario")',
+            type: 'POST',
+            data: modeloBusqueda,
+            success: function (result) {
+                console.log("result BuscarVehiculoEnPlataformas",result);
+                hideLoading();
+                    if (result.idVehiculo) {
+                        $('#IdVehiculoAsignado').val(result.idVehiculo);
+                         $('#agregarVehiculoModal').modal('hide');
+                        $('#agregarmodalVehiculosVehiculoModal').modal('hide');
+                    
+                    
+                        console.log("cierra modales 1");
+                        $('#IdVehiculoAsignado').change();
+
+                     try{
+                        $('#modalVehiculos').modal('hide');
+                         console.log("mostrara info vehiculo");
+                        mostrarInfoVehiculo();
+                    } catch (error) {
+                        console.error(error);
+                    }
+
+                    }
+                    else {
+                       if(result.listaVehiculos){
+                            $('#resultadoContainer').fadeIn();
+                            $("#listaVehiculosContainer").html(result.view.Result);
+                       }
+                       if(result.crearVehiculo){
+                        console.log("crearVehiculo Modal")
+                                $('#vehiculoModal').modal({ backdrop: 'static', keyboard: false });
+                                $("#vehiculoModalContainer").html(result.view.Result);
+                                $('#vehiculoModal').modal('show');  
+
+                          
+                       }
+                    } 
+
+            },
+            error: function (err) {
+                console.log("err",err);
+                sitteg_error("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+    function crearSinPlaca() {
+        $('#resultadoContainer').fadeOut();
+        if (!isControlsValidWithFocus(busquedaVehiculoValidate).isValid) {
+            sitteg_warning('Debes seleccionar una entidad.');
+            return;
+        }
+        var placaValue = "";
+        var serieValue = "";
+
+        var modeloBusqueda = $("#busquedaVehiculoForm").serialize();
+
+        console.log("modeloBusqueda", modeloBusqueda);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("BuscarVehiculoEnPlataformas", "BusquedaVehiculoPropietario")',
+            type: 'POST',
+            data: modeloBusqueda,
+            success: function (result) {
+                console.log("result",result);
+                hideLoading();
+                if (result.idVehiculo) {
+                    console.log("Si hubo vehiculo");
+                    $('#IdVehiculoAsignado').val(result.idVehiculo);
+                    $('#agregarVehiculoModal').modal('hide');
+                    $('#IdVehiculoAsignado').change();
+                }
+                else {
+                    if (result.listaVehiculos) {
+                        console.log("listVehiculos");
+                        $('#resultadoContainer').fadeIn();
+                        $("#listaVehiculosContainer").html(result.view.Result);
+                    }
+                    if (result.crearVehiculo) {
+                        console.log("crearVehiculo");
+                        $('#vehiculoModal').modal({ backdrop: 'static', keyboard: false });
+                        $("#vehiculoModalContainer").html(result.view.Result);
+                        $('#vehiculoModal').modal('show');
+                    }
+                }
+
+            },
+            error: function () {
+                sitteg_error("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+
+    function subMarcaDropDownChange() {
+        var _idMarca = $("#ddlMarcas").data("kendoDropDownList").value();
+        showLoading();
+        $.ajax({
+            url: "/Vehiculos/SubMarcas_ReadPorMarca",
+            type: "POST",
+            data: { idMarca: _idMarca },
+            success: function (data) {
+                var TramosDropDown = $("#idSubmarca").data("kendoDropDownList");
+                TramosDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.log("EE", error)
+                hideLoading();
+            }
+        });
+    }
+
+    function goBack(){
+        $('#agregarVehiculoModal').modal('hide');
+                $('#modalVehiculos').modal('hide');
+
+    }
+
+    function onDataBound() {
+        var grid = $("#gridPersonasMorales").data("kendoGrid");
+        if (grid.dataSource.total() === 1) {
+            setTimeout(function () {
+                var row = grid.tbody.find("tr:first");
+                grid.select(row);
+                row.find(".k-checkbox").trigger("click");
+            }, 50);
+        }
+    }
+</script>

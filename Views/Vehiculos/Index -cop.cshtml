@@ -1,0 +1,714 @@
+﻿@using static GuanajuatoAdminUsuarios.Utils.CatalogosEnums;
+
+@model VehiculoBusquedaModel
+@{
+    var isFromUpdate = Model.isFromUpdate;
+}
+
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        var auth = @autorizaciones;
+
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡EL usuario no tiene acceso a esta opción!",
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            } 
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡EL usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+</script>
+
+<head>
+    <script>
+
+        $(document).ready(function () {
+            var value = $('#hdnIsFromUpdate').val();
+            var isTrueSet = (value.toLowerCase() === 'true');
+            if (isTrueSet) {
+                document.getElementById("sec0").style.display = "none";
+                document.getElementById("VehiculoLocalizado").style.display = "block";
+            }
+        });
+
+       function submitSearch() {
+           console.log("submit")
+            var placasValue = $("#PlacasBusqueda").val().trim();
+            $("#PlacasBusqueda").val(placasValue);
+    var Mydata = $("#frmSearch").serialize();
+    showLoading();
+    $.ajax({
+        url: '@Url.Action("ajax_BuscarVehiculos")',
+        type: 'POST',
+        data: Mydata,
+        success: function (result) {
+            console.log("result",result)
+                    document.getElementById("sec0").style.display = "none";
+                document.getElementById("VehiculoLocalizado").style.display = "block";
+                $("#VehiculoLocalizado").html(result);
+            hideLoading();
+                }, error: function () {
+                     $("#ErrorMessageContainer").html('<div class="error-message">' + result.message + '</div>');
+                    sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                    hideLoading();
+                }
+    });
+}
+
+
+
+        function setDataToIdSubmarca(idMarca) {
+            //console.log("Update Veh IdMarc: ".value);
+            _set_combo_catalog("CatSubmarcasByFilter", idMarca, "idSubmarca", "false", "divSubmarca", "");
+            $('#idSubmarca').kendoDropDownList();
+
+        }
+
+        //function closeForm() {
+        //    console.log("hola ", document.getElementById("placas").value);
+
+        //    if (document.getElementById("placas").value == "GTD7308" || document.getElementById("serie").value == "1N4AB41D95C74309") {
+        //        document.getElementById("sec0").style.display = "none";
+        //        document.getElementById("sec1Sitteg").style.display = "block";
+        //        document.getElementById("sec2").style.display = "block";
+        //    } else if (document.getElementById("placas").value == "GTD7309") {
+        //        document.getElementById("sec0").style.display = "none";
+        //        document.getElementById("sec1Estatal").style.display = "block";
+        //        document.getElementById("sec2").style.display = "block";
+        //    } else {
+        //        document.getElementById("sec0").style.display = "none";
+        //        document.getElementById("sec1").style.display = "block";
+        //        document.getElementById("sec2sec2").style.display = "block";
+        //    }
+        //}
+
+        //function buscarPFisica() {
+        //    console.log("buscarFisica");
+        //    document.getElementById("secFisica").style.display = "block";
+        //    document.getElementById("sec2").style.display = "none";
+
+        //}
+
+        function finalizar() {
+            document.getElementById("sec0").style.display = "block";
+            document.getElementById("VehiculoLocalizado").style.display = "none";
+        }
+
+        function EditarBusquedaMoral() {
+            document.getElementById("sec3").style.display = "block";
+            document.getElementById("PersonaMoralLocalizada").style.display = "none";
+        }
+
+    </script>
+</head>
+
+
+<!-- ***************************** -->
+<div-- class="mainContainer bg-light">
+    @Html.HiddenFor(m=> m.isFromUpdate, new { @id = "hdnIsFromUpdate" })
+    <!-- ** Busqueda ** -->
+    <section id="sec0" class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow mt-3 mb-5 rounded" style="display:block">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-auto pe-0">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <div class="border border-2 border-dark rounded-circle">
+                            <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                <b>1</b>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-auto p-0">
+                        <i class="icon-car h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Captura de vehículos</b></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-6 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 my-4">
+                <h5 class="px-4 colorSuccess d-flex align-items-center"><b class="d-flex align-items-center justify-content-center bgSuccess mb-1 me-2 rounded-circle px-1"><i style="font-size: 10px; padding: 7px 2px;" class="icon-correct text-white"></i></b><b>Búsqueda del vehículo</b></h5>
+                <h6 class="px-4 text-muted">Realiza una búsqueda del vehículo para conocer si ya está capturado en Registro de Infracciones y Accidentes de Guanajuato o de lo contrario importar los datos del registro estatal.</h6>
+            </div>
+        </div>
+
+
+        <!-- *********************************************************** -->
+        <div class="row px-4 align-items-end">
+            <div class="col-12 mt-4 controlForm">
+                <label>Tipo de búsqueda:</label>
+            </div>
+        </div>
+        <nav class="tabCustom">
+            <div class="nav nav-tabs row mx-0" id="nav-tab" role="tablist">
+                <button class="nav-link active col" id="placa-vehiculo-tab" data-bs-toggle="tab" data-bs-target="#placa-vehiculo" type="button" role="tab" aria-controls="placa-vehiculo" aria-selected="true">
+                    <div class="row justify-content-center align-items-center px-3 py-2">
+                        <div class="col-auto radioCustom p-0">
+                            <div class="rounded-circle m-2"></div>
+                        </div>
+                        <div class="col-auto p-0">
+                            <h5 class="m-0"><i class="icon-placa h4"></i> <b>Placa del vehículo</b></h5>
+                        </div>
+                    </div>
+                </button>
+                <button class="nav-link col" id="serie-vehiculo-tab" data-bs-toggle="tab" data-bs-target="#serie-vehiculo" type="button" role="tab" aria-controls="serie-vehiculo" aria-selected="false">
+                    <div class="row justify-content-center align-items-center px-3 py-2">
+                        <div class="col-auto radioCustom p-0">
+                            <div class="rounded-circle m-2"></div>
+                        </div>
+                        <div class="col-auto p-0">
+                            <h5 class="m-0"><i class="icon-fisica h4"></i> <b>No. de serie del vehículo</b></h5>
+                        </div>
+                    </div>
+                </button>
+                <button class="nav-link col" id="serie-vehiculo-tab" data-bs-toggle="tab" data-bs-target="#splaca-vehiculo" type="button" role="tab" aria-controls="splaca-vehiculo" aria-selected="false"
+                        onclick="crearSinPlaca()">
+                    <div class="row justify-content-center align-items-center px-3 py-2">
+                        <div class="col-auto radioCustom p-0">
+                            <div class="rounded-circle m-2"></div>
+                        </div>
+                        <div class="col-auto p-0">
+                            <h5 class="m-0"><i class="icon-fisica h4"></i> <b>Sin serie o placa</b></h5>
+                        </div>
+                    </div>
+                </button>
+
+            </div>
+        </nav>
+        <form id="buscarVehiculoForm">
+
+            <div class="tab-content" id="nav-tabContent">
+
+                <div class="tab-pane tabCustomConteiner fade show active" id="placa-vehiculo" role="tabpanel" aria-labelledby="placa-vehiculo-tab">
+                    <div class="row px-4 mt-4 pb-4 align-items-end">
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBoxFor(t => t.PlacasBusqueda)
+                                    .Label(l => l.Content("Placa del vehículo:"))
+                                    .Placeholder("Ingresa la placa del vehículo")
+                                    .HtmlAttributes(new { style = "width: 100%", autocomplete="off" })
+                                    )
+                            </div>
+                            <div id="ErrorMessage" class="error-container"></div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="tab-pane tabCustomConteiner fade" id="serie-vehiculo" role="tabpanel" aria-labelledby="serie-vehiculo-tab">
+                    <div class="row px-4 mt-4 pb-4 align-items-end">
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBoxFor(t => t.SerieBusqueda)
+                                    .Label(l => l.Content("Número de serie del vehículo:"))
+                                    .Placeholder("Ingresa el número de serie del vehículo")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="tab-pane tabCustomConteiner fade" id="splaca-vehiculo" role="tabpanel" aria-labelledby="splaca-vehiculo-tab">
+                    <div class="row px-4 mt-4 pb-4 align-items-end">
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="controlForm my-3">
+                                <div class="col-12 col-md-6 mx-md-auto col-lg-4 mx-lg-0 ">
+                                    <div class="controlButton my-3" onclick="crearSinPlaca()">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="tabCustomEnd"></div>
+                </div>
+            </div>
+        </form>
+
+
+        <!-- ****************************************************************-->
+       
+
+        <div class="row px-4 mb-4 align-items-end">
+            <!--todo select -->
+            <form id="frmSearch" class="row px-4 mb-4 align-items-end" method="post">
+               
+
+                <div class="col-12 col-md-6 mx-md-auto col-lg-4 mx-lg-0 ">
+                    @*<div class="controlButton my-3" onclick="closeForm()">*@
+                    <div class="controlButton my-3">
+                        <button class="btnPrimary" type="button" id="btnBuscar" onclick="submitSearch()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <div id="resultadoCotejo">
+    </div>
+    <div id="VehiculoLocalizado" style="display:none">
+        
+    </div>
+
+</div>
+
+<!-- Modal -->
+<!-- ********************************************************************************************************** -->
+<div class="modal fade modalCustom" id="editFisico"  aria-labelledby="editFisicoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+        <div class="modal-content">
+
+            <section class=" bg-white rounded">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-editFisica h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Editar persona física</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="row">
+                            <div class="col-auto my-3">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bg-light py-1"></div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-12 my-4">
+                        <h5 class="px-4"><b>Datos de persona física</b></h5>
+                        <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                    </div>
+                </div>
+                <form class="row px-4 mb-4 align-items-end">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("nombreEditFisico")
+                                .Label(l => l.Content("Nombre(s) <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa el nombre(s)")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("paternoEditFisico")
+                                .Label(l => l.Content("Apellido paterno:"))
+                                .Placeholder("Ingresa el apellido paterno")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("maternoEditFisico")
+                                .Label(l => l.Content("Apellido materno:"))
+                                .Placeholder("Ingresa el apellido materno")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("RFCEditFisico")
+                                .Label(l => l.Content("RFC :"))
+                                .Placeholder("Ingresa un RFC válido")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("CURPEditFisico")
+                                .Label(l => l.Content("CURP:"))
+                                .Placeholder("Ingresa un CURP válido")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Fecha de nacimiento <b>(obligatorio)</b></label>
+                            <span>
+                                @(Html.Kendo().DatePicker()
+                                    .Culture("es-ES")
+                                    .Name("nacimientoEditFisico")
+                                    .DateInput()
+                                    )
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm">
+                            <label>Sexo <b>(obligatorio)</b></label>
+                        </div>
+                        <div class="btnToggle mb-3">
+
+
+                            <div style="z-index:0" class="position-relative d-flex align-items-center">
+                                <input class="toggle toggle-left" id="hombre" name="toggle-sexo" value="false"
+                                       type="radio" checked="" />
+                                <label class="btn" for="hombre">Hombre</label>
+                                <input class="toggle toggle-right" id="mujer" name="toggle-sexo" value="true"
+                                       type="radio" />
+                                <label class="btn" for="mujer">&nbsp;&nbsp;Mujer&nbsp;&nbsp;</label>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("telefonoEditFisico")
+                                .Label(l => l.Content("Teléfono:"))
+                                .Placeholder("Ingresa un Teléfono")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("correoEditFisico")
+                                .Label(l => l.Content("Correo electrónico:"))
+                                .Placeholder("Ingresa un correo electrónico:")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Entidad:</label>
+                            <span>
+                                @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                    .Name("entidadEditFisico")
+                                    .DataTextField("")
+                                    .DataValueField("")
+                                    .HtmlAttributes(new { style = "width:100%;" })
+                                    .Filter(FilterType.Contains)
+                                    )
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("coloniaEditFisico")
+                                .Label(l => l.Content("Colonia <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa una colonia")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("calleEditFisico")
+                                .Label(l => l.Content("Calle <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa una calle")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("numeroEditFisico")
+                                .Label(l => l.Content("Número <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa un número interior")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Municipio:</label>
+                            <span>
+                                @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                    .Name("municipioEditFisico")
+                                    .DataTextField("")
+                                    .DataValueField("")
+                                    .HtmlAttributes(new { style = "width:100%;" })
+                                    .Filter(FilterType.Contains)
+                                    )
+                                    )
+                            </span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-12 my-5">
+                        <div class="bg-light pt-1 mx-1"></div>
+                    </div>
+
+
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("licenciaEditFisico")
+                                .Label(l => l.Content("No. Licencia:"))
+                                .Placeholder("Ingresa un número de licencia:")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Vigencia:</label>
+                            <span>
+                                @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                    .Name("vigenciaEditFisico")
+                                    .DataTextField("")
+                                    .DataValueField("")
+                                    .HtmlAttributes(new { style = "width:100%;" })
+                                    .Filter(FilterType.Contains)
+                                    )
+                                    )
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Tipo de licencia:</label>
+                            <span>
+                                @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                    .Name("tipoEditFisico")
+                                    .DataTextField("")
+                                    .DataValueField("")
+                                    .HtmlAttributes(new { style = "width:100%;" })
+                                    .Filter(FilterType.Contains)
+                                    )
+                                    )
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Fecha de vencimiento:</label>
+                            <span>
+                                @(Html.Kendo().DatePicker()
+                                    .Culture("es-ES")
+                                    .Name("vencimientoEditFisico")
+                                    .DateInput()
+                                    )
+
+                            </span>
+                        </div>
+                    </div>
+
+                </form>
+                <div class="row my-4">
+                    <div class="col-12 col-md-6 mx-md-auto">
+                        <div class="row justify-content-around">
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                    <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                </button>
+                            </div>
+                            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                <div class="controlButton" onClick="finalizar()" data-bs-dismiss="modal" aria-label="Close">
+                                    @(Html.Kendo().Button()
+                                        .Name("EditFisico")
+                                        .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                        .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+
+                
+
+
+
+            </section>
+        </div>
+    </div>
+</div>
+
+
+    <div class="modal fade modalCustom" id="VehiculoServiceModal" aria-labelledby="VehiculoServiceLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-body bg-light p-0" id="ModalBodyVehiculoService">
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+    function busquedaVehiculo() {
+        var placasValue = $("#PlacasBusqueda").val().trim();
+        $("#PlacasBusqueda").val(placasValue);
+        var formData = $("#buscarVehiculoForm").serialize();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("BuscarVehiculo")',
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                console.log("response",response);
+                if (response.success === false) {
+                    sitteg_warning("No se encontraron resultados");
+                    return;
+                }
+
+                if (response.noResults) {
+                    Swal.fire({
+                        icon: "info",
+                        title: "Vehículo no registrado en RIAG",
+                        text: "¡Vehículo sin captura en el Registro de Infracciones y Accidentes de Guanajuato!",
+                        showCancelButton: true,
+                        showConfirmButton: false,
+                        cancelButtonText: "Cerrar", 
+                    });
+                    $('#ModalBodyVehiculoService').html(response.data);
+                    $('#VehiculoServiceModal').modal({ backdrop: 'static', keyboard: false });
+                    $('#VehiculoServiceModal').modal('show');
+                    hideLoading();
+                } else if (response.data) {
+
+                    try{
+                    $("#gridInfraccionesVehiculo").data("kendoGrid").dataSource.filter({ field: response.field, operator: "contains", value: response.data })
+                    }
+                    catch{
+
+                    }
+                    setTimeout(() => { $('#agregarVehiculoModal').modal('hide'); },400)
+                    hideLoading();
+                }else{
+                    $('#agregarVehiculoModal').modal('hide');
+                    hideLoading();
+                    sitteg_warning('Sucedio un error intente de nuevo mas tarde.');
+                }
+                
+            },
+            error: function () {
+                sitteg_warning("Sucedio un error intente de nuevo mas tarde");
+                hideLoading();
+            }
+        });
+    }
+
+
+        function crearSinPlaca() {
+            showLoading();
+            $.ajax({
+                url: '@Url.Action("CrearvehiculoSinPlaca")',
+                type: 'POST',
+                data: {},
+                success: function (response) {
+                    Swal.fire({
+                        icon: "info",
+                        title: "Vehículo no registrado en RIAG",
+                        text: "¡Vehículo sin captura en el Registro de Infracciones y Accidentes de Guanajuato!",
+                        showCancelButton: true,
+                        showConfirmButton: false,
+                        cancelButtonText: "Cerrar",
+                    });
+                    $('#ModalBodyVehiculoService').html(response.data);
+                    $('#VehiculoServiceModal').modal({ backdrop: 'static', keyboard: false });
+                    $('#VehiculoServiceModal').modal('show');
+                    hideLoading();
+
+
+                },
+                error: function () {
+                    sitteg_warning("Sucedio un error intente de nuevo mas tarde");
+                    hideLoading();
+                }
+            });
+
+        }
+</script>
+
+
+
+
+
+
+
+
+
+

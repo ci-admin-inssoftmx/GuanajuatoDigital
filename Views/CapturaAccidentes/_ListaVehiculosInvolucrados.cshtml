@@ -1,0 +1,269 @@
+﻿@{
+    bool esSoloLectura = ViewBag.EsSoloLectura ?? false;
+    string claseColor = esSoloLectura ? "colorDisabled" : "colorDanger";
+}
+<div class="row">
+
+
+    <script type="kendo-template" id="my-template">
+        <table style="width:100%">
+          <tr>
+            <td><strong>Vehículo</strong></td>
+            <td>#= Marca # #= Submarca #  #= Modelo #</td>
+          </tr>
+
+          <tr>
+            <td><strong>Placas</strong></td>
+             <td> #= Placa #</td>
+          </tr>
+
+          <tr>
+            <td><strong>Tarjeta</strong></td>
+             <td>#= Tarjeta #</td>
+          </tr>
+
+          <tr>
+            <td><strong>Número vehículo</strong></td>
+             <td>#= numeroConsecutivo #</td>
+          </tr>
+
+          <tr>
+            <td><strong>Tipo carga</strong></td>
+             <td>#= TipoCarga #</td>
+          </tr>
+
+          <tr>
+            <td><strong>Póliza carga</strong></td>
+             <td>#= Poliza #</td>
+          </tr>
+        </table>
+        
+    </script>
+    <script>
+     var myTemplate = kendo.template($('#my-template').html());
+    </script>
+
+
+    <script type="kendo-template" id="my-template2">
+        <table style="width:100%">
+          <tr>
+            <td><strong>Pensión</strong></td>
+            <td>#= Pension #</td>
+          </tr>
+
+          <tr>
+            <td><strong>Grua(s)</strong></td>
+             <td> #= NumeroEconomico #</td>
+          </tr>
+          <tr>
+            <td><strong>Concesionario</strong></td>
+             <td> #= concesionario #</td>
+          </tr>
+          <tr>
+            <td><strong>Forma de Traslado</strong></td>
+             <td>#= FormaTrasladoInvolucrado #</td>
+          </tr>
+
+          <tr>
+            <td><strong>Tipo vehiculo</strong></td>
+             <td>#= TipoVehiculo #</td>
+          </tr>
+
+          <tr>
+            <td><strong>Monto daños</strong></td>
+             <td>#= montoVehiculo #</td>
+          </tr>
+
+        </table>
+
+    </script>
+    <script>
+        var myTemplate2 = kendo.template($('#my-template2').html());
+    </script>
+
+    <div class="row justify-content-between my-2 mb-1 titleCustom mb-1">
+        <div class="col-12 mt-4 mb-2">
+            <h5 class="px-4"><b>Listado de búsqueda</b></h5>
+            <h6 class="px-4 text-muted">Selecciona un vehículo para Editar.</h6>
+        </div>
+    </div>
+<div class="col-12 mb-4 px-4 rounded gridCustom">
+    @(
+        Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel>()
+        .Name("gridVehiculosInvolucrados")
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.IdPersona).Hidden();
+            columns.Bound(c => c.IdVehiculo).Hidden();
+                columns.Select().Width(50).ClientHeaderTemplate("Editar").Title("Editar").Width(100);
+            columns.Bound(c => c.Placa).Title("Placas").Width(100);
+            columns.Bound(p => p.Serie).Title("Serie").Width(100);
+            columns.Bound(p => p.Tarjeta).Title("Tarjeta").Width(100);
+            columns.Bound(p => p.Marca).Title("Marca").Width(100);
+            columns.Bound(c => c.Submarca).Title("Submarca").Width(100);
+            columns.Bound(c => c.Modelo).Title("Modelo").Width(100);
+            columns.Bound(c => c.ConductorInvolucrado).Title("Conductor").Width(250);
+            columns.Bound(p => p.PropietarioInvolucrado).Title("Propietario").Width(250);
+            columns.Bound(c => c.NumeroEconomico).Title("Número Económico").Width(100);
+            columns.Bound(c => c.EntidadRegistro).Title("Entidad Registro").Width(100);
+            columns.Bound(c => c.TipoVehiculo).Title("Tipo").Width(100);
+            columns.Bound(p => p.montoVehiculo).Title("Monto daños").Width(100);
+            @* columns.Bound(p => p.numeroConsecutivo).Title("Vehículo").Width(250).ClientTemplate("#=myTemplate(data)#");                        
+            columns.Bound(p => p.montoVehiculo).Title("Detalles").Width(250).ClientTemplate("#=myTemplate2(data)#"); *@
+            @* columns.Template("<button onclick='mostrarDetalle()' class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-research me-2'></i><b>Detalle</b></h6></button>").Width(110); *@
+            columns.Template(
+            "<button class='w-100 btn " + claseColor + "'>" +
+            "<h6 class='m-0' onclick='eliminarRegistro()'" +
+            "<i class='h5 icon-delete me-2'></i><b>Eliminar</b>" +
+            "</h6></button>"
+            ).Width(110);
+        })
+        .HtmlAttributes(new { style = "height:480px" })
+        .Scrollable()
+        .Pageable()
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .Read(read => read.Action("ObtVehiculosInvol", "CapturaAccidentes"))        
+        )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.fullVehiculo);
+                s.Field(c => c.ConductorInvolucrado);
+                s.Field(c => c.fullDetalles);
+
+            })
+        )        
+</div>
+</div>
+
+<div class="modal fade modalCustom" id="mostrarDetalleModal" aria-labelledby="mostrarDetalleLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyMostrarDetalle">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modalCustom" id="mostrarEliminarModal" aria-labelledby="eliminarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyEliminar">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        let grid = $("#gridVehiculosInvolucrados").data("kendoGrid");
+
+        // Obtener el valor de EsSoloLectura desde ViewData
+        let esSoloLectura = @(ViewData["EsSoloLectura"] as bool? == true ? "true" : "false");
+
+        // Convertir el string a booleano
+        esSoloLectura = esSoloLectura === "true";
+
+        // manejar el evento click del checkbox
+        grid.tbody.on("click", ".k-checkbox", function (e) {
+            e.stopPropagation();
+
+            var row = $(this).closest("tr");
+            var dataItem = grid.dataItem(row);
+
+            grid.clearSelection();
+            grid.select(row);
+
+            // Solo ejecutar si esSoloLectura es false
+            if (!esSoloLectura) {
+                window.needOrigin = 1;
+                window.selectedVehiculoId = dataItem.IdVehiculo;
+                buscarVehiculo(dataItem.IdVehiculo);
+            }
+        });
+
+        // evento lanzado cuando se actualiza con éxito un vehículo
+        window.addEventListener('vehiculoActualizado', function (e) {
+            let grid = $("#gridVehiculosInvolucrados").data("kendoGrid");
+            if (grid) {
+                grid.dataSource.read().then(function () {
+                    // seleccionar el vehículo después de refrescar la grilla
+                    let data = grid.dataSource.data();
+                    for (let i = 0; i < data.length; i++) {
+                        if (data[i].IdVehiculo === window.selectedVehiculoId) {
+                            grid.select(grid.table.find("tr[data-uid='" + data[i].uid + "']"));
+                            break;
+                        }
+                    }
+                });
+            }
+        });
+    });
+
+    // Función para mostrar detalle
+    function mostrarDetalle(event) {
+        var grid = $("#gridVehiculosInvolucrados").data("kendoGrid");
+        var row = $(event.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        var IdVehiculoInvolucrado = dataItem.IdVehiculoInvolucrado;
+        var IdPropietarioInvolucrado = dataItem.IdPropietarioInvolucrado;
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ModalDetallesVehiculo", "CapturaAccidentes")',
+            type: 'POST',
+            data: {
+                IdVehiculoInvolucrado: IdVehiculoInvolucrado,
+                IdPropietarioInvolucrado: IdPropietarioInvolucrado
+            },
+            success: (data) => {
+                $('#ModalBodyMostrarDetalle').html(data);
+                $('#mostrarDetalleModal').modal('show');
+                hideLoading();
+            },
+            error: function () {
+                sitteg_warning("Ocurrió un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+    // Función para eliminar registro
+    function eliminarRegistro(event) {
+        if ('@ViewBag.EsSoloLectura' === 'True') {
+            return;
+        }
+
+        var grid = $("#gridVehiculosInvolucrados").data("kendoGrid");
+        var row = $(event.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        var IdVehiculoInvolucrado = dataItem.IdVehiculoInvolucrado;
+        var IdPropietarioInvolucrado = dataItem.IdPropietarioInvolucrado;
+        var IdAccidente = dataItem.IdAccidente;
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ModalBorraRegistro", "CapturaAccidentes")',
+            type: 'POST',
+            data: {
+                IdVehiculoInvolucrado: IdVehiculoInvolucrado,
+                IdPropietarioInvolucrado: IdPropietarioInvolucrado,
+                IdAccidente: IdAccidente
+            },
+            success: (data) => {
+                $('#ModalBodyEliminar').html(data);
+                $('#mostrarEliminarModal').modal('show');
+                hideLoading();
+            },
+            error: function () {
+                sitteg_warning("Ocurrió un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+</script>
+

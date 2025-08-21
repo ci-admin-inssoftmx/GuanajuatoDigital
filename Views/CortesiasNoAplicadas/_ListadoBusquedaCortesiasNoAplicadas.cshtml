@@ -1,0 +1,83 @@
+﻿@model List<CortesiasNoAplicadasModel>
+
+<div class="row">
+  
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid(Model)
+            .Name("gridRegistro")
+            .Columns(columns =>
+            {				
+                columns.Bound(c => c.IdInfraccion).Hidden();
+                columns.Bound(c => c.folioInfraccion).Title("Folio infracción").Width(90);
+                columns.Bound(c => c.FechaInfraccion).Title("Fecha infracción").Width(90);
+                columns.Bound(c => c.Conductor).Width(110);
+                columns.Bound(c => c.Placas).Width(90);
+                columns.Bound(c => c.Serie).Width(100);
+                columns.Bound(c => c.Propietario).Width(90);
+                columns.Bound(c => c.Estatus).Title("Estatus infracción").Width(90);
+                columns.Command(c => c.Custom("Seleccionar").Click("mostrarDetalle")).Width(80);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+           // //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+         	.ServerOperation(false)
+            .PageSize(5).Model(model => model.Id(p => p.IdInfraccion))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.folioInfraccion);
+                s.Field(c => c.FechaInfraccion);
+                s.Field(c => c.Conductor);
+                s.Field(c => c.Placas);
+                s.Field(c => c.Serie);
+                s.Field(c => c.Propietario);
+                s.Field(c => c.Estatus);
+
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#gridRegistro")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+    </div>
+</div>
+
+<script>
+    function mostrarDetalle(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var Id = dataItem.folioInfraccion;
+        //console.log(Id);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("MostrarDetalle", "CortesiasNoAplicadas")',
+            type: 'POST',
+            data: { Id: Id },
+            success: function (result) {
+                $("#detalle").html(result);
+                $("#detalle").show();
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+</script>

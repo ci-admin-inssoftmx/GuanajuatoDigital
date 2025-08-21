@@ -1,0 +1,281 @@
+﻿<script>
+    function onRowSelectC(e) {
+        var selectedRow = this.select();
+
+        var IdPersona; 
+        
+        if (selectedRow.length > 0) {
+            var dataItem = this.dataItem(selectedRow); 
+            console.log("DTI",dataItem)
+            IdPersona = dataItem.idPersona;
+            console.log(dataItem.idPersona)
+            idAuto = parseInt(window.IdVehiculo)
+        }
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("GuardarConductorVehiculo", "CapturaAccidentes")',
+            type: 'POST',
+            data: { IdPersona: IdPersona, idAuto: idAuto },
+            success: function (result) {
+            sitteg_success("Se ha agregado un conductor")
+                $('#modalAgregarConductor').modal('hide');
+                $('.modal-backdrop').remove();
+                abrirModalDetalles();  
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning("Ocurrio un error, intente de nuevo mas tarde");
+                hideLoading();
+            }
+        });
+    }
+
+    $('#modalComplementoVehiculo').on('click', function (e) {
+        e.stopPropagation();
+    });
+
+    function abrirModalDetalles() {
+        $.ajax({
+            url: '@Url.Action("ModalAgregarComplemeto")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#modalComplementoVehiculo').modal({ backdrop: 'static', keyboard: false });
+                $('#modalComplementoVehiculo').modal('show');
+                $('#ModalBodymodalComplementoVehiculo').html(data);
+                $('#modalComplementoVehiculo').on('click', function (e) {
+                    e.stopPropagation();
+                });
+            }
+        });
+    }
+
+
+    function btnModalEditarPersona(id) {
+        showLoading();
+
+        window.EjecPersona=function (){
+            var grd = $("#gridConductores").data("kendoGrid").dataSource.read()
+        }
+
+        $.ajax({
+            url: '@Url.Action("ajax_ModalEditarPersonaFisica","Personas")',
+            type: 'GET',
+            data: { id: id },
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (value) {
+                hideLoading();
+                
+                console.log("1");
+                $('#modalBodyEditarPersona').html(value);
+                console.log("2");
+                $('#modalEditarPersona').modal({ backdrop: 'static', keyboard: false });
+                console.log("3");
+                $("#XClosePersona").addClass("d-none")
+                console.log("4");
+                $("#cerrarPersonas").addClass("d-none")
+                console.log("5");
+                $("#EditarPersonaPersonas").addClass("d-none")
+                console.log("6");
+                $('#modalEditarPersona').modal('show');
+                
+                console.log("7");
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+
+    function cerrar(){
+                $('#confirmacionModalE').modal('show');
+
+        
+    }
+     function aceptarCerrarModE() {
+       $('#modalBodyEditarPersona').html("");
+        $('#modalEditarPersona').modal('hide');
+        $('body').removeClass('model-open');
+        $('.modal-backdrop').remove();
+        $('#confirmacionModalE').modal('hide');
+    } 
+
+    function cancelarConfirmacionE() {
+        $('#confirmacionModalE').modal('hide');
+
+    }
+    function btnEditarPersona2() {
+
+         var validator = $("#frmEditarPersona").kendoValidator().data('kendoValidator');
+        var idTelefono = $("#telefono");
+        var idTelefonoValue = idTelefono.val();
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'nombre' });
+        controlsValidate.push({ 'controlName': 'PersonaDireccion_colonia' });
+        controlsValidate.push({ 'controlName': 'PersonaDireccion_calle' });
+        controlsValidate.push({ 'controlName': 'PersonaDireccion_numero' });
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+        //// DROP DOWN LIST
+        controlsValidate = [];
+        controlsValidate.push({ 'controlName': 'idGenero' });
+        controlsValidate.push({ 'controlName': 'idCatTipoPersona' });
+        controlsValidate.push({ 'controlName': 'idEntidadED' });
+        
+        
+        if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+        if (isValid) {
+            var formData = $("#frmEditarPersona").serialize();
+            showLoading();
+            $.ajax({
+                url: '@Url.Action("ajax_EditarPersona","Personas")',
+                type: 'POST',
+                data: formData,
+                success: function (result) {
+                    $('#modalBodyEditarPersona').html("");
+                    $('#modalEditarPersona').modal('hide');
+
+                    var grid = $("#gridConductores").data("kendoGrid");
+
+                    if (result && result.data) {
+                        var dataArray = [result.data];
+                        grid.dataSource.data(dataArray);
+                    } else {
+                        console.error("La respuesta no tiene la estructura esperada:", result);
+                    }
+
+  
+                    sitteg_success('Elemento guardado correctamente')
+                    hideLoading();
+                },
+                error: function (xhr, status) {
+                    var errmsg = xhr.responseText;
+                    console.log(errmsg)
+                    sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                    hideLoading();
+                }
+            });
+        }
+        else {
+            idTelefono.prop("disabled", false);         
+            sitteg_info('Debe llenar los campos requeridos');
+            return;
+        }
+
+    }
+
+    function onDataBound() {
+        var grid = $("#gridConductores").data("kendoGrid");
+
+        if (grid.dataSource.total() === 1) {
+            setTimeout(function () {
+                var row = grid.tbody.find("tr:first");
+                grid.select(row);
+                //row.find(".k-checkbox").trigger("click");
+            }, 50);
+        }
+    }
+
+    </script>
+
+
+    <div class="modal fade modalCustom" id="modalEditarPersona" aria-labelledby="modalEditarPersona" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+        <div class="modal-content">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+
+      
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="bg-light py-1"></div>
+                </div>
+            </div>
+            <div class="modal-body" id="modalBodyEditarPersona">
+            </div>
+        </div>       
+    </div>
+
+</div>
+<div class="modal fade" id="confirmacionModalE" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Confirmación</h5>
+                <button type="button" onclick="cancelarConfirmacionE()">X</button>
+            </div>
+            <div class="modal-body">
+                ¿Está seguro de que desea cerrar la ventana y perder la información ingresada?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirmarCerrar" onclick="aceptarCerrarModE()">Aceptar</button>
+                <button type="button" class="btn btn-secondary" id="cancelarConfirmacion" onclick="cancelarConfirmacionE()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+<div class="col-12 my-4 px-4 rounded gridCustom">
+        @(
+                Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel>()
+                .Name("gridConductores")
+            .Events(events => events.Change("onRowSelectC"))
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.IdPersona).Hidden();
+                    columns.Bound(c => c.IdVehiculo).Hidden();
+                    columns.Select().Width(50).ClientHeaderTemplate(" ");
+                    columns.Bound(c => c.nombre).Title("Nombre").Width(100);
+                    columns.Bound(c => c.apellidoPaterno).Title("Apellido Paterno").Width(100);
+                    columns.Bound(c => c.apellidoMaterno).Title("Apellido Materno").Width(100);
+                    columns.Bound(c => c.RFC).Title("RFC").Width(100);
+                    columns.Bound(c => c.CURP).Title("CURP").Width(100);
+                    columns.Bound(c => c.numeroLicencia).Title("No. de Licencia").Width(100);
+                    columns.Bound(c => c.numeroConsecutivo).ClientTemplate(
+                "<button onclick=\"btnModalEditarPersona('#= idPersona #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>"
+                    ).Title("Acciones").Width(100);
+
+        })
+            .HtmlAttributes(new { style = "height:450" })
+            .Pageable(p => p.Enabled(true))
+            .DataSource(dataSource => dataSource
+            .Ajax())
+            .Sortable(scr => scr.Enabled(true))
+            .Scrollable(scr => scr.Height(350))
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("ajax_BuscarPersonasFiscasPagination", "CapturaAccidentes"))
+            //.Create(read => read.Action("ajax_BuscarPersonasFiscasPagination", "CapturaAccidentes"))
+            .PageSize(10)
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.nombre);
+                s.Field(c => c.apellidoPaterno);
+                s.Field(c => c.apellidoMaterno);
+                s.Field(c => c.RFC);
+                s.Field(c => c.CURP);
+                s.Field(c => c.numeroLicencia);
+
+            })
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            .Events(events => events.DataBound("onDataBound"))
+
+        )
+</div>
+</div>

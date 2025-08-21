@@ -1,0 +1,60 @@
+﻿@model List<GruasConcesionariosModel>
+
+<div class="col-12 col-md-6 col-lg-12">
+    <div class="row">
+        <div class="col-12 mb-4 px-4 rounded gridCustom">
+            @(
+                Html.Kendo().Grid(Model)
+                .Name("GridDetail")
+                .Columns(columns =>
+                {
+                    columns.Bound(p => p.TipoGrua).Title("Tipo Grúas").Width(90);
+                    columns.Bound(p => p.placas).Title("Placa Grúa").Width(90);
+                    columns.Bound(p => p.capacidadT).Title("Capacidad").Width(150);
+                    columns.Bound(p => p.fechaArribo).Title("Hora de arribo").Width(150).ClientTemplate("#= kendo.toString(fechaArribo, 'HH:mm') #");
+                    columns.Bound(p => p.fechaInicio).Title("Hora de inicio").Width(150).ClientTemplate("#= kendo.toString(fechaInicio, 'HH:mm') #");
+                    columns.Bound(p => p.fechaFinal).Title("Hora de término").Width(150).ClientTemplate("#= kendo.toString(fechaFinal, 'HH:mm') #");
+                    columns.Bound(p => p.minutosManiobra).Title("Minutos de maniobra").Width(150);
+                    columns.Bound(p => p.abanderamiento).Title("abanderamiento").Width(150);
+                    columns.Bound(p => p.operadorGrua).Title("operador").Width(150);
+                    columns.Bound(p => p.costoAbanderamiento).Title("Costo de abanderamiento").Width(150);
+                    columns.Bound(p => p.costoBanderazo).Title("Costo de banderazo").Width(150);
+                    columns.Bound(p => p.costoSalvamento).Title("Costo de salvamento").Width(150);
+                    columns.Bound(p => p.costoArrastre).Title("Costo de arrastre").Width(150);
+                    columns.Bound(p => p.costoTotal).Title("Costo total").Width(150);
+
+                }).HtmlAttributes(new { style = "height:350" })
+                .Pageable(p => p.Enabled(true))
+                .Scrollable(scr => scr.Height(350))
+                .Sortable()
+                .DataSource(dataSource => dataSource
+                .Ajax()
+                .ServerOperation(false)
+                )
+                .Events(x => x.DataBound("replaceLegend").DataBinding("replaceLegend"))
+                )
+        </div>
+    </div>
+</div>
+<div class="row my-4">
+    <div class="col-12 col-md-6 mx-md-auto">
+        <div class="row justify-content-around">
+            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                    <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                </button>
+            </div>
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <div class="controlButton">
+
+                    <button type="button" class="btnPrimary px-3" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Aceptar</b></h6>
+                    </button>
+                    @*<button class="btnPrimary px-3" onclick="submitVehiculo()"><h5 class="m-0"><b>Guardar</b></h5></button>*@
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

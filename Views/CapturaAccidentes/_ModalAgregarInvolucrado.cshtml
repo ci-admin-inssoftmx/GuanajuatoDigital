@@ -1,0 +1,430 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel
+
+<script>
+
+	function buscarConductor() {
+		// HMG: Se cambian funcionalidades por lentitud en la carga y se hace el paginado.
+		var licenciaBusqueda = $("#PersonaModel_numeroLicenciaBusqueda").val().trim();
+		var rfcBusqueda = $("#PersonaModel_RFCBusqueda").val().trim();
+		var curpBusqueda = $("#PersonaModel_CURPBusqueda").val().trim();
+		var nombreBusqueda = $("#PersonaModel_nombreBusqueda").val().trim();
+		var apellidoPaternoBusqueda = $("#PersonaModel_apellidoPaternoBusqueda").val().trim();
+
+		if (licenciaBusqueda !== "") {
+			if (licenciaBusqueda.length < 10) {
+				sitteg_warning("El número de licencia debe tener al menos 10 caracteres.");
+				return;
+			}
+		}
+		if (rfcBusqueda !== "") {
+			if (rfcBusqueda.length < 10) {
+				sitteg_warning("El RFC debe tener al menos 10 caracteres.");
+				return;
+			}
+		}
+
+		if (curpBusqueda !== "") {
+			if (curpBusqueda.length < 10) {
+				sitteg_warning("El CURP debe tener al menos 10 caracteres.");
+				return;
+			}
+		}
+
+		if ((nombreBusqueda !== "" || apellidoPaternoBusqueda !== "") &&
+			(nombreBusqueda.length < 3 || apellidoPaternoBusqueda.length < 3)) {
+			sitteg_warning("El nombre y el apellido paterno deben tener al menos 3 caracteres.");
+			return;
+		}
+
+		//    var grid = $("#gridPersonas").data("kendoGrid");
+		//   grid.dataSource.data([]);
+		var formData = $("#buscarConductorForm").serializeArray();
+
+
+		console.log("busqueda: " + formData);
+
+		// Aplica Trim a cada valor en formData
+		$.each(formData, function (index, field) {
+			field.value = $.trim(field.value);
+		});
+
+		// Convierte de nuevo a objeto
+		var trimmedData = {};
+		var findData = false;
+		$.each(formData, function (index, field) {
+			trimmedData[field.name] = field.value;
+			if (!findData) {
+				if (field.value != '' && field.value != undefined) {
+					findData = true;
+				}
+			}
+		});
+
+
+
+
+		showLoading();
+		console.log("busqueda: " + trimmedData);
+
+		$.ajax({
+			//  url: '/Personas/BuscarPorParametro',
+			url: '/Personas/BuscarPorParametroPaginado',
+			type: 'POST',
+			data: trimmedData,
+			success: function (response) {
+				console.log("response: ", response);
+				//   if (response.tipo == "success") {
+				//     mostrarModal(response.Data);
+				//     hideLoading();
+				//    return;
+				// }
+				if (response.Data == "1") {
+					hideLoading();
+					buscaEnLicencias()
+					return;
+				}
+				var personasList = response.Data;
+				if (personasList != null) {
+					var grid = $("#gridPersonas").data("kendoGrid");
+					grid.dataSource.data(response.Data);
+					grid.dataSource._total = response.Total;
+				}
+				else {
+					sitteg_warning("La búsqueda no arrojó resultados.");
+					var grid = $("#gridPersonas").data("kendoGrid");
+					grid.dataSource.data([]);
+				}
+
+				hideLoading();
+			},
+			error: function (error) {
+				sitteg_warning('Ocurrió un error en la búsqueda.');
+				hideLoading();
+			}
+		});
+	}
+
+
+	function mostrarModal(jsonData) {
+		const modal = document.getElementById('modalLicencias');
+
+		const modalContent = `
+						<div class="modal-header">
+							<h5 class="modal-title">Datos encontrados en el sistema de licencias</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<p><strong>Nombre:</strong> ${jsonData.nombre}</p>
+							<p><strong>Apellido Paterno:</strong> ${jsonData.primer_apellido}</p>
+							<p><strong>Apellido Materno:</strong> ${jsonData.segundo_apellido}</p>
+							<p><strong>Tipo de Licencia:</strong> ${jsonData.tipolicencia}</p>
+							<p><strong>Número de Licencia:</strong> ${jsonData.num_licencia}</p>
+							<p><strong>Fecha de Expedición:</strong> ${jsonData.fecha_inicio_vigencia}</p>
+							<p><strong>Fecha de Vigencia:</strong> ${jsonData.fecha_termino_vigencia}</p>
+						</div>
+					  <div class="modal-footer">
+						<button type="button" id="cerrarModalBtn" class="btn btn-secondary controlButton" data-dismiss="modal">Cerrar</button>
+						<button type="button" id="guardarEnBaseDeDatosBtn" class="btn btn-primary controlButton">Guardar en Base de Datos</button>
+					  </div>
+					`;
+
+		modal.querySelector('.modal-content').innerHTML = modalContent;
+		const cerrarModalBtn = document.getElementById('cerrarModalBtn');
+		cerrarModalBtn.addEventListener('click', () => {
+			$('#modalLicencias').modal('hide');
+		});
+
+		const guardarEnBaseDeDatosBtn = document.getElementById('guardarEnBaseDeDatosBtn');
+		guardarEnBaseDeDatosBtn.addEventListener('click', () => {
+			const tipoLicenciaMapping = {
+				"TIPO A  CHOFER AUTOMOVILISTA": 1,
+				"TIPO B CHOFER SERVICIO PÚBLICO": 2,
+				"TIPO C  Chofer Servicio de Carga": 3,
+				"TIPO D -MOTOCICLISTA": 4,
+				"PERMISO A -AUTOMOVIL-": 6,
+				"PERMISO D -MOTOCICLETA-": 7,
+				"NO APLICA": 8,
+				"TIPO A": 1,
+				"TIPO B": 2,
+				"TIPO C": 3,
+				"TIPO D": 4,
+				"PERMISO A": 6,
+				"PERMISO D": 7,
+				"A-AUTOMOVILISTA": 1,
+				"B-CHOFER DE SERVICIO PÚBLICO": 2,
+				"C-CHOFER DE SERVICIO DE CARGA": 3,
+				"D-MOTOCICLISTA": 4,
+				"PA-PERMISO AUTOMOVILISTA": 6,
+				"PD-PERMISO MOTOCICLISTA": 7,
+
+				// Puedes agregar más mapeos aquí si es necesario
+			};
+			const tipoLicenciaNumero = tipoLicenciaMapping[jsonData.tipolicencia] || 0;
+			jsonData.id_tipo_licencia = tipoLicenciaNumero;
+			var idVehiculo = $("#IdVehiculoH").val();
+			showLoading();
+			$.ajax({
+				type: 'POST',
+				url: '/CapturaAccidentes/guardaDesdeServicio',
+				data: jsonData,
+				success: function (response) {
+					$('#modalLicencias').modal('hide');
+					var personasList = [response];
+					var grid = $("#gridConductores").data("kendoGrid");
+					grid.dataSource.data(personasList);
+					hideLoading();
+				},
+				error: function (error) {
+					sitteg_warning('Error al guardar en la base de datos:');
+					hideLoading();
+				}
+			});
+		});
+
+		$('#modalLicencias').modal('show');
+	}
+
+	function onRowSelect(e) {
+		var selectedRow = this.select();
+		var dataItem = this.dataItem(selectedRow);
+		var idPersona = dataItem.idPersonaInvolucrado;
+		$('#idPersonaInput').val(idPersona);
+
+		var nombre = dataItem.nombre
+		var apellidoPaterno = dataItem.apellidoPaterno
+		var apellidoMaterno = dataItem.apellidoMaterno
+		var CURP = dataItem.CURP
+		var fechaNacimiento = dataItem.fechaNacimiento.split('T')[0]
+		var dat = fechaNacimiento.split("-")
+		fechaNacimiento = dat[2] + "/" + dat[1] + "/" + dat[0]
+		var RFC = dataItem.RFC
+
+		var nombreCompleto = nombre + " " + apellidoPaterno + " " + apellidoMaterno;
+		$('#gridVehiculosInvolucrados').data('idPersona', idPersona);
+
+		document.getElementById("nombreModal").innerText = nombreCompleto;
+		document.getElementById("curpModal").innerText = CURP;
+		document.getElementById("fechaNacimientoModal").innerText = fechaNacimiento;
+		document.getElementById("rfcModal").innerText = RFC;
+
+		$('#buscarInvolucradoModal').modal('hide');
+		$('body').removeClass('model-open');
+		$('.modal-backdrop').remove();
+		$('#sinBuqueda').hide();
+		$('#involucradoSeleccionado').show();
+
+	}
+
+	function involucardoNoVehiculo() {
+		var grid = $("#gridInvolucradosPrevio").data("kendoGrid");
+		var selectedItem = grid.dataItem(grid.select());
+		var idPersona = selectedItem.idPersonaInvolucrado;
+		$('#idPersonaInput').val(idPersona);
+
+		var nombre = dataItem.nombre
+		var apellidoPaterno = dataItem.apellidoPaterno
+		var apellidoMaterno = dataItem.apellidoMaterno
+		var CURP = dataItem.CURP
+		var fechaNacimiento = convertDate(dataItem.fechaNacimiento);
+		fechaNacimiento = fechaNacimiento == "01/01/0001" ? "" : fechaNacimiento;
+		var RFC = dataItem.RFC
+
+		var nombreCompleto = nombre + " " + apellidoPaterno + " " + apellidoMaterno;
+		$('#gridVehiculosInvolucrados').data('idPersona', idPersona);
+
+		document.getElementById("nombreModal").innerText = nombreCompleto;
+		document.getElementById("curpModal").innerText = CURP;
+		document.getElementById("fechaNacimientoModal").innerText = fechaNacimiento;
+		document.getElementById("rfcModal").innerText = RFC;
+
+		$('#buscarInvolucradoModal').modal('hide');
+		$('body').removeClass('model-open');
+		$('.modal-backdrop').remove();
+		$('#sinBuqueda').hide();
+		$('#involucradoSeleccionado').show();
+
+	}
+	function mostrarModalCapturarConductor() {
+
+		$.ajax({
+			url: '@Url.Action("ModalCapturaConductor")',
+			type: 'POST',
+			contentType: "application/json; charset=utf-8",
+			dataType: "html",
+			success: function (data) {
+				$('#ModalBodyCapturarConductor').html(data);
+				$('#capturarConductorModal').modal('show');
+			}
+		});
+	}
+
+	function cerrarModalInvolucrado(){
+		$('#buscarInvolucradoModal').modal('hide');
+
+	}
+</script>
+<!--SECCION INVOLUCRADOS-->
+<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+	<div class="col-md-12 col-md-auto">
+		<div class="row align-items-center justify-content-center justify-content-md-start">
+			<div class="col-auto">
+				<div class="border border-2 border-dark rounded-circle">
+					<h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+						<b>3</b>
+					</h5>
+				</div>
+			</div>
+			<div class="col-auto p-0">
+				<i class="icon-involucrado h1 colorPrimary"></i>
+			</div>
+			<div class="col-md-9 my-3">
+				<h2 class="m-0 h3"><b>Involucrados</b></h2>
+			</div>
+
+			<div class="col-auto">
+                    <button class="btn-close" type="button" onclick="cerrarModalInvolucrado()"><b></b></button>
+            </div>
+			
+		</div>
+	</div>
+
+</div>
+<div class="row">
+	<div class="col-5 pe-0">
+		<div class="bgSuccess py-1"></div>
+	</div>
+	<div class="col-7 ps-0">
+		<div class="bg-light py-1"></div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-12 my-4">
+		<h5 class="px-4"><b>Datos de los involucrados</b></h5>
+		<h6 class="px-4 text-muted">Selecciona entre búsqueda / nueva persona </h6>
+	</div>
+</div>
+<div class="row px-4 align-items-end">
+	<div class="col-12 mt-4 controlForm">
+		<label>Involucrado de accidente:</label>
+	</div>
+</div>
+<div>
+	<nav class="tabCustom">
+		<div class="nav nav-tabs row mx-0" id="nav-tab" role="tablist">
+			<button class="nav-link col active" id="busqueda-involucrado-tab" data-bs-toggle="tab" data-bs-target="#busqueda-involucrado" type="button" role="tab" aria-controls="busqueda-involucrado" aria-selected="true">
+				<div class="row justify-content-center align-items-center px-3 py-2">
+					<div class="col-auto radioCustom p-0">
+						<div class="rounded-circle m-2"></div>
+					</div>
+					<div class="col-auto p-0">
+						<h5 class="m-0"><i class="icon-fisica h4"></i> <b>Búsqueda de involucrado</b></h5>
+					</div>
+				</div>
+			</button>
+			<button class="nav-link col" id="none-involucrado-tab" data-bs-toggle="tab" data-bs-target="#none-involucrado" type="button" role="tab" aria-controls="none-involucrado" aria-selected="false">
+				<div class="row justify-content-center align-items-center px-3 py-2">
+					<div class="col-auto radioCustom p-0">
+						<div class="rounded-circle m-2"></div>
+					</div>
+					<div class="col-auto p-0">
+						<h5 class="m-0"><i class="icon-sinPropietario h4"></i> <b>Se ignora involucrado</b></h5>
+					</div>
+				</div>
+			</button>
+		</div>
+	</nav>
+	<div class="tab-content" id="nav-tabContent">
+		<div class="tab-pane tabCustomConteiner fade show active" id="busqueda-involucrado" role="tabpanel" aria-labelledby="busqueda-involucrado-tab">
+			<!-- Componente de busqueda de personas físicas -->
+			
+			@{
+				var config =new GuanajuatoAdminUsuarios.Models.Components.BusquedaPersonaFisicaConfig();
+				config.NombreVariableToChange = "idPersonaInput";
+				config.TextoBotonAgregarPersona = "Agregar un nuevo involucrado";
+			}
+				@await Component.InvokeAsync("BusquedaPersonaFisica",new{config})
+			<div id="tablaPersonas">
+                    <partial name="_InfoPrevioInvolucrados" />
+			</div>
+			<div class="row">
+				<div class="col-12">
+					<div class="tabCustomEnd"></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="tab-pane tabCustomConteiner fade" id="none-involucrado" role="tabpanel" aria-labelledby="none-involucrado-tab">
+			<div class="row px-4 my-4 py-5 align-items-end">
+				<div class="col-12 col-md-10 mx-md-auto text-center">
+					<h3><b>Se utiliza cuando se tiene una infracción o accidente</b></h3>
+					<h4 class="fw-normal">y se desconoce el involucrado</h4>
+					<div class="row ">
+						<div class="col-12 col-md-8 mx-md-auto col-lg-5 ">
+							<div class="controlButton my-3">
+								<button class="btnPrimary" name="conductorNone" id="conductorNone" type="button" onclick="sinInvolucrado()"><h5 class="m-0"><b>Finalizar captura</b></h5></button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12">
+					<div class="tabCustomEnd"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+function sinInvolucrado() {
+    showLoading();
+    $.ajax({
+        url: '@Url.Action("SinInvolucrado", "CapturaAccidentes")',
+        type: 'GET',
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: false,
+        success: function (data) {
+			var idPersona = data.idPersona;
+            var nombre = data.nombre;
+            var apellidoPaterno = data.apellidoPaterno;
+            var apellidoMaterno = data.apellidoMaterno;
+            var CURP = data.CURP;
+            var fechaNacimiento = data.fechaNacimiento;
+            console.log("FEC", fechaNacimiento);
+            fechaNacimiento = fechaNacimiento == "01/01/0001" ? "" : fechaNacimiento;
+            var RFC = data.RFC;
+
+          var nombreCompleto = nombre;
+
+			if (apellidoPaterno !== null) {
+				nombreCompleto += " " + apellidoPaterno;
+			}
+
+			if (apellidoMaterno !== null) {
+				nombreCompleto += " " + apellidoMaterno;
+			}
+			$('#idPersonaInput').val(idPersona);
+			document.getElementById("nombreModal").innerText = nombreCompleto;
+            document.getElementById("curpModal").innerText = CURP;
+            document.getElementById("fechaNacimientoModal").innerText = fechaNacimiento;
+            document.getElementById("rfcModal").innerText = RFC;
+
+            $('#buscarInvolucradoModal').modal('hide');
+            $('body').removeClass('model-open');
+            $('.modal-backdrop').remove();
+            $('#sinBuqueda').hide();
+            $('#involucradoSeleccionado').show();
+
+            hideLoading();
+        },
+        error: function () {
+            sitteg_warning("Ocurrió un error al procesar su solicitud.");
+            hideLoading();
+        }
+    });
+}
+
+</script>

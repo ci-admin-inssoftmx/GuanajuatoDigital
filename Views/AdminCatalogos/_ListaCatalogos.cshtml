@@ -1,0 +1,102 @@
+﻿<script>
+    function filtroBusqueda() {
+        return {
+            idCatalogo: $("#idCatalogoFiltro").val(),
+            idDependencia: $("#idDependenciaFiltro").val()
+        }
+    }
+</script>
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.AdminCatalogosModel>()
+            .Name("gridCatalogos")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.elemento).Title("Elemento").Width(30);
+                columns.Bound(c => c.dependencia).Title("Dependencia").Width(60);
+                columns.Command(command =>
+                {
+                    command.Custom("Editar")
+                .Click("editar")
+                .Text("Editar")
+                .HtmlAttributes(new { @class = "btn btn-primary" });
+                }).Width(100);
+            })
+            .HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetCatalogos", "AdminCatalogos").Data("filtroBusqueda"))
+            .PageSize(5)
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.elemento);
+                s.Field(c => c.dependencia);
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+            )
+
+    </div>
+</div>
+
+<script>
+
+    function editar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdAgenciaMinisterio = dataItem.IdAgenciaMinisterio;
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarAgenciaMinisterioModal", "CatAgenciasMinisterio")',
+            type: 'POST',
+            data: { IdAgenciaMinisterio: IdAgenciaMinisterio },
+            success: function (result) {
+                if (result.error) {
+                    sitteg_warning("El usuario no tienen los permisos para esta acción");
+                } else {
+                    $('#ModalBodEditarAgenciaministerio').html(result);
+                    $('#editarAgenciaministerio').modal('show');
+                }
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdAgenciaMinisterio = dataItem.IdAgenciaMinisterio;
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarAgenciaMinisterioModal", "CatAgenciasMinisterio")',
+            type: 'POST',
+            data: { IdAgenciaMinisterio: IdAgenciaMinisterio },
+            success: function (result) {
+                $('#ModalBodEditarAgenciaministerio').html(result);
+                $('#editarAgenciaministerio').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+ 
+</script>

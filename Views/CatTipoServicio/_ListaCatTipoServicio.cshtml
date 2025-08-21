@@ -1,0 +1,89 @@
+﻿ @if (ViewBag.Admin == true)
+{
+    <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+        <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnNuevaCausa" onclick="mostrarModalAgregarTipoS()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addTipoServicio h5 mb-0 me-2"></i><b>Agregar nuevo tipo de servicio</b></h6>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            }
+<div class="row">
+    
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatTipoServicioModel>()
+            .Name("gridCatTipoServicio")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.idCatTipoServicio).Title("Id").Width(40);
+                columns.Bound(c => c.tipoServicio).Title("Tipo Servicio").Width(100);
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(100);
+                columns.Command(c => c.Custom("Editar").Click("getIdTipoServicio")).Width(100);
+                // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetTipos", "CatTipoServicio"))
+            .PageSize(5).Model(model => model.Id(p => p.idCatTipoServicio))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.tipoServicio);
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+            )
+
+
+    </div>
+</div>
+
+    <div class="modal fade modalCustom" id="agregarTipoServicio" aria-labelledby="agregarTipoServicioLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="ModalBodyAgregarTipoServicio">
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+    function getIdTipoServicio(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var idTipoServicio = dataItem.idCatTipoServicio;
+        console.log(idTipoServicio);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarCausasAccidenteModal", "CatTipoServicio")',
+            type: 'POST',
+            data: { idTipoServicio: idTipoServicio },
+            success: function (result) {
+                $('#ModalBodyAgregarTipoServicio').html(result);
+                $('#agregarTipoServicio').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+   
+</script>

@@ -1,0 +1,120 @@
+﻿<script>
+    function filtroOficinas() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+    </script>
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatDelegacionesOficinasTransporteModel>()
+            .Name("gridCatOficinasTransporte")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdOficinaTransporte).Title("Id").Width(40);
+                columns.Bound(c => c.NombreOficina).Title("Nombre de Oficina").Width(100);
+                columns.Bound(c => c.JefeOficina).Title("Jefe de oficina").Width(100);
+                columns.Bound(c => c.Municipio).Title("Sede/Municipio").Width(100);
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(100);
+                columns.Command(c => c.Custom("Editar").Click("getIdOficina")).Width(100);
+                //columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+
+                //columns.Command(c => c.Custom("Delete").Click("redirectDelete")).Width(180);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetDelegacionOfs", "CatDelegacionesOficinasTransporte").Data("filtroOficinas"))
+            .PageSize(5).Model(model => model.Id(p => p.IdOficinaTransporte))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.NombreOficina);
+                s.Field(c => c.JefeOficina);
+                s.Field(c => c.Municipio);
+
+
+            })
+            .Events(x => x.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+    </div>
+</div>
+<div class="modal fade modalCustom" id="agregarDelegacionOficina" aria-labelledby="agregarDelegacionOficinaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyaAgregarDelegacionOficina">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getIdOficina(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdOficinaTransporte = dataItem.IdOficinaTransporte;
+        console.log(IdOficinaTransporte);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarDelegacionOficinaModal", "CatDelegacionesOficinasTransporte")',
+            type: 'POST',
+            data: { IdOficinaTransporte: IdOficinaTransporte },
+            success: function (result) {
+                $('#ModalBodyaAgregarDelegacionOficina').html(result);
+                $('#agregarDelegacionOficina').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdOficinaTransporte = dataItem.IdOficinaTransporte;
+        console.log(IdOficinaTransporte);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarDelegacionOficinaModal", "CatDelegacionesOficinasTransporte")',
+            type: 'POST',
+            data: { IdOficinaTransporte: IdOficinaTransporte },
+            success: function (result) {
+                $('#ModalBodyaAgregarDelegacionOficina').html(result);
+                $('#agregarDelegacionOficina').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

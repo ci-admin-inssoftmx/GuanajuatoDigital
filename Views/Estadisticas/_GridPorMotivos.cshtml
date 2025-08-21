@@ -1,0 +1,53 @@
+﻿@model List<EstadisticaInfraccionMotivosModel>
+<div>
+<div class="row my-4 px-4">
+    <div class="col-md-6">
+       
+        @(Html.Kendo().Grid(Model)
+                .Name("gridConteoMotivos")
+                .Excel(ex => ex.AllPages(true))
+
+            .Columns(columns =>
+            {
+                    columns.Bound(model => model.NumeroMotivos).Title("Cantidad").ClientTemplate("Con #: NumeroMotivos # motivo(s)");
+                    columns.Bound(model => model.ContadorMotivos).Title("Real").ClientFooterTemplate("Total real: #=sum#");
+					columns.Bound(model => model.ResultadoMultiplicacion).Title("Total").ClientFooterTemplate("Total: #=sum#");                
+					//columns.Bound(model => model.TotalReal).Title("Total Real");
+					//columns.Bound(model => model.Total).Title("TotalTotal");
+
+
+				}).HtmlAttributes(new { style = "height:auto" })
+                .Events(events => events.ExcelExport("ConteoMotivos_excelExport")) // Agregar el manejador de eventos ExcelExport
+
+                @*.Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Bottom).PageSizes(true))*@
+                .Pageable(p => p.Enabled(true))
+                .Sortable()
+				   .Scrollable(scr => scr.Enabled(false))
+				   .DataSource(dataSource => dataSource
+				   .Ajax()
+				   .ServerOperation(false)
+				   .Aggregates(aggregates =>
+					 {
+					   aggregates.Add(p => p.ContadorMotivos).Sum();
+					   aggregates.Add(p => p.ResultadoMultiplicacion).Sum();
+					 })
+			)
+                .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+		)
+    </div>
+</div>
+</div>
+ <script>
+   function generateExcelMotivos() {
+        var grid = $("#gridConteoMotivos").data("kendoGrid");
+        var pageSize = grid.dataSource._data.length;
+        var dataSourceTotal = grid.dataSource.total();
+        grid.dataSource.pageSize(dataSourceTotal);
+        grid.saveAsExcel();
+
+        setTimeout(function () {
+            grid.dataSource.pageSize(pageSize);
+        }, 300);
+    }
+</script>

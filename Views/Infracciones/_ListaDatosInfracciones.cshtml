@@ -1,0 +1,29 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CatalogModel
+
+
+@(Html.Kendo().Grid<CatalogModel>()
+    .Name("gridInfraccionesCortesiaDatos")
+    .Columns(columns =>
+    {
+        
+        columns.Bound(c => c.text).Title("Fecha").Width(80);
+        columns.Bound(c => c.value).Title("Observaciones").Width(80);
+       
+    })
+    .HtmlAttributes(new { style = "height:550px" })
+    .DataSource(dataSource => dataSource
+        .Ajax()
+        .Read(read => read.Action("ObtieneDatosInfracciones", "Infracciones"))
+        .ServerOperation(false)
+    )
+    /*.ToolBar(t => t.Search().Text("Buscar..."))
+    .Search(s =>
+    {
+        s.Field(c => c.text);
+        s.Field(c => c.value);
+
+        // Otras búsquedas...
+    })*/
+    .Selectable(selectable => selectable.Mode(GridSelectionMode.Single).Type(GridSelectionType.Row))
+    .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+)

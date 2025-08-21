@@ -1,0 +1,170 @@
+﻿@model GuanajuatoAdminUsuarios.Models.EnvioInfraccionesModel
+
+@{
+	@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+	var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+	var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+
+	$(document).ready(function () {
+		var access = @listaIdsPermitidosJson;
+		var auth = @autorizaciones;
+
+		if (access != undefined && access != '') {
+			if (!access.toString().includes(localStorage.getItem("menuId"))) {
+				Swal.fire({
+					icon: "error",
+					title: "¡El usuario no tiene acceso a esta opción!"
+				});
+				setTimeout(() => {
+					window.location.href = "/Principal";
+				}, 200);
+			} else {
+				//// BUSCAR - CONSULTAR
+				//if (!auth.toString().includes("441")) {
+				//	$("#btnBuscar").prop('disabled', true).css({ "opacity": "0.3" });
+				//	$("#btnEnviarInfracciones").prop('disabled', true).css({ "opacity": "0.3" });
+				//}
+			}
+		} else {
+			Swal.fire({
+				icon: "error",
+				title: "¡El usuario no tiene acceso a esta opción!"
+			});
+			setTimeout(() => {
+				window.location.href = "/Principal";
+			}, 200);
+		}
+	});
+
+</script>
+
+<div class="mainContainer bg-light">
+	<section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+		<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+			<div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+				<div class="row align-items-center justify-content-center justify-content-md-start">
+					<div class="col-auto">
+						<i class="icon-enviar h1 colorPrimary"></i>
+					</div>
+					<div class="col-auto my-3">
+						<h2 class="m-0 h3"><b>Envío de infracciones no pagadas</b></h2>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-12">
+				<div class="bg-light py-1"></div>
+			</div>
+		</div>
+		<div class="col-12 col-md-auto mt-4 mb-2">
+			<h5 class="px-4"><b>Filtros de Búsqueda</b></h5>
+			<h6 class="px-4 text-muted">Filtrar por fecha para localizar la infracción no pagada.</h6>
+		</div>
+		<form id="busquedaInfraccionForm">
+			<div class="row align-items-end my-4 px-4">
+
+				<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+					<div class="controlForm my-3">
+						<label>Inicio:</label>
+						@(
+							Html.Kendo().DatePickerFor(m => m.FechaInicio).Format("dd/MM/yyyy")
+							.Culture("es-ES").Max(DateTime.Now)
+										.HtmlAttributes(new { style = "width: 100%", title = "startDate" })
+							)
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+					<div class="controlForm my-3">
+						<label>Fin:</label>
+						@(Html.Kendo().DatePickerFor(m => m.FechaFin).Format("dd/MM/yyyy")
+							.Culture("es-ES").Max(DateTime.Now)
+							.HtmlAttributes(new { style = "width: 100%", title = "endDate" })
+							)
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+					<div class="controlForm my-3">
+						<label>Folio:</label>
+						@(Html.Kendo().TextBoxFor(m => m.folioInfraccion)
+							.HtmlAttributes(new { style = "width: 100%", title = "folioInfraccion" })
+							)
+					</div>
+				</div>
+			</div>
+		</form>
+@*		<div class="row align-items-center  px-4 px-md-4 pt-3 pb-2">
+			<div class="col-3 ">*@
+				@*<div class="controlButton my-3" onclick="busquedaInfracciones()">
+					@(Html.Kendo().Button()
+						.Name("BuscarEnvio")
+						.HtmlAttributes(new { @class = "btnPrimary" })
+						.Content("<h5 class=\"m-0\"><b>Buscar</b></h5>"))
+				</div>*@
+@*			</div>
+		</div>*@
+		<div class="row">
+		<div class="col-12 col-md-3">
+			<div class="controlButton my-3">
+				<button class="btnPrimary" type="button" id="btnBuscar" onclick="busquedaInfracciones()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+				@* @(Html.Kendo().Button()
+				.Name("BuscarVehiculo")
+				.HtmlAttributes(new { @class = "btnPrimary" })
+				.Content("<h5 class=\"m-0\"><b>Buscar</b></h5>"))*@
+			</div>
+		</div>
+		</div>
+
+		<div class="row justify-content-between align-items-end mb-1">
+			<div class="col-12 col-md-auto mt-4 mb-2">
+				<h5 class="px-4"><b>Listado de infracción</b></h5>
+				<h6 class="px-4 text-muted">Edita los datos de infracción.</h6>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-12 mb-4 px-4 rounded gridEnvio">
+				<div id="tablaEnvioInfracciones">
+					<partial name="_ListaEnvioInfracciones" model="Model" />
+				</div>
+			</div>
+		</div>
+	</section>
+</div>
+
+<script>
+	function busquedaInfracciones() {
+
+		var fechaI = $("#FechaInicio").val()
+		var fechaF = $("#FechaFin").val()
+
+
+		if (fechaI === "" || fechaF === ""){
+			sitteg_warning('Se requieren Fecha Inicio y Fecha Fin para filtrar.');
+			return
+		}
+
+
+
+		var myData = $("#busquedaInfraccionForm").serialize();
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("BusquedaInfracciones", "EnvioInfracciones")',
+			type: 'POST',
+			data: myData,
+			success: function (result) {
+				var grid = $("#gridEnvioInfracciones").data("kendoGrid");
+				grid.dataSource.data(result);
+				grid.refresh();
+				hideLoading();
+			},
+			error: function (error) {
+				sitteg_warning("Se requieren Fecha Inicio y Fecha Fin para filtrar");
+				hideLoading();
+			}
+		});
+	}
+</script>

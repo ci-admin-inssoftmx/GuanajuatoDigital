@@ -1,0 +1,159 @@
+﻿@model GuanajuatoAdminUsuarios.Models.EditarCortesiaModel
+
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Cortesía de infracción</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <form id="editarCortesiaForm" class="row px-4 mb-4 align-items-end">
+        <div class="row">
+            <div class="col-12 my-4">
+                <h6 class="px-4 text-muted">Selecciona si la cortesía fue aplicada o no</h6>
+            </div>
+        </div>
+        <div class="controlForm mb-3">
+            <label>Cortesía aplicada:</label>
+            <div class="btnToggleActive">
+                     @Html.HiddenFor(m=>m.idInfraccion)
+                    @(Html.Kendo().SwitchFor(t => t.infraccionCortesia)
+                    .Checked(true)
+                    .HtmlAttributes(new { id = "cortesiaSwitch", style = "width: 400px; height: 60px;" })
+                    .Messages(c => c.Checked("No aplicada").Unchecked("Aplicada"))
+                    )
+            </div>
+            <br />
+            <div class="row">
+
+                @(Html.Kendo().TextAreaFor(s=>s.ObsevacionesApl)
+                    .HtmlAttributes(new { style = "width: 400px; height: 60px;" })
+                    .Placeholder("Ingresa las observaciones de la aplicacion")
+                    .MaxLength(2000)
+                    
+                )
+                
+
+            </div>
+
+        </div>
+                                            
+    </form>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="editarCortesia()">
+                        @(Html.Kendo().Button()
+                            .Name("EditCortesia")
+                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                            .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+<script>
+    function editarCortesia(){
+        var Mydata = $("#editarCortesiaForm").serialize();
+        var cortesia = $("#cortesiaSwitch").prop("checked");
+         var cortesiaInt = cortesia ? 3 : 4;
+         console.log("j",cortesiaInt)
+    Mydata += "&cortesiaInt=" + cortesiaInt;
+        console.log("Md", Mydata)
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("UpdateCortesia", "Infracciones")',
+            type: 'GET',
+            data: Mydata,
+            success: function (response) {
+                if (response == 4) {
+                    var idInfraccion = response.idInfraccion;
+                   // sitteg_success("Informacion Actualizada");
+                    serviceCrearInfraccion(idInfraccion);
+                    sitteg_success("Informacion Actualizada");
+
+                } else {
+                  sitteg_success("Informacion Actualizada");
+                  $('#editarCortesiaModal').modal('hide');
+                    $("#GridInf").data("kendoGrid").dataSource.read();
+                }
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                hideLoading();
+            }
+        });
+    }
+
+    function serviceCrearInfraccion(idInfraccion) {
+        var shouldGoBack = false;
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ServiceCrearInfraccion", "Infracciones")',
+            type: 'POST',
+            data: { idInfraccion: idInfraccion },
+            success: function (response) {
+               $('#editarCortesiaModal').modal('hide');
+                if (response.success) {
+                    sitteg_success("Infracción actualizada en secretaría de finanzas.");
+                   // shouldGoBack = true;
+                } else if (response.success === false && response.message === "Registro actualizado en RIAG") {
+                    sitteg_info("El registro fue actualizado en RIAG.");
+                   // shouldGoBack = true;
+                } else if (response.success === false && response.message === "Infraccion Guardada, no enviada") {
+                    sitteg_warning("El número de placa excede la longitud máxima, la infracción no se envió a finanzas.");
+                   // shouldGoBack = true;
+                }
+                else if (response.success === false && response.message === "Infracción guardada, no enviada a finanzas") {
+                    sitteg_warning("La infracción no fue enviada a Secretaría de Finanzas.");
+                    //shouldGoBack = true;
+                }
+                else {
+                    sitteg_warning(response.message);
+                }
+                $("#GridInf").data("kendoGrid").dataSource.read();
+
+                var redirectTo = sessionStorage.getItem('redirectTo');
+                console.log("RED", redirectTo);
+                if (shouldGoBack && redirectTo) {
+                    setTimeout(function () {
+                        window.location.href = '/CapturaAccidentes/CapturaAccidenteC';
+                    }, 2000);
+                }
+
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                hideLoading();
+            }
+        });
+    }
+</script>

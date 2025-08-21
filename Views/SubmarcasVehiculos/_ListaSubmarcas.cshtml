@@ -1,0 +1,95 @@
+﻿<div class="row">
+        <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.SubmarcasVehiculosModel>()
+            .Name("gridCatSubmarcas")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdSubmarca).Width(20).Title("Id");
+                columns.Bound(c => c.NombreSubmarca).Width(100);
+                columns.Bound(c => c.estatusDesc).Width(90);
+                columns.Bound(c => c.MarcaVehiculo).Width(90);
+                columns.Command(c => c.Custom("Editar").Click("getId")).Width(100);
+                columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetSubs", "SubmarcasVehiculos"))
+            .PageSize(5).Model(model => model.Id(p => p.IdSubmarca))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.NombreSubmarca);
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+    </div>
+</div>
+
+<script>
+    function getId(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdSubmarca = dataItem.IdSubmarca;
+        console.log(IdSubmarca);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarSubmarcaParcial", "SubmarcasVehiculos")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdSubmarca: IdSubmarca }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#editarSubmarcaBody').html(result);
+                $('#editarSubMarca').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdSubmarca = dataItem.IdSubmarca;
+        console.log(IdSubmarca);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarSubmarcaParcial", "SubmarcasVehiculos")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdSubmarca: IdSubmarca }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#eliminarSubmarcaBody').html(result);
+                $('#eliminarSubMarca').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

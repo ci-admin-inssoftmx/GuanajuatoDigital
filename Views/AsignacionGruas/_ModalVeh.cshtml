@@ -1,0 +1,251 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel
+
+<section class=" bg-white rounded">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-12 col-md-auto">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto">
+                            <div class="border border-2 border-dark rounded-circle">
+                                <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-auto p-0">
+                            <i class="icon-car h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                            <h2 class="m-0 h3"><b>Vehículos involucrados</b></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                     <div class="col-auto">
+                        <div class="row">
+                            <div class="col-auto my-3">
+                                <button class="btn-close" type="button" id="closeModalBtn"></button>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-5 pe-0">
+                    <div class="bgSuccess py-1"></div>
+                </div>
+                <div class="col-7 ps-0">
+                    <div class="bg-light py-1"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mt-4">
+                    <h5 class="px-4"><b>Datos del vehículo</b></h5>
+                    <h6 class="px-4 text-muted">Selecciona el vehículo que requirió el servicio.</h6>
+                </div>
+            </div>
+            <div class="row px-4 align-items-end">
+                <div class="col-12 mt-4 controlForm">
+                    <label>Tipo de búsqueda:</label>
+                </div>
+            </div>
+            <nav class="tabCustom">
+                <div class="nav nav-tabs row mx-0" id="nav-tab" role="tablist">
+                    <button class="nav-link active col" id="placa-vehiculo-tab" data-bs-toggle="tab" data-bs-target="#placa-vehiculo" type="button" role="tab" aria-controls="placa-vehiculo" aria-selected="true">
+                        <div class="row justify-content-center align-items-center px-3 py-2">
+                            <div class="col-auto radioCustom p-0">
+                                <div class="rounded-circle m-2"></div>
+                            </div>
+                            <div class="col-auto p-0">
+                                <h5 class="m-0"><i class="icon-placa h4"></i> <b>Placa del vehículo</b></h5>
+                            </div>
+                        </div>
+                    </button>
+                    <button class="nav-link col" id="serie-vehiculo-tab" data-bs-toggle="tab" data-bs-target="#serie-vehiculo" type="button" role="tab" aria-controls="serie-vehiculo" aria-selected="false">
+                        <div class="row justify-content-center align-items-center px-3 py-2">
+                            <div class="col-auto radioCustom p-0">
+                                <div class="rounded-circle m-2"></div>
+                            </div>
+                            <div class="col-auto p-0">
+                                <h5 class="m-0"><i class="icon-fisica h4"></i> <b>No. de serie del vehículo</b></h5>
+                            </div>
+                        </div>
+                    </button>
+            <button class="nav-link col" id="serie-vehiculo-tab" data-bs-toggle="tab" data-bs-target="#splaca-vehiculo" type="button" role="tab" aria-controls="splaca-vehiculo" aria-selected="false"
+                    onclick="crearSinPlaca()">
+                <div class="row justify-content-center align-items-center px-3 py-2">
+                    <div class="col-auto radioCustom p-0">
+                        <div class="rounded-circle m-2"></div>
+                    </div>
+                    <div class="col-auto p-0">
+                        <h5 class="m-0"><i class="icon-fisica h4"></i> <b>Sin serie o placa</b></h5>
+                    </div>
+                </div>
+            </button>
+                </div>
+            </nav>
+            <form id="buscarVehiculoForm">
+
+                <div class="tab-content" id="nav-tabContent">
+
+                    <div class="tab-pane tabCustomConteiner fade show active" id="placa-vehiculo" role="tabpanel" aria-labelledby="placa-vehiculo-tab">
+                        <div class="row px-4 mt-4 pb-4 align-items-end">
+                            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Placa)
+                                        .Label(l => l.Content("Placa del vehículo:"))
+                                        .Placeholder("Ingresa la placa del vehículo")
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                </div>
+                            </div>
+                        
+                            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="row">
+                                    <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0" onclick="dirigir()">
+                                        @(Html.Kendo().Button()
+                                            .Name("backVehiculo")
+                                            .HtmlAttributes(new { @class = "px-5" })
+                                            .Content("<h6 class=\"m-0\"><i class=\"icon-back me-2\" data-bs-dismiss=\"modal\" aria - label = \"Close\" ></i><b>Capturar nuevo vehículo</b></h6>"))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="tabCustomEnd"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane tabCustomConteiner fade" id="serie-vehiculo" role="tabpanel" aria-labelledby="serie-vehiculo-tab">
+                        <div class="row px-4 mt-4 pb-4 align-items-end">
+                            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Serie)
+                                        .Label(l => l.Content("Número de serie del vehículo:"))
+                                        .Placeholder("Ingresa el número de serie del vehículo")
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="tabCustomEnd"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane tabCustomConteiner fade" id="splaca-vehiculo" role="tabpanel" aria-labelledby="splaca-vehiculo-tab">
+                        <div class="row px-4 mt-4 pb-4 align-items-end">
+                            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <div class="col-12 col-md-6 mx-md-auto col-lg-4 mx-lg-0 ">
+                                         <div class="controlButton my-3" onclick="busquedaVehiculo(0)">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="row justify-content-center align-items-center">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 text-center">
+                    <div class="controlButton my-3" onclick="busquedaVehiculo(1)">
+                        @(Html.Kendo().Button()
+                            .Name("buscar")
+                            .HtmlAttributes(new { @class = "btnPrimary" })
+                            .Content("<h5 class=\"m-0\"><b>Buscar</b></h5>"))
+                    </div>
+                </div>
+            </div>
+            <div id="listadoDetalleVehiculo">
+                <partial name="_ListaBusquedaVehiculo" model="Model" />
+            </div>
+
+    <div class="modal fade modalCustom" id="VehiculoServiceModal" aria-labelledby="VehiculoServiceLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-body bg-light" id="ModalBodyVehiculoService">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function busquedaVehiculo(bandera) {
+        var formData = $("#buscarVehiculoForm").serialize();
+
+        console.log(formData);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("BuscarVehiculo")',
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                if (response.success === false) {
+                    sitteg_warning("No se encontraron resultados");
+                    return;
+                }
+                var sinBusqueda = "@ViewBag.SinBusquedaAG";
+
+                if (response.noResults) {
+                    if (sinBusqueda == "FALSE") {
+                        Swal.fire({
+                            icon: "info",
+                            title: "Vehículo no registrado en RIAG",
+                            text: "¡Vehículo sin captura en el Registro de Infracciones y Accidentes de Guanajuato!",
+                            showCancelButton: true,
+                            showConfirmButton: false,
+                            cancelButtonText: "Cerrar",
+                        });
+                    }
+
+                    $('#ModalBodyVehiculoService').html(response.data);
+                    $('#VehiculoServiceModal').modal({ backdrop: 'static', keyboard: false });
+                    $('#VehiculoServiceModal').modal('show');
+                    hideLoading();
+                } else if (response.data) {
+
+                    try {
+                        $("#gridVehiculosDeposito").data("kendoGrid").dataSource.filter({ field: response.field, operator: "contains", value: response.data })
+                    }
+                    catch {
+
+                    }
+                    setTimeout(() => { $('#agregarVehiculoModal').modal('hide'); }, 400)
+                    hideLoading();
+                } else {
+                    $('#agregarVehiculoModal').modal('hide');
+                    hideLoading();
+                    sitteg_warning('Sucedio un error intente de nuevo mas tarde.');
+                }
+
+            },
+            error: function () {
+                sitteg_warning("Sucedio un error intente de nuevo mas tarde");
+                hideLoading();
+            }
+        });
+    }
+    $(document).ready(function() {
+        // Agregar un evento click al botón
+        $('#closeModalBtn').click(function() {
+            // Ocultar el modal cuando se hace clic en el botón
+            $('#modalVehiculos').modal('hide');
+        });
+    });
+
+    function goBack() {
+
+        $('#modalVehiculos').modal('hide');
+
+    }
+    function dirigir(){
+
+    }
+</script>

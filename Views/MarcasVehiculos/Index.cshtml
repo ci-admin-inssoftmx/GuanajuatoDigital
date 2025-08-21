@@ -1,0 +1,369 @@
+@model GuanajuatoAdminUsuarios.Entity.MarcasVehiculo
+
+<div class="row minH100" id="principal" ;>
+    <nav class="navPrincipal">nav</nav>
+    <div class="mainContainer bg-light">
+        <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto">
+                            <i class="icon-marca h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                            <h2 class="m-0 h3"><b>Catálogo de Marcas de Vehiculo</b></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                    <div class="row">
+                        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                            <button onclick = "show()">
+                                <h6 class="m-0 d-flex align-items-center"><i class="icon-addMarca h5 mb-0 me-2"></i><b>Agregar nueva marca</b></h6>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="bg-light py-1"></div>
+                </div>
+            </div>
+            <div class="row justify-content-between mb-1 titleCustom">
+                <div class="col-12 col-md-auto mt-4 mb-2">
+                    <h5 class="px-4"><b>Listado de marcas de vehículos</b></h5>
+                    <h6 class="px-4 text-muted">Edita o elimina las marcas de vehículos.</h6>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mb-4 px-4 rounded gridCustom" id="grid1">
+<div class="row">
+    <div class="col-md-2">
+                            @*(
+            Html.Kendo().Button()
+            .Name("btnCreate")
+            .HtmlAttributes(new { type = "button" })
+            .Content("Create")
+            .Events(ev => ev.Click("onClick"))
+            .ThemeColor(ThemeColor.Primary)
+            )
+
+           @Html.ActionLink("Nuevo","Create",null,new{@class="btn btn-info"})*@
+    </div>
+</div>
+<hr />
+<br />
+
+@(
+    Html.Kendo().Grid<GuanajuatoAdminUsuarios.Entity.MarcasVehiculo>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.IdMarcaVehiculo).Width(40);
+            columns.Bound(c => c.MarcaVehiculo).Width(190);
+            columns.Command(c => c.Custom("Editar").Click("fnEditar")).Width(100);
+            //columns.Command(c => c.Custom("Delete").Click("Eliminar")).Width(180);
+
+
+        }).HtmlAttributes(new { style = "height:650px" })
+        .Sortable()
+        //.Groupable()
+        .Scrollable()
+        .Pageable()
+        .DataSource(dataSource => dataSource
+            .Ajax()
+        .Read(read => read.Action("GetMarcas", "MarcasVehiculos"))
+            .PageSize(5).Model(model => model.Id(p => p.IdMarcaVehiculo))
+        )
+                        .ToolBar(t => t.Search().Text("Buscar..."))
+        .Search(s =>
+        {
+            s.Field(c => c.MarcaVehiculo);
+        })
+
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+        .Type(GridSelectionType.Row)
+        )
+                        .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+    @*.Events(ev=>ev.Change("onChange"))*@
+    )
+                </div>
+
+            </div>
+
+
+
+        </section>
+
+
+
+
+
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade modalCustom" id="editMarca"  aria-labelledby="editMarcaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered">
+        <div class="modal-content">
+
+            <section class=" bg-white rounded">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-editMarca h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Editar marca de vehículo</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="row">
+                            <div class="col-auto my-3">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bg-light py-1"></div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-12 my-4">
+                        <h5 class="px-4"><b>Datos de marca de vehículo</b></h5>
+                        <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                    </div>
+                </div>
+                <form class="row px-4 mb-4 align-items-end">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(
+                                Html.Kendo().TextBox()
+                                .Name("nombreEditMarca")
+                                .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa una nueva marca de vehículo")
+                                .HtmlAttributes(new { style = "width: 100%" })
+
+
+
+                                )
+
+                        </div>
+                    </div>
+
+                </form>
+                <div class="row my-4">
+                    <div class="col-12 col-md-6 mx-md-auto">
+                        <div class="row justify-content-around">
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                    <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                </button>
+                            </div>
+                            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                <div class="controlButton">
+                                    @(Html.Kendo().Button()
+                                        .Name("EditMarca")
+                                        .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                        .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade modalCustom" id="addMarca"  aria-labelledby="addMarcaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered">
+        <div class="modal-content">
+
+            <section class=" bg-white rounded">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-addMarca h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Agregar marca de vehículo</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="row">
+                            <div class="col-auto my-3">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bg-light py-1"></div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-12 my-4">
+                        <h5 class="px-4"><b>Datos de carretera</b></h5>
+                        <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                    </div>
+                </div>
+                <form class="row px-4 mb-4 align-items-end justify-content-center">
+                    <div class="col-12 col-md-6">
+                        <div class="controlForm my-3" id="Add0">
+                            @(
+                                Html.Kendo().TextBox()
+                                .Name("nombreAddMarca")
+                                .Label(l => l.Content("Marca de vehículo <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa una nueva marca de vehículo")
+                                .HtmlAttributes(new { style = "width: 100%" })
+
+
+                                )
+
+
+                        </div>
+                    </div>
+
+                </form>
+                <div class="row my-4">
+                    <div class="col-12 col-md-6 mx-md-auto">
+                        <div class="row justify-content-around">
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                    <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                </button>
+                            </div>
+                            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                <div class="controlButton" onclick="agregarLst()">
+                                    @(
+                                        Html.Kendo().Button()
+                                        .Name("AddMarcaBtn")
+                                        .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                        .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+
+
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+
+                    </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modalCustom" id="deleteMarca"  aria-labelledby="deleteMarcaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md boxShadow modal-dialog-centered">
+        <div class="modal-content">
+
+            <section class=" bg-white rounded">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-deleteMarca h1 colorDanger"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Eliminar marca de vehículo</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="row">
+                            <div class="col-auto my-3">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bg-light py-1"></div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-12 text-center my-4">
+                        <h3><b>Eliminar registro del catálogo</b></h3>
+                    </div>
+                </div>
+                <div class="row justify-content-center mb-5">
+                    <div class="col-10 col-md-5 mt-1">
+                        <h6 class="px-4 text-muted">Nombre:</h6>
+                        <h5 class="px-4"><b>Tesla</b></h5>
+                    </div>
+
+
+                </div>
+
+                <div class="row my-4">
+                    <div class="col-12">
+                        <div class="row justify-content-around">
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                    <h6 class="m-0 px-3"><b>No eliminar</b></h6>
+                                </button>
+                            </div>
+                            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                <div class="controlButton">
+                                    @(Html.Kendo().Button()
+                                        .Name("EditFisico")
+                                        .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                        .Content("<h5 class=\"m-0 px-3\"><b>Eliminar</b></h5>"))
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<script>
+    function onClick() {
+        //alert("hola")
+        var url = '@Url.Action("Create","MarcasVehiculos")'
+        window.location.href = url;
+    }
+
+    function fnEditar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        window.location.href = '@Url.Action("Update","MarcasVehiculos")?IdMarcaVehiculo=' + dataItem.IdMarcaVehiculo;
+    }
+
+    function Eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        window.location.href = '@Url.Action("Delete","MarcasVehiculos")?IdMarcaVehiculo=' + dataItem.IdMarcaVehiculo;
+    }
+
+    }
+
+    function show() {
+       $('#addMarca').modal('show');
+        return false;
+    }
+</script>

@@ -1,0 +1,377 @@
+﻿@model VehiculoModel
+@using Microsoft.AspNetCore.Http;
+@{
+    var Lectura = false;
+    
+}
+
+<div class="row col-12 px-4">
+    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+        <button type="button" href="#" id="btnNuevoConductor" @(Lectura ? "disabled" : "") onclick="btnEditarVehiculo2(event)">
+            <h6 class="m-0 d-flex align-items-center"><i class="icon-edit h5 mb-0 me-2"></i><b>Editar</b></h6>
+        </button>
+    </div>
+    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+        <button type="button" href="#" id="btnNuevoConductor" @(Lectura ? "disabled" : "") onclick="btnEditarPersona3()">
+            <h6 class="m-0 d-flex align-items-center"><i class="icon-edit h5 mb-0 me-2"></i><b>Editar Propietario</b></h6>
+        </button>
+    </div>
+    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+        <button type="button" href="#" id="btnNuevoConductor" @(Lectura ? "disabled" : "") onclick="btnagregarpropietario()">
+            <h6 class="m-0 d-flex align-items-center"><i class="icon-edit h5 mb-0 me-2"></i><b>Agregar Propietario</b></h6>
+        </button>
+    </div>
+</div>
+<hr />
+@Html.HiddenFor(s => s.idVehiculo)
+@Html.HiddenFor(s=>s.Persona.idPersona)
+<div class="row px-4 mb-4 align-items-end">
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Placas:</label>&nbsp;@Model.placas
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Serie:</label>&nbsp;@Model.serie
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Numero tarjeta:</label>&nbsp;@Model.tarjeta
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Vigencia tarjeta:</label>&nbsp;@(!Model.vigenciaTarjeta.HasValue ? "-" : Model.vigenciaTarjeta.Value.Year < 1980 ? "-" : Model.vigenciaTarjeta.Value.ToString("dd/MM/yyyy"))
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Entidad de registro:</label>&nbsp;@Model.entidadRegistro
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Marca:</label>&nbsp;@Model.marca
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Submarca:</label>&nbsp;@Model.submarca
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Tipo vehículo:</label>&nbsp;@Model.tipoVehiculo
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Modelo:</label>&nbsp;@Model.modelo
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Color:</label>&nbsp;@(Model.color != null ? Model.color.ToString() : "-")
+            
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Capacidad:</label>&nbsp;@(Model.capacidad != null ? Model.capacidad.ToString() : "-")
+ 
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Póliza:</label>&nbsp;@(Model.poliza != null ? Model.poliza.ToString() : "-")
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Carga:</label>&nbsp;@(Model.carga.HasValue ? (Model.carga.Value ? "Si" : "No") : "-")
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Otros:</label>&nbsp;@(Model.otros != null ? Model.otros.ToString() : "-")
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Número económico:</label> &nbsp; @Model.numeroEconomico
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Motor:</label> &nbsp; @Model.motor
+
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Propietario: </label>&nbsp; @Model.Persona.nombreCompleto
+
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 auto btnOutline btnOutlinePrimary" id="btnCambiaPropietario">
+        <button type="button" href="#" @(Lectura ? "disabled" : "") onclick="btnSeleccionarPropietario()">
+            <h6 class="m-0 d-flex align-items-center"><b>...</b></h6>
+        </button>
+    </div>
+</div>
+
+
+<div class="modal fade modalCustom" id="agregarConductorModal2" aria-labelledby="agregarVehiculoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyAgregarConductor2">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade modalCustom" id="modalCrearPersona3" aria-labelledby="modalCrearPersona3" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered ">
+        <div class="modal-content">
+
+            <div class="modal-body" id="modalBodyCrearPersona3">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modalCustom" id="modalCrearVehiculo" aria-labelledby="modalCrearVehiculo" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered ">
+        <div class="modal-content">
+
+            <div class="modal-body" id="modalBodyCrearVehiculo">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function btnEditarVehiculo2(event) {
+        event.preventDefault();
+        let id = $("#idVehiculo").val();
+        let idAccidente = window.idAccidente;
+        let edita = window.eseditar;
+        let DoEditar = window.DoEditar;
+        let needOrigin = window.needOrigin;
+        
+        let url = "";
+        let parameters = {};
+        if (needOrigin) {
+            url = "@Url.Action("ajax_ModalEditarVehiculo", "CapturaAccidentes")";
+            parameters = { id: id, idAccidente: idAccidente, edit: 1 };
+        }
+        else {
+            url = "@Url.Action("ajax_ModalEditarVehiculoHistorico", "CapturaAccidentes")";
+            parameters = { id: id, idAccidente: idAccidente, DoEditar: DoEditar, edit: 1 };
+        }
+
+        showLoading();
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: parameters,
+            contentType: "application/json; charset=utf-8",
+            success: function (value) {
+                window.DoUpdate = function (id) {
+                    buscarVehiculo(id.id);
+                    $('#modalBodyCrearVehiculo').html("");
+                    $('#modalCrearVehiculo').modal('hide');
+
+                    var event = new CustomEvent('vehiculoActualizado', { detail: { id: id.id } });
+                    window.dispatchEvent(event);
+                }
+
+                $('#modalBodyCrearVehiculo').html(value);
+                $('#modalCrearVehiculo').modal({ backdrop: 'static', keyboard: false });
+                $('#modalCrearVehiculo').modal('show');
+                hideLoading();
+            }, 
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+        event.stopPropagation();
+
+    }
+
+    function btnEditarPersona3() {
+        let id = $("#Persona_idPersona").val()
+        let Vehiculoid = $("#idVehiculo").val()
+        let idAccidente = window.idAccidente
+        let url = ""
+        let parameters = {}
+
+        if (window.needOrigin) {
+            url = "@Url.Action("ajax_ModalEditarPersonaFromVehiculoSection", "CapturaAccidentes")";
+            parameters = { id: id, UpdatePermanencia: 1, Ope: window.idAccidente }
+        }
+        else {
+            url = "@Url.Action("ajax_ModalEditarPersonaHistoricoFromVehiculoSection", "CapturaAccidentes")";
+            parameters = { id: id, idAccidente: idAccidenete, UpdatePermanencia: 1, Ope: window.idAccidente }
+        }
+
+        window.DoUpdate = function (_, d) {
+            if (d.data == "1") {
+                buscarVehiculo(Vehiculoid);
+            } else if (d.data > 1) {
+                $("#Persona_idPersona").val(d.data)
+                $.ajax({
+                    url: '@Url.Action("UpdatePropietario")',
+                    type: 'GET',
+                    data: { idPersona: d.data, idVehiculo: Vehiculoid },
+                    contentType: "application/json; charset=utf-8",
+                    success: function (value) {
+                        buscarVehiculo(Vehiculoid);
+                        hideLoading();
+                    }, error: function () {
+                        sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                        hideLoading();
+                    }
+                });
+            }
+            else {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            }
+
+            $('#modalBodyCrearPersona3').html("");
+            $('#modalCrearPersona3').modal('hide');
+        }
+
+        showLoading();
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: parameters,
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (value) {
+                $('#modalBodyCrearPersona3').html(value);
+                $('#modalCrearPersona3').modal({ backdrop: 'static', keyboard: false });
+                $('#modalCrearPersona3').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+        event.stopPropagation();
+    }
+
+    function btnSeleccionarPropietario() {
+        window.DoUpdate = function (a, b) {
+            $("#Persona_idPersona").val(a)
+            $("#idPersona").val(a)
+
+            var Vehiculoid = $("#idVehiculo").val()
+
+
+            $.ajax({
+                url: '@Url.Action("UpdatePropietario")',
+                type: 'GET',
+                data: { idPersona: a, idVehiculo: Vehiculoid },
+                contentType: "application/json; charset=utf-8",
+                success: function (value) {
+                    buscarVehiculo(Vehiculoid);
+                    $("#listadoVehiculosPropietario").toggleClass("d-none")
+                    $("#listadoVehiculos").toggleClass("d-none")
+                    $("#listadoVehiculosPropietario").empty()
+
+                    hideLoading();
+                }, error: function () {
+                    sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                    hideLoading();
+                }
+            });
+        }
+
+
+
+        $.ajax({
+            url: '@Url.Action("ajax_OpenPropietarioList")',
+            type: 'GET',
+            data: {},
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (value) {
+
+                $("#listadoVehiculosPropietario").toggleClass("d-none")
+                $("#listadoVehiculos").toggleClass("d-none")
+                $("#listadoVehiculosPropietario").empty().append(value)
+
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+    function btnagregarpropietario() {
+        
+        window.DoUpdate = function (a, b) {
+            $("#Persona_idPersona").val(a)
+            var Vehiculoid = $("#idVehiculo").val()
+            $.ajax({
+                url: '@Url.Action("UpdatePropietario")',
+                type: 'GET',
+                data: { idPersona: a, idVehiculo: Vehiculoid },
+                contentType: "application/json; charset=utf-8",
+                success: function (value) {
+                    buscarVehiculo(Vehiculoid);
+                    $('#modalBodyCrearPersona').html("");
+                    $('#modalCrearPersona').modal('hide');
+                    $('#modalBodyEditarPersona').html("");
+                    $('#modalEditarPersona').modal('hide');
+                    $('#agregarConductorModal2').modal('hide');
+                    $('#ModalBodyAgregarConductor2').html("");
+                    $('#agregarConductorModal').modal('hide');
+                    window.DoUpdate = undefined
+                    hideLoading();
+                }, error: function () {
+                    sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                    hideLoading();
+                }
+            });
+        }
+
+
+
+        $.ajax({
+            url: '@Url.Action("ModalAgregarConductor")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyAgregarConductor2').html(data);
+                $('#agregarConductorModal2').modal({ backdrop: 'static', keyboard: false });
+                $('#agregarConductorModal2').modal('show');
+            }
+        });
+    }
+
+
+
+
+</script>

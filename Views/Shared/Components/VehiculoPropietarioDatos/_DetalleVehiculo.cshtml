@@ -1,0 +1,420 @@
+﻿@model VehiculoModel
+@using Microsoft.AspNetCore.Http;
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    // var x = ViewBag.ModoSoloLectura;
+    // int modomostrar = (int)HttpContextAccessor.HttpContext.Session.GetInt32("modoMostrar");
+    var Lectura = Convert.ToBoolean(0);
+    
+}
+
+<script>
+    function onRowSelect() {
+
+        var grid = $("#gridPersonasLicencia").data("kendoGrid");
+        var selectedRowData = grid.dataItem(grid.select());
+
+        console.log("EE", selectedRowData);
+
+        const tipoLicenciaMapping = {
+            "TIPO A  CHOFER AUTOMOVILISTA": 1,
+            "TIPO B CHOFER SERVICIO PÚBLICO": 2,
+            "TIPO C  Chofer Servicio de Carga": 3,
+            "TIPO D -MOTOCICLISTA": 4,
+            "PERMISO A -AUTOMOVIL-": 6,
+            "PERMISO D -MOTOCICLETA-": 7,
+            "NO APLICA": 8,
+            "TIPO A": 1,
+            "TIPO B": 2,
+            "TIPO C": 3,
+            "TIPO D": 4,
+            "PERMISO A": 6,
+            "PERMISO D": 7,
+            "A-AUTOMOVILISTA": 1,
+            "B-CHOFER DE SERVICIO PÚBLICO": 2,
+            "C-CHOFER DE SERVICIO DE CARGA": 3,
+            "D-MOTOCICLISTA": 4,
+            "PA-PERMISO AUTOMOVILISTA": 6,
+            "PD-PERMISO MOTOCICLISTA": 7,
+
+        };
+
+        const tipoLicenciaNumero = tipoLicenciaMapping[selectedRowData.tipoLicencia] || 0;
+
+        selectedRowData.idTipoLicencia = tipoLicenciaNumero;
+        console.log("4...")
+        console.log("4.1.." + selectedRowData.nombreCompleto)
+        //   showLoading();
+        var fd = new FormData();
+        fd.append("nombre", selectedRowData.nombre);
+        fd.append("apellidoPaterno", selectedRowData.apellidoPaterno);
+        fd.append("apellidoMaterno", selectedRowData.apellidoMaterno);
+        fd.append("CURP", selectedRowData.CURP);
+        fd.append("RFC", selectedRowData.RFC);
+        fd.append("numeroLicencia", selectedRowData.numeroLicencia);
+        fd.append("tipoLicencia", tipoLicenciaNumero);
+        fd.append("idGenero", selectedRowData.idGenero);
+        fd.append("fechaNacimiento", selectedRowData.fechaNacimiento);
+        fd.append("fechaVigencia", selectedRowData.vigenciaLicencia);
+
+        fd.append("idGenero", selectedRowData.idGenero);
+        fd.append("fechaNacimiento", selectedRowData.fechaNacimiento);
+        fd.append("fechaVigencia", selectedRowData.vigenciaLicencia);
+        fd.append("calle", selectedRowData.calle);
+        fd.append("numero", selectedRowData.numero);
+        fd.append("colonia", selectedRowData.colonia);
+
+        fd.append("idMunicipio", selectedRowData.PersonaDireccion.idMunicipio);
+        fd.append("municipio", selectedRowData.PersonaDireccion.municipio);
+        fd.append("codigoPostal", selectedRowData.PersonaDireccion.codigoPostal);
+        fd.append("entidad", selectedRowData.PersonaDireccion.entidad);
+        fd.append("telefono", selectedRowData.PersonaDireccion.telefono);
+        fd.append("correo", selectedRowData.PersonaDireccion.correo);
+
+        $.ajax({
+            type: 'POST',
+            url: '/Personas/guardaDesdeServicio',
+            contentType: false, // Not to set any content header
+            processData: false, // Not to process data
+            data: fd,
+            success: function (result) {
+                $('#modalLicenciasList').modal('hide');
+                var grid = $("#gridPersonas").data("kendoGrid");
+                if (result && result.data) {
+                    var dataArray = [result.data];
+                    grid.dataSource.data(dataArray);
+                } else {
+                    console.error("La respuesta no tiene la estructura esperada:", result);
+                }
+                sitteg_success('Elemento guardado correctamente')
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Error al guardar en la base de datos:');
+                hideLoading();
+            }
+        });
+    }
+
+    function buscarVehiculo(pidVehiculo) {
+		showLoading();
+		$.ajax({
+			type: "GET",
+            url: '@Url.Action("MostrarDatosVehiculo", "DepositosOtraDependencia")',
+			data: {
+				"idVehiculo": pidVehiculo,
+			},
+			success: function (data) {
+				console.log("DATVE", data)
+                $("#vehiculoPropietarioDatos").html(data);
+				hideLoading();
+			}, error: function () {
+				//sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+
+		});
+	}
+    function btnEditarVehiculo2(event) {
+
+        event.preventDefault();
+        var id = $("#IdVehiculoAsignado").val();
+        var idInfraccion = window.idInfraccion;
+        var edita =window.eseditar;
+        var DoEditar = window.DoEditar;
+        var needOrigin = window.needOrigin;
+        console.log("needOrigin", needOrigin);
+        var url="";
+        var objA={};
+        //if (needOrigin) {
+            url = "@Url.Action("ajax_ModalEditarVehiculo","Infracciones")";
+            objA = { id: id, idInfraccion: idInfraccion, edit:1 };
+        // }
+        // else{
+        //     url = "@Url.Action("ajax_ModalEditarVehiculoHistorico","Infracciones")";
+        //     objA = { id: id, idInfraccion: idInfraccion,DoEditar:DoEditar, edit:1 };
+        // }
+
+        showLoading();
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: objA,
+            contentType: "application/json; charset=utf-8",
+            success: function (value) {
+                window.DoUpdate = function (id) {
+                    buscarVehiculo(id.id);
+                    $('#modalBodyCrearVehiculo').html("");                    
+                    $('#modalCrearVehiculo').modal('hide');
+                }
+
+                $('#modalBodyCrearVehiculo').html(value);
+                $('#modalCrearVehiculo').modal({ backdrop: 'static', keyboard: false });
+                $('#modalCrearVehiculo').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+        event.stopPropagation();
+
+    }
+
+
+    function btnEditarPersona3() {
+        var id = $("#Persona_idPersona").val()
+        var Vehiculoid = $("#IdVehiculoAsignado").val()
+        var idinfraccion = window.idInfraccion
+        var url = ""
+        var objAjax = {}
+
+        //if (window.needOrigin) {
+            url = "@Url.Action("ajax_ModalEditarPersona","Infracciones")";
+            objAjax = { id: id, UpdatePermanencia: 1, Ope: window.idInfraccion }
+        //}
+        // else {
+        //     url = "@Url.Action("ajax_ModalEditarPersonaHistorico","Infracciones")";
+        //     objAjax = { id: id, idinfraccion: idinfraccion, UpdatePermanencia: 1, Ope: window.idInfraccion }
+        // }
+
+        window.DoUpdate = function (_,d) {
+            if (d.data=="1") {
+                buscarVehiculo(Vehiculoid);
+            } else if (d.data > 1) {
+
+                $("#Persona_idPersona").val(d.data)
+
+                $.ajax({
+                    url: '@Url.Action("UpdatePropietario", "Infracciones")";)', 
+                    type: 'GET',
+                    data: { idPersona: d.data, idVehiculo: Vehiculoid },
+                    contentType: "application/json; charset=utf-8",
+                    success: function (value) {
+                        buscarVehiculo(Vehiculoid);
+                        hideLoading();
+                    }, error: function () {
+                        sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                        hideLoading();
+                    }
+                });
+            }
+            else{
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            }
+
+            $('#modalBodyCrearPersona3').html("");
+            $('#modalCrearPersona3').modal('hide');
+
+        }
+
+        showLoading();
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: objAjax,
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (value) {
+                $('#modalBodyCrearPersona3').html(value);
+                $('#modalCrearPersona3').modal({ backdrop: 'static', keyboard: false });
+                $('#modalCrearPersona3').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+        event.stopPropagation();
+
+    }
+
+
+
+
+    function btnSeleccionarPropietario(){
+
+
+        window.DoUpdate=function(a,b){
+            $("#Persona_idPersona").val(a)
+            $("#idPersona").val(a)
+
+            var Vehiculoid = $("#IdVehiculoAsignado").val()
+
+            $.ajax({
+                url: '@Url.Action("UpdatePropietario", "Infracciones")',
+                type: 'GET',
+                data: { idPersona: a, idVehiculo: Vehiculoid },
+                contentType: "application/json; charset=utf-8",
+                success: function (value) {
+                    buscarVehiculo(Vehiculoid);
+                    $("#listadoVehiculosPropietario").toggleClass("d-none")
+                    $("#listadoVehiculos").toggleClass("d-none")
+                    $("#listadoVehiculosPropietario").empty()
+
+                    hideLoading();
+                }, error: function () {
+                    sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                    hideLoading();
+                }
+            });
+        }
+
+
+
+        $.ajax({
+            url: '@Url.Action("ajax_OpenPropietarioList", "Infracciones")',
+            type: 'GET',
+            data: {  },
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (value) {
+
+                $("#listadoVehiculosPropietario").toggleClass("d-none")
+                $("#listadoVehiculos").toggleClass("d-none")
+                $("#listadoVehiculosPropietario").empty().append(value)
+
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+
+    function btnagregarpropietario(){
+        console.log("AGRPROP")
+
+        window.DoUpdate = function (a, b) {
+            $("#Persona_idPersona").val(a)
+            var Vehiculoid = $("#IdVehiculoAsignado").val();
+            $.ajax({
+                url: '@Url.Action("UpdatePropietario", "Infracciones")',
+                type: 'GET',
+                data: { idPersona: a, idVehiculo: Vehiculoid },
+                contentType: "application/json; charset=utf-8",
+                success: function (value) {
+                    buscarVehiculo(Vehiculoid);
+                    $('#modalBodyCrearPersona').html("");
+                    $('#modalCrearPersona').modal('hide');
+                    $('#modalBodyEditarPersona').html("");
+                    $('#modalEditarPersona').modal('hide');
+                    $('#agregarConductorModal2').modal('hide');
+                    $('#ModalBodyAgregarConductor2').html("");
+                    $('#agregarConductorModal').modal('hide');
+                    window.DoUpdate=undefined
+                    hideLoading();
+                }, error: function () {
+                    sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                    hideLoading();
+                }
+            });
+        }
+
+
+
+        $.ajax({
+            url: '@Url.Action("ModalAgregarConductor", "Infracciones")',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyAgregarConductor2').html(data);
+                $('#agregarConductorModal2').modal({ backdrop: 'static', keyboard: false });
+                $('#agregarConductorModal2').modal('show');
+
+
+               /* $('#modalBodyCrearPersona').html(data);
+                $('#modalCrearPersona').modal('show');
+                 $('#modalBodyEditarPersona').html(value);
+                 $('#modalEditarPersona').modal({ backdrop: 'static', keyboard: false });
+                 $('#modalEditarPersona').modal('show');
+                   $('#agregarConductorModal').modal('hide');
+                */
+
+            }
+        });
+    }
+
+
+
+
+</script>
+
+
+<div class="row">
+    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+        <button type="button" href="#" id="btnNuevoConductor" @(Lectura ? "disabled" : "") onclick="btnEditarVehiculo2(event)">
+            <h6 class="m-0 d-flex align-items-center"><i class="icon-edit h5 mb-0 me-2"></i><b>Editar</b></h6>
+        </button>
+    </div>
+    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+        <button type="button" href="#" id="btnNuevoConductor" @(Lectura ? "disabled" : "") onclick="btnEditarPersona3()">
+            <h6 class="m-0 d-flex align-items-center"><i class="icon-edit h5 mb-0 me-2"></i><b>Editar Propietario</b></h6>
+        </button>
+    </div>
+    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+        <button type="button" href="#" id="btnNuevoConductor" @(Lectura ? "disabled" : "") onclick="btnagregarpropietario()">
+            <h6 class="m-0 d-flex align-items-center"><i class="icon-edit h5 mb-0 me-2"></i><b>agregar Propietario</b></h6>
+        </button>
+    </div>
+</div>
+<hr />
+@Html.HiddenFor(s=>s.Persona.idPersona)
+<section>
+        <div id="datosVehiculoPropUbContainer">
+            <div style="width: 50%; float: left;">
+                <h4 class="colorPrimary"><b>Vehículo</b></h4>
+                <p><b>Placa:</b> @Model.placas</p>
+                <p><b>Serie:</b> @Model.serie</p>
+                <p><b>Modelo:</b> @Model.modelo</p>
+                <p><b>Marca:</b> @Model.marca</p>
+                <p><b>Submarca:</b> @Model.submarca</p>
+                <p><b>Tipo de Vehículo:</b> @Model.tipoVehiculo</p>
+                <p><b>Color:</b> @Model.color</p>
+            </div>
+            <div style="width: 50%; float: left;">
+                <h4 class="colorPrimary"><b>Propietario</b></h4>
+                <p><b>Nombre:</b> @Model.propietario</p>
+            <p><b>CURP:</b> @Model.Persona.CURP</p>
+            <p><b>RFC:</b> @Model.Persona.RFC</p>
+
+
+            </div>
+        </div>
+    </section>
+
+
+<div class="modal fade modalCustom" id="agregarConductorModal2" aria-labelledby="agregarVehiculoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyAgregarConductor2">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade modalCustom" id="modalCrearPersona3" aria-labelledby="modalCrearPersona3" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered ">
+        <div class="modal-content">
+
+            <div class="modal-body" id="modalBodyCrearPersona3">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modalCustom" id="modalCrearVehiculo" aria-labelledby="modalCrearVehiculo" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered ">
+        <div class="modal-content">
+
+            <div class="modal-body" id="modalBodyCrearVehiculo">
+            </div>
+        </div>
+    </div>
+</div>
+
+

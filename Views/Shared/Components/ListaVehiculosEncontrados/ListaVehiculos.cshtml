@@ -1,0 +1,78 @@
+@model List<VehiculoModel>
+    <div class="row justify-content-between my-2 mb-1 titleCustom">
+    <div class="offset-1 col-12 mt-4 mb-2">
+        <h5 class="px-4"><b>Listado de vehículos</b></h5>
+        <h6 class="px-4 text-muted">Selecciona un vehículo</h6>
+    </div>
+</div>
+<div class="col-12 mb-4 px-4 rounded gridCustom">
+    @(
+        Html.Kendo().Grid(Model)
+        .Name("gridListaVehiculos")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.idPersona).Hidden();
+            columns.Bound(c => c.idVehiculo).Hidden();
+            columns.Select().Width(50).ClientHeaderTemplate(" ");
+            columns.Bound(c => c.placas).Title("Placas").Width(90);
+            columns.Bound(p => p.serie).Title("Serie").Width(90);
+            columns.Bound(p => p.tarjeta).Title("Tarjeta").Width(90);
+            columns.Bound(p => p.marca).Title("Marca").Width(90);
+            columns.Bound(c => c.submarca).Title("Submarca").Width(90);
+            columns.Bound(c => c.modelo).Title("Modelo").Width(90);
+            columns.Bound(p => p.propietario).Title("Propietario").Width(90);
+            columns.Bound(c => c.numeroEconomico).Title("Número Económico").Width(90);
+            columns.Bound(c => c.entidadRegistro).Title("Entidad Registro").Width(90);
+            columns.Bound(c => c.tipoVehiculo).Title("Tipo").Width(90);
+        }).HtmlAttributes(new { style = "height:auto" })
+        .EnableCustomBinding(true)
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .PageSize(10)
+        )
+        @*.Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Bottom).PageSizes(true))*@
+        .Pageable(p => p.Enabled(true))
+        .Sortable()
+        .Scrollable(scr => scr.Enabled(true))
+        .ToolBar(t => t.Custom().Text("Buscar...").Name("search"))
+        .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+        )
+
+    @(Html.Kendo().Tooltip()
+        .For("#gridListaVehiculos")
+        .Filter("th")
+        .Position(TooltipPosition.Top)
+        )
+</div>
+
+<script>
+    $(document).ready(function () {
+        var grid = $("#gridListaVehiculos").data("kendoGrid");
+        grid.tbody.on("click", ".k-checkbox", onClickVehiculo);
+        function onClickVehiculo(e) {
+            var grid = $("#gridListaVehiculos").data("kendoGrid");
+            var row = $(e.target).closest("tr");
+            var dataItem = grid.dataItem(row);
+
+            var idVehiculo = dataItem.idVehiculo;
+            var idPersonaVehiculo = dataItem.idPersona;
+            
+            $("#IdVehiculoAsignado").val(idVehiculo);
+           
+            if (row.hasClass("k-selected")) {
+                setTimeout(function (e) {
+                    var grid = $("#gridListaVehiculos").data("kendoGrid");
+                    grid.clearSelection();
+                })
+            } else {
+                grid.clearSelection();
+            };
+        };
+    })
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

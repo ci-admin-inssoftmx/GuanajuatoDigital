@@ -1,0 +1,111 @@
+﻿@model List<CatTramosModel>
+<script>
+     function filtroTramo() {
+        var idDependencia = $("#idDependenciaFiltro").val();;
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+</script>
+@if (ViewBag.Admin == true)
+{
+    <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+        <div class="row">
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <button onclick="mostrarModalAgregarTramo()">
+                    <h6 class="m-0 d-flex align-items-center"><i class="icon-addTramo h5 mb-0 me-2"></i><b>Agregar nuevo tramo</b></h6>
+                </button>
+            </div>
+        </div>
+    </div>
+}
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(Html.Kendo().Grid(Model)
+            .Name("gridTramos")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdTramo).Width(40).Title("Id");
+                columns.Bound(c => c.Tramo).Width(80);
+                columns.Bound(c => c.Carretera).Width(100);
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(100);
+                columns.Command(c => c.Custom("Editar").Click("editarTramoMod")).Width(100);
+                // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(100);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            @*.Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Bottom).PageSizes(true))*@
+            .Pageable(p => p.Enabled(true))
+            .Sortable()
+            .Scrollable(scr => scr.Enabled(true))
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetTra", "CatTramos").Data("filtroTramo"))
+
+            .ServerOperation(false)
+            .PageSize(5)
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.Carretera);
+                s.Field(c => c.Tramo);
+
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#gridTramos")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+    </div>
+</div>
+<div class="modal fade modalCustom" id="agregarTramo" aria-labelledby="agregarTramoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyTramo">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function editarTramoMod(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdTramo = dataItem.IdTramo;
+        console.log(IdTramo);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarTramoModal", "CatTramos")',
+            type: 'POST', 
+            data: { IdTramo: IdTramo },
+            success: function (result) {
+                $('#ModalBodyTramo').html(result);
+                $('#agregarTramo').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+
+</script>

@@ -1,0 +1,122 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel
+
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-editClasificacionAccidente h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Editar causa de accidente</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-12 my-4">
+            <h5 class="px-4"><b>Datos de causa de accidente</b></h5>
+            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+        </div>
+    </div>
+    <form id="editarCausaForm" class="row justify-content-center px-4 mb-4 align-items-end">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="controlForm my-3">
+                <label>Causa <b>(obligatorio)</b>:</label>
+                <span>
+                    @Html.HiddenFor(t => t.IdAccidente)
+                    @Html.HiddenFor(t => t.idAccidenteCausa)
+
+                    @(Html.Kendo().DropDownListFor(t => t.IdCausaAccidente).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona una Opción")
+                                .HtmlAttributes(new { style = "width:100%;" })
+                        .Filter(FilterType.Contains)
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("Causas_Drop", "CapturaAccidentes");
+                                    });
+                                }))
+                </span>
+            </div>
+        </div>
+    </form>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="editarCausa()">
+                        @(Html.Kendo().Button()
+                                    .Name("EditarFactor")
+                                    .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                    .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+<script>
+    function editarCausa() {
+         var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate = [];
+        controlsValidate.push({ 'controlName': 'IdCausaAccidente' });
+
+
+        if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+        var Mydata = $("#editarCausaForm").serialize();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarCausa")',
+            type: 'POST',
+            data: Mydata,
+            success: function (data) {
+                if (!data.error) {
+                $("#gridCausasA").data("kendoGrid").dataSource.data(data);
+                $('modal-body').removeClass('model-open');
+                $('.modal-backdrop').remove();
+                $('#causaAccidenteModal').modal('hide');
+                sitteg_success("Se ha modificado la información");
+                } else {
+                    sitteg_warning(data.error);
+                }
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Sucedió un error, intente mas tarde...');
+                hideLoading();
+            }
+        });
+    }
+
+</script>

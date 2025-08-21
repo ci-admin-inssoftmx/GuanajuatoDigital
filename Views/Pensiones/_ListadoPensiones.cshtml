@@ -1,0 +1,328 @@
+﻿@model List<PensionModel>
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+<script>
+    function isGoogleMapsScriptLoaded() {
+        const scripts = document.getElementsByTagName('script');
+        for (let i = 0; i < scripts.length; i++) {
+            if (scripts[i].src.includes('https://maps.googleapis.com/maps/api/js')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    if (!isGoogleMapsScriptLoaded()) {
+        const script = document.createElement('script');
+        script.defer = true;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=@Configuration["AppSettings:GoogleMapsApiKey"]&loading=async&libraries=marker`;
+        document.head.appendChild(script);
+    }
+</script>
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+</script>
+
+<div class="row">
+    @if (ViewBag.NoResultsMessage != null)
+    {
+        <div class="alert alert-info">
+            @ViewBag.NoResultsMessage
+        </div>
+    }
+
+<div class="col-12 mb-4 px-4 rounded gridCustom">
+    <div class="row mb-1">
+        <div class="col-12 col-md-auto mt-4 mb-2 titleCustom">
+            <h5 class="px-4"><b>Listado de Pensiones</b></h5>
+            <h6 class="px-4 text-muted">Edita los datos de las pensiones.</h6>
+        </div>
+    </div>
+        <div>
+            <br />
+            <br />
+            <br />
+
+        </div>
+    @(
+
+            Html.Kendo().Grid(Model)
+            .Name("GridP")
+            .ToolBar(tools =>
+            {
+                tools.Search().Text("Buscar...");
+            })
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.estatusDesc).Title("Estatus").Width(90);
+                columns.Bound(c => c.IdPension).Width(20).Hidden();
+                columns.Bound(c => c.estatus).Width(20).Hidden();
+                columns.Bound(p => p.Pension).Title("Pensión").Width(150); 
+                columns.Bound(p => p.Permiso).Title("Permiso").Width(100);
+                columns.Bound(p => p.delegacion).Title("Delegación").Width(100);
+                columns.Bound(c => c.municipio).Title("Municipio").Width(100);
+                columns.Bound(c => c.Direccion).Title("Dirección").Width(150);
+                columns.Bound(c => c.Telefono).Title("Teléfono").Width(100);
+                columns.Bound(c => c.Correo).Title("Correo electrónico").Width(150);
+                columns.Bound(c => c.responsable).Title("Responsable").Width(90);
+                columns.Bound(c => c.Asociados).Title("Asociados").Width(90);
+
+               // columns.Bound(c => c.placas).Title("Grúa (Placas)").Width(90);
+
+                columns.Bound(c => c.IdPension).ClientTemplate(
+                "<button onclick=\"editarPensionByGrid('#= IdPension #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i></h6></button>"
+                ).Title("Editar").Sortable(false).Width(70);
+
+
+
+                columns.Bound(c => c.IdPension).ClientTemplate(
+                "<button onclick=\"DeletePensionByGrid('#= IdPension #','#= estatus #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-delete me-2'></i></h6></button>"
+                ).Title("Estatus").Sortable(false).Width(70);
+
+
+
+            }).HtmlAttributes(new { style = "height:350" })
+           
+            @*.Pageable(pager => pager.AlwaysVisible(true).PageSizes(new int[] { 5, 10, 20, 100 }).Position(GridPagerPosition.Bottom))*@
+            .Pageable(p => p.Enabled(true))
+            .Sortable()
+            .Scrollable(scr => scr.Height(350))
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            )
+            .Search(s =>
+            {
+                s.Field(c => c.estatusDesc);
+                s.Field(c => c.Pension);
+                s.Field(c => c.Permiso);
+                s.Field(c => c.delegacion);
+                s.Field(c => c.municipio);
+                s.Field(c => c.Direccion);
+                s.Field(c => c.Telefono);
+                s.Field(c => c.Correo);
+                s.Field(c => c.responsable);
+                s.Field(c => c.concesionario);
+
+            })
+            //.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            .Events(events => events.DataBound("replaceLegend"))
+
+            .Events(events => events.DataBound("onGridDataBound"))
+
+            )
+    @(Html.Kendo().Tooltip()
+            .For("#GridP")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+
+
+        <script>
+            function onGridDataBound() {
+                var grid = $("#GridP").data("kendoGrid");
+                grid.tbody.find("tr").each(function () {
+                    var dataItem = grid.dataItem(this);
+                    var latitud = dataItem.Latitud;
+                    var longitud = dataItem.Longitud;
+
+                    if (latitud && longitud) {
+                        $(this).find(".btn-geolocalizacion").show();
+                    } else {
+                        $(this).find(".btn-geolocalizacion").hide();
+                    }
+                });
+            }
+
+            function abrirGeolocalizacion() {
+                var grid = $("#GridP").data("kendoGrid");
+                var dataItem = grid.dataItem($(event.target).closest("tr"));
+
+                // Obtener latitud y longitud de la fila seleccionada
+                var latitud = dataItem.Latitud;
+                var longitud = dataItem.Longitud;
+
+                if (latitud && longitud) {
+                    // Enviar datos al controlador para cargar el modal
+                    $.ajax({
+                        url: '@Url.Action("ajax_VerGeolocalizacion")',
+                        type: 'POST',
+                        data: {
+                            latitud: latitud,
+                            longitud: longitud
+                        },
+                        dataType: "html",
+                        success: function (data) {
+                            $('#modalBodyCargaGeolocalizacionVer').html(data);
+                            $('#modalCargaGeolocalizacionVer').modal({ backdrop: 'static', keyboard: false });
+                            $('#modalCargaGeolocalizacionVer').modal('show');
+                            $('#modalCargaGeolocalizacionVer').show();
+
+                            // Actualizar el modal con la información proporcionada
+                            document.getElementById('latitude').innerHTML = latitud;
+                            document.getElementById('longitude').innerHTML = longitud;
+
+                            // Opcional: Si necesitas inicializar el mapa u otros elementos
+                            initMap();
+                            hideLoading();
+                        },
+                        error: function () {
+                            sitteg_warning("Ocurrió un error al procesar su solicitud.");
+                            hideLoading();
+                        }
+                    });
+                } else {
+                    sitteg_warning("La latitud o longitud no están disponibles.");
+                }
+            }
+
+            function closeModalCargaGeolocalizacionVer() {
+                $('#modalCargaGeolocalizacionVer').modal('hide'); // Cierra el modal
+                $('#modalBodyCargaGeolocalizacionVer').html(''); // Limpia el contenido del modal
+
+                // Opcional: Eliminar el backdrop si persiste
+                $('.modal-backdrop').remove();
+            }
+
+
+
+            //$(document).ready(function () {
+            //    var auth = @autorizaciones;
+            //    var grid = $("#GridP").data("kendoGrid");
+
+            //    console.log(auth);
+
+            //    // EDITAR
+            //    //if (!auth.toString().includes("275")) {
+            //    //    grid.hideColumn(1);
+            //    //}
+
+            //});
+
+    </script>
+</div>
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#GridP").data("kendoGrid").bind("dataBound", function () {
+            var grid = this;
+            grid.tbody.find("tr").each(function () {
+                var dataItem = grid.dataItem(this);
+                var latitud = dataItem.Latitud;
+                var longitud = dataItem.Longitud;
+               // alert("Longitud: " + longitud)
+
+                if (latitud && longitud) {
+                    $(this).find(".btn-geolocalizacion").show();
+                }
+            });
+        });
+    });
+
+    function DeletePensionByGrid(idPension,estatus){
+        var grid = $("#GridP").data("kendoGrid");
+        var auth = @autorizaciones;
+        //var dataItem = grid.dataItem($(event.srcElement).closest("tr").next());         
+       console.log(estatus)
+        var it = $("#idestatus").val(idPension)
+        var it = $("#PensionSwitch").data("kendoSwitch")        
+        it.check(estatus == 1);
+       $("#eliminarPension").modal('show');
+    }
+
+
+    function editarPensionByGrid(idPension) {
+        var grid = $("#GridP").data("kendoGrid");
+        var auth = @autorizaciones;
+
+
+        // EDITAR
+        //if (!auth.toString().includes("275")) {
+        //    Swal.fire({
+        //        icon: "error",
+        //        title: "¡El usuario no tiene acceso a esta opción!",
+        //    });
+        //    setTimeout(() => {
+        //    }, 200);
+        //    return;
+        //}
+
+        var dataItem = idPension;//grid.dataItem($(event.srcElement).closest("tr").next());
+        console.log("dataitem",idPension);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_ModalEditarPension")',
+            type: 'GET',
+            data: { idPension: idPension },
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (value) {
+                if (value.error) {
+                    sitteg_warning("El usuario no tienen los permisos para esta acción");
+                } else {
+                $('#modalBodyEditarPension').html(value);
+                $('#modalEditarPension').modal('show');
+                }
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title; 
+        return titulo; 
+    }
+
+      $(document).ready(function () {
+        var auth = @autorizaciones;
+        var grid = $("#GridP").data("kendoGrid");
+
+
+
+    });
+</script>
+
+
+<div class="modal fade modalCustom" id="modalCargaGeolocalizacionVer" aria-labelledby="modalCargaGeolocalizacionVer" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-geolocalizacion h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Geolocalización</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="row">
+                        <div class="col-auto my-4">
+                            <button type="button" class="btn-close" onclick="closeModalCargaGeolocalizacionVer()" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-body" id="modalBodyCargaGeolocalizacionVer">
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,426 @@
+﻿@model IncidenciasBusquedaModel
+
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        var auth = @autorizaciones;
+
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡El usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            } else {
+                //// BUSCAR - CONSULTAR
+                //if (!auth.toString().includes("431")) {
+                //    $("#btnBuscar").prop('disabled', true).css({ "opacity": "0.3" });
+                //}
+
+                //// IMPRIMIR
+                //if (!auth.toString().includes("432")) {
+                //    $("#btnGenerarExcel").prop('disabled', true).css({ "opacity": "0.3" });
+                //    $("#btnGenerarExcel2").prop('disabled', true).css({ "opacity": "0.3" });
+                //}
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡El usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+</script>
+
+<script>
+    function tipoServicioDropDownChange() {
+        var tipoServicioDDlValue = $("#idTipoServicio").data("kendoDropDownList").value();
+
+        showLoading();
+        $.ajax({
+            url: "/Estadisticas/SubtipoServicio_Drop",
+            type: "POST",
+            data: { tipoServicioDDlValue: tipoServicioDDlValue },
+            success: function (data) {
+                var subtipoDropDown = $("#idSubTipoServicio").data("kendoDropDownList");
+                subtipoDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+</script>
+<div class="mainContainer bg-light">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-estadisticas h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Estadísticas</b></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-auto mt-4 mb-2">
+            <h5 class="px-4"><b>Filtros de Búsqueda</b></h5>
+            <h6 class="px-4 text-muted">Filtros de búsqueda para localizar la incidencia de las infracciones</h6>
+        </div>
+        <form id="frmBusquedaEstadisticasIncidencias">
+            <div class="row align-items-end my-4 px-4">
+                <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Tipo Motivo:</label>
+                        @(Html.Kendo().DropDownListFor(d => d.idTipoMotivo).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .HtmlAttributes(new { style = "width:100%;", Id = "ddlTipoMotivos" })
+                            .OptionLabel("Seleccione una opción...")
+                            .BindTo(new List<SelectListItem>
+                        {
+                        new SelectListItem { Text = "Motívos de Transporte", Value = "0" },
+                        new SelectListItem { Text = "Motívos de Tránsito", Value = "1" }
+                        })
+                            )
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Delegación:</label>
+                        @(Html.Kendo().DropDownListFor(m => m.idDelegacion).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                             .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una delegación")
+                            .Filter(FilterType.Contains)
+
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Delegaciones_Drop", "Estadisticas");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .Filter(FilterType.Contains)
+                            )
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Oficial:</label>
+                        @(Html.Kendo().DropDownListFor(f => f.idOficial).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("OficialesDependenciaTodos_Drop", "Oficiales");
+                                });
+                            })
+                            .OptionLabel("-- Seleccione --")
+                            .Filter(FilterType.Contains)
+
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            )
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Carretera:</label>
+                        @(Html.Kendo().DropDownListFor(m => m.idCarretera).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .Label(l => l.Content("Carretera <b>(obligatorio)</b>:"))
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una Carretera")
+                            .Events(e => e.Change("carreteraDropDownChange"))
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("CarreterasPorDelegacion_Drop", "CatCarreteras");
+                                });
+                            })
+                            )
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Tramo:</label>
+                        @(Html.Kendo().DropDownListFor(m => m.idTramo).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .Label(l => l.Content("Tramo <b>(obligatorio)</b>:"))
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona un Tramo")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Tramos_Drop", "Depositos");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .Filter(FilterType.Contains)
+                            )
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Tipo de cortesía:</label>
+                        <span>
+                            @(Html.Kendo().DropDownListFor(d => d.IdTipoCortesia).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .HtmlAttributes(new { style = "width:100%;", Id = "ddlCortesia" })
+                                .OptionLabel("Seleccione una opción...")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("Cortesias_Read", "Infracciones");
+                                    });
+                                }))
+
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Tipo vehículo:</label>
+                        <div id="divTramo">
+                            @(Html.Kendo().DropDownListFor(f => f.idTipoVehiculo).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                .BindTo((SelectList)ViewBag.CatTiposVehiculo)
+                                .OptionLabel("-- Seleccione --")
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                )
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Tipo servicio:</label>
+                        @(Html.Kendo().DropDownListFor(m => m.idTipoServicio).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .BindTo((SelectList)ViewBag.CatTipoServicio)
+                            .OptionLabel("-- Seleccione --")
+                            .Events(e => e.Change("tipoServicioDropDownChange"))
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            )
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Subtipo servicio:</label>
+                        <div id="divTramo">
+                            @(Html.Kendo().DropDownListFor(f => f.idSubTipoServicio).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona una opción")
+                                .Filter(FilterType.Contains)
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("SubtipoServicio_Drop", "Estadisticas");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                )
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Tipo licencia:</label>
+                        @(Html.Kendo().DropDownListFor(m => m.idTipoLicencia).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .BindTo((SelectList)ViewBag.CatTipoLicencia)
+                            .OptionLabel("-- Seleccione --")
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            )
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Municipio:</label>
+                        <div id="divTramo">
+                            @(Html.Kendo().DropDownListFor(f => f.idMunicipio).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Seleccione Municipio...")
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                .Filter(FilterType.Contains)
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("Municipios_Guanajuato", "Estadisticas");
+                                    });
+                                }))
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Inicio:</label>
+                        @(Html.Kendo().DatePickerFor(t => t.fechaInicio).Max(DateTime.Now)
+                            .Culture("es-ES")
+                            .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "start" })
+                            )
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Fin:</label>
+                        @(Html.Kendo().DatePickerFor(t => t.fechaFin).Max(DateTime.Now)
+                            .Culture("es-ES")
+                            .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "end" })
+                            )
+                    </div>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <div class="controlButton">
+                            <button class="btnPrimary" id="btnBuscar" type="button" onclick="submitSearch()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div id="estadisticasInfracciones">
+            <partial name="_EstadisticaInfraccionesMotivos" model="@ViewBag.Estadisticas" />
+        </div>
+        <div id="estadisticasInfracciones2">
+            <partial name="_GridPorMotivos" model="@ViewBag.GridPorMotivos" />
+        </div>
+        <div id="estadisticasInfracciones3">
+            <partial name="_GridInfracciones" model="@ViewBag.GridInfracciones" />
+        </div>
+
+
+    </section>
+
+</div>
+
+<script>
+    function submitSearch() {
+        var Mydata = $("#frmBusquedaEstadisticasIncidencias").serialize();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("GetInfraccionesGridBusqueda")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                $("#estadisticasInfracciones3").html(result);
+
+                $.ajax({
+                    url: '@Url.Action("ajax_BusquedaIncidenciasInfracciones")',
+                    type: 'POST',
+                    data: Mydata,
+                    success: function (result) {
+                        $("#estadisticasInfracciones").html(result);
+                        
+                        $.ajax({
+                            url: '@Url.Action("ajax_BusquedaParaMotivos")',
+                            type: 'POST',
+                            data: Mydata,
+                            success: function (result) {
+                                 $("#estadisticasInfracciones2").html(result);
+                                hideLoading();
+                            },
+                            error: function () {
+                                // Maneja errores
+                                sitteg_warning("Ocurrió un error al actualizar el ViewBag.");
+                                hideLoading();
+                            }
+                        });
+                        
+                    },
+                    error: function () {
+                        // Maneja errores
+                        sitteg_warning("Ocurrió un error al procesar su solicitud.");
+                        hideLoading();
+                    }
+                });
+            },
+            error: function () {
+                // Maneja errores
+                sitteg_warning("Ocurrió un error al actualizar el ViewBag.");
+                hideLoading();
+            }
+        });
+    }
+
+
+
+    function startChange() {
+        var endPicker = $("#end").data("kendoDatePicker"),
+            startDate = this.value();
+
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate() + 1);
+            endPicker.min(startDate);
+        }
+    }
+
+    function endChange() {
+        var startPicker = $("#start").data("kendoDatePicker"),
+            endDate = this.value();
+
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate() - 1);
+            startPicker.max(endDate);
+        }
+    }
+    $(document).ready(function () {
+        var datePicker = $("#FechaInicio").data("kendoDatePicker");
+        datePicker.value(null);
+    });
+    $(document).ready(function () {
+        var datePicker = $("#FechaFin").data("kendoDatePicker");
+        datePicker.value(null);
+    });
+    function carreteraDropDownChange() {
+        var carreteraDDValue = $("#idCarretera").data("kendoDropDownList").value();
+
+        showLoading();
+        $.ajax({
+            url: "/Estadisticas/Tramos_Drop",
+            type: "POST",
+            data: { carreteraDDValue: carreteraDDValue },
+            success: function (data) {
+                var TramosDropDown = $("#idTramo").data("kendoDropDownList");
+                TramosDropDown.dataSource.data(data);
+                hideLoading();
+                $("#idTramo").trigger("onFinishLoading");
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+</script>

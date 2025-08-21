@@ -1,0 +1,9 @@
+﻿@model MotivosInfraccionVistaModel
+
+@(Html.Kendo().NumericTextBoxFor(m => m.calificacion)
+    .Decimals(2)
+    .Step(1)
+    .Min(Model.CalificacionMinima)
+    .Max(Model.CalificacionMaxima)
+    .Value(Model.calificacion ?? 0)
+)

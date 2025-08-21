@@ -1,0 +1,312 @@
+﻿@model ComparativoInfraccionesResumenModel
+
+<button type="button" id="btnGenerarExcel" class=" mx-4 btn btn-outline-success d-flex align-items-center" onclick="generateExcel()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filetype-xls" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5L14 4.5ZM6.472 15.29a1.176 1.176 0 0 1-.111-.449h.765a.578.578 0 0 0 .254.384c.07.049.154.087.25.114.095.028.202.041.319.041.164 0 .302-.023.413-.07a.559.559 0 0 0 .255-.193.507.507 0 0 0 .085-.29.387.387 0 0 0-.153-.326c-.101-.08-.255-.144-.462-.193l-.619-.143a1.72 1.72 0 0 1-.539-.214 1.001 1.001 0 0 1-.351-.367 1.068 1.068 0 0 1-.123-.524c0-.244.063-.457.19-.639.127-.181.303-.322.527-.422.225-.1.484-.149.777-.149.305 0 .564.05.78.152.216.102.383.239.5.41.12.17.186.359.2.566h-.75a.56.56 0 0 0-.12-.258.625.625 0 0 0-.247-.181.923.923 0 0 0-.369-.068c-.217 0-.388.05-.513.152a.472.472 0 0 0-.184.384c0 .121.048.22.143.3a.97.97 0 0 0 .405.175l.62.143c.217.05.406.12.566.211a1 1 0 0 1 .375.358c.09.148.135.335.135.56 0 .247-.063.466-.188.656a1.216 1.216 0 0 1-.539.439c-.234.105-.52.158-.858.158-.254 0-.476-.03-.665-.09a1.404 1.404 0 0 1-.478-.252 1.13 1.13 0 0 1-.29-.375Zm-2.945-3.358h-.893L1.81 13.37h-.036l-.832-1.438h-.93l1.227 1.983L0 15.931h.861l.853-1.415h.035l.85 1.415h.908L2.253 13.94l1.274-2.007Zm2.727 3.325H4.557v-3.325h-.79v4h2.487v-.675Z"></path>
+    </svg>
+    <h5 class="mb-0 ms-2"><b>Generar excel</b></h5>
+    
+</button>
+<div class="row my-4 px-4">
+	<div class="col-md-12">
+		<div>
+			<nav class="tabCustom">
+				@*navegador tabs*@
+				<div class="nav nav-tabs row mx-0" id="nav-tab" role="tablist">
+					<button class="nav-link active col" id="resultadosGenerales-tab" data-bs-toggle="tab" data-bs-target="#resultadosGenerales-container" type="button" role="tab" aria-controls="resultadosGenerales-container" aria-selected="true">
+						<div class="row justify-content-center align-items-center px-2 py-1">
+							<div class="col-auto radioCustom p-0">
+								<div class="rounded-circle m-1"></div>
+							</div>
+							<div class="col-auto p-0">
+								<h6 class="m-0"><b>Resultados generales</b></h6>
+							</div>
+						</div>
+					</button>
+					<button class="nav-link col" id="detallesPorCausa-tab" data-bs-toggle="tab" data-bs-target="#detallesPorCausa-container" type="button" role="tab" aria-controls="detallesPorCausa-container" aria-selected="false">
+						<div class="row justify-content-center align-items-center px-2 py-1">
+							<div class="col-auto radioCustom p-0">
+								<div class="rounded-circle m-1"></div>
+							</div>
+							<div class="col-auto p-0">
+								<h6 class="m-0"><b>Detalle por causa</b></h6>
+							</div>
+						</div>
+					</button>
+					<button class="nav-link col" id="desgloseTotalDeInfracciones-tab" data-bs-toggle="tab" data-bs-target="#desgloseTotalDeInfracciones-container" type="button" role="tab" aria-controls="desgloseTotalDeInfracciones-container" aria-selected="false">
+						<div class="row justify-content-center align-items-center px-2 py-1">
+							<div class="col-auto radioCustom p-0">
+								<div class="rounded-circle m-1"></div>
+							</div>
+							<div class="col-auto p-0">
+								<h6 class="m-0"><b>Desglose total de infracciones</b></h6>
+							</div>
+						</div>
+					</button>
+				</div>
+			</nav>
+			@*Contenidos de cada tab*@
+			<div class="tab-content" id="nav-tabContent">
+				<div class="tab-pane tabCustomConteiner fade show active" id="resultadosGenerales-container" role="tabpanel" aria-labelledby="resultadosGenerales-tab">
+					<div class="row align-items-start my-4 px-4">
+						<div class="col-12 col-md-6 my-3">
+							@(Html.Kendo().Grid(Model.resultadosGenerales)
+								.Name("gridResultadosGenerales")
+								.Columns(columns =>
+								{
+									columns.Bound(c => c.año).Title("Año");
+									columns.Bound(p => p.total).Title("Total").ClientFooterTemplate("total : #=sum#");
+								}).HtmlAttributes(new { style = "height:auto" })
+								.Events(e => e.ExcelExport("Generales_excelExport"))
+								@*.Pageable(pager => pager.AlwaysVisible(false).Position(GridPagerPosition.Bottom).PageSizes(false))*@
+								.Pageable(p => p.Enabled(true))
+								.Sortable()
+								.Scrollable(scr => scr.Enabled(false))
+								.DataSource(dataSource => dataSource
+								.Ajax()
+								.ServerOperation(false)
+								.Aggregates(aggregates =>
+								{
+									aggregates.Add(p => p.total).Sum();
+								})
+								)
+								.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+								)
+						</div>
+						<div class="col-12 col-md-6 my-3">
+							@(Html.Kendo().Chart(Model.resultadosGenerales)
+								.Name("chartResultadosGenerales")
+								.Title("Resultados Generales")
+								.Subtitle("/Resultados Generales/")
+								.Legend(legend => legend
+								.Visible(true)
+								.Position(ChartLegendPosition.Top)
+								)
+								.ChartArea(chartArea => chartArea
+								.Background("transparent")
+								)
+								.Series(series =>
+								{
+									series.Bar(model => model.total);
+								})
+								.CategoryAxis(axis => axis
+								.Categories(c => c.año)
+								.MajorGridLines(lines => lines.Visible(false))
+								)
+								.ValueAxis(axis => axis
+								.Line(line => line.Visible(false))
+								.MajorGridLines(lines => lines.Visible(true))
+								)
+								.Tooltip(tooltip => tooltip
+								.Visible(true)
+								.Template("#= dataItem.total #: #= value #")
+								)
+								)
+						</div>
+					</div>
+				</div>
+				<div class="tab-pane tabCustomConteiner fade" id="detallesPorCausa-container" role="tabpanel" aria-labelledby="detallesPorCausa-tab">
+					<div class="row align-items-start my-4 px-4">
+						<div class="col-12 my-3">
+							<!-- Este div contiene el grid -->
+							@(Html.Kendo().Grid(Model.detallesPorCausa)
+								.Name("gridDetallesPorCausa")
+								.Columns(columns =>
+								{
+									columns.Bound(c => c.causa).Title("Causa");
+									columns.Bound(p => p.cantidad).Title("Cantidad").ClientFooterTemplate("Total : #=sum#");
+									columns.Bound(c => c.año).Title("Año");
+								}).HtmlAttributes(new { style = "height:auto" })
+								.Events(e => e.ExcelExport("Causa_excelExport"))
+								.Pageable(p => p.Enabled(true))
+								.Sortable()
+								.Scrollable(scr => scr.Enabled(false))
+								.DataSource(dataSource => dataSource
+								.Ajax()
+								.ServerOperation(false)
+								.Aggregates(aggregates =>
+								{
+									aggregates.Add(p => p.cantidad).Sum();
+								})
+								)
+								.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+								)
+						</div>
+					</div>
+					<div class="row align-items-start my-4 px-4">
+						<!-- Nueva fila para la gráfica -->
+						<div id="divDinamico" class="col-12 my-3">
+							<!-- Este div contiene la gráfica -->
+							@(Html.Kendo().Chart(Model.detallesPorCausa)
+								.Name("chartDetallesPorCausa")
+								.Title("Detalles Por Causa")
+								.Subtitle("/Resultados Generales/")
+								.Legend(legend => legend
+								.Visible(true)
+								.Position(ChartLegendPosition.Top)
+								)
+								.ChartArea(chartArea => chartArea
+								.Background("transparent")
+								)
+								.Series(series =>
+								{
+									series.Bar(model => model.cantidad);
+								})
+								.CategoryAxis(axis => axis
+								.Categories(c => c.causaTrunc)
+								.MajorGridLines(lines => lines.Visible(false))
+								.Labels(labels => labels
+								.Rotation(0) // Ajusta según sea necesario
+								.Visible(true)
+								)
+								)
+								.ChartArea(height => height.Height(3000))
+								.ValueAxis(axis => axis
+								.Line(line => line.Visible(false))
+								.MajorGridLines(lines => lines.Visible(true))
+								)
+								.Tooltip(tooltip => tooltip
+								.Visible(true)
+								.Template("#= dataItem.causa #: #= value #")
+								)
+								.HtmlAttributes(new { style = "height:4000px; width:100%;" }) // Ajusta la altura
+								)
+						</div>
+					</div>
+				</div>
+
+				<div class="tab-pane tabCustomConteiner fade " id="desgloseTotalDeInfracciones-container" role="tabpanel" aria-labelledby="desgloseTotalDeInfracciones-tab">
+					<div class="row align-items-start my-4 px-4">
+						<div class="col-12 col-md-6 my-3">
+							@(Html.Kendo().Grid(Model.desgloseTotalDeInfracciones)
+								.Name("gridDesgloseTotalDeInfracciones")
+								.Columns(columns =>
+								{
+									columns.Bound(c => c.numeroMotivo).Title("Número de motivos").Width(50);
+									columns.Bound(p => p.totalInfracciones).Title("Total Infracciones").Width(50).ClientFooterTemplate("Total : #=sum#");
+									columns.Bound(p => p.totalContabiliza).Title("Total contabiliza").Width(50)
+									.ClientFooterTemplate("Total : #=sum#");
+									columns.Bound(c => c.año).Title("Año").Width(50);
+								}).HtmlAttributes(new { style = "height:auto" })
+								.Events(e => e.ExcelExport("Totales_excelExport"))
+								@*.Pageable(pager => pager.AlwaysVisible(false).Position(GridPagerPosition.Bottom).PageSizes(false))*@
+								.Pageable(p => p.Enabled(true))
+								.Sortable()
+								.Scrollable(scr => scr.Enabled(false))
+								.DataSource(dataSource => dataSource
+								.Ajax()
+								.ServerOperation(false)
+								.Aggregates(aggregates =>
+								{
+									aggregates.Add(p => p.totalInfracciones).Sum();
+									aggregates.Add(p => p.totalContabiliza).Sum();
+								})
+								)
+								.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+								)
+						</div>
+						<div class="col-12 col-md-6 my-3">
+							@(Html.Kendo().Chart(Model.desgloseTotalDeInfracciones)
+								.Name("chartDesgloseTotalDeInfracciones")
+								.Title("Desglose Total De Infracciones")
+								.Subtitle("/Resultados Generales/")
+								.Legend(legend => legend
+								.Visible(true)
+								.Position(ChartLegendPosition.Top)
+								)
+								.ChartArea(chartArea => chartArea
+								.Background("transparent")
+								)
+								.Series(series =>
+								{
+									series.Column(model => model.totalInfracciones);
+								})
+								.CategoryAxis(axis => axis
+								.Categories(c => c.numeroMotivo) 
+								.MajorGridLines(lines => lines.Visible(false))
+								.Labels(labels => labels
+								.Rotation(0) 
+								)
+								)
+								.ValueAxis(axis => axis
+								.Line(line => line.Visible(false))
+								.MajorGridLines(lines => lines.Visible(true))
+								)
+								.Tooltip(tooltip => tooltip
+								.Visible(true)
+								.Template("#= dataItem.total #: #= value #")
+								)
+								)
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	function loadBinary(url, callback) {
+		var xhr = new XMLHttpRequest();
+		xhr.onload = function () {
+			callback(xhr.response, xhr.getResponseHeader("Content-Type"));
+		};
+		xhr.onerror = function () {
+			callback(null);
+		};
+		xhr.open("GET", url);
+		xhr.responseType = "arraybuffer";
+		xhr.send();
+	}
+	var promises = [
+		$.Deferred(),
+		$.Deferred(),
+		$.Deferred()
+	];
+
+	var workbookArr = [];
+
+	function tooltipContent(e) {
+		var titulo = e.target.context.dataset.title;
+		return titulo;
+	}
+	function Generales_excelExport(e) { //"ExcelExport" event handler of "products" Grid.
+	
+		e.preventDefault();
+		promises[0].resolve(e.workbook);
+	}
+	function Causa_excelExport(e) { 
+		e.preventDefault();
+		promises[1].resolve(e.workbook);
+	}
+	function Totales_excelExport(e) { 
+		e.preventDefault();
+		promises[2].resolve(e.workbook);
+	}
+	function generateExcel() {
+		$("#gridResultadosGenerales").data("kendoGrid").saveAsExcel();
+		$("#gridDetallesPorCausa").data("kendoGrid").saveAsExcel();
+		$("#gridDesgloseTotalDeInfracciones").data("kendoGrid").saveAsExcel();
+		$.when.apply(null, promises)
+			.then(function (generalesWorkbook, causaWorkbook, totalesWorkbook) {
+				var sheets = [
+					generalesWorkbook.sheets[0],
+					causaWorkbook.sheets[0],
+					totalesWorkbook.sheets[0]
+				];
+				sheets[0].title = "Resultados generales";
+				sheets[1].title = "Detalles por causas";
+				sheets[2].title = "Totales de infracciones";
+				var workbook = new kendo.ooxml.Workbook({
+					sheets: sheets
+				});
+				kendo.saveAs({
+					dataURI: workbook.toDataURL(),
+					fileName: "ComparativoInfracciones.xlsx"
+				})
+			});
+	}
+</script>
+

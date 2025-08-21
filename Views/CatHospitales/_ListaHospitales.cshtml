@@ -1,0 +1,153 @@
+﻿<script>
+    function returnData(){
+        var idMun = $("#IdMunicipioH").val();
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+        return { idMunicipio: idMun, idDependencia : idDependencia }
+    }
+</script>
+
+  @if (ViewBag.Admin == true)
+        {
+              <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnNuevoHoapital" onclick="mostrarModalHopsitales()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addHospital h5 mb-0 me-2"></i><b>Agregar nuevo hospital</b></h6>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatHospitalesModel>()
+            .Name("gridCatHospitales")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdHospital).Title("Id").Width(40);
+                columns.Bound(c => c.NombreHospital).Title("Nombre de Hospital").Width(100);
+                columns.Bound(c => c.Municipio).Title("Municipio").Width(100);
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(100);
+                columns.Command(c => c.Custom("Editar").Click("getIdHospital")).Width(100);
+               // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetHospitalesLista", "CatHospitales").Data("returnData"))
+            .PageSize(5).Model(model => model.Id(p => p.IdHospital))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.NombreHospital);
+                s.Field(c => c.Municipio);
+
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+    </div>
+</div>
+<div class="modal fade modalCustom" id="agregarHospital" aria-labelledby="agregarHospitalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyaAgregarHospital">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function getIdHospital(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdHospital = dataItem.IdHospital;
+        var Corp = dataItem.Corp;
+
+        console.log(IdHospital);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarHospitalModal", "CatHospitales")',
+            type: 'POST',
+            data: { IdHospital: IdHospital, Corp: Corp },
+            success: function (result) {
+                $('#ModalBodyaAgregarHospital').html(result);
+                $('#agregarHospital').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdHospital = dataItem.IdHospital;
+
+        console.log(IdHospital);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarHospitalModal", "CatHospitales")',
+            type: 'POST',
+            data: { IdHospital: IdHospital},
+            success: function (result) {
+                $('#ModalBodyaAgregarHospital').html(result);
+                $('#agregarHospital').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+    function Municipios_DropChangeC() {
+        var idEntidad = $("#IdEntidad").data("kendoDropDownList").value();
+        var CORP = $("#idDependenciaFiltro").val();
+
+        showLoading();
+        $.ajax({
+            url: "/CatHospitales/Municipios_DropChange",
+            type: "POST",
+            data: { idEntidad: idEntidad, CORP: CORP },
+            success: function (data) {
+                var IdMunicipio2 = $("#IdMunicipio").data("kendoDropDownList");
+                //console.log(data);
+                IdMunicipio2.dataSource.data(data);
+                hideLoading();
+                // $("#IdMunicipio2").trigger("onFinishLoading");
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+   
+</script>

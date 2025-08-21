@@ -1,0 +1,374 @@
+﻿<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatCamposObligatoriosModel>()
+            .Name("gridCatCamposObligatorios")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdCampo).Title("Id").Width(40);
+                columns.Bound(c => c.Campo).Title("Nombre Campo").Width(100);
+                columns.Bound(c => c.EstatusAccidente).Title("Accidentes").ClientTemplate("#=templateAccidente(data)#").Width(100);
+                columns.Bound(c => c.EstatusInfracciones).Title("Infracciones").ClientTemplate("#=templateInfracciones(data)#").Width(100);
+                columns.Bound(c => c.EstatusDepositos).Title("Depositos").ClientTemplate("#=templateDepositos(data)#").Width(100);
+                columns.Bound(c => c.EstatusDepositos).Title("Configuración Activa").ClientTemplate("#=templateSwitch(data)#").Width(100);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetCamposObligatoriosJSON", "CatCamposObligatorios"))
+            .PageSize(5).Model(model => model.Id(p => p.IdCampo))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.Campo);
+
+
+            })
+            .Events(x => x.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            .Events(x => x.DataBound("onGridDataBound"))
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#gridCatCamposObligatorios")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+    </div>
+
+</div>
+
+<script>kendo.syncReady(function () { jQuery("#btnActivo").kendoSwitch({ "checked": true, "messages": { "checked": "Activo", "unchecked": "Inactivo" } }); });</script>
+
+<div class="modal fade modalCustom" id="agregarCamposOpcionales" aria-labelledby="agregarCamposOpcionalesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyaAgregarCamposOpcionales">
+                <section class=" bg-white rounded">
+                    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                        <div class="col-auto pe-0">
+                            <div class="row align-items-center justify-content-center justify-content-md-start">
+                                <div class="col-auto pe-0">
+                                    <i class="icon-fisica h1 colorPrimary"></i>
+                                </div>
+                                <div class="col-auto my-3">
+                                    <h2 class="m-0 h3"><b><span id="campoNombre"></span></b></h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="row">
+                                <div class="col-auto my-3">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="document.getElementById('btnActivo_' + currentId).checked = false;"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="bg-light py-1"></div>
+                        </div>
+
+                    </div>
+                    <form id="guardarDatosForm" class="row px-4 mb-4 align-items-end justify-content-center">
+                        <div class="col-12 col-md-8">
+                            <div class="controlForm my-3">
+                                <label id="statusLabel">Al dar click en guardar se activarán las opciones seleccionadas en los flujos aplicables a tu corporación.</label>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row my-4">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close" onclick="document.getElementById('btnActivo_' + currentId).checked = false;">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton" onclick="GuardarEstatus()">
+                                        @(Html.Kendo().Button()
+                                            .Name("Guardar")
+                                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                            .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function toggleActiveClass(buttonId) {
+        var button = document.getElementById(buttonId);
+        button.classList.add('active');
+    }
+
+    function onGridDataBound() {
+        toggleActiveClass('nav-config-param-tab');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var button = document.getElementById('nav-config-param-tab');
+        if (button) {
+            button.addEventListener('click', function () {
+                toggleActiveClass('nav-config-param-tab');
+            });
+        }
+    });
+    function GuardarEstatus1() {
+
+        var Mydata = $("#guardarDatosForm").serialize();
+        console.log(Mydata);
+        $('#agregarDelegacionOficina').modal('hide');
+        $('body').removeClass('model-open');
+        $('.modal-backdrop').remove();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarDelegacionOficinaMod")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                var grid = $("#gridCatOficinasTransporte").data("kendoGrid");
+                grid.dataSource.read();
+                $('#agregarDelegacionOficina').modal('hide');
+                sitteg_success("Información guardada correctamente.");
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+</script>
+
+<script>
+    var currentId = null;
+    function CambioEstatus(id, componente) {
+        var isChecked = document.getElementById(componente + "_" + id).checked;
+
+        var btnActivo = document.getElementById('btnActivo_' + id);
+
+        if (isChecked) {
+            btnActivo.disabled = false;
+            btnActivo.checked = false;
+        } else {
+            btnActivo.disabled = false
+            btnActivo.checked = false;
+        }
+    }
+
+    function AbrirModal(id, nombre) {
+        $('#agregarCamposOpcionales').modal('show');
+
+        var miSpan = document.getElementById('campoNombre');
+        miSpan.textContent = 'Campo ' + nombre;
+        currentId = id;
+
+        var accidenteChecked = document.getElementById('accidente_' + currentId).checked ? "Activo" : "Inactivo";
+        var infraccionChecked = document.getElementById('infraccion_' + currentId).checked ? "Activo" : "Inactivo";
+        var depositoChecked = document.getElementById('deposito_' + currentId).checked ? "Activo" : "Inactivo";
+
+        document.getElementById('statusLabel').innerHTML = `Al hacer clic en "Guardar", se aplicarán las opciones seleccionadas a los flujos correspondientes de tu corporación:<br><br>
+                    <ul>
+                        <li>Accidentes: <strong>${accidenteChecked}</strong></li>
+                        <li>Infracciones: <strong>${infraccionChecked}</strong></li>
+                        <li>Depósitos: <strong>${depositoChecked}</strong></li>
+                    </ul>`;
+    }
+
+    function GuardarEstatus() {
+        var btnActivo = document.getElementById('btnActivo_' + currentId);
+
+        var accidenteChecked = document.getElementById('accidente_' + currentId).checked ? 1 : 0;
+        var infraccionChecked = document.getElementById('infraccion_' + currentId).checked ? 1 : 0;
+        var depositoChecked = document.getElementById('deposito_' + currentId).checked ? 1 : 0;
+        var data = {
+            IdCampoObligatorio: 0,
+            IdDelegacion: 1,
+            Delegacion: "",
+            IdMunicipio: 1,
+            Municipio: "",
+            IdCampo: currentId,
+            Campo: "",
+            EstatusAccidente: accidenteChecked,
+            EstatusInfracciones: infraccionChecked,
+            EstatusDepositos: depositoChecked,
+            FechaActualizacion: "",
+            ActualizadoPor: ""
+        };
+        console.log(JSON.stringify(data));
+        $('#agregarCamposOpcionales').modal('hide');
+        showLoading(); // Asegúrate de definir esta función en tu código
+
+        $.ajax({
+            url: '@Url.Action("AgregarCamposObligatoriosMod", "CatCamposObligatorios")',
+            type: 'POST',
+            data: data,
+            success: function (result) {
+                var grid = $("#gridCatCamposObligatorios").data("kendoGrid");
+                grid.dataSource.read();
+                sitteg_success("Información guardada correctamente.");
+                hideLoading(); // Asegúrate de definir esta función en tu código
+                btnActivo.disabled = true;
+                btnActivo.checked = true;
+            },
+            error: function () {
+                sitteg_warning("Ocurrió un error al procesar su solicitud.");
+                hideLoading(); // Asegúrate de definir esta función en tu código
+            }
+        });
+    }
+
+    function escapeHtml(str) {
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;")
+            .replace(/ /g, "&nbsp;");
+    }
+
+    function templateAccidente(data) {
+        return `<input type="checkbox" id=accidente_${data.IdCampo} ${data.EstatusAccidente ? "checked" : ""} onChange=CambioEstatus(${data.IdCampo},"accidente") />`
+    }
+    function templateInfracciones(data) {
+        const isDisabled = data.Campo === 'Validacion Parte';
+
+        return `
+            <input type="checkbox"
+                id="infraccion_${data.IdCampo}"
+                ${data.EstatusInfracciones ? "checked" : ""}
+                ${isDisabled ? "disabled" : ""}
+                onChange="CambioEstatus(${data.IdCampo}, 'infraccion')"
+            />
+        `;
+    }
+
+    function templateDepositos(data) {
+        const isDisabled = data.Campo === 'Validacion Parte';
+
+        return `
+            <input type="checkbox"
+                id="deposito_${data.IdCampo}"
+                ${data.EstatusDepositos ? "checked" : ""}
+                ${isDisabled ? "disabled" : ""}
+                onChange="CambioEstatus(${data.IdCampo}, 'deposito')"
+            />
+        `;
+    }
+
+    function templateSwitch(data) {
+        var campoEscapado = escapeHtml(data.Campo);
+        return `<div class="row justify-content-center btnToggleActive">
+                                            <div class="switch btnToggle col-12">
+                                                    <input checked="checked" disabled data-valor="1" id="btnActivo_${data.IdCampo}" name="btnActivo_${data.IdCampo}" type="checkbox" value="true" onChange=AbrirModal(${data.IdCampo},'${campoEscapado}') />
+                                                        <label for="btnActivo_${data.IdCampo}" class="slider">
+                                                            <span class="on-off-label on-label">ON</span>
+                                                            <span class="on-off-label off-label">OFF</span>
+                                                        </label>
+                                            </div>
+                                        </div>
+            `
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>
+<style>
+    /* Estilos para el switch */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 80px; /* Aumenta el ancho para ajustar el texto */
+        height: 34px;
+    }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            border-radius: 50%;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+
+        input:checked + .slider:before {
+            transform: translateX(46px); /* Ajusta el valor para encajar con el texto */
+        }
+
+    /* Estilo para el switch en modo deshabilitado */
+    input:disabled + .slider {
+        background-color: #2196F3;
+    }
+
+        input:disabled + .slider:before {
+            background-color: #f8f9fa;
+        }
+
+    /* Estilos para los textos ON y OFF */
+    .switch .on-off-label {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 12px;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .switch .on-label {
+        left: 10px;
+    }
+
+    .switch .off-label {
+        right: 10px;
+        color: #fff;
+    }
+
+</style>

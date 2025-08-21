@@ -1,0 +1,161 @@
+﻿
+<script>
+
+    function IdCorp() {
+        var corp = $("#Delegacion").val()
+        return {idCorp:corp}
+    }
+
+    function chanCorp(){
+
+        $("#idAplicacion").data("kendoDropDownList").dataSource.read()
+
+    }
+
+</script>
+
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="h1 icon-addAws colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Crear Alertamiento</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <form id="crearWsForm" class="row px-4 mb-4 align-items-end justify-content-center">
+        <div class="row align-items-end">
+            <div class="col-12 col-lg-6 my-4">
+                <h5 class="px-4"><b>Datos de Alertamientos</b></h5>
+                <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+            </div>
+
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="controlForm my-3">
+                <label>Corporacion <b>(obligatorio)</b>:</label>
+                @(Html.Kendo().DropDownList()
+                    .Name("Delegacion")
+                    .DataTextField("text")
+                    .OptionLabel("-- Seleccione una delegación --")
+                    .DataValueField("value")
+                    .DataSource(s => s.Read("GetCorpCatalog", "CatAlertamiento"))
+                    .Events(s=>s.Change("chanCorp"))
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="controlForm my-3">
+                <label>Aplicada a <b>(obligatorio)</b>:</label>
+                @(Html.Kendo().DropDownList()
+                    .Name("idAplicacion")
+                    .DataTextField("text")
+                    .DataValueField("value")
+                    .Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")                    
+                    .OptionLabel("-- Seleccione --")
+                    .DataSource(s => s.Read(w => w.Action("GetAplicadaCatalog", "CatAlertamiento").Data("IdCorp")))
+                    .HtmlAttributes(new { style = "width:100%;", required = "required" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="controlForm my-3">
+                <div class="input-group">
+                    <label>Cantidad <b>(obligatorio)</b>:</label>
+                    <input name="cantidad" id="cantidad" class="" value="0" onkeydown="validarNumero(event)" style="height: 3.6em;" />
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </form>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton">
+                        <button class="btnPrimary px-3" onclick="crearService()">
+                            <h5 class="m-0"><b>Guardar</b></h5>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+
+<script>
+    function crearService() {
+
+        var Mydata = $("#crearWsForm").serialize();
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'cantidad' });
+        controlsValidate.push({ 'controlName': 'idAplicacion' });
+        controlsValidate.push({ 'controlName': 'Delegacion' });
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("Ajax_CrearService")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                if(!result){
+                    sitteg_warning("Ya existe un alertamiento con estos parametros.");
+                    $('#modalWS').modal('hide');
+                     $('#ModalBodyWS').empty();
+                }
+                else{
+                var grid = $("#gridCatWS").data("kendoGrid");
+                grid.dataSource.read();
+                $('#modalWS').modal('hide');
+                $('#ModalBodyWS').empty();
+
+                sitteg_success("Información guardada correctamente.");
+                }
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Sucedió un error, intente mas tarde...');
+                hideLoading();
+            }
+        });
+    }
+
+</script>

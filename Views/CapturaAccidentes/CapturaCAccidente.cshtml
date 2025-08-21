@@ -1,0 +1,1854 @@
+﻿@model GuanajuatoAdminUsuarios.Models.DatosAccidenteModel
+@{
+    bool esSoloLectura = ViewBag.EsSoloLectura ?? false;
+
+    var EsEdicion = ViewBag.EsEdicion;
+    var lon = Model.Longitud;
+
+    var GetMun = EsEdicion == "1" ? "Drop_MunicipiosTodos" : "Drop_MunicipiosActivosPorEntidad";
+
+    var certificadoDe = EsEdicion == "1" ? "Drop_Hospitales" : "Drop_HospitalesActivos";
+    var AutoridadesDisposicion = EsEdicion == "1" ? "Drop_AutoridadesDisposicion" : "Drop_AutoridadesDisposicionActivas";
+    var AutoridadesEntrega = EsEdicion == "1" ? "Drop_AutoridadesEntrega" : "Drop_AutoridadesEntregaActivas";
+    var Entidades = EsEdicion == "1" ? "Drop_Entidades" : "Drop_EntidadesActivas";
+    var Oficiales = EsEdicion == "1" ? "Drop_Oficiales" : "Drop_OficialesActivos";
+    var Agencias = EsEdicion == "1" ? "Drop_Agencias" : "Drop_AgenciasActivas";
+    var EtiReq = "Elabora (obligatorio)";
+     var EtiReq2= "Supervisor (obligatorio)";
+    var EtiReq3 = "Autoriza (obligatorio)";
+
+
+}
+
+<style>
+    .d-none {
+        display: none;
+    }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.6.172/pdf.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $("#montoCamino, #montoCarga,#montoPropietarios,#montoOtros").on("paste", function (e) {
+            var clipboardData = e.originalEvent.clipboardData || window.clipboardData;
+            var pastedData = clipboardData.getData('text');
+            var regex = /^[a-zA-Z0-9.]+$/;
+
+            if (!regex.test(pastedData)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
+    function GetEntidad() {
+        var entidat = $("#IdEntidadCompetencia").val() ?? 0
+
+        return { entidadDDlValue: entidat }
+    }
+
+    function ReloadMun() {
+        var dl = $("#IdCiudad").data("kendoDropDownList").dataSource
+
+        dl.read()
+    }
+    function onKeyPress(e) {
+        var key = String.fromCharCode(e.keyCode || e.charCode);
+        var currentValue = e.target.value;
+
+        // Si el primer carácter es un espacio, prevenir la acción
+        if (currentValue.length === 0 && key === ' ') {
+            e.preventDefault();
+            return false;
+        }
+
+        // Si el primer carácter es '0' o '.', prevenir la acción
+        if (currentValue.length === 0 && (key === '0' || key === '.')) {
+            e.preventDefault();
+            return false;
+        }
+
+        // Resto del código de validación...
+    }
+
+
+function eliminarCeroyPunto(input) {
+    var value = input.value;
+    // Mientras el primer carácter sea '0', '.' o ' ', eliminarlo
+    while (value.length > 0 && (value.charAt(0) === '0' || value.charAt(0) === '.' || value.charAt(0) === ' ')) {
+        value = value.substring(1);
+    }
+    input.value = value;
+}
+
+    function ParteVisible() {
+        $.ajax({
+            url: '/CapturaAccidentes/PartePermitido',
+            type: 'GET',
+            data: {},
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                var Jsonstring = JSON.stringify(data);
+                var content = JSON.parse(Jsonstring);
+                if (content.Requerido == 1) {
+                    let labelFolio = document.getElementById("LabFolio");
+                    labelFolio.innerText = '@EtiReq';
+                     let labelFolio2 = document.getElementById("LabFolio2");
+                    labelFolio2.innerText = '@EtiReq2'; 
+                    let labelFolio3 = document.getElementById("LabFolio3");
+                    labelFolio3.innerText = '@EtiReq3';
+                }
+            }
+        })
+    }
+
+   ParteVisible();
+
+</script>
+
+
+
+
+
+<script>
+
+    function Know() {
+        console.log("its here")
+    }
+
+</script>
+
+
+<div class="mainContainer bg-light">
+    <form id="detalleAccidenteForm">
+        <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto">
+                            <div class="border border-2 border-dark rounded-circle">
+                                <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                    <b>1</b>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="icon-danoAccidente h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                            <h2 class="m-0 h3"><b>Daños materiales del accidente</b></h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-8 pe-0">
+                    <div class="bgSuccess py-1"></div>
+                </div>
+                <div class="col-4 ps-0">
+                    <div class="bg-light py-1"></div>
+                </div>
+            </div>
+            <div class="row justify-content-between align-items-end mb-1">
+                <div class="col-12 col-md-auto mt-4 mb-2">
+                    <h5 class="px-4"><b>Daños del accidente</b></h5>
+                    <h6 class="px-4 text-muted">Da de alta los daños del accidente.</h6>
+                </div>
+            </div>
+            <div class="row px-4 mb-4 align-items-end">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.montoCamino)
+                            .Label(l => l.Content("Daños al camino:"))
+                            .Placeholder("Ingresa el monto al que ascienden los daños al camino")
+                            .Enable(!ViewBag.EsSoloLectura)
+                            .HtmlAttributes(new { style = "width: 100%", id = "montoCamino", onkeypress = "return onKeyPress(event);" , onkeyup  = "eliminarCeroyPunto(this);" })
+
+                            )
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.montoCarga)
+                            .Label(l => l.Content("Daños a la carga:"))
+                            .Placeholder("Ingresa el monto al que ascienden los daños a la carga")
+                            .Enable(!ViewBag.EsSoloLectura)
+                            .HtmlAttributes(new { style = "width: 100%", id = "montoCarga", onkeypress = "return onKeyPress(event)", onkeyup  = "eliminarCeroyPunto(this);" })
+                            )
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.montoPropietarios)
+                            .Label(l => l.Content("Daños a propietarios:"))
+                            .Placeholder("Ingresa el monto al que ascienden los daños a los propietarios")
+                            .Enable(!ViewBag.EsSoloLectura)
+                            .HtmlAttributes(new { style = "width: 100%", id = "montoPropietarios", onkeypress = "return onKeyPress(event);", onkeyup  = "eliminarCeroyPunto(this);" })
+                            )
+
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.montoOtros)
+                            .Label(l => l.Content("Otros daños:"))
+                            .Placeholder("Ingresa el monto al que ascienden los daños bajo el concepto de otros")
+                            .Enable(!ViewBag.EsSoloLectura)
+                            .HtmlAttributes(new { style = "width: 100%", id = "montoOtros", onkeypress = "return onKeyPress(event);", onkeyup = "eliminarCeroyPunto(this);" })
+                            )
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto">
+                            <div class="border border-2 border-dark rounded-circle">
+                                <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                    <b>2</b>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="icon-infracion h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                            <h2 class="m-0 h3"><b>Infracciones</b></h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-8 pe-0">
+                    <div class="bgSuccess py-1"></div>
+                </div>
+                <div class="col-4 ps-0">
+                    <div class="bg-light py-1"></div>
+                </div>
+            </div>
+            <div class="row justify-content-between align-items-end mb-1">
+                <div class="col-12 col-md-auto mt-4 mb-2">
+                    <h5 class="px-4"><b>Listado de infracciones del accidente</b></h5>
+                    <h6 class="px-4 text-muted">Da de alta las infracciones del accidente.</h6>
+                </div>
+                <div class="col-12 col-lg-auto text-center">
+                    <div class="btnOutline btnOutlinePrimary px-4 my-3">
+                        <button onclick="mostrarModalAgregarInfraccion(event)" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                            <h5 class="m-0"><i class="me-2 icon-addInfracion"></i><b>Agregar infracción</b></h5>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="row ">
+                <div class="col-12 my-4 px-4 rounded">
+                    <!--TABLALISTA INFRACCIONEES-->
+                    <partial name="_ListaInfraccionesAccidente" model="Model" esSoloLectura="@ViewBag.EsSoloLectura" />
+                </div>
+            </div>
+        </section>
+
+        <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto">
+                            <div class="border border-2 border-dark rounded-circle">
+                                <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                    <b>3</b>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="icon-infracion h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                            <h2 class="m-0 h3"><b>Daños materiales de los vehículos</b></h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-8 pe-0">
+                    <div class="bgSuccess py-1"></div>
+                </div>
+                <div class="col-4 ps-0">
+                    <div class="bg-light py-1"></div>
+                </div>
+            </div>
+            <div class="row justify-content-between align-items-end mb-1">
+                <div class="col-12 col-md-auto mt-4 mb-2">
+                    <h5 class="px-4"><b>Listado de daños en los vehículos</b></h5>
+                    <h6 class="px-4 text-muted">Da de alta los daños en los vehículos.</h6>
+                </div>
+            </div>
+            <div class="row ">
+                <div class="col-12 my-4 px-4 rounded">
+                </div>
+                <!--TABLA VEHICULOS INV PARA DAÑOS-->
+                <div id="tablaConMonto">
+                    <partial name="_ListaVehiculosDaños" model="Model" esSoloLectura="@ViewBag.EsSoloLectura" />
+                </div>
+            </div>
+
+        </section>
+        <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded pb-1">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-12 col-md-auto">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto">
+                            <div class="border border-2 border-dark rounded-circle">
+                                <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                    <b>4</b>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-auto p-0">
+                            <i class="icon-accidentes h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                            <h2 class="m-0 h3"><b>Complemento de accidente</b></h2>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-10 pe-0">
+                    <div class="bgSuccess py-1"></div>
+                </div>
+                <div class="col-2 ps-0">
+                    <div class="bg-light py-1"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mt-4">
+                    <h5 class="px-4"><b>Datos de complementarios del accidente</b></h5>
+                    <h6 class="px-4 text-muted">
+                        Da de alta los datos complementarios del accidente
+                    </h6>
+                </div>
+            </div>
+            <div class="row justify-content-between mb-1">
+                <div class="col-12 col-lg-6 mt-4 mb-2">
+                    <h5 class="px-4"><b>Certificado</b></h5>
+                </div>
+            </div>
+            <div class="row px-4 mb-4 align-items-end mb-4 ">
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 d-none">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.Latitud)
+                            .Label(l => l.Content("Latitud:"))
+                            .Placeholder("Ingresa la latitud donde ocurrió el accidente.")
+                            .HtmlAttributes(new { style = "width: 100%", type = "number" })
+                            .Enable(!esSoloLectura)
+                            )
+
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 d-none">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.Longitud)
+                            .Label(l => l.Content("Longitud:"))
+                            .Placeholder("Ingresa la longitud donde ocurrió el accidente.")
+                            .HtmlAttributes(new { style = "width: 100%", type = "number" })
+                            .Enable(!ViewBag.EsSoloLectura)
+                            )
+
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Certificado de:</label>
+                        <span>
+                            @(Html.Kendo().DropDownListFor(t => t.IdCertificado).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona una opción")
+                                .Filter(FilterType.Contains)
+
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action(certificadoDe, "Catalogos");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                .Enable(!ViewBag.EsSoloLectura)
+                                )
+                        </span>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-4">
+                    <div class="col-11">
+                        <div class="bg-light pt-1"></div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <h5><b>Elementos</b></h5>
+                    <label class="label">Seleccione uno o varios elementos que se encontraron en el accidente:</label>
+                </div>
+
+                <div class="row align-items-end">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Armas</label>
+                            <div class="btnToggleActive">
+                                @(Html.Kendo().SwitchFor(t => t.ArmasBool)
+                                    .Name("armasSwitch")
+                                    .Messages(c => c.Checked("Si").Unchecked("No"))
+                                    .HtmlAttributes(new { data_valor = 1 }))
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div id="campoArmasTexto" style="visibility: hidden;" class="controlForm my-3">
+                            <label for="ArmasTextBox">Descripción de armas</label>
+                            @(Html.Kendo().TextBoxFor(t => t.ArmasTexto)
+                                .HtmlAttributes(new { style = "width: 100%", id = "ArmasTexto" })
+                                .Enable(!ViewBag.EsSoloLectura)
+                                )
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Drogas</label>
+                            <div class="btnToggleActive">
+                                @(Html.Kendo().SwitchFor(t => t.DrogasBool)
+                                    .Name("drogasSwitch")
+                                    .Messages(c => c.Checked("Si").Unchecked("No"))
+                                    .HtmlAttributes(new { data_valor = 1 }))
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div id="campoDrogasTexto" style="visibility: hidden;" class="controlForm my-3">
+                            <label for="DrogasTextBox">Descripción de drogas</label>
+                            @(Html.Kendo().TextBoxFor(t => t.DrogasTexto)
+                                .HtmlAttributes(new { style = "width: 100%", id = "DrogasTexto" })
+                                .Enable(!ViewBag.EsSoloLectura)
+                                )
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Valores</label>
+                            <div class="btnToggleActive">
+                                @(Html.Kendo().SwitchFor(t => t.ValoresBool)
+                                    .Name("valoresSwitch")
+                                    .Messages(c => c.Checked("Si").Unchecked("No"))
+                                    .HtmlAttributes(new { data_valor = 1 }))
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div id="campoValoresTexto" style="visibility: hidden;" class="controlForm my-3">
+                            <label for="ValoresTextBox">Descripción de valores</label>
+                            @(Html.Kendo().TextBoxFor(t => t.ValoresTexto)
+                                .HtmlAttributes(new { style = "width: 100%", id = "ValoresTexto" })
+                                .Enable(!ViewBag.EsSoloLectura)
+                                )
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Prendas</label>
+                            <div class="btnToggleActive">
+                                @(Html.Kendo().SwitchFor(t => t.PrendasBool)
+                                    .Name("prendasSwitch")
+                                    .Messages(c => c.Checked("Si").Unchecked("No"))
+                                    .HtmlAttributes(new { data_valor = 1 }))
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div id="campoPrendasTexto" style="visibility: hidden;" class="controlForm my-3">
+                            <label for="PrendasTextBox">Descripción de prendas</label>
+                            @(Html.Kendo().TextBoxFor(t => t.PrendasTexto)
+                                .HtmlAttributes(new { style = "width: 100%", id = "PrendasTexto" })
+                                .Enable(!ViewBag.EsSoloLectura)
+                                )
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Otros</label>
+                            <div class="btnToggleActive">
+                                @(Html.Kendo().SwitchFor(t => t.OtrosBool)
+                                    .Name("otrosSwitch")
+                                    .Messages(c => c.Checked("Si").Unchecked("No"))
+                                    .HtmlAttributes(new { data_valor = 1 }))
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div id="campoTexto" style="visibility: hidden;" class="controlForm my-3">
+                            <label for="OtrosTextBox">Descripción de otros</label>
+                            @(Html.Kendo().TextBoxFor(t => t.OtrosTexto)
+                                .HtmlAttributes(new { style = "width: 100%", id = "OtrosTexto" })
+                                .Enable(!ViewBag.EsSoloLectura)
+                                )
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBoxFor(t => t.entregaObjetos)
+                            .Label(l => l.Content("Entrega de objetos:"))
+                            .Placeholder("Ingresa los objetos que se entregaron")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            .Enable(!ViewBag.EsSoloLectura)
+                            )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBoxFor(t => t.entregaOtros)
+                            .Label(l => l.Content("Entrega otros:"))
+                            .Placeholder("Ingresa la entrega de otros conceptos")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            .Enable(!ViewBag.EsSoloLectura)
+                            )
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded pb-1">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-12 col-md-auto">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto">
+                            <div class="border border-2 border-dark rounded-circle">
+                                <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                    <b>5</b>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-auto p-0">
+                            <i class="icon-involucrado h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                            <h2 class="m-0 h3"><b>Involucrados</b></h2>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="row">
+                <div class="col-8 pe-0">
+                    <div class="bgSuccess py-1"></div>
+                </div>
+                <div class="col-4 ps-0">
+                    <div class="bg-light py-1"></div>
+                </div>
+            </div>
+            <div class="row mb-2 mt-4 titleCustom   ">
+                <div class="col-12">
+                    <h5 class="px-4"><b>Listado de búsqueda</b></h5>
+                    <h6 class="px-4 text-muted">Selecciona un involucrado para señalar detención.</h6>
+                </div>
+            </div>
+            <div id="tablaConFechaYHora">
+                <partial name="_ListaInvolucradosFechaYHora" model="Model" esSoloLectura="@ViewBag.EsSoloLectura" />
+            </div>
+            <div class="row px-4 align-items-end">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Convenio: </label>
+                        <div class="btnToggleActive">
+                            @(Html.Kendo().SwitchFor(t => t.convenioBool)
+
+                                .Name("convenioSwitch")
+                                .Checked(Model.EstadoConvenio == 1)
+                                .Messages(c => c.Checked("Si").Unchecked("No"))
+                                .HtmlAttributes(new { data_valor = 1 })
+                                )
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="controlForm my-3">
+
+                        <div id="convenioTexto" style="visibility: hidden;">
+                            @(Html.Kendo().TextBoxFor(t => t.observacionesConvenio)
+                                .Label(l => l.Content("Observaciones de convenio:"))
+                                .Placeholder("Ingresa las observaciones")
+                                .HtmlAttributes(new { style = "width: 100%", id = "observacionesConvenio" })
+                                .Enable(!ViewBag.EsSoloLectura)
+                                )
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>A disposición de:</label>
+                        <span>
+                            @(Html.Kendo().DropDownListFor(t => t.IdAutoridadDisposicion).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona una opción")
+                                .Filter(FilterType.Contains)
+
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action(AutoridadesDisposicion, "Catalogos");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                .Enable(!ViewBag.EsSoloLectura)
+                                )
+                        </span>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Entregado a:</label>
+                        <span>
+                            @(Html.Kendo().DropDownListFor(t => t.IdAutoridadEntrega).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona una opción")
+                                .Filter(FilterType.Contains)
+
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action(AutoridadesEntrega, "Catalogos");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                .Enable(!ViewBag.EsSoloLectura)
+                                )
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+
+        </section>
+        <div class="row justify-content-center mt-4">
+            <div class="col-11">
+                <div class="bg-light pt-1"></div>
+            </div>
+        </div>
+        <div class="row justify-content-between mb-1">
+            <div class="col-12 col-lg-6 mt-4 mb-2">
+                <h5 class="px-4"><b>Competencia ministerial</b></h5>
+            </div>
+        </div>
+        <div class="row px-4 mb-4 align-items-end">
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.consignacionHechos)
+                        .Label(l => l.Content("Procede la consignación de los hechos:"))
+                        .Placeholder("Ingresa el nombre de quien procede la consignación de los hechos")
+                        .HtmlAttributes(new { style = "width: 100%", })
+                        .Enable(!ViewBag.EsSoloLectura)
+                        )
+
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Entidad:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(t => t.IdEntidadCompetencia).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .Events(s => s.Change("ReloadMun"))
+                            .Filter(FilterType.Contains)
+
+                            .OptionLabel("Selecciona una opción")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action(Entidades, "Catalogos");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .Enable(!ViewBag.EsSoloLectura)
+                            )
+                    </span>
+                </div>
+
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Ciudad de:</label>
+                    <span>
+                        @(
+                            Html.Kendo().DropDownListFor(t => t.IdCiudad)
+                            .Filter(FilterType.Contains)
+                            .NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una opción")
+                            .DataSource(source =>
+                            {
+                                source.Read(read => read.Action(GetMun, "Catalogos").Data("GetEntidad"));
+                            })
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .Enable(!ViewBag.EsSoloLectura)
+                            )
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-11">
+                <div class="bg-light pt-1"></div>
+            </div>
+        </div>
+        <div class="row justify-content-between mb-1">
+            <div class="col-12 col-lg-6 mt-4 mb-2">
+                <h5 class="px-4"><b>Consignación</b></h5>
+            </div>
+        </div>
+        <div class="row px-4 mb-4 align-items-end">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Elabora consignación:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(t => t.IdElaboraConsignacion).NoDataTemplate("No se encontraron datos")
+                            .Filter(FilterType.Contains)
+
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una opción")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action(Oficiales, "Catalogos");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .Enable(!ViewBag.EsSoloLectura)
+                            )
+                    </span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.numeroOficio)
+                        .Label(l => l.Content("Número de oficio:"))
+                        .Placeholder("Ingresa el número de oficio")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        .Enable(!ViewBag.EsSoloLectura)
+                        )
+
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Agencia de ministerio que recibe:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(t => t.IdAgenciaMinisterio).NoDataTemplate("No se encontraron datos")
+                            .Filter(FilterType.Contains)
+
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una opción")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action(Agencias, "Catalogos");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .Enable(!ViewBag.EsSoloLectura)
+                            )
+                    </span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Recibe en ministerio:</label>
+                    <span>
+                        @(Html.Kendo().TextBoxFor(t => t.RecibeMinisterio)
+                            .Placeholder("Ingresa el nombre de quien recibe en ministerio")
+                            .HtmlAttributes(new { style = "width: 100%", })
+                            .Enable(!ViewBag.EsSoloLectura)
+                            )
+
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-11">
+                <div class="bg-light pt-1"></div>
+            </div>
+        </div>
+        <div class="row justify-content-between mb-1">
+            <div class="col-12 col-lg-6 mt-4 mb-2">
+                <h5 class="px-4"><b>Validación de partes</b></h5>
+            </div>
+        </div>
+
+        <div class="row px-4 mb-4 align-items-end">
+
+            <!--
+            <div class="row my-3 mb-4">
+                <div class="col-12 col-md-6 mx-md-auto">
+                    <div class="row justify-content-around">
+                        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                             <button class="controlButton" type="button" id="cambiarContenidoButton" @(ViewBag.EsSoloLectura ? "disabled" : "")>Listar Todos</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            -->
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label id="LabFolio">Elabora:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(t => t.IdElabora).NoDataTemplate("No se encontraron datos")
+                            .Filter(FilterType.Contains)
+
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una opción")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action(Oficiales, "Catalogos");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .Enable(!ViewBag.EsSoloLectura)
+                            )
+                    </span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label id="LabFolio2">Supervisor:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(t => t.IdSupervisa).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una opción")
+                            .Filter(FilterType.Contains)
+
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action(Oficiales, "Catalogos");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .Enable(!ViewBag.EsSoloLectura)
+                            )
+                    </span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label id="LabFolio3">Autoriza:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(t => t.IdAutoriza).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una opción")
+                            .Filter(FilterType.Contains)
+
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action(Oficiales, "Catalogos");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .Enable(!ViewBag.EsSoloLectura)
+                            )
+                    </span>
+                </div>
+            </div>
+        </div>
+         <div class="row justify-content-between mb-1">
+            <div class="col-12 col-lg-6 mt-4 mb-2">
+                <h5 class="px-4"><b>Trayectoria del Accidente</b></h5>
+            </div>
+        </div>
+        <div class="row px-4">
+            <div class="col-12 col-md-6">
+                <div class="controlForm my-3">
+                    <label>Ingrese los hechos del accidente:</label>
+                    <div class="input-group">                  
+                        <textarea 
+                        autocomplete="off" 
+                        name="trayectoria" 
+                        class="form-control" 
+                        placeholder = "Es la descripción de los hechos tal cual como ocurrieron en orden cronológico.",
+                        rows="4" 
+                        id="trayectoria"
+                        @(ViewBag.EsSoloLectura ? "disabled" : "")>@Model.trayectoria</textarea>
+                    </div>
+            </div>
+        </div>
+    </form>
+    <div class="row justify-content-between mb-1">
+            <div class="col-12 col-lg-6 mt-4 mb-2">
+                <h5 class="px-4"><b>Carga de archivos</b></h5>
+            </div>
+        </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-5  me-md-3 mb-4">
+                <div class="controlForm">
+                    <div id="conInfo">
+                    @if (!string.IsNullOrEmpty(Model.boletaStr))
+                    {
+                        <span>Boleta actual: @System.IO.Path.GetFileName(Model.boletaStr)</span>
+                        <button type="button" class="btn btn-primary mt-2" onclick="mostrarCarga()" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                            Cambiar archivo
+                        </button>
+                        <button type="button" class="btn btn-secondary mt-2" onclick="mostrarBoleta()" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                            Mostrar boleta guardada
+                        </button>
+                    }
+                    </div>
+                    <div class="input-group @(string.IsNullOrEmpty(Model.boletaStr) ? "" : "d-none")" id="inputCarga">
+                        <label for="boletaFisica">Agregar boleta:</label>
+                         <div class="input-group">
+                        <input type="file" name="boletaFisica" id="boletaFisica" class="form-control mb-2" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                        </div>
+                        <button type="button" class="btn btn-primary mt-2" onclick="guardarBoleta()" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                            Guardar boleta
+                        </button>
+                        <button type="button" class="btn btn-secondary mt-2" onclick="mostrarBoleta()" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                            Mostrar boleta guardada
+                        </button>
+                    </div>
+                </div>
+            </div>
+             <div class="col-12 col-md-5  me-md-3 mb-4">
+                <div class="controlForm">
+                    <div id="conInfoParte">
+                        @if (!string.IsNullOrEmpty(Model.archivoParteStr))
+                    {
+                        <span>Archivo actual: @System.IO.Path.GetFileName(Model.archivoParteStr)</span>
+                        <div>
+                        <button type="button" class="btn btn-primary mt-2" onclick="mostrarCargaArchivo()" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                            Cambiar archivo
+                        </button>
+                        <button type="button" class="btn btn-secondary mt-2" onclick="mostrarArchivo()" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                            Mostrar archivo guardado
+                        </button>
+                        </div>
+                    }
+                    </div>
+                    <div class="input-group @(string.IsNullOrEmpty(Model.archivoParteStr) ? "" : "d-none")" id="inputCargaArchivo">
+                        <label for="boletaFisica">Agregar archivo:</label>
+                         <div class="input-group">
+                        <input type="file" name="parteFisico" id="parteFisico" class="form-control mb-2" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                        </div>
+                        <button type="button" class="btn btn-primary mt-2" onclick="guardarArchivo()" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                            Guardar archivo
+                        </button>
+                        <button type="button" class="btn btn-secondary mt-2" onclick="mostrarArchivo()" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                            Mostrar archivo guardado
+                        </button>
+                    </div>
+                </div>
+            </div>
+                   </div>
+    </div>
+@*FAME BOLETA*@
+   <div class="modal fade" id="boletaModal" tabindex="-1" aria-labelledby="boletaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="archivoModalLabel">Vista Previa del Archivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="pdfContainer" style="display: none; overflow: auto; max-height: 500px;">
+                    <canvas id="pdfViewerBol" style="display: block; width: auto; height: auto;"></canvas>
+                    <div>
+                        <button id="prevPage" class="btn btn-primary">Anterior</button>
+                        <button id="nextPage" class="btn btn-primary">Siguiente</button>
+                        <button id="zoomIn" class="btn btn-primary">Zoom +</button>
+                        <button id="zoomOut" class="btn btn-primary">Zoom -</button>
+                        <span id="pageNum"></span> / <span id="pageCount"></span>
+                    </div>
+                </div>
+                <div id="imageContainerBol" style="display: none;">
+                    <img id="imageViewerBol" style="width: 100%; height: auto;" />
+                </div>
+                <p id="archivoError" style="display: none; color: red;">No se puede cargar el archivo.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+@*FRAME ARCHIVO*@
+
+ <div class="modal fade" id="archivoModal" tabindex="-1" aria-labelledby="archivoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="archivoModalLabel">Vista Previa del Archivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="pdfContainerArc" style="display: none; overflow: auto; max-height: 500px;">
+                    <canvas id="pdfViewerArc" style="display: block; width: auto; height: auto;"></canvas>
+                    <div>
+                        <button id="prevPageArc" class="btn btn-primary">Anterior</button>
+                        <button id="nextPageArc" class="btn btn-primary">Siguiente</button>
+                        <button id="zoomInArc" class="btn btn-primary">Zoom +</button>
+                        <button id="zoomOutArc" class="btn btn-primary">Zoom -</button>
+                        <span id="pageNumArc"></span> / <span id="pageCountArc"></span>
+                    </div>
+                </div>
+                <div id="imageContainerArc" style="display: none;">
+                    <img id="imageViewerArc" style="width: 100%; height: auto;" />
+                </div>
+                <p id="archivoErrorArc" style="display: none; color: red;">No se puede cargar el archivo.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div class="row my-3 mb-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0" onclick="goBack(event)">
+                    @(Html.Kendo().Button()
+                        .Name("back")
+                        .HtmlAttributes(new { @class = "px-5" })
+                        .Content("<h6 class=\"m-0\"><i class=\"icon-back me-2\"></i><b>Regresar</b></h6>"))
+                </div>
+               <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+    <button type="button" id="botnEnvio" class="controlButton" onclick="enviarDatos(event)" style="@(esSoloLectura ? "display:none;" : "")">
+        <h5 class="m-0"><b>Finalizar captura</b></h5>
+    </button>
+</div>
+                    <div id="botnReturn" class="controlButton" onclick="regresarBusqueda(event)" style="@(esSoloLectura ? "" : "display:none;")">
+                        @(Html.Kendo().Button()
+                            .Name("Finalizar")
+                            .HtmlAttributes(new { @class = "btnPrimary px-5" })
+                            .Content("<h5 class=\"m-0\"><b>Regresar a busqueda</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade modalCustom" id="agregarInfraccionModal" aria-labelledby="agregarInfraccionLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="ModalBodyAgregarInfraccion">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function mostrarModalAgregarInfraccion(event) {
+        event.preventDefault();
+        showLoading();
+
+        var montoCamino = $('#montoCamino').val();
+        var montoCarga = $('#montoCarga').val();
+        var montoPropietarios = $('#montoPropietarios').val();
+        var montoOtros = $('#montoOtros').val();
+
+        $.ajax({
+            url: '@Url.Action("ModalInfraccionesVehiculos")',
+            type: 'POST',
+            data: {
+                montoCamino: montoCamino,
+                montoCarga: montoCarga,
+                montoPropietarios: montoPropietarios,
+                montoOtros: montoOtros
+            },
+            success: function (data) {
+                $('#ModalBodyAgregarInfraccion').html(data);
+                $('#agregarInfraccionModal').modal('show');
+                hideLoading(); // Ocultar el indicador de carga solo después de que la solicitud AJAX tenga éxito
+            }
+        });
+    }
+
+document.getElementById('boletaFisica').addEventListener('change', function(event) {
+    var file = event.target.files[0];
+    if (file) {
+        var reader = new FileReader();
+        
+        reader.onload = function(e) {
+            var iframe = document.getElementById('boletaIframe');
+            iframe.src = e.target.result;
+        };
+        
+        reader.readAsDataURL(file);
+    }
+});
+ 
+   function mostrarBoleta() {
+    showLoading();
+        $.ajax({
+            url: '@Url.Action("ObtenerBoleta", "CapturaAccidentes")',
+            type: 'GET',
+            success: function (data) {
+            if (data.file) {
+                var fileType = data.app;
+                var src = 'data:' + fileType + ';base64,' + data.file;
+
+                // Muestra el contenedor adecuado dependiendo del tipo de archivo
+                var pdfContainer = document.getElementById('pdfContainer');
+                var imageContainer = document.getElementById('imageContainerBol');
+                var imageViewer = document.getElementById('imageViewerBol');
+                var canvas = document.getElementById('pdfViewerBol');
+                var context = canvas.getContext('2d');
+
+                if (fileType === 'application/pdf') {
+                    pdfContainer.style.display = 'block';
+                    imageContainer.style.display = 'none';
+                    
+                    pdfjsLib.getDocument(src).promise.then(function (pdf) {
+                        var pageNum = 1;
+                        var scale = 1.0;
+                        var pageCount = pdf.numPages;
+
+                        function renderPage(num) {
+                            pdf.getPage(num).then(function (page) {
+                                var viewport = page.getViewport({ scale: scale });
+                                canvas.height = viewport.height;
+                                canvas.width = viewport.width;
+
+                                var renderContext = {
+                                    canvasContext: context,
+                                    viewport: viewport
+                                };
+                                page.render(renderContext);
+                                document.getElementById('pageNum').textContent = num;
+                                document.getElementById('pageCount').textContent = pageCount;
+                            });
+                        }
+
+                        document.getElementById('prevPage').addEventListener('click', function () {
+                            if (pageNum > 1) {
+                                pageNum--;
+                                renderPage(pageNum);
+                            }
+                        });
+
+                        document.getElementById('nextPage').addEventListener('click', function () {
+                            if (pageNum < pageCount) {
+                                pageNum++;
+                                renderPage(pageNum);
+                            }
+                        });
+
+                        document.getElementById('zoomIn').addEventListener('click', function () {
+                            scale += 0.1;
+                            renderPage(pageNum);
+                        });
+
+                        document.getElementById('zoomOut').addEventListener('click', function () {
+                            if (scale > 0.1) {
+                                scale -= 0.1;
+                                renderPage(pageNum);
+                            }
+                        });
+
+                        renderPage(pageNum);
+
+                        // Mostrar el modal
+                        var myModal = new bootstrap.Modal(document.getElementById('boletaModal'));
+                        myModal.show();
+                        hideLoading();
+                    }).catch(function (error) {
+                        document.getElementById('archivoError').style.display = 'block';
+                        hideLoading();
+                    });
+
+                } else if (fileType.startsWith('image/')) {
+                    pdfContainer.style.display = 'none';
+                    imageContainer.style.display = 'block';
+                    imageViewer.src = src;
+
+                    // Mostrar el modal
+                        var myModal = new bootstrap.Modal(document.getElementById('boletaModal'));
+                    myModal.show();
+                    hideLoading();
+                } else {
+                    document.getElementById('archivoError').style.display = 'block';
+                    hideLoading();
+                }
+            } else {
+                hideLoading();
+                sitteg_warning('No se ha guardado un archivo.');
+            }
+        },
+        error: function (xhr, status, error) {
+            hideLoading();
+            console.error('Error al obtener el archivo:', error);
+            document.getElementById('archivoError').style.display = 'block';
+        }
+    });
+}
+
+   
+
+    function mostrarArchivo() {
+    showLoading();
+        $.ajax({
+            url: '@Url.Action("ObtenerArchivoParte", "CapturaAccidentes")',
+            type: 'GET',
+            success: function (data) {
+            if (data.file) {
+                var fileType = data.app;
+                var src = 'data:' + fileType + ';base64,' + data.file;
+
+                // Muestra el contenedor adecuado dependiendo del tipo de archivo
+                var pdfContainer = document.getElementById('pdfContainerArc');
+                var imageContainer = document.getElementById('imageContainerArc');
+                var imageViewer = document.getElementById('imageViewerArc');
+                var canvas = document.getElementById('pdfViewerArc');
+                var context = canvas.getContext('2d');
+
+                if (fileType === 'application/pdf') {
+                    pdfContainer.style.display = 'block';
+                    imageContainer.style.display = 'none';
+                    
+                    pdfjsLib.getDocument(src).promise.then(function (pdf) {
+                        var pageNum = 1;
+                        var scale = 1.0;
+                        var pageCount = pdf.numPages;
+
+                        function renderPage(num) {
+                            pdf.getPage(num).then(function (page) {
+                                var viewport = page.getViewport({ scale: scale });
+                                canvas.height = viewport.height;
+                                canvas.width = viewport.width;
+
+                                var renderContext = {
+                                    canvasContext: context,
+                                    viewport: viewport
+                                };
+                                page.render(renderContext);
+                                document.getElementById('pageNumArc').textContent = num;
+                                document.getElementById('pageCountArc').textContent = pageCount;
+                            });
+                        }
+
+                        document.getElementById('prevPageArc').addEventListener('click', function () {
+                            if (pageNum > 1) {
+                                pageNum--;
+                                renderPage(pageNum);
+                            }
+                        });
+
+                        document.getElementById('nextPageArc').addEventListener('click', function () {
+                            if (pageNum < pageCount) {
+                                pageNum++;
+                                renderPage(pageNum);
+                            }
+                        });
+
+                        document.getElementById('zoomInArc').addEventListener('click', function () {
+                            scale += 0.1;
+                            renderPage(pageNum);
+                        });
+
+                        document.getElementById('zoomOutArc').addEventListener('click', function () {
+                            if (scale > 0.1) {
+                                scale -= 0.1;
+                                renderPage(pageNum);
+                            }
+                        });
+
+                        renderPage(pageNum);
+
+                        // Mostrar el modal
+                        var myModal = new bootstrap.Modal(document.getElementById('archivoModal'));
+                        myModal.show();
+                        hideLoading();
+                    }).catch(function (error) {
+                        document.getElementById('archivoErrorArc').style.display = 'block';
+                        hideLoading();
+                    });
+
+                } else if (fileType.startsWith('image/')) {
+                    pdfContainer.style.display = 'none';
+                    imageContainer.style.display = 'block';
+                    imageViewer.src = src;
+
+                    // Mostrar el modal
+                        var myModal = new bootstrap.Modal(document.getElementById('archivoModal'));
+                    myModal.show();
+                    hideLoading();
+                } else {
+                    document.getElementById('archivoErrorArc').style.display = 'block';
+                    hideLoading();
+                }
+            } else {
+                hideLoading();
+                sitteg_warning('No se ha guardado un archivo.');
+            }
+        },
+        error: function (xhr, status, error) {
+            hideLoading();
+            console.error('Error al obtener el archivo:', error);
+            document.getElementById('archivoError').style.display = 'block';
+        }
+    });
+}
+
+function enviarDatos(e) {
+            e.preventDefault();
+    var formData = new FormData($("#detalleAccidenteForm")[0]);
+
+    // Agrega los valores de los switches al FormData
+    formData.append('armasValue', $("#armasSwitch").prop("checked") ? 1 : 0);
+    formData.append('drogasValue', $("#drogasSwitch").prop("checked") ? 1 : 0);
+    formData.append('valoresValue', $("#valoresSwitch").prop("checked") ? 1 : 0);
+    formData.append('prendasValue', $("#prendasSwitch").prop("checked") ? 1 : 0);
+    formData.append('otrosValue', $("#otrosSwitch").prop("checked") ? 1 : 0);
+    formData.append('convenioValue', $("#convenioSwitch").prop("checked") ? 1 : 0);
+
+
+    let isValid = true;
+ 
+       // controlsValidate.push({ 'controlName': 'IdElabora' });
+       // controlsValidate.push({ 'controlName': 'IdSupervisa' });
+       //controlsValidate.push({ 'controlName': 'IdAutoriza' });
+
+    let labelFolio = document.getElementById("LabFolio");
+		if (labelFolio.innerText == '@EtiReq') {
+			var ValFolio = $("#IdElabora").val();
+			if (ValFolio == 0) {
+            
+				sitteg_warning("El campo Elabora es obligatorio");
+				return;
+			}
+		}
+          let labelFolio2 = document.getElementById("LabFolio2");
+		if (labelFolio2.innerText == '@EtiReq2') {
+			var ValFolio = $("#IdSupervisa").val();
+			if (ValFolio == 0) {
+            
+				sitteg_warning("El campo Supervisor es obligatorio");
+				return;
+			}
+		}  
+        let labelFolio3 = document.getElementById("LabFolio3");
+		if (labelFolio3.innerText == '@EtiReq3') {
+			var ValFolio = $("#IdAutoriza").val();
+			if (ValFolio == 0) {
+            
+				sitteg_warning("El campo Autoriza es obligatorio");
+				return;
+			}
+		}
+
+
+
+
+    // Muestra el loading
+    showLoading();
+
+    // Envía la solicitud AJAX
+    $.ajax({
+        url: '@Url.Action("InsertarDatos")',
+        type: 'POST',
+        data: formData,
+        processData: false, // Impide que jQuery procese los datos
+        contentType: false, // Impide que jQuery establezca el Content-Type
+        success: function (result) {
+            if (result.success === false) {
+                sitteg_error(result.message);
+                    hideLoading();
+                return;
+            }
+            sitteg_success("Se ha concluido el registro del accidente");
+            window.location.href = "/CapturaAccidentes/Index";
+            hideLoading();
+        },
+        error: function (error) {
+            sitteg_warning("¡Sucedió un error, intente más tarde...");
+            hideLoading();
+        }
+    });
+}
+function guardarBoleta() {
+        var archivoInput = document.getElementById('boletaFisica');
+        var archivo = archivoInput.files[0];
+        console.log("0", archivoInput)
+
+                console.log("A",archivo)
+
+        if (!archivo) {
+            sitteg_warning('Por favor, selecciona un archivo primero.');
+            return;
+        }
+          if (archivo && archivo.size > 6 * 1024 * 1024) { // 6 MB en bytes
+            sitteg_warning('El archivo del parte excede el tamaño máximo permitido.');
+            return; 
+        }
+        var formData = new FormData();
+        formData.append('boleta', archivo);
+        console.log("B",formData)
+        $.ajax({
+            url: '/CapturaAccidentes/GuardarBoleta', 
+            type: 'POST',
+            data: formData,
+            contentType: false, 
+            processData: false,
+            success: function(response) {
+                if (response.success) {
+                    sitteg_success('Boleta guardada correctamente.');
+                } else {
+                    sitteg_warning('Error: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                sitteg_warning('Hubo un error al guardar la boleta.');
+                console.error('Error:', error);
+            }
+        });
+    }
+
+    function guardarArchivo() {
+        var archivoInput = document.getElementById('parteFisico');
+        var archivo = archivoInput.files[0];
+
+        if (!archivo) {
+            sitteg_warning('Por favor, selecciona un archivo primero.');
+            return;
+        }
+          if (archivo && archivo.size > 6 * 1024 * 1024) { // 6 MB en bytes
+            sitteg_warning('El archivo del parte excede el tamaño máximo permitido.');
+            return; 
+        }
+        var formData = new FormData();
+        formData.append('parteFisico', archivo);
+
+        $.ajax({
+            url: '/CapturaAccidentes/GuardarArchivoParte', 
+            type: 'POST',
+            data: formData,
+            contentType: false, 
+            processData: false,
+            success: function(response) {
+                if (response.success) {
+                    sitteg_success('Archivo guardado correctamente.');
+                } else {
+                    sitteg_warning('Error: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                sitteg_warning('Hubo un error al guardar el archivo.');
+                console.error('Error:', error);
+            }
+        });
+    }
+
+
+    $("#cambiarContenidoButton").click(function (event) {
+        event.preventDefault();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("CambiosDDLOficiales", "CapturaAccidentes")',
+            type: 'GET',
+            success: function (data) {
+                $("#IdElabora").data("kendoDropDownList").dataSource.data(data);
+                $("#IdSupervisa").data("kendoDropDownList").dataSource.data(data);
+                $("#IdAutoriza").data("kendoDropDownList").dataSource.data(data);
+                $("#IdElaboraConsignacion").data("kendoDropDownList").dataSource.data(data);
+
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    });
+
+
+    $(document).ready(function () {
+        var v = '@ViewBag.EsSoloLectura';
+        if (v == 'True') {
+            var btn = $("#cambiarContenidoButton");
+            btn.css("visibility", "hidden");
+        }
+
+        var switchElementA = $("#armasSwitch").data("kendoSwitch");
+        var campoArmasTexto = $("#campoArmasTexto");
+
+        switchElementA.bind("change", function () {
+            if (switchElementA.check()) {
+                campoArmasTexto.css("visibility", "visible");
+            } else {
+                campoArmasTexto.css("visibility", "hidden");
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        var switchElementD = $("#drogasSwitch").data("kendoSwitch");
+        var campoDrogasTexto = $("#campoDrogasTexto");
+
+        switchElementD.bind("change", function () {
+            if (switchElementD.check()) {
+                campoDrogasTexto.css("visibility", "visible");
+            } else {
+                campoDrogasTexto.css("visibility", "hidden");
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        var switchElementV = $("#valoresSwitch").data("kendoSwitch");
+        var campoValoresTexto = $("#campoValoresTexto");
+
+        switchElementV.bind("change", function () {
+            if (switchElementV.check()) {
+                campoValoresTexto.css("visibility", "visible");
+            } else {
+                campoValoresTexto.css("visibility", "hidden");
+            }
+        });
+    });
+
+
+    $(document).ready(function () {
+        var switchElementP = $("#prendasSwitch").data("kendoSwitch");
+        var campoPrendasTexto = $("#campoPrendasTexto");
+
+        switchElementP.bind("change", function () {
+            if (switchElementP.check()) {
+                campoPrendasTexto.css("visibility", "visible");
+            } else {
+                campoPrendasTexto.css("visibility", "hidden");
+            }
+        });
+
+    });
+
+    $(document).ready(function () {
+        var switchElementO = $("#otrosSwitch").data("kendoSwitch");
+        var campoTexto = $("#campoTexto");
+
+        switchElementO.bind("change", function () {
+            if (switchElementO.check()) {
+                campoTexto.css("visibility", "visible");
+            } else {
+                campoTexto.css("visibility", "hidden");
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        var switchElementConv = $("#convenioSwitch").data("kendoSwitch");
+        var convenioTexto = $("#convenioTexto");
+
+        switchElementConv.bind("change", function () {
+            if (switchElementConv.check()) {
+                convenioTexto.css("visibility", "visible");
+            } else {
+                convenioTexto.css("visibility", "hidden");
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        verificarCamposDeTexto();
+
+        $("#armasSwitch").change(function () {
+            verificarCamposDeTexto();
+        });
+
+        function verificarCamposDeTexto() {
+            var $campoArmasTexto = $("#campoArmasTexto");
+            var $armasTexto = $("#ArmasTexto");
+
+            var switchEstado = $("#armasSwitch").is(":checked");
+
+            var textoNoVacio = $armasTexto.val().trim() !== "";
+
+            if (textoNoVacio || switchEstado) {
+                $campoArmasTexto.css("visibility", "visible");
+            } else {
+                $campoArmasTexto.css("visibility", "hidden");
+            }
+        }
+    });
+
+    $(document).ready(function () {
+        verificarCamposDeTexto();
+
+        $("#drogasSwitch").change(function () {
+            verificarCamposDeTexto();
+        });
+
+        function verificarCamposDeTexto() {
+            var $campoDrogasTexto = $("#campoDrogasTexto");
+            var $drogasTexto = $("#DrogasTexto");
+
+            var switchEstadoD = $("#drogasSwitch").is(":checked");
+
+            var textoNoVacioD = $drogasTexto.val().trim() !== "";
+
+            if (textoNoVacioD || switchEstadoD) {
+                $campoDrogasTexto.css("visibility", "visible");
+            } else {
+                $campoDrogasTexto.css("visibility", "hidden");
+            }
+        }
+    });
+
+
+    $(document).ready(function () {
+        verificarCamposDeTexto();
+
+        $("#valoresSwitch").change(function () {
+            verificarCamposDeTexto();
+        });
+
+        function verificarCamposDeTexto() {
+            var $campoValoresTexto = $("#campoValoresTexto");
+            var $valoresTexto = $("#ValoresTexto");
+
+            var switchEstadoV = $("#valoresSwitch").is(":checked");
+
+            var textoNoVacioV = $valoresTexto.val().trim() !== "";
+
+            if (textoNoVacioV || switchEstadoV) {
+                $campoValoresTexto.css("visibility", "visible");
+            } else {
+                $campoValoresTexto.css("visibility", "hidden");
+            }
+        }
+    });
+
+    $(document).ready(function () {
+        verificarCamposDeTexto();
+
+        $("#prendasSwitch").change(function () {
+            verificarCamposDeTexto();
+        });
+
+        function verificarCamposDeTexto() {
+            var $campoPrendasTexto = $("#campoPrendasTexto");
+            var $prendasTexto = $("#PrendasTexto");
+
+            var switchEstadoP = $("#prendasSwitch").is(":checked");
+
+            var textoNoVacioP = $prendasTexto.val().trim() !== "";
+
+            if (textoNoVacioP || switchEstadoP) {
+                $campoPrendasTexto.css("visibility", "visible");
+            } else {
+                $campoPrendasTexto.css("visibility", "hidden");
+            }
+        }
+    });
+
+    $(document).ready(function () {
+        verificarCamposDeTexto();
+
+        $("#otrosSwitch").change(function () {
+            verificarCamposDeTexto();
+        });
+
+        function verificarCamposDeTexto() {
+            var $campoOtrosTexto = $("#campoTexto");
+            var $otrosTexto = $("#OtrosTexto");
+
+            var switchEstadoO = $("#otrosSwitch").is(":checked");
+
+            var textoNoVacioO = $otrosTexto.val().trim() !== "";
+
+            if (textoNoVacioO || switchEstadoO) {
+                $campoOtrosTexto.css("visibility", "visible");
+            } else {
+                $campoOtrosTexto.css("visibility", "hidden");
+            }
+        }
+    });
+    $(document).ready(function () {
+        verificarCamposDeTexto();
+
+        $("#convenioSwitch").change(function () {
+            verificarCamposDeTexto();
+        });
+
+        function verificarCamposDeTexto() {
+            var $campoconvenioTexto = $("#convenioTexto");
+            var $convenioTexto = $("#observacionesConvenio");
+
+            var switchEstadoConv = $("#convenioSwitch").is(":checked");
+
+            var textoNoVacioConv = $convenioTexto.val().trim() !== "";
+
+            if (textoNoVacioConv || switchEstadoConv) {
+                $campoconvenioTexto.css("visibility", "visible");
+            } else {
+                $campoconvenioTexto.css("visibility", "hidden");
+            }
+        }
+    });
+
+
+    $(document).ready(function () {
+        var esSoloLectura = @(ViewBag.EsSoloLectura ? "true" : "false");
+
+        var switchInstance = $("#otrosSwitch").data("kendoSwitch");
+        var switchDrogas = $("#drogasSwitch").data("kendoSwitch");
+        var switchArmas = $("#armasSwitch").data("kendoSwitch");
+        var switchValores = $("#valoresSwitch").data("kendoSwitch");
+        var switchPrendas = $("#prendasSwitch").data("kendoSwitch");
+        var switchConvenio = $("#convenioSwitch").data("kendoSwitch");
+        // Establece el switch en modo solo lectura
+        if (esSoloLectura) {
+            switchInstance.readonly();
+            switchDrogas.readonly();
+            switchArmas.readonly();
+            switchValores.readonly();
+            switchPrendas.readonly();
+            switchConvenio.readonly();
+
+        }
+    });
+
+    function regresarBusqueda(event) {
+                event.preventDefault();
+        var origen = '@ViewBag.Origen';
+
+        // Evaluar el valor de origen y redirigir según corresponda
+        if (origen === 'especial') {
+            window.location.href = '/BusquedaEspecialAccidentes/Index';
+        } else {
+            window.location.href = '/BusquedaAccidentes/Index';
+        }
+    }
+
+    /*  switchElementD.bind("change", function () {
+          if (switchElementD.check()) {
+              campoDrogasTexto.show();
+          } else {
+          campoDrogasTexto.hide();
+          }
+      });
+    });
+
+    $(document).ready(function () {
+      var switchElementV = $("#valoresSwitch").data("kendoSwitch");
+      var campoValoresTexto = $("#campoValoresTexto");
+
+      switchElementV.bind("change", function () {
+          if (switchElementV.check()) {
+              campoValoresTexto.show();
+          } else {
+          campoValoresTexto.hide();
+          }
+      });
+    });
+
+    $(document).ready(function () {
+      var switchElementP = $("#prendasSwitch").data("kendoSwitch");
+      var campoPrendasTexto = $("#campoPrendasTexto");
+
+      switchElementP.bind("change", function () {
+          if (switchElementP.check()) {
+              campoPrendasTexto.show();
+          } else {
+              campoPrendasTexto.hide();
+          }
+      });
+    });
+
+    $(document).ready(function () {
+      var switchElementO = $("#otrosSwitch").data("kendoSwitch");
+      var campoTexto = $("#campoTexto");
+
+      switchElementO.bind("change", function () {
+          if (switchElementO.check()) {
+              campoTexto.show();
+          } else {
+              campoTexto.hide();
+          }
+      });
+    });*/
+
+    function goBack(event) {
+                event.preventDefault();
+        var esSoloLectura = @(ViewBag.EsSoloLectura ? "true" : "false");
+        var url = '/CapturaAccidentes/CapturaBAccidente/?esSoloLectura=' + esSoloLectura;
+        window.location.href = url;
+
+    }
+
+    function mostrarCarga() {
+        var inputCarga = document.getElementById('inputCarga');
+        var conInfo = document.getElementById('conInfo');
+
+        if (inputCarga) {
+            inputCarga.classList.remove('d-none');
+        }
+
+        if (conInfo) {
+            conInfo.classList.add('d-none');
+        }
+    }
+
+    
+    function mostrarCargaArchivo() {
+        var inputCargaArchivo = document.getElementById('inputCargaArchivo');
+        var conInfoParte = document.getElementById('conInfoParte');
+
+        if (inputCargaArchivo) {
+            inputCargaArchivo.classList.remove('d-none');
+        }
+
+        if (conInfoParte) {
+            conInfoParte.classList.add('d-none');
+        }
+    }
+
+</script>
+
+
+
+
+

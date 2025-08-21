@@ -1,0 +1,408 @@
+﻿
+@model GuanajuatoAdminUsuarios.Models.FirmasModel
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡EL usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡EL usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+</script>
+<style>
+    .drop-zone {
+        position: relative;
+        text-align: center;
+        border: 2px dashed #ccc;
+        padding: 20px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    .drop-zone__prompt {
+        margin-bottom: 10px;
+    }
+
+    .image-container {
+        width: 100%;
+        max-width: 260px;
+        height: auto;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    #previewImage {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .row {
+        margin-bottom: 20px; /* Añade margen inferior para separar las filas */
+    }
+
+    img {
+        max-width: 100%; /* Ajusta la imagen para que no se desborde */
+        height: auto; /* Mantiene la proporción de la imagen */
+        display: block; /* Asegura que la imagen esté en una nueva línea */
+    }
+</style>
+<div class="mainContainer bg-light">
+
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-addFirma h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Alta de nueva firma</b></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-auto mt-4 mb-2">
+            <h5 class="px-4"><b>Datos de firma</b></h5>
+            <h6 class="px-4 text-muted">Completa los datos obligatorios para dar de alta.</h6>
+        </div>
+        <div class="col-12 col-md-auto mt-4 mb-2">
+            <h5 class="px-4">Dependencia:</h5>
+            <h6 class="px-4 text-muted"><b>Mobilidad</b></h6>
+        </div>
+        <form id="nuevaFirmaForm" class="row px-4 align-items-end" enctype="multipart/form-data">
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="controlForm my-3">
+                             <label>Cargo <b>(obligatorio)</b>:</label>
+                            <span>
+                                @(Html.Kendo().DropDownListFor(t => t.IdPuesto).Filter(FilterType.Contains)
+                                    .NoDataTemplate("No se encontraron datos")
+                                    .DataTextField("Text")
+                                    .DataValueField("Value")
+                                    .OptionLabel("Selecciona un cargo")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetAllPuestosActivos", "Catalogos");
+                                        });
+                                    })
+                                    )
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+                        <div class="controlForm my-3" style="height: auto;">
+                            <label>Nombre <b>(obligatorio)</b>:</label>
+                            <div class="input-group">
+                                <input autocomplete="off" type="text" id="Nombre" name="Nombre" class="form-control" style="height: 3.5em;" placeholder="Ingrese nombre completo" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+                <div class="controlForm mb-3">
+                    <label>Fecha inicio <b>(obligatorio)</b>:</label>
+                    <span>
+                        @(Html.Kendo().DatePicker()
+                            .Name("FechaInicio")
+                            .Min(DateTime.Today)
+                            .Culture("es-ES")
+                            .Format("dd/MM/yyyy")
+                            .HtmlAttributes(new
+                            {
+                                style = "width: 100%",
+                                id = "FechaInicio",
+                                placeholder = "Fecha de inicio",
+                                onkeydown = "fechaKeyDown(event)"
+                            })
+                            .Events(e =>
+                            {
+                                e.Change("cambiaFechaInicio");
+                            }))
+                    </span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+                <div class="controlForm mb-3">
+                    <label>Fecha fin de vigencia <b>(obligatorio)</b>:</label>
+                    <span>
+                        @(Html.Kendo().DatePicker()
+                            .Name("FechaFin")
+                            .Min(DateTime.Today.AddDays(1))
+                            .Culture("es-ES")
+                            .Format("dd/MM/yyyy")
+                            .HtmlAttributes(new
+                            {
+                                style = "width: 100%",
+                                id = "FechaFin",
+                                placeholder = "Fecha de vigencia",
+                                onkeydown = "fechaKeyDown(event)"
+                            })
+                            )
+                    </span>
+                </div>
+            </div>
+            <div class="row px-4 mt-4 py-5 align-items-end">
+                <div class="col-12 col-md-10 mx-md-auto text-center">
+                    <h3><b>Adjunta firma escaneada en formato imagen</b></h3>
+                    <div class="row justify-content-center">
+                        <div class="drop-zone" ondragleave="gragend()" ondrop="drophadler(event)" ondragover="dragOver(event)" style=" height: 430px">
+                            <div class="drop-zone__prompt">
+                                <div class="image-container" style="display: grid; grid-template-rows: auto auto;">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <img id="previewImage" src="" alt="Vista previa" style="display:none; max-width: 100%; height: auto; object-fit: contain;">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <svg id="svgImage" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="56.791" height="47.148" viewBox="0 0 106.791 87.148" onclick="document.getElementById('fileInput').click();">
+                                                <defs>
+                                                    <clipPath id="clip-path">
+                                                        <rect id="Rectángulo_2602" data-name="Rectángulo 2602" width="106.791" height="87.148" fill="none" />
+                                                    </clipPath>
+                                                </defs>
+                                                <g id="Grupo_1206" data-name="Grupo 1206" clip-path="url(#clip-path)">
+                                                    <path id="Trazado_720" data-name="Trazado 720" d="M44.9,0C28.864,0,17.567,13.843,18.165,28.177A20.889,20.889,0,0,0,0,48.541C0,61.113,9.68,70.385,20.63,70.385H35.192a2.427,2.427,0,1,0,0-4.854H20.63c-8.224,0-15.776-6.878-15.776-16.99,0-8.142,7.119-15.776,15.776-15.776A2.427,2.427,0,0,0,23.018,30C21.3,17.739,30.906,4.856,44.9,4.856A21.8,21.8,0,0,1,58.022,9.065,2.427,2.427,0,1,0,60.9,5.159,26.783,26.783,0,0,0,44.9,0ZM73.419,11.718a18.018,18.018,0,0,0-7.774,1.859,2.442,2.442,0,0,0,2.2,4.361,13.4,13.4,0,0,1,12.817.493c3.844,2.306,6.713,6.581,6.713,13.121a2.426,2.426,0,0,0,2.01,2.389c7.292,1.224,12.553,8.5,12.553,15.814,0,8.781-6.924,15.776-18.2,15.776H71.6a2.427,2.427,0,1,0,0,4.854H83.734c13.4,0,23.057-9.195,23.057-20.63,0-8.993-5.879-17.7-14.79-20.137-.58-7.025-4.028-12.436-8.835-15.32a18.263,18.263,0,0,0-8.609-2.579c-.377-.016-.758-.006-1.138,0ZM53.112,41.42a2.587,2.587,0,0,0-1.539.729L41.2,52.521a2.593,2.593,0,1,0,3.646,3.687L50.8,50.252V84.518a2.593,2.593,0,1,0,5.186,0V50.252l5.956,5.956a2.593,2.593,0,1,0,3.647-3.687L55.219,42.149a2.592,2.592,0,0,0-2.107-.729Z" />
+                                                </g>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row justify-content-center">
+                                    <h2 id="NameFile" style="display:none; max-height:200px; overflow:hidden">
+                                    </h2>
+                                    <h5 style="padding-left: 0px;">Arrastra o adjunta la</h5>
+                                    <h5 class="fw-bold" style="padding-left: 0px;">IMAGEN (JPG)</h5>
+                                </div>
+                            </div>
+                            <input type="file" name="myFile" id="fileInput" class="drop-zone__input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="row px-4 justify-content-center mb-3">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+                <div class="controlButton my-3" onclick="guardarFirma()">
+                    @(Html.Kendo().Button()
+                    .Name("AltaFirma")
+                    .HtmlAttributes(new { @class = "btnPrimary" })
+                    .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                </div>
+
+            </div>       
+        </div>
+    </section>
+</div>
+
+ <script>
+
+    var dropZone = document.querySelector('.drop-zone');
+    var fileInput = document.getElementById('fileInput');
+    var svgImage = document.getElementById('svgImage');
+    var file
+    const previewImage = document.getElementById('previewImage');
+
+     function drophadler(ev) {
+         ev.preventDefault();
+
+         if (ev.dataTransfer.items) {
+             // Usar la interfaz DataTransferItemList para acceder a el/los archivos)
+
+             if (ev.dataTransfer.items[0].kind === "file") {
+                 file = ev.dataTransfer.items[0].getAsFile();
+                 svgImage.classList.add("ready")
+                 $("#NameFile").empty().append(file.name)
+             }
+
+         } else {
+             // Usar la interfaz DataTransfer para acceder a el/los archivos
+
+
+             file = ev.dataTransfer.files[0]
+             svgImage.classList.add("ready")
+             $("#NameFile").empty().append(file.name)
+
+         }
+         dropZone.style.background = "white"
+
+         // Pasar el evento a removeDragData para limpiar
+         removeDragData(ev);
+     }
+
+     function removeDragData(ev) {
+         if (ev.dataTransfer.items) {
+             // Use DataTransferItemList interface to remove the drag data
+             ev.dataTransfer.items.clear();
+         } else {
+             // Use DataTransfer interface to remove the drag data
+             ev.dataTransfer.clearData();
+         }
+     }
+
+     function gragend(event) {
+         dropZone.style.background = "white"
+     }
+
+     function dragOver(e) {
+         e.preventDefault();
+         dropZone.style.background = "lightgray"
+         console.log("esta dentro")
+     }
+
+     document.getElementById('fileInput').onchange = function (event) {
+         var file = event.target.files[0];
+         var reader = new FileReader();
+
+         reader.onload = function (e) {
+             svgImage.classList.add("ready")
+             $("#NameFile").empty().append(file.name)
+            previewImage.src = e.target.result;
+            previewImage.style.display = 'block';
+         };
+
+         reader.readAsDataURL(file);
+     };
+
+     function guardarFirma() {
+         var myData = new FormData($("#nuevaFirmaForm").get(0));
+         var file = document.getElementById('fileInput').files[0];
+         myData.append('file', file);
+
+         for (const value of myData.values()) {
+             console.log(value);
+         }
+
+         var controlsValidate = [];
+         var isValid = true;
+
+         controlsValidate.push({ 'controlName': 'Nombre' });
+         controlsValidate.push({ 'controlName': 'FechaInicio' });
+         controlsValidate.push({ 'controlName': 'FechaFin' });
+         controlsValidate.push({ 'controlName': 'fileInput' });
+
+         // INPUTS
+         if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+         // DROP DOWN LIST
+         controlsValidate = [];
+         controlsValidate.push({ 'controlName': 'IdPuesto' });
+
+         if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+         if (!isValid) {
+             sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+             return;
+         }
+         showLoading();
+         $.ajax({
+             url: '/Firmas/GuardarFirma',
+             type: 'POST',
+             data: myData,
+             processData: false,
+             contentType: false,
+             success: function (result) {
+                 if (result.success) {
+                     sitteg_success("Se ha creado un registro de firma");
+                     window.location.href = '/Firmas/Index'
+                 } else {
+                     console.log(result.errors);
+                     sitteg_warning("Ocurrieron los siguientes errores:\n" + result.message);
+                 }
+                 hideLoading();
+             }, error: function (xhr, status, error) {
+                 console.log(error);
+                 sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                 hideLoading();
+             }
+         });
+     }
+
+     function cambiaFechaInicio() {
+         var datePickerControl = $("#FechaFin").data("kendoDatePicker");
+         var fechaSeleccionada = new Date(this.value());
+         var currentDate = new Date();
+         fechaSeleccionada.setDate(fechaSeleccionada.getDate() + 1);
+         if (fechaSeleccionada.getFullYear() < currentDate.getFullYear()) {
+             currentDate.setDate(currentDate.getDate() + 1);
+         }
+         datePickerControl.value("");
+         datePickerControl.min(fechaSeleccionada.getFullYear() < currentDate.getFullYear() ? currentDate : fechaSeleccionada);
+     }
+
+     function fechaKeyDown(e) {
+         var value = e.target.value
+         var key = e.key
+         var keyCode = e.keyCode
+         var pattern = /^[0-3]([0-9](\/([0-1]([0-9](\/([1-2]([0-9]([0-9]([0-9])?)?)?)?)?)?)?)?)?$/
+         var date = value + key
+         var can = pattern.test(date)
+         if ([8, 46, 37, 38, 39, 40, 9].indexOf(keyCode) != -1) {
+             return
+         }
+         if (can) {
+             if (date.length == 10) {
+                 var splDate = date.split('/')
+                 var newDate = new Date(parseInt(splDate[2]), parseInt(splDate[1]) - 1, parseInt(splDate[0]))
+                 var day = newDate.getDate() < 10 ? "0" + newDate.getDate() : newDate.getDate()
+                 var month = newDate.getMonth() < 9 ? "0" + (parseInt(newDate.getMonth()) + parseInt(1)) : (parseInt(newDate.getMonth()) + parseInt(1))
+                 var year = newDate.getFullYear()
+                 var newStringDate = `${day}/${month}/${year}`
+                 if (day == splDate[0] && month == splDate[1] && year == splDate[2]) {
+                     var NowStr = $("#" + e.target.id).data("kendoDatePicker").dateView._current
+                     console.log(NowStr)
+                     var selectetDay = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+                     if (selectetDay > NowStr) {
+                         $("#FechaPago").val("")
+                         e.preventDefault()
+                     }
+                 }
+                 else {
+                     $("#FechaPago").val("")
+                     e.preventDefault()
+                 }
+             } else if (date.length > 10) e.preventDefault()
+             return
+         }
+         e.preventDefault()
+     }
+
+   </script>

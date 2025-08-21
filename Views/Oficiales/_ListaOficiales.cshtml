@@ -1,0 +1,136 @@
+
+    <script>
+        function GetdataOficialesGrid(){
+              var idDependencia = $("#idDependenciaFiltro").val();;
+
+        idDependencia = idDependencia ? idDependencia : null;
+        return {
+            idDelegacionFiltro: $("#idDelegacionFiltro").val(),
+            nombre: $("#NombreB").val(),
+            apellidoPaterno: $("#ApellidoPaternoB").val(),
+            apellidoMaterno: $("#ApellidoMaternoB").val(),
+            idDependencia : idDependencia
+
+            }
+            }
+
+        </script>
+ @if (ViewBag.Admin == true)
+        {
+    <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+        <div class="row">
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <button href="#" id="btnNuevaDep" onclick="mostrarModal()">
+                    <h6 class="m-0 d-flex align-items-center"><i class="icon-addOficial h5 mb-0 me-2"></i><b>Agregar nuevo oficial</b></h6>
+                </button>
+            </div>
+        </div>
+    </div>
+        }
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(Html.Kendo().Grid<CatOficialesModel>()
+        .Name("gridCatOficiales")
+        .Columns(columns =>
+        {
+                columns.Bound(c => c.IdOficial).Width(80).Title("Id");
+            columns.Bound(c => c.Nombre).Width(100);
+            columns.Bound(c => c.ApellidoPaterno).Width(190);
+            columns.Bound(c => c.ApellidoMaterno).Width(190);
+            columns.Bound(c => c.nombreOficina).Width(190);
+            columns.Bound(c => c.estatusDesc).Width(100).Title("Estatus en sistema").Width(100); ;
+            columns.Command(c => c.Custom("Editar").Click("getIdOfi")).Width(100);
+                //columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(100);
+
+           
+        }).HtmlAttributes(new { style = "height:550px" })
+            @*.Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Bottom).PageSizes(true))*@
+            .Pageable(p => p.Enabled(true))
+            .Sortable()
+            .Scrollable(scr => scr.Enabled(true))
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(r => r.Action("ajax_BuscarDelegacion", "Oficiales").Data("GetdataOficialesGrid"))
+            .PageSize(50)
+        )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+        .Search(s =>
+        {
+            s.Field(c => c.Nombre);
+            s.Field(c => c.ApellidoPaterno);
+            s.Field(c => c.ApellidoMaterno);
+
+        })
+
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+        .Type(GridSelectionType.Row)
+        )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+    )
+
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+    </div>
+</div>
+<div class="modal fade modalCustom" id="agregarOficial" aria-labelledby="agregarOficialLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyCrearOficial">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function getIdOfi(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdOficial = dataItem.IdOficial;
+        
+
+        console.log(IdOficial);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarOficialParcial", "Oficiales")',
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdOficial: IdOficial }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCrearOficial').html(result);
+                $('#agregarOficial').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdOficial = dataItem.IdOficial;
+        console.log(IdOficial);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarOficialParcial", "Oficiales")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdOficial: IdOficial }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCrearOficial').html(result);
+                $('#agregarOficial').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

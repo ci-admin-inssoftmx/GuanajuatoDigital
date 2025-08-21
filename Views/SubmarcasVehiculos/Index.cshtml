@@ -1,0 +1,74 @@
+
+<div class="row">
+    <div class="col-md-10">
+        <h2>Submarcas de Vehiculos</h2>
+    </div>
+    <br />
+    <div class="col-md-2">
+        @(
+            Html.Kendo().Button()
+            .Name("btnCreate")
+            .HtmlAttributes(new { type = "button" })
+            .Content("Create")
+            .Events(ev => ev.Click("onClick"))
+            .ThemeColor(ThemeColor.Primary)
+            )
+
+        @*   @Html.ActionLink("Nuevo","Create",null,new{@class="btn btn-info"})*@
+    </div>
+</div>
+<hr />
+<br />
+
+@(
+    Html.Kendo().Grid<GuanajuatoAdminUsuarios.Entity.SubmarcasVehiculo>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.IdSubmarca).Width(140);
+            columns.Bound(c => c.NombreSubmarca).Width(190);
+            columns.Command(c => c.Custom("Update").Click("redirectUpdate")).Width(180);
+            columns.Command(c => c.Custom("Delete").Click("redirectDelete")).Width(180);
+
+
+        }).HtmlAttributes(new { style = "height:550px" })
+        .Sortable()
+        //.Groupable()
+        .Scrollable()
+        .Pageable()
+        .DataSource(dataSource => dataSource
+            .Ajax()
+        .Read(read => read.Action("GetSubmarcas", "SubmarcasVehiculos"))
+            .PageSize(5).Model(model => model.Id(p => p.IdSubmarca))
+        )
+     .ToolBar(t => t.Search().Text("Buscar..."))
+        .Search(s =>
+        {
+            s.Field(c => c.NombreSubmarca);
+        })
+
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+        .Type(GridSelectionType.Row)
+        )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+    @*.Events(ev=>ev.Change("onChange"))*@
+    )
+
+<script>
+    function onClick() {
+        //alert("hola")
+        var url = '@Url.Action("Create","SubmarcasVehiculos")'
+        window.location.href = url;
+    }
+
+    function redirectUpdate(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        window.location.href = '@Url.Action("Update","SubmarcasVehiculos")?IdSubmarca=' + dataItem.IdSubmarca;
+    }
+
+    function redirectDelete(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        window.location.href = '@Url.Action("Delete","SubmarcasVehiculos")?IdSubmarca=' + dataItem.IdSubmarca;
+    }
+</script>

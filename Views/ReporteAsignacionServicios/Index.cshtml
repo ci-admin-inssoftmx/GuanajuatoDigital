@@ -1,0 +1,409 @@
+﻿@model ReporteAsignacionBusquedaModel
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡EL usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡EL usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+</script>
+
+<head>
+    <script>
+        function submitSearch() {
+            var Mydata = $("#frmSearch").serialize();
+            showLoading();
+            $.ajax({
+                url: '@Url.Action("ajax_BuscarReporte")',
+                type: 'POST',
+                data: Mydata,
+                success: function (result) {
+                    $("#listadoReporteAsignacion").html(result);
+                    hideLoading();
+                }, error: function () {
+                    sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                    hideLoading();
+                }
+            });
+        }
+
+        function startChange() {
+            var endPicker = $("#end").data("kendoDatePicker"),
+                startDate = this.value();
+
+            if (startDate) {
+                startDate = new Date(startDate);
+                startDate.setDate(startDate.getDate() + 1);
+                endPicker.min(startDate);
+            }
+        }
+
+        function endChange() {
+            var startPicker = $("#start").data("kendoDatePicker"),
+                endDate = this.value();
+
+            if (endDate) {
+                endDate = new Date(endDate);
+                endDate.setDate(endDate.getDate() - 1);
+                startPicker.max(endDate);
+            }
+        }
+
+        function testKeyDown(e) {
+            var value = e.target.value
+            var key = e.key
+            var keyCode = e.keyCode
+            var pattern = /^[0-3]([0-9](\/([0-1]([0-9](\/([1-2]([0-9]([0-9]([0-9])?)?)?)?)?)?)?)?)?$/
+            var date = value + key
+            var can = pattern.test(date)
+
+            if ([8, 46, 37, 38, 39, 40, 9].indexOf(keyCode) != -1) {
+                return
+            }
+
+            if (can) {
+                if (date.length == 10) {
+                    var splDate = date.split('/')
+                    var newDate = new Date(parseInt(splDate[2]), parseInt(splDate[1]) - 1, parseInt(splDate[0]))
+                    var day = newDate.getDate() < 10 ? "0" + newDate.getDate() : newDate.getDate()
+                    var month = newDate.getMonth() < 9 ? "0" + (parseInt(newDate.getMonth()) + parseInt(1)) : (parseInt(newDate.getMonth()) + parseInt(1))
+                    var year = newDate.getFullYear()
+                    var newStringDate = `${day}/${month}/${year}`
+                    if (day == splDate[0] && month == splDate[1] && year == splDate[2]) {
+                        var NowStr = $("#" + e.target.id).data("kendoDatePicker").dateView._current
+                        console.log(NowStr)
+                        var selectetDay = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+
+                        if (selectetDay > NowStr) {
+                            $("#start").val("")
+                            e.preventDefault()
+                        }
+                    }
+                    else {
+                        $("#start").val("")
+                        e.preventDefault()
+                    }
+                } else if (date.length > 10) e.preventDefault()
+                return
+            }
+            e.preventDefault()
+        }
+
+        function testKeyDown2(e) {
+            var value = e.target.value
+            var key = e.key
+            var keyCode = e.keyCode
+            var pattern = /^[0-3]([0-9](\/([0-1]([0-9](\/([1-2]([0-9]([0-9]([0-9])?)?)?)?)?)?)?)?)?$/
+            var date = value + key
+            var can = pattern.test(date)
+
+            if ([8, 46, 37, 38, 39, 40, 9].indexOf(keyCode) != -1) {
+                return
+            }
+
+            if (can) {
+                if (date.length == 10) {
+                    var splDate = date.split('/')
+                    var newDate = new Date(parseInt(splDate[2]), parseInt(splDate[1]) - 1, parseInt(splDate[0]))
+                    var day = newDate.getDate() < 10 ? "0" + newDate.getDate() : newDate.getDate()
+                    var month = newDate.getMonth() < 9 ? "0" + (parseInt(newDate.getMonth()) + parseInt(1)) : (parseInt(newDate.getMonth()) + parseInt(1))
+                    var year = newDate.getFullYear()
+                    var newStringDate = `${day}/${month}/${year}`
+                    if (day == splDate[0] && month == splDate[1] && year == splDate[2]) {
+                        var NowStr = $("#" + e.target.id).data("kendoDatePicker").dateView._current
+                        console.log(NowStr)
+                        var selectetDay = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+
+                        if (selectetDay > NowStr) {
+                            $("#end").val("")
+                            e.preventDefault()
+                        }
+                    }
+                    else {
+                        $("#end").val("")
+                        e.preventDefault()
+                    }
+                } else if (date.length > 10) e.preventDefault()
+                return
+            }
+            e.preventDefault()
+        }
+
+
+
+        $(".export-pdf").click(function () {
+            // Convert the DOM element to a drawing using kendo.drawing.drawDOM
+           
+            kendo.drawing.drawDOM($(".content-wrapper"))
+                .then(function (group) {
+                    // Render the result as a PDF file
+                    return kendo.drawing.exportPDF(group, {
+                        paperSize: "auto",
+                        margin: { left: "1cm", top: "1cm", right: "1cm", bottom: "1cm" }
+                    });
+                })
+                .done(function (data) {
+                    // Save the PDF file
+                    kendo.saveAs({
+                        dataURI: data,
+                        fileName: "TransitoTransporte.pdf",
+                        proxyURL: "@Url.Action("Pdf_Export_Save")"
+                    });
+                });
+        });
+
+        function onSelectEventoValue(e) {
+            var dataItem = this.dataItem(e.item);
+            console.log("event :: select (" + dataItem.Text + " : " + dataItem.Value + ")");
+            //alert(dataItem.Text)
+            //@Model.Evento= dataItem.Text;
+            //$('#hdnEvento').val(dataItem.Text);
+            $('#hdnEvento').val(dataItem.Text);
+        }
+
+        function downLoadPdfFiltered() {
+
+            var data = {
+                IdGrua: $('#ddlGrua').val(),
+                IdPension: $('#ddlPension').val(),
+                IdEvento: $('#ddlEvento').val(),
+                Evento: $('#hdnEvento').val(),
+                FechaInicio: $('#start').val(),
+                FechaFin: $('#end').val(),
+                idDelegacion: $('#ddlDelegacion').val()
+            };
+            var json = JSON.stringify(data);
+            window.location = '/ReporteAsignacionServicios/CreatePdf?data=' + json;
+  
+        }
+
+    </script>
+</head>
+
+
+<div class="mainContainer bg-light">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-deposito h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Reporte de asignación de servicios</b></h2>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-auto mt-4 mb-2">
+            <h5 class="px-4"><b>Búsqueda de Solicitudes</b></h5>
+            <h6 class="px-4 text-muted">Realiza una búsqueda personalizada de solicitudes.</h6>
+        </div>
+        <form id="frmSearch" class="row px-4 mb-4 align-items-end" method="post">
+                 <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Delegación:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(d => d.idDelegacion).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Seleccione oficina/delegación...")
+                            .HtmlAttributes(new { style = "width:100%;", Id = "ddlDelegacion" })
+                            .Filter(FilterType.Contains)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Delegaciones_Read", "ReporteAsignacionServicios");
+                                });
+                            }))
+                    </span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Grúa:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(d => d.IdGrua).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Seleccione grúa...")
+                            .HtmlAttributes(new { style = "width:100%;", Id = "ddlGrua" })
+                            .Filter(FilterType.Contains)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Grua_Read", "ReporteAsignacionServicios");
+                                });
+                            }))
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Inicio:</label>
+                    @(Html.Kendo().DatePickerFor(t => t.FechaInicio).Max(DateTime.Now)
+                        .Culture("es-ES")
+                        .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "start", onkeydown = "testKeyDown(event)" })
+                        .ParseFormats(new[] { "dd/MM/yyyy", "dd-MM-yyyy" })  // Agrega los formatos que esperas recibir
+                        )
+
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Tipo de evento:</label>
+                    <span>
+                        @Html.HiddenFor(m=>m.Evento, new{Id="hdnEvento"})
+                        @(Html.Kendo().DropDownListFor(d => d.IdEvento).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Seleccione Evento...")
+                            .HtmlAttributes(new { style = "width:100%;", Id = "ddlEvento" })
+                            .Events(x => x.Select("onSelectEventoValue"))
+                            .Filter(FilterType.Contains)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Evento_Read", "ReporteAsignacionServicios");
+                                });
+                            }))
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Pensión:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(d => d.IdPension).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Seleccione pensión...")
+                            .HtmlAttributes(new { style = "width:100%;", Id = "ddlPension" })
+                            .Filter(FilterType.Contains)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Pension_Read", "ReporteAsignacionServicios");
+                                });
+                            }))
+                    </span>
+                </div>
+            </div>
+
+
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Fin:</label>
+                    @(Html.Kendo().DatePickerFor(t => t.FechaFin).Max(DateTime.Now)
+                        .Culture("es-ES")
+                        .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "end", onkeydown = "testKeyDown2(event)" })
+                        .ParseFormats(new[] { "dd/MM/yyyy", "dd-MM-yyyy" })  // Agrega los formatos que esperas recibir
+                        )
+
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlButton my-3">
+                    <button class="btnPrimary" type="button" onclick="submitSearch()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="btnOutline btnOutlinePrimary my-3">
+
+                    <button type="button" onclick="downLoadPdfFiltered()" class='btnPrimary w-100'><h5 class="m-0"><i class='icon-data m-0'></i>&nbsp;&nbsp; <b>Reporte</b></h5></button>
+
+                </div>
+            </div>
+
+        </form>
+
+        <div id="listadoReporteAsignacion">
+            <partial name="_ListadoReporteAsignacion" model="Model.ListReporteAsignacion" />
+        </div>
+    </section>
+</div>
+<script>
+    $(function () {
+        function checkDates() {
+
+            var startDate = $("#start")
+            var endDate = $("#end")
+            console.log("START",startDate.val(),"END", endDate.val())
+            console.log(kendo.parseDate(endDate.val()) > kendo.parseDate(startDate.val()))
+            if (startDate.val() != '' && endDate.val() != '') {
+                if (kendo.parseDate(endDate.val()) < kendo.parseDate(startDate.val())) {
+                    sitteg_warning("La fecha final debe ser mayor a la fecha inicial.");
+                   // alert('La fecha final debe ser mayor a la fecha inicial');
+                    endDate.val(startDate.val());
+                }
+            }
+        }
+
+        var startDate = $("#start").kendoDatePicker({
+            change: checkDates
+        });
+        var endDate = $("#end").kendoDatePicker({
+            change: checkDates
+        });
+
+        $("#start").kendoValidator({
+            parseFormats: []  // Deshabilita la validación automática
+            rules: {
+                date: function (input) {
+                    var d = kendo.parseDate(input.val());
+                    return d instanceof Date;
+                }
+            }
+        });
+
+        $("#end").kendoValidator({
+            parseFormats: []  // Deshabilita la validación automática
+            rules: {
+                date: function (input) {
+                    var d = kendo.parseDate(input.val());
+                    return d instanceof Date;
+                }
+            }
+        });
+    });
+</script>

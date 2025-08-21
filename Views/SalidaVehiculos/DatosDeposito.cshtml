@@ -1,0 +1,360 @@
+﻿@model GuanajuatoAdminUsuarios.Models.SalidaVehiculosModel
+
+
+
+
+<div class="mainContainer bg-light">
+
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                       
+                    </div>
+                    <div class="col-auto">
+                        <i class="icon-deposito h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Salida de Vehículos</b></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-4 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+
+        <form id="dataSalidaForm" class="row px-4 mb-4 align-items-end">
+            <div class="col-12">
+                <div class="row align-items-end">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @Html.HiddenFor(t=>t.idDeposito)
+                            <label>Fecha Ingreso:</label>
+                            @(Html.Kendo().DatePickerFor(t => t.fechaIngreso).Max(DateTime.Now)
+                                .Label(l => l.Content("Fecha Ingreso:"))
+                                .Value(Model.fechaIngreso)
+
+                                .Culture("es-ES")
+                                .HtmlAttributes(new { style = "width: 80%", id = "fechaIngreso", @readonly = "readonly" })
+                                )
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @if (Model.fechaIngreso <= DateTime.Now)
+                            {
+                                <label>Fecha Salida <b>(obligatorio):</b></label>
+                                @(Html.Kendo().DatePickerFor(t => t.fechaSalida)
+                                    .Max(DateTime.Now).Min(Model.fechaIngreso)
+                                    .Label(l => l.Content("Fecha salida:"))
+                                    .Culture("es-ES")
+                                    .HtmlAttributes(new { style = "width: 80%", id = "fechaSalida" })
+                                    .Events(e => e.Change("calcularDiferenciaDias"))
+                                    )
+                            }
+                            else
+                            {
+                                <label>Fecha Salida <b>(obligatorio):</b></label>
+                                @(Html.Kendo().DatePickerFor(t => t.fechaSalida)
+                                    .Max(DateTime.Now)
+                                    .Label(l => l.Content("Fecha salida:"))
+                                    .Culture("es-ES")
+                                    .HtmlAttributes(new { style = "width: 80%", id = "fechaSalida" })
+                                    .Events(e => e.Change("calcularDiferenciaDias"))
+                                    )
+                            }
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                                @(Html.Kendo().TextBoxFor(t => t.diasResguardo)
+                                    .HtmlAttributes(new { style = "max-width: 80%" }) 
+                                    .Label(l => l.Content("Días de  resguardo:"))
+                                    .Placeholder("")
+                                    .HtmlAttributes(new { style = "width: 100%",id = "diasResguardo" })
+                                    .HtmlAttributes(new { @readonly = "readonly" })
+
+                                    )
+                            </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <div>
+                                @(Html.Kendo().NumericTextBoxFor(t => t.costoDeposito)
+                                    .HtmlAttributes(new { autocomplete = "off" })
+                                    .Label(l => l.Content("Costo depósito <b>(obligatorio):</b>"))
+                                    .Format("n2")
+                                    .Size(ComponentSize.Large)
+                                    .Spinners(false) // Deshabilita las flechas de incremento y disminución
+                                    )
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <partial name="_ListadoGruas" model="Model" />
+            </div>
+
+            <div class="row px-4 mb-4 align-items-end">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    
+                    <div class="controlForm my-3 selecciondeFecha">
+                        @(Html.Kendo().TextBoxFor(t => t.costoTotalTodasGruas)
+                            .Label(l => l.Content("Costo total grúa(s)"))
+                            @*.Value("0.00")*@
+                            .HtmlAttributes(new {  id = "costoTotalTodasGruas" })                            
+                            .Enable(false)
+
+                            )
+                    </div>
+                </div>
+            </div>
+            <div class="row px-4 mb-4 align-items-end">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3 selecciondeFecha">
+                        @(Html.Kendo().TextBoxFor(t => t.recibe)
+                            .Label(l => l.Content("Recibe <b>(obligatorio):"))
+                            .Placeholder("Nombre de quien recibe")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                    </div>
+                </div>
+            
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3 selecciondeFecha">
+                        @(Html.Kendo().TextBoxFor(t => t.entrega)
+                            .Label(l => l.Content("Entrega <b>(obligatorio):"))
+                            .Placeholder("Nombre de quien entrega")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                    </div>
+                </div>
+            
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3 selecciondeFecha">
+                        @(Html.Kendo().TextBoxFor(t => t.observaciones)
+                            .Label(l => l.Content("Observaciones:"))
+                            .Placeholder("")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                    </div>
+                </div>
+            </div>
+
+            <div class="my-3" id="datosDepositoContainer">
+                <div style="width: 50%; float: left;">
+                    <h4 class="colorPrimary"><b>Vehículo</b></h4>
+                    <p><b>Tipo de Vehículo:</b> <span id="tipoVehiculo">@{ if (Model.tipoVehiculo != null) { @Model.tipoVehiculo; } else { @("-"); } }</span></p>
+                    <p><b>Modelo:</b> <span id="modelo">@{ if (Model.modelo != null) { @Model.modelo; } else { @("-"); } }</span></p>
+                    <p><b>Marca:</b> <span id="marca">@{ if (Model.marca != null) { @Model.marca; } else { @("-"); } }</span></p>
+                    <p><b>Submarca:</b> <span id="submarca">@{ if (Model.submarca != null) { @Model.submarca; } else { @("-"); } }</span></p>
+                    <p><b>Serie:</b> <span id="serie">@{ if (Model.serie != null) { @Model.serie; } else { @("-"); } }</span></p>
+                    <p><b>Color:</b> <span id="color">@{ if (Model.color != null) { @Model.color; } else { @("-"); } }</span></p>
+                    <p><b>Folio Inventario:</b> <span id="folioInventario">@{ if (Model.folioInventario != null) { @Model.folioInventario; } else { @("-"); } }</span></p>
+
+                </div>
+                <div style="width: 50%; float: left;">
+                    <h4 class="colorPrimary"><b>Propietario</b></h4>
+                    <p><b>Nombre:</b> <span id="propietario">@{ if (Model.propietario != null) { @Model.propietario; } else { @("-"); } }</span></p>
+                    <h5 class="colorPrimary"><b>Solicitante</b></h5>
+                    <p><b>Nombre solicitante:</b> <span id="solicitante">@{ if (Model.solicitante != null) { @Model.solicitante; } else { @("-"); } }</span></p>
+                </div>
+                <div style="width: 50%; float: left;">
+                    <h4 class="colorPrimary"><b>Evento</b></h4>
+                    <p><b>Servicio:</b> <span id="evento">@{ if (Model.evento != null) { @Model.evento; } else { @("-"); } }</span></p>
+                    <p><b>Propietario Grúa:</b> <span id="propietarioGrua">@{ if (Model.propietarioGrua != null) { @Model.propietarioGrua; } else { @("-"); } }</span></p>
+                    <p>
+                        <b>Hora Solicitud:</b> <span id="horaSolicitud">
+                            @{
+                                if (Model.fechaSolicitud != null)
+                                {
+                                    @Model.fechaSolicitud.ToString("HH:mm")
+                                    ; // HH:mm muestra solo la hora y minutos
+                                }
+                                else
+                                {
+                                    @("-")
+                                    ;
+                                }
+                            }
+                        </span>
+                    </p>
+                    <p>
+                        <b>Hora de Término:</b> <span id="horaTermino">
+                            @{
+                                if (Model.fechaFinal != null)
+                                {
+                                    @Model.fechaFinal.ToString("HH:mm")
+                                    ; // HH:mm muestra solo la hora y minutos
+                                }
+                                else
+                                {
+                                    @("-")
+                                    ;
+                                }
+                            }
+                        </span>
+                    </p>
+                </div>
+                <div style="width: 50%; float: left;">
+                    <h4 class="colorPrimary"><b>Ubicación</b></h4>
+                    <p><b>Tramo:</b> <span id="tramo">@{ if (Model.tramo != null) { @Model.tramo; } else { @("-"); } }</span></p>
+                    <p><b>Carretera:</b> <span id="carretera">@{
+                                if (Model.carretera != null) { 
+                                    @Model.carretera
+                                    ; } else { 
+                                    @(
+                                        "-"
+                                        )
+                                    ; }
+                            }</span></p>
+                    <p><b>Kilómetro:</b> 
+                        <span id="kilometro">
+
+                            @{
+                                if (Model.kilometro != null)
+                                {
+                                    @Model.kilometro
+                                    ;
+                                }
+                                else
+                                {
+                                    @("-")
+                                    ;
+                                }
+                            }
+
+                        </span></p>
+
+                    <p><b>Colonia:</b> <span id="colonia">@{ if (Model.colonia != null) { @Model.colonia; } else { @("-"); } }</span></p>
+                    <p><b>Calle:</b> <span id="calle">@{ if (Model.calle != null) { @Model.calle; } else { @("-"); } }</span></p>
+                    <p><b>Número:</b> <span id="numero">@{ if (Model.numero != null) { @Model.numero; } else { @("-"); } }</span></p>
+                    <p><b>Municipio:</b> <span id="municipio">@{ if (Model.municipio != null) { @Model.municipio; } else { @("-"); } }</span></p>
+                    <p><b>Intersección:</b> <span id="interseccion">@{ if (Model.interseccion != null) { @Model.interseccion; } else { @("-"); } }</span></p>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div id="idDepContainer" style="display:none"></div>
+        </form>
+
+    <div class="row px-4 mb-4 align-items-end  justify-content-center">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlButton my-3">
+                @(Html.Kendo().Button()
+                    .Name("guardarData")
+                    .HtmlAttributes(new { @class = "btnPrimary", @onclick = "guardarDatos(); return false;" })
+                    .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+            </div>
+
+        </div>
+    </div>
+    </section>
+</div>
+<script>
+function calcularDiferenciaDias() {
+    var fechaIngreso = $("#fechaIngreso").data("kendoDatePicker").value();
+    var fechaSalida = $("#fechaSalida").data("kendoDatePicker").value();
+
+    if (fechaIngreso && fechaSalida) {
+        var fechaInicioSinHora = new Date(fechaIngreso.getFullYear(), fechaIngreso.getMonth(), fechaIngreso.getDate());
+        var fechaFinSinHora = new Date(fechaSalida.getFullYear(), fechaSalida.getMonth(), fechaSalida.getDate());
+
+        var diffTime = fechaFinSinHora - fechaInicioSinHora;
+
+        var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); //Math.ceil para redondear hacia arriba
+
+        diffDays++;
+
+        $("#diasResguardo").data("kendoTextBox").value(diffDays);
+    }
+}
+
+    function guardarDatos() {
+        var controlsValidate = [];
+        var isValid = true;
+        controlsValidate.push({ 'controlName': 'fechaSalida' });
+        controlsValidate.push({ 'controlName': 'recibe' });
+        controlsValidate.push({ 'controlName': 'entrega' });
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+         if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+        //$("#costoDeposito").removeClass("errorData");
+        if ( parseInt($("#costoDeposito").val())<=0 ) {
+            //$("#costoDeposito").addClass("errorData");
+            sitteg_warning('El Costo depósito es un dato requerido.');
+            return;
+        }
+
+
+        var Mydata = $("#dataSalidaForm").serialize();
+        console.log(Mydata);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("GuardarDatosSalida")',
+            type: 'POST',
+            data: Mydata,
+            success: function (data) {
+                sitteg_success('Se ha actualizado la información');
+
+               hideLoading();
+                window.location.href = '@Url.Action("Index", "SalidaVehiculos")';
+            },
+            error: function (error) {
+                sitteg_warning('Sucedió un error, intente mas tarde...');
+                hideLoading();
+            }
+        });
+    }
+
+
+    function guardarDatos2() {
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'recibe' });
+        controlsValidate.push({ 'controlName': 'entrega' });
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+
+        var Mydata = $("#dataSalidaForm").serialize();
+        console.log(Mydata);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("GuardarDatosSalida")',
+            type: 'POST',
+            data: Mydata,
+            success: function (data) {
+                sitteg_success('Se ha actualizado la información');
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Sucedió un error, intente mas tarde...');
+                hideLoading();
+            }
+        });
+    }
+
+</script>
+

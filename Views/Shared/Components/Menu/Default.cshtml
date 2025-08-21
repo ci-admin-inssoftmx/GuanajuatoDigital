@@ -1,0 +1,23 @@
+﻿@model IEnumerable<GuanajuatoAdminUsuarios.Models.MenuViewModel>
+
+     @(Html.Kendo().Menu()
+  .Name("menu")
+  .Items(items =>
+  {
+    foreach (var menu in Model.Where(m => m.Nivel == 0))
+     {
+      if (menu.Nivel == 0)
+       {
+         items.Add()
+         .Text(menu.Titulo).Action(menu.Accion, menu.Controlador)
+         .Items(children =>
+           {
+            foreach (var submenu in Model.Where(m => m.Nivel == menu.Id))
+             {
+                       children.Add().Text(submenu.Titulo).Action(submenu.Accion, submenu.Controlador, new { area = "Administracion" });
+             }
+           });
+       }
+     }
+  })
+)

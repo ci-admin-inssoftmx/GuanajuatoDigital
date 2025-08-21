@@ -1,0 +1,228 @@
+﻿@{
+	@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+
+	var delegacion = @HttpContextAccessor.HttpContext.Session.GetInt32("IdOficina").Value;
+
+
+}
+
+
+
+<script>
+	var oficina = "@delegacion"
+
+	function TemplateMostrar(data){
+
+		
+		if (data.idEstatusReporte == "3" && data.idDelegacion == oficina)
+	return	`<button onclick="mostrarAccidente('${data.IdAccidente}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-research me-2'></i><b>Mostrar</b></h6></button>`
+	else
+	return ""
+
+	}
+
+	function TemplatePdf(data){
+
+		if (data.idEstatusReporte == "3" && data.idDelegacion == oficina)
+		return `<button onclick="downLoadPdf('${data.IdAccidente}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='h5 icon-pdf me-2'></i><b>Descargar</b></h6></button>`
+		else
+		return ""
+
+
+	}
+	function TemplateEditar(data) {
+		console.log(data, oficina)
+		if ( data.idDelegacion == oficina)
+		return`<button onclick="editarAccidente('${data.IdAccidente}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>`
+		else
+		return ""
+
+	}
+
+	</script>
+
+
+
+
+<div class="row">
+	<div class="col-12 mb-4 px-4 rounded gridCustom">
+
+		@(
+			Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.BusquedaAccidentesModel>()
+			.Name("gridBusquedaAccidentes")
+			@*.ToolBar(tools => 
+			tools.Pdf())
+			.Pdf(pdf => pdf
+			.FileName("BusquedaGeneralAccidentes.pdf")
+			.AllPages()
+			.PaperSize("A4")
+			.Scale(0.75)
+			.TemplateId("page-template")
+			)*@
+			.Columns(columns =>
+			{
+				columns.Bound(c => c.IdAccidente).Hidden();
+				columns.Bound(c => c.NumeroSecuencial).Title("Número").Width(60);
+				columns.Bound(c => c.numeroReporte).Title("Folio").Width(100);
+				columns.Bound(c => c.fecha).Title("Fecha").ClientTemplate("#= new Date(fecha).toLocaleDateString('en-GB') #").Width(100);
+				columns.Bound(c => c.hora).Title("Hora").Width(70);
+				columns.Bound(c => c.municipio).Title("Municipio").Width(100);
+				columns.Bound(c => c.carretera).Title("Carretera").Width(100);
+				columns.Bound(c => c.tramo).Title("Tramo").Width(100);
+				columns.Bound(c => c.estatusReporte).Title("Estatus").Width(100);
+				columns.Bound(c => c.folioEmergencia).Title("Folio Emergencia").Width(100);
+				columns.Bound(p => p.IdAccidente).ClientTemplate("#=  TemplatePdf(data) #").Title("Exportar").Sortable(false).Width(90);
+				columns.Bound(p => p.IdAccidente).ClientTemplate("#=  TemplateMostrar(data) #").Title("Mostrar").Sortable(false).Width(90);
+				columns.Bound(p => p.IdAccidente).ClientTemplate("#= TemplateEditar(data) #").Title("Editar").Sortable(false).Width(90);
+				/* columns.Bound(p => p.IdAccidente).ClientTemplate(
+				"<button onclick=\"consultarAccidente('#= IdAccidente #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Consultar</b></h6></button>"
+				).Title("Consultar").Sortable(false).Width(90);*/
+
+			}).HtmlAttributes(new { style = "height:550px" })
+			.EnableCustomBinding(true)
+			.DataSource(dataSource => dataSource
+			.Ajax()
+			.Read(read => read.Action("GetAccidentesBusquedaPagination", "BusquedaAccidentes"))
+			.PageSize(10)
+			)
+			.Pageable() 
+			.Sortable(s => s.Enabled(false))
+			.Scrollable()
+			.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+			@*.ToolBar(t => t.Custom().Text("Buscar...").Name("search"))*@
+			)
+
+
+	</div>
+</div>
+
+
+<script type="text/x-kendo-template" id="page-template">
+	<div class="toolbar">
+	  <label class="category-label" for="category">Test input:</label>
+	  <input type="search" id="category" style="width: 150px"/>
+	  <a class="k-button k-button-icontext k-grid-pdf" href="\\#">Export to Pdf</a>
+	</div>
+</script>
+<script id="rowTemplate" type="text/x-kendo-tmpl">
+	<tr data-uid="#: uid #">
+	  <td class="photo">
+		<img src="../content/web/Employees/#: EmployeeID #.jpg" alt="#: EmployeeID #" />
+	  </td>
+	  <td class="details">
+		<span class="name">#: FirstName# #: LastName# </span>
+		<span class="title">Title: #: Title #</span>
+	  </td>
+	  <td class="country">
+		#: Country #
+	  </td>
+	  <td class="employeeID">
+		#: EmployeeID #
+	  </td>
+	</tr>
+</script>
+<script id="altRowTemplate" type="text/x-kendo-tmpl">
+	<tr class="k-alt" data-uid="#: uid #">
+	  <td class="photo">
+		<img src="../content/web/Employees/#: data.EmployeeID #.jpg" alt="#: EmployeeID #" />
+	  </td>
+	  <td class="details">
+		<span class="name">#: FirstName# #: LastName# </span>
+		<span class="title">Title: #: Title #</span>
+	  </td>
+	  <td class="country">
+		#: Country #
+	  </td>
+	  <td class="employeeID">
+		#: EmployeeID #
+	  </td>
+	</tr>
+</script>
+
+
+<script src="https://unpkg.com/pako/dist/pako_deflate.min.js"></script>
+<script>
+	const downloadFile = (blob, fileName) => {
+		const link = document.createElement('a');
+		// create a blobURI pointing to our Blob
+		link.href = URL.createObjectURL(blob);
+		link.download = fileName;
+		// some browser needs the anchor to be in the doc
+		document.body.append(link);
+		link.click();
+		link.remove();
+		// in case the Blob uses a lot of memory
+		setTimeout(() => URL.revokeObjectURL(link.href), 7000);
+	};
+
+	function downLoadPdf(Id) {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', '@Url.Action("AccidentesDetallado","PDFGenerator")' + "?idAccidente=" + Id, true);
+		xhr.responseType = 'blob';
+		xhr.onload = function (e) {
+			if (this.status == 200) {
+				var myBlob = this.response;
+				const downloadFile = (blob, fileName) => {
+					const link = document.createElement('a');
+					// create a blobURI pointing to our Blob
+					link.href = URL.createObjectURL(blob);
+					link.download = fileName;
+					// some browser needs the anchor to be in the doc
+					document.body.append(link);
+					link.click();
+					link.remove();
+					// in case the Blob uses a lot of memory
+					setTimeout(() => URL.revokeObjectURL(link.href), 7000);
+				};
+				downloadFile(new Blob([myBlob]), "AccidentesDetalles.pdf");
+				//var myBlob = this.response;
+				//let fileURL = URL.createObjectURL(myBlob);
+				//window.open(fileURL);
+				// myBlob is now the blob that the object URL pointed to.
+			}
+		};
+		xhr.send();
+		//window.open('/PDFGenerator/AccidentesDetallado?idAccidente=' + Id);
+	}
+	function editarAccidente(idAccidente) {
+		showLoading();
+		$.ajax({
+			url: '/CapturaAccidentes/SetLastInsertedIdEdit',
+			type: 'POST',
+			data: { idAccidente: idAccidente },
+			success: function (result) {
+
+				if (result && result.LastInsertedId != null) {
+					window.location.href = '/CapturaAccidentes/CapturaAaccidente/?lstId=' + result.LastInsertedId + '&showE=false';
+				} else {
+					sitteg_warning("Intentelo de nuevo mas tarde.");
+				}
+				hideLoading();
+			},
+			error: function () {
+				sitteg_warning("Ocurrió un error. Por favor, inténtelo de nuevo más tarde.");
+				hideLoading();
+			}
+		});
+	}
+
+	function mostrarAccidente(idAccidente, origen) {
+		showLoading();
+		$.ajax({
+			url: '/CapturaAccidentes/SetLastInsertedIdEdit',
+			type: 'POST',
+			data: { idAccidente: idAccidente, origen:"busqueda" },
+			success: function (result) {
+
+				window.location.href = '/CapturaAccidentes/CapturaAaccidente/?lstId=' + result.LastInsertedId + '&showE=true';
+				hideLoading();
+				
+			},
+			error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+	}
+
+</script>

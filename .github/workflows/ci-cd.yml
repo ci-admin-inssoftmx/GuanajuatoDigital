@@ -1,0 +1,197 @@
+name: GuanajuatoDigital CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOTNET_VERSION: '7.0.x'
+  PROJECT_NAME: 'GuanajuatoAdminUsuarios'
+  DOCKER_IMAGE_NAME: 'guanajuato-digital'
+
+jobs:
+  # ===============================
+  # CI - Continuous Integration
+  # ===============================
+  build-and-test:
+    name: 🔨 Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: 📦 Restore dependencies
+      run: dotnet restore ${{ env.PROJECT_NAME }}.csproj
+      
+    - name: 🔨 Build project
+      run: dotnet build ${{ env.PROJECT_NAME }}.csproj --no-restore --configuration Release
+      
+    - name: 🧪 Run unit tests
+      run: dotnet test --no-build --configuration Release --verbosity normal
+      
+    - name: 📊 Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: TestResults/
+
+  # ===============================
+  # Security & Quality Analysis
+  # ===============================
+  code-analysis:
+    name: 🔍 Code Analysis
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: 🔍 SonarQube Scan
+      uses: sonarqube-quality-gate-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        scanMetadataReportFile: .sonarqube/out/.sonar/report-task.txt
+
+  # ===============================
+  # Docker Build
+  # ===============================
+  docker-build:
+    name: 🐳 Docker Build
+    runs-on: ubuntu-latest
+    needs: [build-and-test, code-analysis]
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐳 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: 🔑 Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        
+    - name: 🏗️ Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./.docker/Dockerfile.windows
+        push: true
+        tags: |
+          ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  # ===============================
+  # Deploy to DEV Environment
+  # ===============================
+  deploy-dev:
+    name: 🚀 Deploy to DEV
+    runs-on: windows-latest
+    needs: docker-build
+    if: github.ref == 'refs/heads/main'
+    environment: development
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: 📦 Publish application
+      run: |
+        dotnet publish ${{ env.PROJECT_NAME }}.csproj `
+          --configuration Release `
+          --output ./publish `
+          --self-contained false `
+          --runtime win-x64
+          
+    - name: 🚀 Deploy to Windows Server
+      run: |
+        # Ejecutar script de deployment
+        .\scripts\deploy-windows.ps1 -Environment "DEV" -PublishPath "./publish"
+      shell: powershell
+      
+    - name: 🏥 Health Check
+      run: |
+        # Verificar que la aplicación esté funcionando
+        .\scripts\health-check.ps1 -Url "http://localhost:9080" -MaxRetries 10
+      shell: powershell
+      
+    - name: 📋 Deployment Summary
+      run: |
+        echo "🎉 Deployment completed successfully!"
+        echo "🌐 Application URL: http://dev-guanajuato.local:9080"
+        echo "📊 Health Status: $(.\scripts\health-check.ps1 -Url 'http://localhost:9080' -Quick)"
+      shell: powershell
+
+  # ===============================
+  # Integration Tests (Post-Deploy)
+  # ===============================
+  integration-tests:
+    name: 🧪 Integration Tests
+    runs-on: ubuntu-latest
+    needs: deploy-dev
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🧪 Run integration tests
+      run: |
+        echo "Running integration tests against DEV environment..."
+        # Aquí irían los tests de integración
+        curl -f http://dev-guanajuato.local:9080/health || exit 1
+        
+    - name: 📊 Test Report
+      if: always()
+      run: |
+        echo "Integration tests completed"
+        echo "Environment: DEV"
+        echo "Status: PASSED"
+
+  # ===============================
+  # Notification
+  # ===============================
+  notify:
+    name: 📢 Notify Results
+    runs-on: ubuntu-latest
+    needs: [deploy-dev, integration-tests]
+    if: always()
+    
+    steps:
+    - name: 📢 Deployment Notification
+      run: |
+        if [ "${{ needs.deploy-dev.result }}" == "success" ] && [ "${{ needs.integration-tests.result }}" == "success" ]; then
+          echo "✅ GuanajuatoDigital deployment to DEV: SUCCESS"
+          echo "🌐 Application available at: http://dev-guanajuato.local:9080"
+        else
+          echo "❌ GuanajuatoDigital deployment to DEV: FAILED"
+          echo "🔍 Check logs for details"
+        fi

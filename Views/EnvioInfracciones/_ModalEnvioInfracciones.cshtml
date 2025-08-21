@@ -1,0 +1,306 @@
+﻿@model ModalEnvioModel
+
+<div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+    <div class="modal-content">
+
+        <section class=" bg-white rounded">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-auto pe-0">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto pe-0">
+                            <i class="icon-enviar h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                            <h2 class="m-0 h3"><b>Datos de envío de infracciones</b></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="row">
+                        <div class="col-auto my-3">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="bg-light py-1"></div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-12 my-4">
+                    <h5 class="px-4"><b>Envío de infracciones</b></h5>
+                    <h6 class="px-4 text-muted">Agrega datos de envío.</h6>
+                </div>
+            </div>
+            <form id="dataEnvioInfraccionForm" class="row px-4 mb-4 align-items-end">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <input type="hidden" id="SelectedIds" name="idInfraccionSeleccionados" value="@string.Join(",", Model.SelectedIds)" />
+                        @(Html.Kendo().TextBoxFor(m => m.Oficio)
+                            .Label(l => l.Content("No. de oficio donde se envío <b>(obligatorio)</b>:"))
+                            .Placeholder("Ingresa el número del oficio")
+                            .HtmlAttributes(new { style = "width: 100%", id = "oficio" })
+                            )
+
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Fecha de envío <b>(obligatorio)</b>:</label>
+                        <span>
+                           @(Html.Kendo().DatePickerFor(m => m.FechaEnvio)
+                            .Label(l => l.Content("Fecha:"))
+                                .Culture("es-ES")
+                                .HtmlAttributes(new { style = "width: 100%", title = "please enter date", id = "fechaEnvio" })
+)
+
+                        </span>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Lugar a donde se envía <b>(obligatorio):</b></label>
+                        <span>
+                            @(Html.Kendo().DropDownListFor(m => m.IdLugarEnvio).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona una Oficina")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("OficinasRenta_Drop", "EnvioInfracciones");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:100%;", id = "idLugarEnvio" })
+                                )
+                        </span>
+                    </div>
+                </div>
+
+            </form>
+            <div class="row my-4">
+                <div class="col-12 col-md-6 mx-md-auto">
+                    <div class="row justify-content-around">
+                        <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                            <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                            </button>
+                        </div>
+                        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                            <div class="controlButton" onclick="enviarInfracciones()">
+                                @(Html.Kendo().Button()
+                                    .Name("AddCortesia")
+                                    .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                    .Content("<h5 class=\"m-0\"><b>Enviar</b></h5>"))
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             </div>
+            <div class="modal fade" id="myModal"  role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">Resultado del envío</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        </div>
+                        <div class="modal-body">
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+         </section>
+       </div>
+  </div>
+  <script>
+    //function enviarInfracciones() {
+    //    var formSerialized = $("#dataEnvioInfraccionForm").serialize();
+    //    var selectedIds = idInfraccionesSeleccionados;
+    //    var oficioValue = $("#oficio").val();
+    //    var fechaEnvioValue = $("#fechaEnvio").val();
+    //    var idLugarEnvioValue = $("#idLugarEnvio").val();
+
+    //    var controlsValidate = [];
+    //    var isValid = true;
+
+    //    controlsValidate.push({ 'controlName': 'Oficio' });
+    //    controlsValidate.push({ 'controlName': 'FechaEnvio' });
+
+    //    // INPUTS
+    //    if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+
+    //    // DROP DOWN LIST
+    //    controlsValidate = [];
+    //    controlsValidate.push({ 'controlName': 'IdLugarEnvio' });
+    //    if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+
+    //    if (!isValid) {
+    //        sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+    //        return;
+    //    }
+
+    //    var data = {
+    //        model: {
+    //            SelectedIds: selectedIds,
+    //            Oficio: oficioValue,
+    //            FechaEnvio: fechaEnvioValue,
+    //            IdLugarEnvio: idLugarEnvioValue,
+    //        },
+    //        form: formSerialized
+    //    };
+    //    showLoading();
+    //    $.ajax({
+
+    //        url: "/EnvioInfracciones/ajax_GuardarInfraccionesEnviadas",
+    //        type: 'POST',
+    //        data: data,
+    //        success: function (result) {
+    //            console.log("uy", result);
+
+    //            if (result.success) {
+    //                var message = 'Resultado del envío:';
+    //                message += 'Total de infracciones: ' + result.totalInfracciones + '\n';
+    //              //  message += 'Enviadas con éxito: ' + result.successCount;
+
+    //                if (result.successCount > 0) {
+    //                    var processedIdsArray = Array.from(result.processedInfraccionIds);
+    //                    if (processedIdsArray.length > 0) {
+    //                        var processedIds = processedIdsArray.join(', ');
+    //                        message += '\nLas siguientes infracciones fueron procesadas exitosamente: ' + processedIds;
+    //                    } else {
+    //                        message += '\nNo se encontraron infracciones procesadas.';
+    //                    }
+    //                }
+
+    //                showModal(message);
+    //            } else {
+    //                sitteg_warning('Uno o más registros no pudieron ser enviados. Inténtalo nuevamente.');
+    //            }
+    //            hideLoading();
+    //        },
+    //        error: function (error) {
+    //            sitteg_warning('Lo sentimos, ha ocurrido un error.');
+    //            hideLoading();
+    //        }
+    //    });
+    //}
+    //function enviarInfracciones() {
+    //    var formSerialized = $("#dataEnvioInfraccionForm").serialize();
+    //    var selectedIds = idInfraccionesSeleccionados;
+    //    var oficioValue = $("#oficio").val();
+    //    var fechaEnvioValue = $("#fechaEnvio").val();
+    //    var idLugarEnvioValue = $("#idLugarEnvio").val();
+    //    var controlsValidate = [];
+    //    var isValid = true;
+
+    //    controlsValidate.push({ 'controlName': 'Oficio' });
+    //    controlsValidate.push({ 'controlName': 'FechaEnvio' });
+
+    //    // INPUTS
+    //    if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+
+    //    // DROP DOWN LIST
+    //    controlsValidate = [];
+    //    controlsValidate.push({ 'controlName': 'IdLugarEnvio' });
+    //    if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+
+    //    if (!isValid) {
+    //        sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+    //        return;
+    //    }
+    //    var data = {
+    //        model: {
+    //            SelectedIds: selectedIds,
+    //            Oficio: oficioValue,
+    //            FechaEnvio: fechaEnvioValue,
+    //            IdLugarEnvio: idLugarEnvioValue,
+    //        },
+    //        form: formSerialized
+    //    };
+    //    showLoading();
+    //    $.ajax({
+    //        url: "/EnvioInfracciones/ajax_GuardarInfraccionesEnviadas",
+    //        type: 'POST',
+    //        data: data,
+    //        success: function (result) {
+    //            sitteg_success('Infracciones enviadas correctamente');
+    //            $('#enviarInfraccionesModal').modal('hide');
+    //            hideLoading();
+    //        },
+    //        error: function (error) {
+    //            sitteg_warning('Lo sentimos, ha ocurrido un error.');
+    //            hideLoading();
+    //        }
+    //    });
+    //}
+
+    function showModal(message) {
+        $('#myModal .modal-body').text(message);
+        $('#myModal').modal('show');
+    }
+    function enviarInfracciones() {
+        var formSerialized = $("#dataEnvioInfraccionForm").serialize();
+        var selectedIds = idInfraccionesSeleccionados; // idInfraccionesSeleccionados es el array de IDs seleccionados
+        var oficioValue = $("#oficio").val(); // Obtén el valor del campo "Oficio" del formulario
+        var fechaEnvioValue = $("#fechaEnvio").val(); // Obtén el valor del campo "FechaEnvio" del formulario
+        var idLugarEnvioValue = $("#idLugarEnvio").val(); // Obtén el valor del campo "IdLugarEnvio" del formulario
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'oficio' });
+        controlsValidate.push({ 'controlName': 'fechaEnvio' });
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+        // DROP DOWN LIST
+        controlsValidate = [];
+        controlsValidate.push({ 'controlName': 'idLugarEnvio' });
+        if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+        var data = {
+            model: {
+                SelectedIds: selectedIds,
+                Oficio: oficioValue,
+                FechaEnvio: fechaEnvioValue,
+                IdLugarEnvio: idLugarEnvioValue,
+                // Agrega otras propiedades del modelo según sea necesario
+            },
+            form: formSerialized
+        };
+        showLoading();
+        $.ajax({
+            url: "/EnvioInfracciones/ajax_GuardarInfraccionesEnviadas",
+            type: 'POST',
+            data: data,
+            success: function (result) {
+                sitteg_success('Infracciones enviadas correctamente');
+                $('#enviarInfraccionesModal').modal('hide');
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                hideLoading();
+            }
+        });
+    }
+
+
+</script>

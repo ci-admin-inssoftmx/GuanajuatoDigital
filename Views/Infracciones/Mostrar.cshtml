@@ -1,0 +1,543 @@
+﻿@model InfraccionesModel;
+@functions {
+    string ObtenerValorSeguro(object obj, string propiedad)
+    {
+        if (obj == null) return string.Empty;
+
+        var propiedades = propiedad.Split('.');
+        object valor = obj;
+
+        foreach (var p in propiedades)
+        {
+            var infoPropiedad = valor?.GetType().GetProperty(p);
+            if (infoPropiedad == null) return string.Empty;
+
+            valor = infoPropiedad.GetValue(valor);
+            if (valor == null) return string.Empty;
+        }
+
+        // Verificar si el valor es de tipo DateTime y formatear adecuadamente
+        if (valor is DateTime fecha)
+        {
+            return fecha.ToString("dd/MM/yyyy");
+        }
+
+        return valor?.ToString() ?? string.Empty;
+    }
+
+}
+<script>
+    console.log('@ObtenerValorSeguro(Model, "Persona.idCatTipoPersona")');
+    var tp = @ObtenerValorSeguro(Model, "Persona.idCatTipoPersona");
+    $(document).ready(function () {
+        if (tp == 2) {
+            $('#curp').hide();
+            $('#sx').hide();
+            $('#fn').hide();
+            $('#p2').hide();
+            $('#lic').hide();
+            $('#tpl').hide();
+            $('#fvl').hide();
+            $('#vl').hide();
+        }
+        
+    });
+       
+</script>
+
+
+<div class="mainContainer bg-light h-100" style="overflow-y:scroll; max-height:100vh;">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-between justify-content-md-start">
+                    
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Detalle de infracción</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto text-md-end">
+                <div class="row">
+                    <div class="col-auto btnOutline my-2" onclick="goBackBusqueda()">
+                        @(Html.Kendo().Button()
+                            .Name("backInfraccionBE3")
+                            .HtmlAttributes(new { @class = "px-5" })
+                            .Content("<h6 class=\"m-0\"><i class=\"icon-back me-2\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></i><b>Regresar</b></h6>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mx-2 my-2 row ">
+            <div class="row">
+                <h2><i class="icon-infracion h1 colorPrimary"></i> Información </h2>
+            </div>
+
+            <div class="row my-2">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Fecha Infraccion</label>
+                        <input type="text" class="form-control" value="@Model.fechaInfraccion.ToString("dd/MM/yyyy")" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">Hora</label>
+                        <input type="text" class="form-control" value="@Model.fechaInfraccion.ToString("HH:mm")" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Folio</label>
+                        <input type="text" class="form-control" value="@(Model.folioInfraccion ?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">Oficial</label>
+                        <input type="text" class="form-control" value="@(Model.nombreCompletoOficial ?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">Municipio</label>
+                        <input type="text" class="form-control" value="@(Model.municipio ?? string.Empty)" readonly />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <br>
+         <br>
+        <br>
+
+        <div class="mx-2 my-2 row ">
+            <div class="row">
+                <h2><i class="icon-carretera h1 colorPrimary"></i> Lugar</h2>
+            </div>
+
+            <div class="row my-2">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Carretera</label>
+                        <input type="text" class="form-control" value="@(Model.carretera?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">Tramo</label>
+                        <input type="text" class="form-control" value="@(Model.tramo?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Kilometro</label>
+                        <input type="text" class="form-control" value="@(Model.kmCarretera?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Calle</label>
+                        <input type="text" class="form-control" value="@(Model.lugarCalle?? string.Empty)" readonly />
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+         <br>
+         <br>
+        <br>
+        <div class="mx-2 my-2 row ">
+            <div class="row">
+                <h2><i class="icon-edit-car h1 colorPrimary"></i> Vehículo</h2>
+            </div>
+
+            <div class="row my-2">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">Placas</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.placas?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Serie</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.serie?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">No Tarjeta</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.tarjeta?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Vigencia tarjeta</label>
+                        <input type="text" class="form-control" value="@((Model.Vehiculo.vigenciaTarjeta.HasValue && Model.Vehiculo.vigenciaTarjeta.Value != new DateTime(1900, 1, 1)) ? Model.Vehiculo.vigenciaTarjeta.Value.ToString("dd/MM/yyyy") : "-")" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Entidad registro</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.entidadRegistro)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">Marca</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.marca?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">submarca</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.submarca?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">Tipo vehiculo</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.tipoVehiculo?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">Modelo</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.modelo?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">Color</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.color?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Motor</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.motor?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Capacidad</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo?.capacidad != null ? Model.Vehiculo.capacidad.ToString() : string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Poliza</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.poliza?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Carga</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.cargaInt == 1 ? "Si" : "NO")" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">Otros</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.otros?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Numero económico</label>
+                        <input type="text" class="form-control" value="@(Model.Vehiculo.numeroEconomico?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <!--PartialView Propietario
+                <div class="row my-4 px-4">
+                    <div id="detallePersonas">
+                        <partial name="_DetallePropietario" model="Model.Propietario" />
+                    </div>
+                </div>-->      
+            </div>
+        </div>
+         <br>
+         <br>
+        <br>
+        <div class="mx-2 my-2 row ">
+            <div class="row">
+                <h2><i class="icon-conductor h1 colorPrimary"></i> Propietario</h2>
+            </div>
+
+            <div class="row my-2">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-control" value="@(Model.Persona.nombreCompleto?? string.Empty)" readonly />
+                    </div>
+                </div>
+                 
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">RFC</label>
+                        <input type="text" class="form-control" value="@(Model.Persona.RFC?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div id="curp" class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">CURP</label>
+                        <input type="text" class="form-control" value="@(Model.Persona.CURP?? string.Empty)" readonly />
+                    </div>
+                </div> 
+                <div id="sx" class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">Sexo</label>
+                        <input type="text" class="form-control" value="@(Model.Persona.genero?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div id="fn" class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Fecha nacimiento</label>
+                        <input type="text" class="form-control" value="@(Model.Persona.fechaNacimiento.HasValue ? Model.Persona.fechaNacimiento.Value.ToString(" dd /MM/yyyy") : string.Empty)" readonly />
+                    </div>
+                </div>
+                 <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                     <div class=" my-3">
+                         <label class="form-label">Entidad</label>
+                         <input type="text" class="form-control" value="@(Model.Persona?.PersonaDireccion?.entidad?? string.Empty)" readonly />
+                     </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">Municipio</label>
+                        <input type="text" class="form-control" value="@(Model.Persona?.PersonaDireccion?.municipio?? string.Empty)" readonly />
+                    </div>
+                </div>
+                 <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                     <div class=" my-3">
+                         <label class="form-label">Calle</label>
+                         <input type="text" class="form-control" value="@(Model.Persona?.PersonaDireccion?.calle?? string.Empty)" readonly />
+                     </div>
+                </div>
+                 <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                     <div class=" my-3">
+                         <label class="form-label">Número</label>
+                         <input type="text" class="form-control" value="@(Model.Persona?.PersonaDireccion?.numero?? string.Empty)" readonly />
+                     </div>
+                </div>
+                 <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                     <div class=" my-3">
+                         <label class="form-label">Colonia</label>
+                         <input type="text" class="form-control" value="@(Model.Persona.PersonaDireccion.colonia?? string.Empty)" readonly />
+                     </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" value="@(Model.Persona?.PersonaDireccion?.telefono ?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Correo</label>
+                        <input type="text" class="form-control" value="@(Model.Persona?.PersonaDireccion?.correo?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div id="lic" class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Licencia</label>
+                        <input type="text" class="form-control" value="@(Model.Persona?.numeroLicencia?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div id="tpl" class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Tipo de licencia</label>
+                        <input type="text" class="form-control" value="@(Model.Persona?.tipoLicencia ?? string.Empty)" readonly />
+                    </div>
+                </div>
+                <div id="fvl" class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Fecha de vencimiento de licencia</label>
+                        <input type="text" class="form-control" value="@((Model.Persona?.vigenciaLicencia.HasValue ?? false) ? Model.Persona.vigenciaLicencia.Value.ToString("dd/MM/yyyy") : string.Empty)" readonly />
+                    </div>
+                </div>
+                <div id="vl" class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Vigencia de licencia</label>
+                        <input type="text" class="form-control" value="@(Model.Persona?.vigencia?? string.Empty)" readonly />
+                    </div>
+                </div>
+            </div>
+            <br>
+            <br>
+            <br>
+
+        <div class="mx-2 my-2 row ">
+            <div class="row">
+                <h2><i class="icon-conductor h1 colorPrimary"></i> Conductor</h2>
+            </div>
+
+            <div class="row my-2">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.nombreCompleto")" readonly />
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Tipo de persona</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.tipoPersona")" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+                        <label class="form-label">CURP</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.CURP")" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">RFC</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.RFC")" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Sexo</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.genero")" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Fecha nacimiento</label>
+                        <input type="text" class="form-control" value="@(!string.IsNullOrWhiteSpace(ObtenerValorSeguro(Model, "PersonaInfraccion2.fechaNacimiento")) && ObtenerValorSeguro(Model, "PersonaInfraccion.fechaNacimiento") != "01/01/0001" ? ObtenerValorSeguro(Model, "PersonaInfraccion.fechaNacimiento") : "-")" readonly />
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Municipio</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.PersonaDireccion.municipio")" readonly />
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Entidad</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.PersonaDireccion.entidad")" readonly />
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Calle</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.PersonaDireccion.calle")" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+                        <label class="form-label">Numero</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.PersonaDireccion.numero")" readonly />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+
+                        <label class="form-label">Colonia</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.PersonaDireccion.colonia")" readonly />
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.PersonaDireccion.telefono")" readonly />
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+
+                        <label class="form-label">Correo</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.PersonaDireccion.correo")" readonly />
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+
+                        <label class="form-label">Tipo Licencia</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.tipoLicencia")" readonly />
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class=" my-3">
+
+                        <label class="form-label">Licencia</label>
+                        <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.numeroLicencia")" readonly />
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                    <div class=" my-3">
+
+                        <label class="form-label">Fecha de vigencia  </label>
+                        <input type="text" class="form-control" value="@((ObtenerValorSeguro(Model, "PersonaInfraccion2.vigenciaLicencia") == "01/01/0001") ? "-" : ObtenerValorSeguro(Model, "PersonaInfraccion2.vigenciaLicencia"))" readonly />
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                        <div class=" my-3">
+                            <label class="form-label">Vigencia</label>
+                            <input type="text" class="form-control" value="@ObtenerValorSeguro(Model, "PersonaInfraccion2.vigencia")" readonly />
+
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <br />
+        <br>
+
+            <div class="row my-3 mb-4">
+                <div class="col-12 col-md-6 mx-md-auto">
+                    <div class="row justify-content-around">
+                        <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0" onclick="goBackBusqueda()">
+                            @(Html.Kendo().Button()
+                                .Name("back")
+                                .HtmlAttributes(new { @class = "px-5" })
+                                .Content("<h6 class=\"m-0\"><i class=\"icon-back me-2\"></i><b>Regresar</b></h6>"))
+                        </div>
+                        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                            <div class="controlButton" onclick="dirigirParte2(@Model.idInfraccion)">
+                                @(Html.Kendo().Button()
+                                    .Name("finalInvolucrado")
+                                    .HtmlAttributes(new { @class = "btnPrimary px-5" })
+                                    .Content("<h5 class=\"m-0\"><b>Siguiente</b></h5>"))
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>           
+      </div>
+
+              
+
+</section>
+</div>
+<script>
+    function goBackBusqueda(){
+        window.location.href = '/Infracciones/BusquedaEspecial'
+
+    }
+
+    function dirigirParte2(idInfraccion) {
+    window.location.href = '/Infracciones/ComplementoMostrar?id=' + idInfraccion;
+}
+
+</script>

@@ -1,0 +1,183 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CatMunicipiosModel
+<script>
+    function delegacion() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+</script>
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-addMunicipio h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Agregar nuevo municipio</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-12 my-4">
+            <h5 class="px-4"><b>Datos de municipio</b></h5>
+            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+        </div>
+    </div>
+    <form id="agregarMunicipioForm" class="row px-4 mb-4 align-items-end">
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                <label>Entidad <b>(obligatorio)</b>:</label>
+                <span>
+                    @Html.HiddenFor(model => model.Corp, new { id = "idDependenciaFiltro" })
+                    @(Html.Kendo().DropDownListFor(t => t.IdEntidad).NoDataTemplate("No se encontraron datos")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("Selecciona una Entidad").Filter(FilterType.Contains)
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("Entidades_Drop", "CatMunicipios").Data("delegacion");
+                            });
+                        })
+                        //.HtmlAttributes(new { data_required_msg = "El campo Municipio es obligatorio" })
+                        .HtmlAttributes(new { style = "width:100%;" })
+                        )
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                <label>Delegación <b>(obligatorio)</b>:</label>
+                <span>
+                    @(Html.Kendo().DropDownListFor(t => t.IdOficinaTransporte).NoDataTemplate("No se encontraron datos")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("Selecciona una Delegacion").Filter(FilterType.Contains)
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetDelegaciones", "Catalogos").Data("delegacion");
+                            });
+                        })
+                        //.HtmlAttributes(new { data_required_msg = "El campo Municipio es obligatorio" })
+                        .HtmlAttributes(new { style = "width:100%;" })
+                        )
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t=>t.Municipio)
+                    .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                    .Placeholder("Ingresa el nombre del municipio")
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.abreviatura)
+                    .Label(l => l.Content("Abreviatura :"))
+                    .Placeholder("Ingresa la abreviatura del municipio")
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+
+            </div>
+        </div>
+
+    </form>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="agregarMunicipio()">
+                        @(Html.Kendo().Button()
+                            .Name("AddMunicipio")
+                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                            .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+
+
+<script>
+    function agregarMunicipio() {
+          var CORP = $("#idDependenciaFiltro").val();
+        CORP = CORP ? CORP : null;
+
+        $("#agregarMunicipioForm").find('input[name="Corp"]').val(CORP);
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'Municipio' });
+
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+        controlsValidate = [];
+        controlsValidate.push({ 'controlName': 'IdEntidad' });
+
+        controlsValidate.push({ 'controlName': 'IdOficinaTransporte' });
+
+        if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+        var Mydata = $("#agregarMunicipioForm").serialize();
+        console.log(Mydata);
+        $('#agregarMunicipio').modal('hide');
+        $('body').removeClass('model-open');
+        $('.modal-backdrop').remove();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("CrearMunicipioMod")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                //$("#gridMunicipios").data("kendoGrid").dataSource.data(result);
+                sitteg_success('Elemento guardado correctamente')
+                $('#catalogosModal').modal('hide');
+
+                var grid = $("#gridMunicipios").data("kendoGrid");
+                grid.dataSource.read(); 
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+</script>

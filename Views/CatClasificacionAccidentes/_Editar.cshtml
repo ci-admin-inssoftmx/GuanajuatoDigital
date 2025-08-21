@@ -1,0 +1,110 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CatClasificacionAccidentesModel
+
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-editClasificacionAccidente h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Editar clasificación de accidente</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <form id="editarClasificacionForm" class="row px-4 mb-4 align-items-end justify-content-center">
+    <div class="row align-items-end">
+        <div class="col-12 col-lg-6 my-4">
+            <h5 class="px-4"><b>Datos de clasificación de accidente</b></h5>
+            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+        </div>
+        <div class="col-12 col-lg-6 my-4 btnToggleActive">
+            @(Html.Kendo().SwitchFor(t => t.ValorEstatusClasificacionAccidentes)
+                .Name("clasificacionAccidentesSwitch")
+                    .Checked(Model.Estatus == 1)
+                    .Messages(c => c.Checked("Activo").Unchecked("Inactivo"))
+                    .HtmlAttributes(new { data_valor = Model.Estatus })
+                    )
+        </div>
+    </div>
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                @Html.HiddenFor(m=>m.IdClasificacionAccidente)
+                @(Html.Kendo().TextBoxFor(t => t.NombreClasificacion)
+                    .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                    .Placeholder("Ingresa el nombre de la clasificacion")
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+
+            </div>
+        </div>
+
+
+    </form>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="editarClasificacion()">
+                        @(Html.Kendo().Button()
+                            .Name("EditClas")
+                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                            .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+
+<script>
+    function editarClasificacion() {
+
+        var Mydata = $("#editarClasificacionForm").serialize();
+        console.log(Mydata);
+        $('#agregarClasificacionAccidente').modal('hide');
+        $('body').removeClass('model-open');
+        $('.modal-backdrop').remove();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarClasificacionAccidenteMod")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                var grid = $("#gridCatClasificacionAccidente").data("kendoGrid");
+                grid.dataSource.read();
+                $('#agregarClasificacionAccidente').modal('hide');
+
+                sitteg_success("Información guardada correctamente.");
+
+                hideLoading();
+            },
+            error: function (error) {
+               sitteg_warning('Lo sentimos, ha ocurrido un error.');
+               hideLoading();
+            }
+        });
+    }
+
+</script>

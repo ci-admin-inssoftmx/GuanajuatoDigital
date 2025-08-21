@@ -1,0 +1,42 @@
+﻿@model GuanajuatoAdminUsuarios.Models.MarcaVehiculoModel
+@{
+}
+
+
+<div class="row">
+    <div class="col-md-10">
+        <h2>Modificar Marca</h2>
+    </div>
+    <br />
+    <div class="col-md-2">
+        @Html.ActionLink("Cancelar","Index",null,new{@class="btn btn-info"})
+    </div>
+</div>
+<hr />
+<br />
+
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("Update", "MarcasVehiculos"))
+        {
+            @Html.HiddenFor(m=>m.IdMarcaVehiculo);
+            
+
+            @(Html.Kendo().TextBoxFor(t => t.MarcaVehiculo)
+                .HtmlAttributes(new { placeholder = "Marca de Vehiculo", required = "required", validationmessage = "Introducemarca de vehiculo" })
+                .Label(l => l.Content("Marca de Vehiculo <b>(obligatorio)</b>:"))
+                )
+            <br />  <br />
+
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <a href='@Url.Action("Index")' class="btn btn-default">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </div>
+
+        }
+
+    </div>
+</div>

@@ -1,0 +1,291 @@
+@{
+	bool esSoloLectura = ViewBag.EsSoloLectura ?? false;
+	string claseColor = esSoloLectura ? "colorDisabled" : "colorDanger";
+}
+<style>
+	.photo {
+		width: 140px;
+	}
+
+	.details {
+		width: 400px;
+		color: #898989;
+	}
+
+	.name {
+		display: block;
+		font-size: 1.6em;
+	}
+
+	.title {
+		display: block;
+		padding-top: 1.6em;
+	}
+
+	.employeeID,
+	.country {
+		font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+		font-size: 50px;
+		font-weight: bold;
+		color: #898989;
+	}
+	/* .k-grid-header .k-header {
+				padding: 10px 20px;
+			} */
+
+	#gridInvolucradosTodo td {
+		background: -moz-linear-gradient(top, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.15) 100%);
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.05)), color-stop(100%,rgba(0,0,0,0.15)));
+		background: -webkit-linear-gradient(top, rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.15) 100%);
+		background: -o-linear-gradient(top, rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.15) 100%);
+		background: -ms-linear-gradient(top, rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.15) 100%);
+		background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.15) 100%);
+		padding: 20px;
+	}
+
+	#gridInvolucradosTodo td {
+		background: -moz-linear-gradient(top, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.1) 100%);
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.2)), color-stop(100%,rgba(0,0,0,0.1)));
+		background: -webkit-linear-gradient(top, rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.1) 100%);
+		background: -o-linear-gradient(top, rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.1) 100%);
+		background: -ms-linear-gradient(top, rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.1) 100%);
+		background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.1) 100%);
+	}
+</style>
+
+<script>
+	function FormatDate(date) {
+		var cdate = convertDate(date);
+		cdate = cdate == "01/01/0001" ? "" : cdate;
+		return cdate;
+	}
+</script>
+<div class="row">
+	<div class="col-12 mb-4 px-4 rounded gridCustom">
+
+		@(
+			Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel>()
+
+			.Name("gridInvolucradosTodo")//.Groupable()
+			.Columns(columns =>
+			{
+				columns.Template(" ").Width(140).Title("Detalles");
+				columns.Template(" ").Width(140).Title("Datos persona");
+				columns.Template(" ").Width(140).Title("Domicilio persona");
+				columns.Template(" ").Width(140).Title("Vehículo en que viajaba");
+				columns.Template(" ").Width(140).Title("");
+				columns.Bound(i => i.ConductorInvolucrado).Hidden();
+				columns.Bound(i => i.EstadoVictima).Hidden();
+				columns.Bound(i => i.NombreHospital).Hidden();
+				columns.Bound(i => i.InstitucionTraslado).Hidden();
+				columns.Bound(i => i.Asiento).Hidden();
+				columns.Bound(i => i.Cinturon).Hidden();
+				columns.Bound(i => i.nombre).Hidden();
+				columns.Bound(i => i.RFC).Hidden();
+				columns.Bound(i => i.CURP).Hidden();
+				columns.Bound(i => i.Sexo).Hidden();
+				columns.Bound(i => i.TipoLicencia).Hidden();
+				columns.Bound(i => i.Direccion).Hidden();
+				columns.Bound(i => i.Municipio).Hidden();
+				columns.Bound(i => i.Entidad).Hidden();
+				columns.Bound(i => i.Telefono).Hidden();
+				columns.Bound(i => i.Correo).Hidden();
+				columns.Bound(i => i.IdAccidente).Hidden();
+				columns.Bound(i => i.Placa).Hidden();
+				columns.Bound(i => i.Marca).Hidden();
+				columns.Bound(i => i.Submarca).Hidden();
+				columns.Bound(i => i.TipoVehiculo).Hidden();
+				columns.Bound(i => i.Modelo).Hidden();
+				@*columns.Command(c => c.Custom("Editar").Click("getId")).Width(100);
+		columns.Command(c => c.Custom("Eliminar").Click("getId")).Width(100); *@
+
+			}).HtmlAttributes(new { style = "height:500px" })
+			.ClientRowTemplate(
+			"<tr data-uid='#: uid #'>" +
+			"<td class='Detalles'>" +
+			"<p><span class='description'>Participacion : #: ConductorInvolucrado# </span></p>" +
+			"<p><span class='description'>Estado : #: EstadoVictima# </span></p>" +
+			"<p><span class='description'>Llevado a : #: NombreHospital# </span></p>" +
+			"<p><span class='description'>Traslado : #: InstitucionTraslado# </span></p>" +
+			"<p><span class='description'>Asiento : #: Asiento# </span></p>" +
+			"<p><span class='description'>Cinturon : #: Cinturon# </span></p>" +
+			"</td>" +
+			"<td class='DatosPersona'>" +
+			"<p><span class='description'>Nombre : #: nombre# </span></p>" +
+			"<p><span class='description'>RFC : #: RFC# </span></p>" +
+			"<p><span class='description'>CURP : #: CURP# </span></p>" +
+			"<p><span class='description'>Sexo : #: Sexo# </span></p>" +
+			"<p><span class='description'>Fecha nacimiento : #: FormatDateNacimiento# </span></p>" +
+			"<p><span class='description'>Licencia : #: TipoLicencia# </span></p>" +
+			"</td>" +
+			"<td class='DomicilioPersona'>" +
+			"<p><span class='description'>Dirección : #: Direccion# </span></p>" +
+			"<p><span class='description'>Municipio : #: Municipio# </span></p>" +
+			"<p><span class='description'>Entidad : #: Entidad# </span></p>" +
+			"<p><span class='description'>Teléfono : #: Telefono# </span></p>" +
+			"<p><span class='description'>Correo : #: Correo# </span></p>" +
+			"</td>" +
+			"<td class='VehiculoViajaba'>" +
+			"<p><span class='description'>No. : #: IdAccidente# </span></p>" +
+			"<p><span class='description'>Placas : #: Placa# </span></p>" +
+			"<p><span class='description'>Marca : #: Marca# </span></p>" +
+			"<p><span class='description'>SubMarca : #: Submarca# </span></p>" +
+			"<p><span class='description'>Tipo : #: TipoVehiculo# </span></p>" +
+			"<p><span class='description'>Modelo : #: Modelo# </span></p>" +
+			"</td>" +
+			"<td class=''>" +
+			"<p><span class='description'><button onclick='mostrarModalInvolucrados()' class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button></span></p>" +
+			"<p><span class='description'><button onclick='eliminarRegistroInvolucrado()' class='w-100 btn " + claseColor + "'><i class='h5 icon-delete me-2'></i><b>Eliminar</b></h6></button></span></p>" +
+			"</td>" +
+			"</tr>"
+			)
+			.ClientAltRowTemplate(
+			"<tr data-uid='#: uid #'>" +
+			"<td class='Detalles'>" +
+			"<p><span class='description'>Participacion : #: ConductorInvolucrado# </span></p>" +
+			"<p><span class='description'>Estado : #: EstadoVictima# </span></p>" +
+			"<p><span class='description'>Llevado a : #: NombreHospital# </span></p>" +
+			"<p><span class='description'>Traslado : #: InstitucionTraslado# </span></p>" +
+			"<p><span class='description'>Asiento : #: Asiento# </span></p>" +
+			"<p><span class='description'>Cinturon : #: Cinturon# </span></p>" +
+			"</td>" +
+			"<td class='DatosPersona'>" +
+			"<p><span class='description'>Nombre : #: nombre# </span></p>" +
+			"<p><span class='description'>RFC : #: RFC# </span></p>" +
+			"<p><span class='description'>CURP : #: CURP# </span></p>" +
+			"<p><span class='description'>Sexo : #: Sexo# </span></p>" +
+			"<p><span class='description'>Fecha nacimiento : #: FormatDateNacimiento# </span></p>" +
+			"<p><span class='description'>Licencia : #: TipoLicencia# </span></p>" +
+			"</td>" +
+			"<td class='DomicilioPersona'>" +
+			"<p><span class='description'>Dirección : #: Direccion# </span></p>" +
+			"<p><span class='description'>Municipio : #: Municipio# </span></p>" +
+			"<p><span class='description'>Entidad : #: Entidad# </span></p>" +
+			"<p><span class='description'>Teléfono : #: Telefono# </span></p>" +
+			"<p><span class='description'>Correo : #: Correo# </span></p>" +
+			"</td>" +
+			"<td class='VehiculoViajaba'>" +
+			"<p><span class='description'>No. : #: NoAccidente# </span></p>" +
+			"<p><span class='description'>Placas : #: Placa# </span></p>" +
+			"<p><span class='description'>Marca : #: Marca# </span></p>" +
+			"<p><span class='description'>SubMarca : #: Submarca# </span></p>" +
+			"<p><span class='description'>Tipo : #: TipoVehiculo# </span></p>" +
+			"<p><span class='description'>Modelo : #: Modelo# </span></p>" +
+			"</td>" +
+			"<td class=''>" +
+			"<p><span class='description'><button onclick='mostrarModalInvolucrados()' class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button></span></p>" +
+			"<p><span class='description'><button onclick='eliminarRegistroInvolucrado()' class='w-100 btn " + claseColor + "'><i class='h5 icon-delete me-2'></i><b>Eliminar</b></h6></button></span></p>" +
+			"</td>" +
+			"</tr>"
+			)
+			.Sortable()
+			//.Groupable()
+			.Scrollable()
+			.Pageable()
+			.DataSource(dataSource => dataSource
+			.Ajax()
+			.Read(read => read.Action("ObtInvolucradosAccidente", "CapturaAccidentes"))
+			.PageSize(5).Model(model => model.Id(p => p.nombre))
+			)
+			.ToolBar(t => t.Search().Text("Buscar..."))
+			.Search(s =>
+			{
+				s.Field(c => c.ConductorInvolucrado);
+				s.Field(c => c.EstadoVictima);
+				s.Field(c => c.NombreHospital);
+				s.Field(c => c.InstitucionTraslado);
+				s.Field(c => c.Asiento);
+				s.Field(c => c.Cinturon);
+				s.Field(c => c.nombre);
+				s.Field(c => c.RFC);
+				s.Field(c => c.CURP);
+				s.Field(c => c.Sexo);
+				s.Field(c => c.TipoLicencia);
+				s.Field(c => c.Direccion);
+				s.Field(c => c.Municipio);
+				s.Field(c => c.Entidad);
+				s.Field(c => c.Telefono);
+				s.Field(c => c.Correo);
+				s.Field(c => c.Placa);
+				s.Field(c => c.Marca);
+				s.Field(c => c.Submarca);
+				s.Field(c => c.TipoVehiculo);
+			})
+			.Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+			.Type(GridSelectionType.Row)
+			)
+			)
+	</div>
+</div>
+
+<div class="modal fade modalCustom" id="mostrarEliminarModal" aria-labelledby="eliminarLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-body" id="ModalBodyEliminar">
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script>
+	$(document).ready(function () {
+		$("#gridInvolucradosTodo .k-grid table").addClass("table table-condensed");
+	});
+
+	function eliminarRegistroInvolucrado() {
+		if ('@ViewBag.EsSoloLectura' === 'True') {
+			return;
+		}
+		var grid = $("#gridInvolucradosTodo").data("kendoGrid");
+		var row = $(event.target).closest("tr");
+		var dataItem = grid.dataItem(row);
+		var IdAccidente = dataItem.IdAccidente
+		var IdPersona = dataItem.IdPersona
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("ModalBorraRegistroPersona", "CapturaAccidentes")',
+			type: 'POST',
+			data: {
+				IdAccidente: IdAccidente,
+				IdPersona: IdPersona
+			},
+			success: (data) => {
+				$('#ModalBodyEliminar').html(data);
+				$('#mostrarEliminarModal').modal('show');
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+	}
+
+	function mostrarModalInvolucrados() {
+
+
+		var grid = $("#gridInvolucradosTodo").data("kendoGrid");
+		var row = $(event.target).closest("tr");
+		var dataItem = grid.dataItem(row);
+		var IdPersona = dataItem.IdPersona
+		console.log(dataItem);
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("ModalAgregarInvolucradoPersona", "CapturaAccidentes")',
+			type: 'POST',
+			data: {
+				IdPersona: IdPersona
+			},
+			success: (data) => {
+				$('#ModalBodyAgregarInvolucrado').html(data);
+				$('#agregarInvolucradoModal').modal('show');
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+	}
+
+
+</script>

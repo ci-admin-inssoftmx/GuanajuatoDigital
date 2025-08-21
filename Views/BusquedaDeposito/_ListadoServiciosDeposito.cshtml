@@ -1,0 +1,105 @@
+﻿<script>
+    function grid_errorHandler(e) {
+        console.log(e)
+    }
+</script>
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.BusquedaDepositoModel>()
+            .Name("gridBusquedaServicioDepositos2")
+            
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.idDeposito).Hidden();
+                columns.Bound(c => c.FechaEventoFormateada).Title("Fecha del evento").Width(150).ClientTemplate("#= mostrarFecha(FechaEventoFormateada) #");
+                columns.Bound(c => c.folioInfraccion).Title("Número de infracción").Width(170);
+                columns.Bound(c => c.placa).Title("Placas").Width(100);
+                columns.Bound(c => c.propietarioCompleto).Title("Propietario").Width(120);
+                columns.Bound(c => c.FechaIngresoFormateada).Title("Fecha de ingreso").Width(150).ClientTemplate("#= mostrarFecha(FechaIngresoFormateada) #");
+                columns.Bound(c => c.FechaSalidaFormateada).Title("Fecha de salida").Width(150).ClientTemplate("#= mostrarFecha(FechaSalidaFormateada) #");
+                columns.Bound(c => c.pension).Title("Pensión").Width(100);
+                columns.Bound(c => c.grua).Title("Nombre Grúa").Width(200);
+                columns.Template("<button data-bs-toggle='modal' class='w-100 btn'><h6 class='m-0 colorPrimary' onclick='detalleGrua(event)'><i class='h5 icon-edit me-2'></i><b>Detalle Grúa(s)</b></h6></button>").Width(120);
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Pageable(p => p.Enabled(true))
+            .Sortable()
+            .Scrollable()
+            
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Events(events => events.Error("grid_errorHandler")) // Handle the "error" event
+            .ServerOperation(false)
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.grua);
+                s.Field(c => c.FechaSalidaFormateada);
+                s.Field(c => c.FechaEventoFormateada);
+                s.Field(c => c.folioInfraccion);
+                s.Field(c => c.placa);
+                s.Field(c => c.propietarioCompleto);
+                s.Field(c => c.pension);
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(x => x.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            )
+
+
+
+    </div>
+</div>
+<div class="modal fade modalCustom" id="detallesGruaModal"  aria-labelledby="agregarVehiculoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyDetallesGrua">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+
+
+    function detalleGrua(event) {
+        event.preventDefault();
+        var grid = $("#gridBusquedaServicioDepositos2").data("kendoGrid");
+        var row = $(event.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        var Id = dataItem.idDeposito;
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ModalDetalleGrua", "BusquedaDeposito")',
+            type: 'POST',
+            data: { Id: Id },
+            success: function (result) {
+                $('#ModalBodyDetallesGrua').html(result);
+                $('#detallesGruaModal').modal('show');
+                hideLoading();
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+        function mostrarFecha(fecha) {
+            if (fecha && fecha !== "01/01/0001") {
+                return fecha;
+            } else {
+                return " ";
+            }
+        }
+
+ 
+
+</script>
+

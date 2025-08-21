@@ -1,0 +1,2972 @@
+﻿@font-face {
+  font-family: 'Proxima Nova';
+  src: local('Proxima Nova'), local('Proxima Nova'), url(fonts/Proxima-Nova-Reg.otf) format('opentype');
+}
+
+@font-face {
+  font-family: 'Proxima Nova Bold';
+  src: local('Proxima Nova Bold'), local('Proxima Nova Bold'), url(fonts/Proxima-Nova-Bold.otf) format('opentype');
+}
+
+@font-face {
+  font-family: 'baloo_2bold';
+  src: url('fonts/baloo2-bold-webfont.woff2') format('woff2'), url('fonts/baloo2-bold-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --main-color: #0066FF;
+  --second-color: #E4ECFA;
+  --success-color: #00BB35;
+  --warning-color: #E4B931;
+  --danger-color: #FD493F;
+}
+
+* {
+  font-family: 'Proxima Nova', sans-serif;
+}
+
+h1 b,
+h2 b {
+  font-family: 'baloo_2bold', sans-serif;
+}
+
+h3 b,
+h4 b,
+h5 b,
+h6 b,
+label b {
+  font-family: 'Proxima Nova Bold', sans-serif;
+}
+
+@font-face {
+    font-family: 'RIAG';
+    src: url('fonts/RIAG.eot?ao1ks9');
+    src: url('fonts/RIAG.eot?ao1ks9#iefix') format('embedded-opentype'), url('fonts/RIAG.ttf?ao1ks9') format('truetype'), url('fonts/RIAG.woff?ao1ks9') format('woff'), url('fonts/RIAG.svg?ao1ks9#RIAG') format('svg');
+    font-weight: normal;
+    font-style: normal;
+    font-display: block;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'RIAG' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.icon-editAws:before {
+  content: "\e9db";
+}
+.icon-aws:before {
+  content: "\e9dc";
+}
+.icon-addAws:before {
+  content: "\e9de";
+}
+
+.icon-deleteAws:before {
+  content: "\e9dd";
+}
+
+.icon-relacionData:before {
+    content: "\e9d8";
+}
+.icon-configuracionPatrones:before {
+  content: "\e9df";
+}
+.icon-adminData:before {
+    content: "\e9d9";
+}
+
+.icon-addRelacionData:before {
+    content: "\e9da";
+}
+
+.icon-puestos:before {
+  content: "\e9d7";
+}
+.icon-aseguradoras:before {
+  content: "\e9d6";
+}
+.icon-geolocalizacion:before {
+  content: "\e9d3";
+}
+.icon-catalogoConfi:before {
+  content: "\e9d4";
+}
+.icon-turnos:before {
+  content: "\e9d5";
+}
+.icon-deleteCargo:before {
+  content: "\e9cf";
+}
+.icon-editCargo:before {
+  content: "\e9d0";
+}
+.icon-addCargo:before {
+  content: "\e9d1";
+}
+.icon-cargo:before {
+  content: "\e9d2";
+}
+.icon-deleteFirma:before {
+  content: "\e9c7";
+}
+.icon-editFirma:before {
+  content: "\e9c8";
+}
+.icon-addFirma:before {
+  content: "\e9c9";
+}
+.icon-firma:before {
+  content: "\e9ca";
+}					  
+.icon-deleteBloc:before {
+  content: "\e9cb";
+}
+.icon-addBloc:before {
+  content: "\e9cc";
+}
+.icon-editBloc:before {
+  content: "\e9cd";
+}
+.icon-bloc:before {
+  content: "\e9ce";
+}
+.icon-deleteSubtipoServicio:before {
+  content: "\e9bf";
+}
+
+.icon-editSubtipoServicio:before {
+  content: "\e9c0";
+}
+
+.icon-addSubtipoServicio:before {
+  content: "\e9c1";
+}
+
+.icon-subtipoServicio:before {
+  content: "\e9c2";
+}
+
+.icon-editTipoServicio:before {
+  content: "\e9c3";
+}
+
+.icon-deleteTipoServicio:before {
+  content: "\e9c4";
+}
+
+.icon-addTipoServicio:before {
+  content: "\e9c5";
+}
+
+.icon-tipoServicio:before {
+  content: "\e9c6";
+}
+
+.icon-salir:before {
+  content: "\e9be";
+}
+
+.icon-addConcesonaria:before {
+  content: "\e9a9";
+}
+
+.icon-addDeposito:before {
+  content: "\e9aa";
+}
+
+.icon-addGrua:before {
+  content: "\e9ab";
+}
+
+.icon-addInventario:before {
+  content: "\e9ac";
+}
+
+.icon-addPension:before {
+  content: "\e9ad";
+}
+
+.icon-addTransito:before {
+  content: "\e9ae";
+}
+
+.icon-concesonaria:before {
+  content: "\e9af";
+}
+
+.icon-deleteConcesonaria:before {
+  content: "\e9b0";
+}
+
+.icon-deleteDeposito:before {
+  content: "\e9b1";
+}
+
+.icon-deleteGrua:before {
+  content: "\e9b2";
+}
+
+.icon-deleteInventario:before {
+  content: "\e9b3";
+}
+
+.icon-deletePension:before {
+  content: "\e9b4";
+}
+
+.icon-deleteTransito:before {
+  content: "\e9b5";
+}
+
+.icon-editConcesonaria:before {
+  content: "\e9b6";
+}
+
+.icon-editDeposito:before {
+  content: "\e9b7";
+}
+
+.icon-editGrua:before {
+  content: "\e9b8";
+}
+
+.icon-editInventario:before {
+  content: "\e9b9";
+}
+
+.icon-editPension:before {
+  content: "\e9ba";
+}
+
+.icon-editTransito:before {
+  content: "\e9bb";
+}
+
+.icon-pension:before {
+  content: "\e9bc";
+}
+
+.icon-transito:before {
+  content: "\e9bd";
+}
+
+.icon-accidente:before {
+  content: "\e9a7";
+}
+
+.icon-catalogos:before {
+  content: "\e9a8";
+}
+
+.icon-addDanoAccidente:before {
+  content: "\e99f";
+}
+
+.icon-addDanoVehiculo:before {
+  content: "\e9a0";
+}
+
+.icon-danoAccidente:before {
+  content: "\e9a1";
+}
+
+.icon-danoVehiculo:before {
+  content: "\e9a2";
+}
+
+.icon-deleteDanoAccidente:before {
+  content: "\e9a3";
+}
+
+.icon-deleteDanoVehiculo:before {
+  content: "\e9a4";
+}
+
+.icon-editDanoAccidente:before {
+  content: "\e9a5";
+}
+
+.icon-editDanoVehiculo:before {
+  content: "\e9a6";
+}
+
+.icon-addFactorAccidente:before {
+  content: "\e996";
+}
+
+.icon-addInvolucrado:before {
+  content: "\e997";
+}
+
+.icon-deleteFactorAccidente:before {
+  content: "\e998";
+}
+
+.icon-down:before {
+  content: "\e999";
+}
+
+.icon-editFactorAccidente:before {
+  content: "\e99a";
+}
+
+.icon-editInvolucrado:before {
+  content: "\e99b";
+}
+
+.icon-factorAccidente:before {
+  content: "\e99c";
+}
+
+.icon-involucrado:before {
+  content: "\e99d";
+}
+
+.icon-up:before {
+  content: "\e99e";
+}
+
+.icon-infoAdicional:before {
+  content: "\e995";
+}
+
+.icon-deleteClasificacionAccidente:before {
+  content: "\e993";
+}
+
+.icon-addClasificacionAccidente:before {
+  content: "\e994";
+}
+
+.icon-clasificacionAccidente:before {
+  content: "\e98f";
+}
+
+.icon-editClasificacionAccidente:before {
+  content: "\e990";
+}
+
+.icon-estadisticas:before {
+  content: "\e991";
+}
+
+.icon-excel:before {
+  content: "\e992";
+}
+
+.icon-addCortesia:before {
+  content: "\e98b";
+}
+
+.icon-addEnviar:before {
+  content: "\e98c";
+}
+
+.icon-cortesia:before {
+  content: "\e98d";
+}
+
+.icon-enviar:before {
+  content: "\e98e";
+}
+
+.icon-editRecibo:before {
+  content: "\e986";
+}
+
+.icon-deleteRecibo:before {
+  content: "\e987";
+}
+
+.icon-cancelInfracion:before {
+  content: "\e988";
+}
+
+.icon-addRecibo:before {
+  content: "\e989";
+}
+
+.icon-recibo:before {
+  content: "\e98a";
+}
+
+.icon-pdf:before {
+  content: "\e985";
+}
+
+.icon-propietario:before {
+  content: "\e984";
+}
+
+.icon-addConductor:before {
+  content: "\e980";
+}
+
+.icon-conductor:before {
+  content: "\e981";
+}
+
+.icon-deleteConductor:before {
+  content: "\e982";
+}
+
+.icon-editConductor:before {
+  content: "\e983";
+}
+
+.icon-opciones:before {
+  content: "\e968";
+}
+
+.icon-addOpciones:before {
+  content: "\e969";
+}
+
+.icon-deleteOpciones:before {
+  content: "\e96a";
+}
+
+.icon-editOpciones:before {
+  content: "\e96b";
+}
+
+.icon-editHospital:before {
+  content: "\e96c";
+}
+
+.icon-deleteHospital:before {
+  content: "\e96e";
+}
+
+.icon-hospital:before {
+  content: "\e96f";
+}
+
+.icon-oficinas:before {
+  content: "\e970";
+}
+
+.icon-deleteOficinas:before {
+  content: "\e971";
+}
+
+.icon-addOficinas:before {
+  content: "\e972";
+}
+
+.icon-editOficinas:before {
+  content: "\e973";
+}
+
+.icon-causas:before {
+  content: "\e974";
+}
+
+.icon-deleteCausas:before {
+  content: "\e975";
+}
+
+.icon-addCausas:before {
+  content: "\e976";
+}
+
+.icon-editCausas:before {
+  content: "\e977";
+}
+
+.icon-factores:before {
+  content: "\e978";
+}
+
+.icon-deleteFactores:before {
+  content: "\e979";
+}
+
+.icon-addFactores:before {
+  content: "\e97a";
+}
+
+.icon-editFactores:before {
+  content: "\e97b";
+}
+
+.icon-editAdccidentes:before {
+  content: "\e97c";
+}
+
+.icon-addAccidentes:before {
+  content: "\e97d";
+}
+
+.icon-deleteAccidentes:before {
+  content: "\e97e";
+}
+
+.icon-accidentes:before {
+  content: "\e97f";
+}
+
+.icon-deleteTraslado:before {
+  content: "\e960";
+}
+
+.icon-addTraslado:before {
+  content: "\e961";
+}
+
+.icon-editTraslado:before {
+  content: "\e962";
+}
+
+.icon-traslado:before {
+  content: "\e963";
+}
+
+.icon-editEntrega:before {
+  content: "\e964";
+}
+
+.icon-addEntrega:before {
+  content: "\e965";
+}
+
+.icon-deleteEntrega:before {
+  content: "\e966";
+}
+
+.icon-entrega:before {
+  content: "\e967";
+}
+
+.icon-addMinisterio:before {
+  content: "\e951";
+}
+
+.icon-addAutoridad:before {
+  content: "\e952";
+}
+
+.icon-deleteAutoridad:before {
+  content: "\e953";
+}
+
+.icon-autoridad:before {
+  content: "\e954";
+}
+
+.icon-editAutoridad:before {
+  content: "\e955";
+}
+
+.icon-addCarga:before {
+  content: "\e956";
+}
+
+.icon-deleteCarga:before {
+  content: "\e957";
+}
+
+.icon-editCarga:before {
+  content: "\e958";
+}
+
+.icon-carga:before {
+  content: "\e959";
+}
+
+.icon-editInfracion:before {
+  content: "\e95a";
+}
+
+.icon-deleteInfracion:before {
+  content: "\e95b";
+}
+
+.icon-addInfracion:before {
+  content: "\e95c";
+}
+
+.icon-ministerio:before {
+  content: "\e95d";
+}
+
+.icon-editMinisterio:before {
+  content: "\e95e";
+}
+
+.icon-deleteMinisterio:before {
+  content: "\e95f";
+}
+
+.icon-oficina:before {
+  content: "\e94d";
+}
+
+.icon-deleteOficina:before {
+  content: "\e94e";
+}
+
+.icon-addOficina:before {
+  content: "\e94f";
+}
+
+.icon-editOficina:before {
+  content: "\e950";
+}
+
+.icon-udi:before {
+  content: "\e945";
+}
+
+.icon-date:before {
+  content: "\e946";
+}
+
+.icon-editDate:before {
+  content: "\e947";
+}
+
+.icon-addDate:before {
+  content: "\e948";
+}
+
+.icon-deleteDate:before {
+  content: "\e949";
+}
+
+.icon-editUdi:before {
+  content: "\e94a";
+}
+
+.icon-addUdi:before {
+  content: "\e94b";
+}
+
+.icon-deleteUdi:before {
+  content: "\e94c";
+}
+
+.icon-tipoVehiculo:before {
+  content: "\e93d";
+}
+
+.icon-deleteTipoVehiculo:before {
+  content: "\e93e";
+}
+
+.icon-editTipoVehiculo:before {
+  content: "\e93f";
+}
+
+.icon-addTipoVehiculo:before {
+  content: "\e940";
+}
+
+.icon-subMarcar:before {
+  content: "\e941";
+}
+
+.icon-editSubMarcar:before {
+  content: "\e942";
+}
+
+.icon-addSubMarcar:before {
+  content: "\e943";
+}
+
+.icon-deleteSubMarcar:before {
+  content: "\e944";
+}
+
+.icon-editEntidad:before {
+  content: "\e939";
+}
+
+.icon-deleteEntidad:before {
+  content: "\e93a";
+}
+
+.icon-addEntidad:before {
+  content: "\e93b";
+}
+
+.icon-entidad:before {
+  content: "\e93c";
+}
+
+.icon-editOficial:before {
+  content: "\e932";
+}
+
+.icon-deleteOficial:before {
+  content: "\e933";
+}
+
+.icon-addOficial:before {
+  content: "\e934";
+}
+
+.icon-deleteMunicipio:before {
+  content: "\e935";
+}
+
+.icon-addMunicipio:before {
+  content: "\e936";
+}
+
+.icon-editMunicipio:before {
+  content: "\e937";
+}
+
+.icon-municipio:before {
+  content: "\e938";
+}
+
+.icon-deposito:before {
+  content: "\e929";
+}
+
+.icon-ubicacion:before {
+  content: "\e92a";
+}
+
+.icon-back:before {
+  content: "\e924";
+}
+
+.icon-grua:before {
+  content: "\e92b";
+}
+
+.icon-inventario:before {
+  content: "\e92c";
+}
+
+.icon-editTramo:before {
+  content: "\e928";
+}
+
+.icon-tramo:before {
+  content: "\e925";
+}
+
+.icon-addTramo:before {
+  content: "\e926";
+}
+
+.icon-deleteTramo:before {
+  content: "\e927";
+}
+
+.icon-addHospital:before {
+  content: "\e96d";
+}
+
+.icon-garantia:before {
+  content: "\e91b";
+}
+
+.icon-licencia:before {
+  content: "\e91c";
+}
+
+.icon-tarjeta:before {
+  content: "\e91d";
+}
+
+.icon-placa:before {
+  content: "\e91e";
+}
+
+.icon-infracion:before {
+  content: "\e91f";
+}
+
+.icon-less:before {
+  content: "\e919";
+}
+
+.icon-plus:before {
+  content: "\e91a";
+}
+
+.icon-addMarca:before {
+  content: "\e915";
+}
+
+.icon-editMarca:before {
+  content: "\e916";
+}
+
+.icon-deleteMarca:before {
+  content: "\e917";
+}
+
+.icon-marca:before {
+  content: "\e918";
+}
+
+.icon-filter:before {
+  content: "\e912";
+}
+
+.icon-delegacion:before {
+  content: "\e913";
+}
+
+.icon-carretera:before {
+  content: "\e90e";
+}
+
+.icon-delete:before {
+  content: "\e90f";
+}
+
+.icon-deleteCarretera:before {
+  content: "\e910";
+}
+
+.icon-addCarretera:before {
+  content: "\e911";
+}
+
+.icon-editColor:before {
+  content: "\e92e";
+}
+
+.icon-deleteColor:before {
+  content: "\e92f";
+}
+
+.icon-addColor:before {
+  content: "\e930";
+}
+
+.icon-color:before {
+  content: "\e931";
+}
+
+.icon-oficial:before {
+  content: "\e92d";
+}
+
+.icon-dependencia:before {
+  content: "\e920";
+}
+
+.icon-editDependencia:before {
+  content: "\e921";
+}
+
+.icon-addDependencia:before {
+  content: "\e922";
+}
+
+.icon-deleteDependencia:before {
+  content: "\e923";
+}
+
+.icon-editCarretera:before {
+  content: "\e914";
+}
+
+.icon-edit-car:before {
+  content: "\e90a";
+}
+
+.icon-editMoral:before {
+  content: "\e90b";
+}
+
+.icon-editFisica:before {
+  content: "\e90c";
+}
+
+.icon-addCar:before {
+  content: "\e909";
+}
+
+.icon-correct:before {
+  content: "\e90d";
+}
+
+.icon-addFisica:before {
+  content: "\e902";
+}
+
+.icon-research:before {
+  content: "\e903";
+}
+
+.icon-edit:before {
+  content: "\e904";
+}
+
+.icon-addMoral:before {
+  content: "\e905";
+}
+
+.icon-sinPropietario:before {
+  content: "\e906";
+}
+
+.icon-fisica:before {
+  content: "\e907";
+}
+
+.icon-moral:before {
+  content: "\e908";
+}
+
+.icon-car:before {
+  content: "\e900";
+}
+
+.icon-data:before {
+  content: "\e901";
+}
+
+
+
+.icon-deleteFirma:before {
+    content: "\e9c7";
+}
+
+.icon-editFirma:before {
+    content: "\e9c8";
+}
+
+.icon-addFirma:before {
+    content: "\e9c9";
+}
+
+.icon-firma:before {
+    content: "\e9ca";
+}
+
+.icon-deleteBloc:before {
+    content: "\e9cb";
+}
+
+.icon-addBloc:before {
+    content: "\e9cc";
+}
+
+.icon-editBloc:before {
+    content: "\e9cd";
+}
+
+.icon-bloc:before {
+    content: "\e9ce";
+}
+
+.icon-deleteSubtipoServicio:before {
+    content: "\e9bf";
+}
+
+.icon-editSubtipoServicio:before {
+    content: "\e9c0";
+}
+
+.icon-addSubtipoServicio:before {
+    content: "\e9c1";
+}
+
+.icon-subtipoServicio:before {
+    content: "\e9c2";
+}
+
+.icon-editTipoServicio:before {
+    content: "\e9c3";
+}
+
+.icon-deleteTipoServicio:before {
+    content: "\e9c4";
+}
+
+.icon-addTipoServicio:before {
+    content: "\e9c5";
+}
+
+.icon-tipoServicio:before {
+    content: "\e9c6";
+}
+
+.icon-salir:before {
+    content: "\e9be";
+}
+
+.icon-addConcesonaria:before {
+    content: "\e9a9";
+}
+
+.icon-addDeposito:before {
+    content: "\e9aa";
+}
+
+.icon-addGrua:before {
+    content: "\e9ab";
+}
+
+.icon-addInventario:before {
+    content: "\e9ac";
+}
+
+.icon-addPension:before {
+    content: "\e9ad";
+}
+
+.icon-addTransito:before {
+    content: "\e9ae";
+}
+
+.icon-concesonaria:before {
+    content: "\e9af";
+}
+
+.icon-deleteConcesonaria:before {
+    content: "\e9b0";
+}
+
+.icon-deleteDeposito:before {
+    content: "\e9b1";
+}
+
+.icon-deleteGrua:before {
+    content: "\e9b2";
+}
+
+.icon-deleteInventario:before {
+    content: "\e9b3";
+}
+
+.icon-deletePension:before {
+    content: "\e9b4";
+}
+
+.icon-deleteTransito:before {
+    content: "\e9b5";
+}
+
+.icon-editConcesonaria:before {
+    content: "\e9b6";
+}
+
+.icon-editDeposito:before {
+    content: "\e9b7";
+}
+
+.icon-editGrua:before {
+    content: "\e9b8";
+}
+
+.icon-editInventario:before {
+    content: "\e9b9";
+}
+
+.icon-editPension:before {
+    content: "\e9ba";
+}
+
+.icon-editTransito:before {
+    content: "\e9bb";
+}
+
+.icon-pension:before {
+    content: "\e9bc";
+}
+
+.icon-transito:before {
+    content: "\e9bd";
+}
+
+.icon-accidente:before {
+    content: "\e9a7";
+}
+
+.icon-catalogos:before {
+    content: "\e9a8";
+}
+
+.icon-addDanoAccidente:before {
+    content: "\e99f";
+}
+
+.icon-addDanoVehiculo:before {
+    content: "\e9a0";
+}
+
+.icon-danoAccidente:before {
+    content: "\e9a1";
+}
+
+.icon-danoVehiculo:before {
+    content: "\e9a2";
+}
+
+.icon-deleteDanoAccidente:before {
+    content: "\e9a3";
+}
+
+.icon-deleteDanoVehiculo:before {
+    content: "\e9a4";
+}
+
+.icon-editDanoAccidente:before {
+    content: "\e9a5";
+}
+
+.icon-editDanoVehiculo:before {
+    content: "\e9a6";
+}
+
+.icon-addFactorAccidente:before {
+    content: "\e996";
+}
+
+.icon-addInvolucrado:before {
+    content: "\e997";
+}
+
+.icon-deleteFactorAccidente:before {
+    content: "\e998";
+}
+
+.icon-down:before {
+    content: "\e999";
+}
+
+.icon-editFactorAccidente:before {
+    content: "\e99a";
+}
+
+.icon-editInvolucrado:before {
+    content: "\e99b";
+}
+
+.icon-factorAccidente:before {
+    content: "\e99c";
+}
+
+.icon-involucrado:before {
+    content: "\e99d";
+}
+
+.icon-up:before {
+    content: "\e99e";
+}
+
+.icon-infoAdicional:before {
+    content: "\e995";
+}
+
+.icon-deleteClasificacionAccidente:before {
+    content: "\e993";
+}
+
+.icon-addClasificacionAccidente:before {
+    content: "\e994";
+}
+
+.icon-clasificacionAccidente:before {
+    content: "\e98f";
+}
+
+.icon-editClasificacionAccidente:before {
+    content: "\e990";
+}
+
+.icon-estadisticas:before {
+    content: "\e991";
+}
+
+.icon-excel:before {
+    content: "\e992";
+}
+
+.icon-addCortesia:before {
+    content: "\e98b";
+}
+
+.icon-addEnviar:before {
+    content: "\e98c";
+}
+
+.icon-cortesia:before {
+    content: "\e98d";
+}
+
+.icon-enviar:before {
+    content: "\e98e";
+}
+
+.icon-editRecibo:before {
+    content: "\e986";
+}
+
+.icon-deleteRecibo:before {
+    content: "\e987";
+}
+
+.icon-cancelInfracion:before {
+    content: "\e988";
+}
+
+.icon-addRecibo:before {
+    content: "\e989";
+}
+
+.icon-recibo:before {
+    content: "\e98a";
+}
+
+.icon-pdf:before {
+    content: "\e985";
+}
+
+.icon-propietario:before {
+    content: "\e984";
+}
+
+.icon-addConductor:before {
+    content: "\e980";
+}
+
+.icon-conductor:before {
+    content: "\e981";
+}
+
+.icon-deleteConductor:before {
+    content: "\e982";
+}
+
+.icon-editConductor:before {
+    content: "\e983";
+}
+
+.icon-opciones:before {
+    content: "\e968";
+}
+
+.icon-addOpciones:before {
+    content: "\e969";
+}
+
+.icon-deleteOpciones:before {
+    content: "\e96a";
+}
+
+.icon-editOpciones:before {
+    content: "\e96b";
+}
+
+.icon-editHospital:before {
+    content: "\e96c";
+}
+
+.icon-deleteHospital:before {
+    content: "\e96e";
+}
+
+.icon-hospital:before {
+    content: "\e96f";
+}
+
+.icon-oficinas:before {
+    content: "\e970";
+}
+
+.icon-deleteOficinas:before {
+    content: "\e971";
+}
+
+.icon-addOficinas:before {
+    content: "\e972";
+}
+
+.icon-editOficinas:before {
+    content: "\e973";
+}
+
+.icon-causas:before {
+    content: "\e974";
+}
+
+.icon-deleteCausas:before {
+    content: "\e975";
+}
+
+.icon-addCausas:before {
+    content: "\e976";
+}
+
+.icon-editCausas:before {
+    content: "\e977";
+}
+
+.icon-factores:before {
+    content: "\e978";
+}
+
+.icon-deleteFactores:before {
+    content: "\e979";
+}
+
+.icon-addFactores:before {
+    content: "\e97a";
+}
+
+.icon-editFactores:before {
+    content: "\e97b";
+}
+
+.icon-editAdccidentes:before {
+    content: "\e97c";
+}
+
+.icon-addAccidentes:before {
+    content: "\e97d";
+}
+
+.icon-deleteAccidentes:before {
+    content: "\e97e";
+}
+
+.icon-accidentes:before {
+    content: "\e97f";
+}
+
+.icon-deleteTraslado:before {
+    content: "\e960";
+}
+
+.icon-addTraslado:before {
+    content: "\e961";
+}
+
+.icon-editTraslado:before {
+    content: "\e962";
+}
+
+.icon-traslado:before {
+    content: "\e963";
+}
+
+.icon-editEntrega:before {
+    content: "\e964";
+}
+
+.icon-addEntrega:before {
+    content: "\e965";
+}
+
+.icon-deleteEntrega:before {
+    content: "\e966";
+}
+
+.icon-entrega:before {
+    content: "\e967";
+}
+
+.icon-addMinisterio:before {
+    content: "\e951";
+}
+
+.icon-addAutoridad:before {
+    content: "\e952";
+}
+
+.icon-deleteAutoridad:before {
+    content: "\e953";
+}
+
+.icon-autoridad:before {
+    content: "\e954";
+}
+
+.icon-editAutoridad:before {
+    content: "\e955";
+}
+
+.icon-addCarga:before {
+    content: "\e956";
+}
+
+.icon-deleteCarga:before {
+    content: "\e957";
+}
+
+.icon-editCarga:before {
+    content: "\e958";
+}
+
+.icon-carga:before {
+    content: "\e959";
+}
+
+.icon-editInfracion:before {
+    content: "\e95a";
+}
+
+.icon-deleteInfracion:before {
+    content: "\e95b";
+}
+
+.icon-addInfracion:before {
+    content: "\e95c";
+}
+
+.icon-ministerio:before {
+    content: "\e95d";
+}
+
+.icon-editMinisterio:before {
+    content: "\e95e";
+}
+
+.icon-deleteMinisterio:before {
+    content: "\e95f";
+}
+
+.icon-camposOpcionales:before {
+    content: "\e9e0";
+}
+
+.icon-oficina:before {
+    content: "\e94d";
+}
+
+.icon-deleteOficina:before {
+    content: "\e94e";
+}
+
+.icon-addOficina:before {
+    content: "\e94f";
+}
+
+.icon-editOficina:before {
+    content: "\e950";
+}
+
+.icon-udi:before {
+    content: "\e945";
+}
+
+.icon-date:before {
+    content: "\e946";
+}
+
+.icon-editDate:before {
+    content: "\e947";
+}
+
+.icon-addDate:before {
+    content: "\e948";
+}
+
+.icon-deleteDate:before {
+    content: "\e949";
+}
+
+.icon-editUdi:before {
+    content: "\e94a";
+}
+
+.icon-addUdi:before {
+    content: "\e94b";
+}
+
+.icon-deleteUdi:before {
+    content: "\e94c";
+}
+
+.icon-tipoVehiculo:before {
+    content: "\e93d";
+}
+
+.icon-deleteTipoVehiculo:before {
+    content: "\e93e";
+}
+
+.icon-editTipoVehiculo:before {
+    content: "\e93f";
+}
+
+.icon-addTipoVehiculo:before {
+    content: "\e940";
+}
+
+.icon-subMarcar:before {
+    content: "\e941";
+}
+
+.icon-editSubMarcar:before {
+    content: "\e942";
+}
+
+.icon-addSubMarcar:before {
+    content: "\e943";
+}
+
+.icon-deleteSubMarcar:before {
+    content: "\e944";
+}
+
+.icon-editEntidad:before {
+    content: "\e939";
+}
+
+.icon-deleteEntidad:before {
+    content: "\e93a";
+}
+
+.icon-addEntidad:before {
+    content: "\e93b";
+}
+
+.icon-entidad:before {
+    content: "\e93c";
+}
+
+.icon-editOficial:before {
+    content: "\e932";
+}
+
+.icon-deleteOficial:before {
+    content: "\e933";
+}
+
+.icon-addOficial:before {
+    content: "\e934";
+}
+
+.icon-deleteMunicipio:before {
+    content: "\e935";
+}
+
+.icon-addMunicipio:before {
+    content: "\e936";
+}
+
+.icon-editMunicipio:before {
+    content: "\e937";
+}
+
+.icon-municipio:before {
+    content: "\e938";
+}
+
+.icon-deposito:before {
+    content: "\e929";
+}
+
+.icon-ubicacion:before {
+    content: "\e92a";
+}
+
+.icon-back:before {
+    content: "\e924";
+}
+
+.icon-grua:before {
+    content: "\e92b";
+}
+
+.icon-inventario:before {
+    content: "\e92c";
+}
+
+.icon-editTramo:before {
+    content: "\e928";
+}
+
+.icon-tramo:before {
+    content: "\e925";
+}
+
+.icon-addTramo:before {
+    content: "\e926";
+}
+
+.icon-deleteTramo:before {
+    content: "\e927";
+}
+
+.icon-addHospital:before {
+    content: "\e96d";
+}
+
+.icon-garantia:before {
+    content: "\e91b";
+}
+
+.icon-licencia:before {
+    content: "\e91c";
+}
+
+.icon-tarjeta:before {
+    content: "\e91d";
+}
+
+.icon-placa:before {
+    content: "\e91e";
+}
+
+.icon-infracion:before {
+    content: "\e91f";
+}
+
+.icon-less:before {
+    content: "\e919";
+}
+
+.icon-plus:before {
+    content: "\e91a";
+}
+
+.icon-addMarca:before {
+    content: "\e915";
+}
+
+.icon-editMarca:before {
+    content: "\e916";
+}
+
+.icon-deleteMarca:before {
+    content: "\e917";
+}
+
+.icon-marca:before {
+    content: "\e918";
+}
+
+.icon-filter:before {
+    content: "\e912";
+}
+
+.icon-delegacion:before {
+    content: "\e913";
+}
+
+.icon-carretera:before {
+    content: "\e90e";
+}
+
+.icon-delete:before {
+    content: "\e90f";
+}
+
+.icon-deleteCarretera:before {
+    content: "\e910";
+}
+
+.icon-addCarretera:before {
+    content: "\e911";
+}
+
+.icon-relacionData:before {
+    content: "\e9d8";
+}
+
+.icon-adminData:before {
+    content: "\e9d9";
+}
+
+.icon-editColor:before {
+    content: "\e92e";
+}
+
+.icon-deleteColor:before {
+    content: "\e92f";
+}
+
+.icon-addColor:before {
+    content: "\e930";
+}
+
+.icon-color:before {
+    content: "\e931";
+}
+
+.icon-oficial:before {
+    content: "\e92d";
+}
+
+.icon-dependencia:before {
+    content: "\e920";
+}
+
+.icon-editDependencia:before {
+    content: "\e921";
+}
+
+.icon-addDependencia:before {
+    content: "\e922";
+}
+
+.icon-deleteDependencia:before {
+    content: "\e923";
+}
+
+.icon-editCarretera:before {
+    content: "\e914";
+}
+
+.icon-edit-car:before {
+    content: "\e90a";
+}
+
+.icon-editMoral:before {
+    content: "\e90b";
+}
+
+.icon-editFisica:before {
+    content: "\e90c";
+}
+
+.icon-addCar:before {
+    content: "\e909";
+}
+
+.icon-correct:before {
+    content: "\e90d";
+}
+
+.icon-addFisica:before {
+    content: "\e902";
+}
+
+.icon-research:before {
+    content: "\e903";
+}
+
+.icon-edit:before {
+    content: "\e904";
+}
+
+.icon-addMoral:before {
+    content: "\e905";
+}
+
+.icon-sinPropietario:before {
+    content: "\e906";
+}
+
+.icon-fisica:before {
+    content: "\e907";
+}
+
+.icon-moral:before {
+    content: "\e908";
+}
+
+.icon-car:before {
+    content: "\e900";
+}
+
+.icon-data:before {
+    content: "\e901";
+}
+
+
+.h7 {
+  font-size: 12px
+}
+
+.navPrincipal {
+  background-color: var(--second-color);
+}
+
+.navPrincipal img {
+  object-fit: contain;
+  max-width: 280px;
+}
+
+.navPrincipal .nav-tabs .nav-link {
+  padding: 1rem .2rem;
+}
+
+.navPrincipal .nav-tabs .nav-link.active,
+.navPrincipal .nav-tabs .nav-item.show .nav-link {
+  background-color: var(--second-color);
+  border-color: var(--second-color);
+  border-radius: 0;
+}
+
+.tooltipNav {
+  display: none;
+  top: 28%;
+  left: 50px;
+  background: var(--main-color);
+  color: white;
+  padding: 0.2rem 0.6rem;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: bolder;
+  text-shadow: 0px 0px white;
+}
+
+.tooltipNav::after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-right: 8px solid var(--main-color);
+  border-bottom: 6px solid transparent;
+  position: absolute;
+  left: -6px;
+  top: 25%;
+}
+
+.navPrincipal .nav-tabs .nav-link:hover .tooltipNav {
+  display: flex
+}
+
+.navPrincipal .nav-tabs .nav-link.active i,
+.navPrincipal .nav-tabs .nav-item.show .nav-link i {
+  color: var(--main-color);
+}
+
+.navPrincipal-content {
+  background-color: var(--main-color);
+}
+
+.navPrincipal-content button i {
+  color: var(--second-color);
+}
+
+.navPrincipal-link .nav-item {
+  padding-top: .4rem;
+  padding-bottom: .4rem;
+}
+
+.navPrincipal-link .nav-item.active {
+  background-color: white;
+  border-radius: 0.25rem;
+  box-shadow: rgb(0 0 0 / 7%) 0px 2px 8px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 768px) {
+  .navPrincipal {
+    flex: 1;
+  }
+
+  .mainContainer {
+    flex: 6;
+  }
+}
+
+@media (min-width: 769px) {
+  .navPrincipal {
+    min-width: 220px;
+    max-width: 20%;
+  }
+
+  .mainContainer {
+    min-width: 70%;
+    max-width: 80%;
+  }
+}
+
+.colorPrimary {
+  color: var(--main-color);
+}
+
+.colorWarning {
+  color: var(--warning-color);
+}
+
+.colorDanger {
+  color: var(--danger-color);
+}
+
+.colorSuccess {
+  color: var(--success-color);
+}
+
+.bgSuccess {
+  background-color: var(--success-color);
+}
+
+.bgWarning {
+  background-color: var(--warning-color);
+}
+
+.bgDanger {
+  background-color: var(--danger-color);
+}
+
+.numberCard {
+  width: 35px;
+  height: 35px;
+}
+
+.navPrincipal {
+  width: 100%;
+}
+
+.mainContainer {
+  width: 100%
+}
+
+.minH100 {
+  min-height: 100vh;
+}
+
+.opacity-50 {
+  opacity: .5
+}
+
+.boxShadow {
+  box-shadow: rgb(0 0 0 / 7%) 0px 2px 8px;
+}
+
+.controlForm label,
+.controlForm input,
+.controlForm select,
+.controlForm .k-datepicker,
+.controlForm .k-timepicker,
+.controlForm .k-formatted-value {
+  width: 100%;
+}
+
+.controlForm .k-picker-wrap,
+.controlForm .k-picker-wrap input,
+.controlForm .k-datetimepicker input,
+.controlForm .k-timepicker input,
+.controlForm .k-formatted-value {
+  border: none;
+  height: 100%;
+}
+
+.controlForm .k-textbox,
+.controlForm .k-numerictextbox,
+.controlForm .k-dropdown,
+.controlForm .k-datepicker,
+.controlForm .k-datetimepicker,
+.controlForm .k-timepicker input,
+.controlForm .k-formatted-value {
+  border: none;
+  height: 58px;
+}
+
+.controlForm .k-dropdown .k-dropdown-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.controlForm label {
+  font-weight: bold;
+  color: #292929;
+  margin: 0 0 10px 8px;
+  text-align: left;
+}
+
+.controlForm label b {
+  font-weight: 400;
+}
+
+.controlForm .k-i-calendar::before,
+.controlForm .k-i-clock::before {
+  font-size: 32px;
+  color: #292929;
+}
+
+.controlForm .k-select {
+  background-color: white;
+  padding: 0 20px;
+}
+
+.controlForm input,
+.controlForm input[type="file"],
+.controlForm .k-dropdown-wrap,
+.controlForm select,
+.controlForm .k-textarea {
+  height: 100%;
+  padding: 0 10px;
+  border: none;
+  background-color: white;
+  box-shadow: none;
+}
+
+.controlForm input[type="file"] {
+  padding: 10px 0;
+}
+
+.controlForm input,
+.controlForm input[type="file"],
+.controlForm .k-textarea,
+.controlForm .k-dropdown,
+.controlForm .k-datepicker,
+.controlForm .k-dateinput,
+.controlForm .k-datetimepicker,
+.controlForm .k-timepicker,
+.controlForm .k-formatted-value {
+  border: 2px #292929c7 solid;
+  display: block;
+  border-radius: 4px;
+}
+
+.controlForm .k-imageeditor .k-toolbar {
+  background-color: #f2f2f6;
+}
+
+.controlForm .k-imageeditor .k-dropdown {
+  height: 42px;
+}
+
+.controlForm .k-imageeditor .k-toolbar .k-button,
+.controlForm .k-imageeditor .k-toolbar .k-button-secondary {
+  border-color: #bacdd5;
+  color: #212121;
+  background-color: #f2f2f6;
+  background-image: linear-gradient(rgba(255, 255, 255, .1), rgba(255, 255, 255, 0));
+}
+
+
+.controlForm .k-datepicker .k-select.k-state-hover,
+.controlForm .k-datepicker .k-select:hover,
+.controlForm .k-timepicker .k-select.k-state-hover,
+.controlForm .k-timepicker .k-select:hover,
+.controlForm .k-dropdown .k-dropdown-wrap.k-state-hover,
+.controlForm .k-dropdown .k-dropdown-wrap:hover,
+.controlForm .k-dropdowntree .k-dropdown-wrap.k-state-hover,
+.controlForm .k-dropdowntree .k-dropdown-wrap:hover,
+.controlForm .k-datetimepicker .k-link:hover {
+  border-color: #f1f1f1;
+  background-color: #f1f1f1;
+}
+
+.controlForm .k-textarea>.k-input {
+  padding: 4px 0;
+}
+
+.controlForm .k-textarea>.k-input2 {
+  padding: 4px 0;
+  height: 100px;
+}
+
+.controlForm .k-datetimepicker .k-select .k-link-date,
+.controlForm .k-datetimepicker .k-select .k-link-time {
+  margin: auto 8px;
+}
+
+.controlButton button {
+  height: 58px;
+  width: 100%;
+}
+
+
+.controlButton .btnPrimary {
+  color: white;
+  background-color: var(--main-color);
+  border-radius: 4px;
+  border: 2px solid var(--main-color);
+}
+
+.btnOutline button,
+.btnOutline a {
+  background-color: white;
+  border: 2px solid #292929;
+  color: #292929;
+  padding: 1rem .85rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.btnOutline button:hover {
+  background-color: #292929;
+  color: white;
+}
+
+.btnOutlinePrimary button,
+.btnOutlinePrimary a {
+  border: 2px solid var(--main-color);
+  color: var(--main-color);
+}
+
+.btnOutlinePrimary button:hover,
+.btnOutlinePrimary a:hover {
+  background-color: var(--main-color);
+  color: white;
+}
+
+
+
+.tabCustom .nav-tabs {
+  border-bottom: 2px solid transparent;
+}
+
+.tabCustom .nav-tabs .nav-link {
+  max-width: 330px;
+  color: #292929;
+  border: 2px solid;
+  border-color: transparent;
+  border-radius: 0;
+  margin-bottom: -2px;
+  background-color: #f8f9fa;
+}
+
+.tabCustom .nav-tabs .nav-link.active {
+  max-width: 330px;
+  color: var(--main-color);
+  border-bottom: 0;
+  border-color: var(--main-color) var(--main-color) white;
+  background-color: white;
+  border-radius: 4px 4px 0 0;
+  box-shadow: white 0 2px 0;
+}
+
+.radioCustom div {
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-color: #292929;
+  border: 2px solid;
+}
+
+.tabCustom .nav-tabs .nav-link.active .radioCustom div {
+  border-color: var(--main-color);
+  box-shadow: inset 0px 0px 0 3px white;
+  background-color: var(--main-color);
+}
+
+.tabCustomConteiner {
+  border: 2px solid;
+  border-bottom: 0;
+  border-color: var(--main-color) var(--main-color) #f8f9fa;
+  box-shadow: #f8f9fa 0px 8px;
+}
+
+.tabCustomEnd {
+  border-bottom: 2px solid;
+  border-bottom-color: var(--main-color);
+  box-shadow: rgb(0 0 0 / 7%) 0px 2px 8px;
+}
+
+.modalCustom {
+  background: #ffffffc9;
+}
+
+.modalCustom .modal-xl {
+  width: 92%;
+  max-width: 1300px;
+  margin: 12px auto;
+}
+
+
+
+.btnToggle .btn {
+  padding: 8px 10px;
+  position: relative;
+  text-align: center;
+  border-radius: 0;
+  transition: background 600ms ease, color 600ms ease;
+  height: 100%;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+.btnToggle div {
+  border: solid 2px #292929c7;
+  border-radius: 4px;
+  height: 58px;
+  width: 100%;
+}
+
+.btnToggleActive .k-switch {
+  width: 100%;
+  height: 58px;
+}
+
+.btnToggleActive .k-switch-container,
+.btnToggleActive .k-switch-container:hover {
+  height: 100%;
+  border: solid 2px #292929c7;
+  border-radius: 4px;
+  position: relative;
+  background-color: white;
+}
+
+
+.btnToggleActive .k-switch-container .k-switch-label-on,
+.btnToggleActive .k-switch-container .k-switch-label-off {
+  font-size: 18px;
+  letter-spacing: 1px;
+  font-weight: bold;
+  text-transform: capitalize;
+  width: 50%;
+  max-width: 50%;
+  text-align: center;
+  color: #292929c7;
+  z-index: 2;
+}
+
+.btnToggleActive .k-switch[aria-checked="true"] .k-switch-container .k-switch-label-on {
+  color: white;
+}
+
+.btnToggleActive .k-switch[aria-checked="false"] .k-switch-container .k-switch-label-off {
+  color: white;
+}
+
+.btnToggleActive .k-switch-container .k-switch-handle {
+  width: 49.6%;
+  height: 50px;
+  margin-top: 2px;
+  border-radius: 2px;
+  background-color: var(--main-color);
+  border-color: var(--main-color);
+  z-index: 1;
+}
+
+.btnToggleActive .k-switch-on .k-switch-handle {
+  left: calc(100% - 99.5%);
+}
+
+.btnToggleActive .k-switch-off .k-switch-handle {
+  left: calc(100% - 50%);
+}
+
+input[type="radio"].toggle {
+  display: none;
+}
+
+input[type="radio"].toggle+label {
+  cursor: pointer;
+  min-width: 40px;
+  min-height: 40px;
+  margin: 0;
+}
+
+input[type="radio"].toggle+label:hover {
+  background: none;
+  color: var(--main-color);
+}
+
+input[type="radio"].toggle+label:after {
+  background: var(--main-color);
+  border-radius: 2px;
+  content: "";
+  height: 100%;
+  position: absolute;
+  top: 0;
+  transition: left 200ms cubic-bezier(0.77, 0, 0.175, 1);
+  width: 100%;
+  z-index: -1;
+}
+
+.btnToggle input[type="radio"].toggle.toggle-left+label {
+  border-right: 0;
+}
+
+.btnToggle input[type="radio"].toggle.toggle-left+label:after {
+  left: 100%;
+}
+
+
+.btnToggle input[type="radio"].toggle.toggle-right+label:after {
+  left: -100%;
+}
+
+.btnToggle input[type="radio"].toggle:checked+label {
+  cursor: default;
+  color: #fff;
+  transition: color 200ms;
+  height: 100%;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+.btnToggle input[type="radio"].toggle:checked+label:after {
+  left: 0;
+}
+
+
+.k-grid tr .checkbox-align {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.k-grid th {
+  padding: 10px 10px;
+  border-width: 0 0 1px 1px;
+  white-space: nowrap;
+  background-color: #f2f2f6;
+  font-size: 16px;
+  font-weight: bold;
+  color: #292929;
+}
+
+.k-grid-add-row,
+.k-grid-footer,
+.k-grid-header,
+.k-grouping-header {
+  background-color: #f2f2f6;
+}
+
+.k-pager-wrap {
+  border-color: #bacdd5;
+  color: #292929;
+  background-color: #f2f2f6;
+}
+
+.k-pager-numbers .k-link {
+  color: #292929;
+  font-weight: bold;
+}
+
+.k-pager-numbers .k-link.k-state-selected {
+  color: var(--main-color);
+  background-color: transparent;
+  border: solid 2px var(--main-color);
+}
+
+.k-dropdown .k-dropdown-wrap,
+.k-dropdowntree .k-dropdown-wrap {
+  border-color: #bacdd5;
+  color: #292929;
+  background-color: white;
+  background-image: linear-gradient(rgba(255, 255, 255, .1), rgba(255, 255, 255, 0));
+}
+
+.k-grid td {
+  color: #292929;
+  font-weight: 400;
+}
+
+.k-checkbox.k-checked,
+.k-checkbox:checked {
+  border-color: var(--main-color);
+  color: white;
+  background-color: var(--main-color);
+}
+
+.k-checkbox {
+  width: 22px;
+  height: 22px;
+}
+
+.k-grid td.k-state-selected,
+.k-grid tr.k-state-selected>td {
+  background-color: rgb(65 147 191 / 25%);
+}
+
+
+
+.btnToggleCustom button {
+  border: 2px #292929c7 solid;
+}
+
+.btnToggleCustom button.active {
+  border: 2px var(--main-color) solid;
+  background-color: var(--main-color);
+  color: white;
+}
+
+.btnToggleCustom button.active .radioCustom div {
+  border-color: var(--main-color);
+  box-shadow: inset 0px 0px 0 3px white;
+  background-color: var(--main-color);
+}
+
+.gridCustom .k-grid-toolbar {
+  background-color: transparent;
+}
+
+/*.gridCustom .k-grid {
+    max-height: 450px;
+}*/
+
+.gridCustom .k-grid-toolbar .k-grid-search {
+  height: 58px;
+  margin-left: auto;
+  width: 100%;
+  margin-top: 1rem;
+  margin-bottom: 8px;
+}
+
+
+.gridCustom .k-grid-toolbar .k-grid-search input {
+  height: 3000%;
+}
+
+.k-command-cell {
+  display: flex;
+  justify-content: center;
+}
+
+.k-command-cell .k-grid-Editar {
+  background: transparent;
+  border: transparent;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--main-color);
+  font-weight: bold;
+}
+
+.k-command-cell a::before {
+  content: "\e904";
+  display: block;
+  font-family: 'RIAG' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.titleCustom {
+  position: initial;
+  z-index: 1;
+  width: 100%;
+}
+
+
+.gridMotivo .k-pager-wrap {
+  display: none
+}
+
+.gridEnvio .k-pager-wrap {
+  bottom: -100px;
+}
+
+.gridMotivo .footerGrid {
+  padding-right: 11px;
+}
+
+.gridEnvio .footerGrid {
+  padding-left: 25px;
+}
+
+.gridMotivo .footerGrid div {
+  max-width: calc(100% - 80% - 13px);
+  min-width: 180px;
+}
+
+.gridEnvio .footerGrid div {
+  max-width: calc(100% - 1px);
+  min-width: 180px;
+  top: -46px;
+  position: relative;
+}
+
+.gridMotivo .salarios {
+  height: 16px;
+  margin-left: 6px;
+}
+
+.gridMotivo .inputSalario input {
+  height: 32px
+}
+
+
+
+
+@media (min-width: 845px) {
+    .titleCustom {
+        position: absolute;
+        z-index: 1;
+        width: 342px;
+    }
+
+  .gridCustom .k-grid-toolbar .k-grid-search {
+    width: 240px;
+  }
+}
+@media (min-width: 985px) {
+    .titleCustom {
+        position: absolute;
+        z-index: 1;
+        width: 542px;
+    }
+}
+@media (min-width: 1200px) {
+    .titleCustom {
+        position: absolute;
+        z-index: 1;
+        width: 100%;
+    }
+}
+.inputNumberCustom input {
+  min-width: 50px;
+  min-height: 40px;
+  padding: 5px;
+}
+
+.drop-zone {
+  max-width: 950px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: 500;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.drop-zone--over {
+  border: solid #bacdd5 1px;
+  background-color: #e8ebed;
+  box-shadow: #292929 0px 0px 0px 1px;
+  border-radius: 4px;
+}
+
+.drop-zone__input {
+  display: none;
+}
+
+.drop-zone__thumb {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #cccccc;
+  background-size: cover;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.drop-zone__thumb::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 5px 0;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.75);
+  font-size: 14px;
+  text-align: center;
+}
+
+
+.radioCustomTelerik .k-radio-list {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.radioCustomTelerik .k-radio-list li {
+  position: relative;
+}
+
+.radioCustomTelerik .k-radio-list li input {
+  position: absolute;
+  z-index: 1;
+  top: 21px;
+  left: 18px;
+  padding: 0px;
+}
+
+.radioCustomTelerik .k-radio {
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-color: #292929;
+  box-shadow: #292929 0px 0px 0px 1px;
+}
+
+
+
+.radioCustomTelerik .k-radio-list li label {
+  margin-bottom: 1rem;
+  padding: 1rem 1rem 1rem 2.6rem;
+  border: 2px #292929c7 solid;
+  font-size: 1.25rem;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 56px;
+  border-radius: 0.25rem;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.radioCustomTelerik .k-radio:checked+label {
+  border: 2px var(--main-color) solid;
+  color: white;
+  background-color: var(--main-color);
+}
+
+.radioCustomTelerik input:checked {
+  background-color: white;
+  border-color: var(--main-color);
+  box-shadow: var(--main-color) 0px 0px 0px 1px;
+}
+
+.radioCustomTelerik .k-radio.k-checked::before,
+.radioCustomTelerik .k-radio:checked::before {
+  width: 10px;
+  height: 10px;
+  background-color: var(--main-color)
+}
+
+.h-95px {
+  height: 95px;
+}
+
+.mxW-16rem {
+  max-width: 16rem;
+}
+
+.borderWarning input {
+  border: 2px var(--warning-color) solid;
+}
+
+.borderDanger input {
+  border: 2px var(--danger-color) solid;
+}
+
+
+.barCustom path[d="M0 9 L 15 9 15 12 0 12Z"] {
+  fill: var(--main-color);
+}
+
+.hidden-column {
+  display: none;
+}
+
+.navbar-nav {
+  gap: 4px;
+  line-height: 1;
+}
+
+.iconMenu {
+  background-color: #fff;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  height: 50px;
+  width: 50px;
+  display: none;
+}
+
+.iconMenu:focus {
+  outline: 0;
+}
+
+.iconMenu .line {
+  background-color: #5290f9;
+  height: 4px;
+  width: 80%;
+  position: absolute;
+  top: 35%;
+  left: 10%;
+}
+
+.iconMenu .line2 {
+  top: auto;
+  bottom: 35%;
+}
+
+#nav.active .iconMenu .line1 {
+  transform: rotate(-765deg) translateY(6px) translateX(-2px);
+  left: auto;
+  margin-left: 1px;
+}
+
+#nav.active .iconMenu .line2 {
+  transform: rotate(765deg) translateY(-6px) translateX(0px);
+  left: auto;
+  margin-left: 1px;
+}
+
+#gridInfraccionesPorVehiculo {
+  height: fit-content !important;
+}
+
+@media(max-width: 768px) {
+  .iconMenu {
+    display: flex !important;
+  }
+
+  #nav #nav-tab,
+  #nav #nav-tabContent {
+    display: none !important;
+  }
+
+  #nav.active #nav-tab,
+  #nav.active #nav-tabContent {
+    display: flex !important;
+  }
+}
+
+td button,
+td .k-button {
+  color: var(--main-color);
+  font-weight: bold;
+  background: transparent;
+  border: 1px transparent;
+  font-size: 1rem;
+  font-family: 'Proxima Nova Bold', sans-serif;
+  padding: 0.375rem 0.75rem;
+}
+
+
+.loadingGif {
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 10, 10, 0.10);
+  z-index: 9999;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  width: 100vw;
+  height: 100vh;
+}
+
+.errorData {
+  border: 1px solid red !important;
+  border-radius: 5px !important;
+}
+
+.activeData {
+  border: 2px solid #0066FF !important;
+  border-radius: 5px !important;
+}
+
+.clearfix::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Estilos para el contenedor personalizado */
+.custom-number-input {
+  position: relative;
+  display: inline-block;
+}
+
+.custom-input {
+  width: calc(100% - 50px);
+  height: 100px;
+}
+
+/* Estilos para los controles del spinner personalizado */
+.spinner-controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Estilos para los botones de incremento y decremento */
+.spinner-controls button {
+  width: 100%;
+  height: 50%;
+  border: none;
+  background-color: #e0e0e0;
+  cursor: pointer;
+}
+
+.spinner-controls button:hover {
+  background-color: #d0d0d0;
+}
+
+/* Estilo original del botón de cerrar */
+.btnClose {
+  color: #000;
+  border-color: #000;
+}
+
+.btnClose:hover {
+  color: #fff;
+  background-color: #ff0000;
+  /* Color de fondo rojo al hacer hover */
+  border-color: #ff0000;
+}
+
+.textarea-custom {
+    width: 100%;
+    resize: none;
+    border: 2px solid #000; 
+    padding: 8px;
+    box-sizing: border-box;
+    border-radius : 4px;
+}
+
+.textarea-custom:focus {
+   border-color: black;
+}
+
+/* Estilo específico del botón de cerrar en contexto .btnOutline */
+.btnOutline .btnClose:hover {
+  background-color: #ff0000;
+  /* Color de fondo rojo al hacer hover */
+  color: #fff;
+}
+.form-check-inline-radio {
+    display: inline-block;
+    margin-right: 0rem;
+    margin-left: 0.8rem;
+    margin-top:20px;
+}
+
+.form-check-inline-radio-label {
+    display: inline-block;
+    margin-right: 0rem;
+    margin-left: 0rem;
+}
+
+.controlForm .form-check-inline-radio-label .radio-label {
+    font-weight: bold;
+    margin: 0 0 0px 0px;
+}
+
+#sectionCrearPension .k-animation-container > .k-popup#ddlDelegaciones-list,
+#sectionCrearPension .k-animation-container > .k-popup#idMunicipio-list,
+#sectionCrearPension .k-animation-container > .k-popup#idResponsable-list {
+    top: 14px;
+    left: 40px;
+}
+
+#sectionCap .k-animation-container > .k-popup#idEdntidad2-list,
+#sectionCap .k-animation-container > .k-popup#idColor-list,
+#sectionCap .k-animation-container > .k-popup#ddlMarcas-list,
+#sectionCap .k-animation-container > .k-popup#idSubmarca-list,
+#sectionCap .k-animation-container > .k-popup#idTipoVehiculo-list,
+#sectionCap .k-animation-container > .k-popup#ddlCatTipoServicio-list,
+#sectionCap .k-animation-container > .k-popup#idEntidad-list {
+    top: 23px;
+}
+
+#frmEditarPersona .k-animation-container > .k-popup#id_genero_help-list,
+#frmEditarPersona .k-animation-container > .k-popup#idTipoLicencia-list,
+#frmEditarPersona .k-animation-container > .k-popup#idVigencia-list,
+#frmEditarPersona .k-animation-container > .k-popup#idEntidadED-list,
+#frmEditarPersona .k-animation-container > .k-popup#idMunicipioED-list,
+#frmEditarPersona .k-animation-container > .k-popup#idTipoLicencia-list {
+    top: 113px;
+    left: 5px;
+}
+
+#frmEditarPersona.desface .k-animation-container > .k-popup#idTipoLicencia-list,
+#frmEditarPersona.desface .k-animation-container > .k-popup#idVigencia-list,
+#frmEditarPersona.desface .k-animation-container > .k-popup#idEntidadED-list,
+#frmEditarPersona.desface .k-animation-container > .k-popup#idGenero-list,
+#frmEditarPersona.desface .k-animation-container > .k-popup#idTipoLicencia-list,
+#frmEditarPersona.desface .k-animation-container > .k-popup#idTipoLicencia-list,
+#frmEditarPersona.desface .k-animation-container > .k-popup#idTipoLicencia-list {
+    top: 96px;
+    left: -12px;
+}
+
+.frmEditarPersona .k-animation-container > .k-popup#idGenero-list {
+    transform: translateY(0px) !important;
+    top: 2182px;
+}
+
+.drop-zone-firmas {
+    max-width: 950px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 500;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+@media (min-width: 768px) {
+    .desface .k-animation-container > .k-popup#ddlCatSubTipoServicio-list {
+        top: 1130px;
+    }
+}
+
+@media (min-width: 840px) {
+    .desface .k-animation-container > .k-popup#ddlCatSubTipoServicio-list {
+        top: 1106px;
+    }
+}
+
+@media (min-width: 992px) {
+    .desface .k-animation-container > .k-popup#ddlCatSubTipoServicio-list {
+        top: 735px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .desface .k-animation-container > .k-popup#ddlCatSubTipoServicio-list {
+        top: 612px;
+    }
+}
+
+@media (min-width: 1800px) {
+    .desface .k-animation-container > .k-popup#ddlCatSubTipoServicio-list {
+        top: 413px;
+    }
+}
+
+@media (min-width: 1800px) {
+    .col-xx-2 {
+        flex: 0 0 auto;
+        width: 16.66666667%;
+    }
+
+    .btnToggleActive .k-switch-container .k-switch-label-on, .btnToggleActive .k-switch-container .k-switch-label-off {
+        max-width: 40%;
+    }
+}
+
+@media (min-width: 1800px) {
+    .col-xx-2 {
+        flex: 0 0 auto;
+        width: 16.66666667%;
+    }
+
+    .btnToggleActive .k-switch-container .k-switch-label-on, .btnToggleActive .k-switch-container .k-switch-label-off {
+        max-width: 40%;
+    }
+}
+
+
+@media(min-width: 768px) {
+    .loginFooter {
+        position: absolute;
+        width: 100%;
+        bottom: 0;
+    }
+}

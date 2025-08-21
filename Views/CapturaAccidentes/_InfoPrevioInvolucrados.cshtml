@@ -1,0 +1,89 @@
+﻿@model List<CapturaAccidentesModel>
+
+<script>
+	function onRowSelect(e) {
+		var selectedRow = this.select();
+		var dataItem = this.dataItem(selectedRow);
+		var idPersona = dataItem.idPersona;
+		$('#idPersonaInput').val(idPersona);
+		console.log("FEC", idPersona)
+		var nombre = dataItem.nombre
+		var apellidoPaterno = dataItem.apellidoPaterno
+		var apellidoMaterno = dataItem.apellidoMaterno
+		var CURP = dataItem.CURP
+		var fechaNacimiento = dataItem.fechaNacimiento;
+		console.log("FEC", fechaNacimiento)
+		fechaNacimiento = fechaNacimiento == "01/01/0001" ? "" : formatDate(fechaNacimiento); 
+		var RFC = dataItem.RFC
+
+		var nombreCompleto = nombre + " " + apellidoPaterno + " " + apellidoMaterno;
+		$('#gridVehiculosInvolucrados').data('idPersona', idPersona);
+
+		document.getElementById("nombreModal").innerText = nombreCompleto;
+		document.getElementById("curpModal").innerText = CURP;
+		document.getElementById("fechaNacimientoModal").innerText = fechaNacimiento;
+		document.getElementById("rfcModal").innerText = RFC;
+
+		$('#buscarInvolucradoModal').modal('hide');
+		$('body').removeClass('model-open');
+		$('.modal-backdrop').remove();
+		$('#sinBuqueda').hide();
+		$('#involucradoSeleccionado').show();
+
+	}
+
+	function formatDate(fecha) {
+		var fechaNacimiento = new Date(fecha);
+		var dia = fechaNacimiento.getDate();
+		var mes = fechaNacimiento.getMonth() + 1; 
+		var anio = fechaNacimiento.getFullYear();
+
+		dia = dia < 10 ? '0' + dia : dia;
+		mes = mes < 10 ? '0' + mes : mes;
+
+		
+		var fechaFormateada = dia + '/' + mes + '/' + anio;
+
+		return fechaFormateada;
+	}
+
+	function editarPersona(idPersona) {
+		var esFisico = 1;
+		 showLoading();
+		$.ajax({
+			url: '@Url.Action("ajax_ModalEditarPersona2")',
+			type: 'GET',
+			data: { idPersona: idPersona, esFisico: esFisico },
+			contentType: "application/json; charset=utf-8",
+			success: function (value) {
+				$('#modalCrearPersona').modal('show');
+				$('#modalCrearPersona').html("");
+				$('#modalBodyCrearPersona').html("");				
+				$('#modalBodyCrearPersona').html(value);
+				$('#modalCrearPersona').modal({ backdrop: 'static', keyboard: false });
+				$('#modalCrearPersona').modal('show');
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+		event.stopPropagation();
+	}
+	
+</script>
+
+<div class="col-12 mb-4 px-4 rounded gridCustom">
+
+
+	<div class="modal fade modalCustom" id="modalCrearPersona" aria-labelledby="modalCrearPersona" aria-hidden="true">
+		<div class="modal-dialog modal-xl boxShadow modal-dialog-centered ">
+			<div class="modal-content">
+
+				<div class="modal-body" id="modalBodyCrearPersona">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+

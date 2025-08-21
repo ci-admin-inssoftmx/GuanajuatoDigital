@@ -1,0 +1,214 @@
+﻿<script>
+     function eliminarGruaModal(event) {
+        var grid = $("#gridGruas").data("kendoGrid");
+        var row = $(event.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        var idAsignacion = dataItem.idAsignacion
+        showLoading();
+        $.ajax({
+            url: "/AsignacionGruas/ModalEliminarGrua",
+            type: 'POST',
+            data: {
+                idAsignacion: idAsignacion
+            },
+            success: (data) =>{
+                $('#ModalBodyEliminarGrua').html(data);
+                $('#eliminarGruaModal').modal('show');
+                hideLoading();
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error intetnte mas tarde");
+                hideLoading();
+            }
+        });
+    }
+
+    function editarGrua(idAsignacion) {
+        showLoading();
+        $.ajax({
+            url: '/AsignacionGruas/ModalEditarGrua',
+            type: 'POST',
+            data: { idAsignacion: idAsignacion },
+            success: function (data) {
+                $('#ModalBodyEditarGrua').html(data);
+                $('#editarGruaModal').modal('show');
+                hideLoading();
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+
+        });
+    }
+
+    function quitData() {
+        var grid = $("#gridGruas").data("kendoGrid");
+
+        grid.bind("dataBound", function () {
+            setTimeout(() => {
+                var t = document.querySelector("span.k-pager-info.k-label");
+                var i = document.querySelector(".k-pager-sizes.k-label");
+
+                if (t.innerHTML == "No items to display") {
+                    t.innerHTML = "";
+                }
+
+                if (i && i.innerHTML.includes("items per page")) {
+                    i.innerHTML = "";
+                }
+
+                // Obtener el texto actual de t
+                var text = t.textContent;
+
+                // Reemplazar "of" por "de" y "items" por "elementos"
+                text = text.replace(/of/g, "de").replace(/items/g, "elementos");
+
+                // Asignar el nuevo texto al elemento t
+                t.textContent = text;
+            }, 500);
+        });
+    }
+
+</script>
+
+<script type="kendo-template" id="my-template">
+    <table style="width:100%">
+      <tr>
+        <td><strong>No. Económico:</strong></td>
+        <td>#= numeroEconomico #</td>
+      </tr>
+
+      <tr>
+        <td><strong>Tipo grúa:</strong></td>
+         <td> #= TipoGrua #</td>
+      </tr>
+
+      <tr>
+        <td><strong>Placas:</strong></td>
+         <td>#= Placas #</td>
+      </tr>
+
+      <tr>
+        <td><strong>Operador:</strong></td>
+         <td>#= operadorGrua #</td>
+      </tr>
+
+    </table>
+
+</script>
+<script>
+    var myTemplate = kendo.template($('#my-template').html());
+</script>
+
+<script type="kendo-template" id="my-template1">
+    <table style="width:100%">
+      <tr>
+        <td><strong>#= Abanderamiento # Abanderamiento</strong></td>
+      </tr>
+
+      <tr>
+        <td><strong>#= Salvamento # Salvamento</strong></td>
+      </tr>
+
+      <tr>
+        <td><strong>#= Arrastre # Arrastre</strong></td>
+         @*<td>#= fin #</td>*@
+      </tr>
+    </table>
+
+</script>
+<script>
+    var myTemplate1 = kendo.template($('#my-template1').html());
+</script>
+
+
+<script type="kendo-template" id="my-template2">
+    <table style="width:100%">
+      <tr>
+        <td><strong>Arribo:</strong></td>
+        <td>#= arribo #</td>
+      </tr>
+
+      <tr>
+        <td><strong>Inicio:</strong></td>
+         <td> #= inicio #</td>
+      </tr>
+
+      <tr>
+        <td><strong>Término:</strong></td>
+         <td>#= fin #</td>
+      </tr>
+
+      <tr>
+        <td><strong>Tiempo:</strong></td>
+         <td>#= tiempoTranscurrido # minutos</td>
+      </tr>
+
+    </table>
+
+</script>
+<script>
+    var myTemplate2 = kendo.template($('#my-template2').html());
+</script>
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.SeleccionGruaModel>()
+            .Name("gridGruas")
+            @*.Events(s => s.DataBound("quitData").DataBinding("quitData"))*@
+
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.idAsignacion).Hidden();
+                columns.Bound(c => c.fullGrua).Title("Grúa").Width(100).Width(250).ClientTemplate("#=myTemplate(data)#");
+                columns.Bound(c => c.servicios).Title("Servicios").Width(100).ClientTemplate("#=myTemplate1(data)#");
+                columns.Bound(c => c.tiempoServicio).Title("Tiempo de servicio").Width(100).ClientTemplate("#=myTemplate2(data)#");
+               columns.Bound(p => p.idAsignacion).ClientTemplate(
+            "<button onclick=\"editarGrua('#= idAsignacion #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>"
+            ).Title("Editar").Sortable(false).Width(90);
+                columns.Template("<button data-bs-toggle='modal' class='w-100 btn'><h6 class='m-0 colorDanger' onclick='eliminarGruaModal(event)'><i class='h5 icon-delete me-2'></i><b>Eliminar</b></h6></button>").Width(50);
+
+            
+            })
+            .HtmlAttributes(new { style = "height:400px" })
+            .Sortable()
+            ////.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GruasAsignadasTabla", "AsignacionGruas"))
+            .PageSize(5).Model(model => model.Id(p => p.fullGrua))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.fullGrua);
+                s.Field(c => c.servicios);
+                s.Field(c => c.tiempoServicio);
+
+             
+            })
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(x => x.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            )
+    </div>
+
+    <div class="modal fade modalCustom" id="eliminarGruaModal"  aria-labelledby="eliminarGruaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="ModalBodyEliminarGrua">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modalCustom" id="editarGruaModal"  aria-labelledby="editarGruaLabel" aria-hidden="true">
+        <div class="modal-body" id="ModalBodyEditarGrua">
+        </div>
+    </div>
+</div>
+
+

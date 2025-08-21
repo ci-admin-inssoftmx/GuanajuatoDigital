@@ -1,0 +1,165 @@
+﻿@model GuanajuatoAdminUsuarios.Models.BusquedaDepositoModel
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+    $(document).ready(function () {
+
+        $("#busquedaPrDepositoForm").on("submit",(e)=>{e.preventDefault()})
+
+
+        var access = @listaIdsPermitidosJson;
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡EL usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡EL usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+</script>
+<div class="mainContainer bg-light">
+
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    
+                    <div class="col-auto">
+                        <i class="icon-deposito h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Búsqueda por Depósito</b></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-4 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-auto mt-4 mb-2">
+        </div>
+        <form id="busquedaPrDepositoForm" class="row px-4 mb-4 align-items-end">
+            <div class="col-12">
+                <div class="row align-items-end">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBoxFor(t => t.placa)
+                                .HtmlAttributes(new { style = "width: 80%" })
+                                .Label(l => l.Content("Placas:"))
+                                .Placeholder("Ingresa la placa")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                        </div>
+                    </div>
+                      <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBoxFor(t => t.serie)
+                                .HtmlAttributes(new { style = "width: 80%" })
+                                .Label(l => l.Content("Serie:"))
+                                .Placeholder("Ingresa el número de serie")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Fecha de ingreso:</label>
+                            <span>
+                                @(Html.Kendo().DatePickerFor(t => t.fechaIngreso).Max(DateTime.Now)
+                                    .Label(l => l.Content("Fecha:"))
+                                    .Culture("es-ES")
+                                    .HtmlAttributes(new { style = "width: 100%", title = "please enter date" })
+                                    )
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBoxFor(t => t.folioInfraccion)
+                                    .HtmlAttributes(new { style = "width: 80%" })
+                                    .Label(l => l.Content("Folio de infracción:"))
+                                    .Placeholder("Ingresa el número folio")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+                        </div>
+
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBoxFor(t => t.propietario)
+                            .HtmlAttributes(new { style = "width: 80%" })
+                            .Label(l => l.Content("Propietario del vehículo:"))
+                            .Placeholder("Ingresa nombre del propietario")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                        </div>
+
+                    </div>
+                    <div class="px-4 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div type ="button" class="controlButton my-3" onclick="buscarDeposito()">
+                            @(Html.Kendo().Button()
+                    .Name("buscarVehiculo")
+                    .HtmlAttributes(new { @class = "btnPrimary" })
+                    .Content("<h5 class=\"m-0\"><b>Buscar</b></h5>"))
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <partial name="_ListadoServiciosDeposito" model="Model" />
+
+    </section>
+
+
+ </div>
+ <script>
+    function buscarDeposito(){
+          event.preventDefault();
+        var Mydata = $("#busquedaPrDepositoForm").serialize();
+        console.log(Mydata);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_BusquedaDepositos", "BusquedaDeposito")',
+            type: 'POST',
+            data: Mydata,
+            success: (data) => {
+                console.log(data)
+                var grid = $("#gridBusquedaServicioDepositos2").data("kendoGrid");
+                grid.dataSource.data(data);
+                grid.dataSource.page(0);
+                hideLoading();
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+     
+ </script>

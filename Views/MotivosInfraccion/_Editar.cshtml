@@ -1,0 +1,293 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CatMotivosInfraccionModel
+
+@{
+    Layout = null;
+}
+
+<script>
+    function corporacionFilter() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+
+    var controlsValidate = [];
+    $(document).ready(function () {
+        hideLoading();
+
+        //controlsValidate.push({ 'controlName': 'ddlConcepto', 'isDropDown': true });
+        controlsValidate.push({ 'controlName': 'idSubConcepto', 'isDropDown': true });
+        controlsValidate.push({ 'controlName': 'Nombre', 'isInput': true });
+        controlsValidate.push({ 'controlName': 'CalificacionMinima', 'isInput': true });
+        controlsValidate.push({ 'controlName': 'CalificacionMaxima', 'isInput': true });
+        controlsValidate.push({ 'controlName': 'Fundamento', 'isInput': true });
+
+        //Se agrega a los controles requeridos el evento de perdida de foco para remover el estilo de requerido
+        addOnLostFocusRequiredControls(controlsValidate);
+
+    });
+
+    window.IdConceptoWM = "@Model.idConcepto"
+
+    function GetData() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+        return { idConcepto: window.IdConceptoWM, idDependencia: idDependencia }
+    }
+
+    function loadSubConceptos2() {
+        var value = $("#ddlConcepto").val()
+        window.IdConceptoWM = value
+        $("#idSubConcepto").data("kendoDropDownList").dataSource.read()
+    }
+
+</script>
+
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-editInfracion h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Editar motivo de infracción</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <form id="EditarMotivoInfraccionForm" class="row px-4 mb-4 align-items-end justify-content-center">
+        <div class="row align-items-end">
+            <div class="col-12 col-lg-6 my-4">
+                <h5 class="px-4"><b>Datos de motivo de infracción</b></h5>
+                <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+            </div>
+            <div class="col-12 col-lg-6 my-4 btnToggleActive">
+                @(Html.Kendo().SwitchFor(t => t.ValorEstatusMotivosInfraccion)
+                        .Name("motivosInfraccionSwitch")
+                    .Checked(Model.Estatus == 1)
+                    .Messages(c => c.Checked("Activo").Unchecked("Inactivo"))
+                    .HtmlAttributes(new { data_valor = Model.Estatus })
+                    )
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Tipo motivo infracción:</label>
+                @Html.HiddenFor(model => model.Corp, new { id = "idDependenciaFiltro" })
+
+                @(
+
+                    Html.Kendo().DropDownListFor(m => m.idConcepto).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .Events(e => e.Change("loadSubConceptos2"))
+                    .HtmlAttributes(new { style = "width:100%;", id = "ddlConcepto", required = "required" })
+                    .DataSource(s =>
+                    {
+                        s.Read(w =>
+                        {
+                            w.Action("GetConceptoPorCorp", "MotivosInfraccion").Data("corporacionFilter");
+                        });
+                    })
+                    .DataValueField("value")
+                    .DataTextField("text")
+                    .OptionLabel("-- Seleccione --")
+
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Subtitpo motivo infracción <b>(obligatorio)</b>:</label>
+                <div id="divSubConcepto">
+                    @(Html.Kendo().DropDownListFor(m => m.idSubConcepto).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                        .DataSource(s =>
+                        {
+                            s.Read(w =>
+                            {
+                                w.Action("drop_GetcatSubConceptoInfraccion", "MotivosInfraccion").Data("GetData");
+                            });
+                        })
+                        .DataValueField("value")
+                        .DataTextField("text")
+                                    .OptionLabel("-- Seleccione --")
+                                    .HtmlAttributes(new { style = "width:100%;" }))
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @Html.HiddenFor(m => m.IdCatMotivoInfraccion)
+                @(Html.Kendo().TextBoxFor(t=>t.Nombre)
+                                .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa el nombre del motivo de infracción")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t=>t.CalificacionMinima)
+                    .Label(l => l.Content("Calificación mínima <b>(obligatorio)</b>:"))
+                                .Placeholder("Mínima")
+                                .HtmlAttributes(new { style = "width: 100%", type = "number" })
+                                )
+
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t=>t.CalificacionMaxima)
+                    .Label(l => l.Content("Calificación máxima <b>(obligatorio)</b>:"))
+                                .HtmlAttributes(new { style = "width: 100%", type = "number" })
+                                )
+
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <span>
+                    @(Html.Kendo().TextBoxFor(t=>t.Fundamento)
+                                    .Label(label => label.Content("Fundamento <b>(obligatorio)</b>:"))
+@*                                    .Rows(3)
+                                    .MaxLength(200)*@
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Fecha inicio de vigencia</label>
+                            <span>
+                    @(Html.Kendo().DatePickerFor(t => t.fechaInicioVigencia).Format("dd/MM/yyyy")
+                        .Culture("es-ES")
+                        .HtmlAttributes(new { style = "width: 100%", title = "startDate" })
+                                    
+                                    )
+                            </span>
+                        </div>
+                    </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+               <label>Fecha final de vigencia</label>
+                <span>
+                    @(Html.Kendo().DatePickerFor(t => t.fechaFinVigencia).Format("dd/MM/yyyy")
+                        .Culture("es-ES")
+                        .HtmlAttributes(new { style = "width: 100%", title = "startDate" })
+                        
+                        )
+                </span>
+            </div>
+        </div>
+    </form>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton">
+                        <button class="btnPrimary px-3" onclick="editarMotivoInfraccion()">
+                            <h5 class="m-0"><b>Guardar</b></h5>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+  
+<script>
+ function editarMotivoInfraccion() {
+        var CORP = $("#idDependenciaFiltro").val();
+        CORP = CORP ? CORP : null;
+        $("#EditarMotivoInfraccionForm").find('input[name="Corp"]').val(CORP);
+
+        var Mydata = $("#EditarMotivoInfraccionForm").serialize();
+        console.log(Mydata);
+        if (!isControlsValidWithFocus(controlsValidate).isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+        var minimo = parseInt($("#CalificacionMinima").val(), 0);
+        var maximo = parseInt($("#CalificacionMaxima").val(), 0);
+        var element = $('#CalificacionMinima');
+        element.removeClass("errorData");
+
+        if (minimo <= 0) {
+            element.addClass("errorData");
+            element.focus();
+            sitteg_warning('La calificación mínima debe ser mayor a 0.');
+            return;
+        }
+
+        element = $('#CalificacionMaxima');
+        element.removeClass("errorData");
+        if (maximo <= 0) {
+            element.addClass("errorData");
+            element.focus();
+            sitteg_warning('La calificación máxima debe ser mayor a 0.');
+            return;
+        }
+
+        $('#addMotivo').modal('hide');
+        $('body').removeClass('model-open');
+        $('.modal-backdrop').remove();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcialModal")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+              var grid = $("#gridCatMotivos").data("kendoGrid");
+                grid.dataSource.read();
+                $('#addMotivo').modal('hide');
+                sitteg_success("Información actualizada correctamente.");
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+    $("#ddlConcepto").on("change", function () {
+        var value = $(this).val();
+        var ddlIdSubConcepto = $("#idSubConcepto").data("kendoDropDownList");
+        ddlIdSubConcepto.dataSource.data([]);
+
+        var functionName = "_on_change_SubConcepto";
+        _set_combo_catalog("CatSubConceptoInfraccion", value, "idSubConcepto", "false", "divSubConcepto", functionName);
+    });
+
+    function _on_change_SubConcepto() {
+        var value = $("#idSubConcepto").val();
+    }
+
+</script>

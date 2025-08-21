@@ -1,0 +1,244 @@
+﻿<script>
+
+    function TemplateAsignar(data){
+        var result = ""
+            if (data.Estado == 1 || data.Estado == 2) {
+                result=`<button class='k-button' style='border: 2px solid;' onclick='AsigBlo("${data.Serie}")'>Asignar</button>`
+                     } else {
+                result=""
+            } 
+            return result
+    }
+
+    function TemplateCancelar(data) {
+        var result = ""
+        if (data.Estado == 1 || data.Estado == 2) {
+            result = `<button class='k-button' onclick='CancelBlo("${data.RegistraId}","${data.Serie}")'>Cancelar</button>`
+        } else {
+            result = ""
+        }
+        return result
+    }
+
+    function TemplateEstatus(data) {
+        var result = ""
+        if (data.Estado == 1 || data.Estado == 2) {
+            result = `<span class='k-label k-state-info k-state-default'>${data.Estadodesc}</span>`
+        } else {
+            result = `<span class='k-label k-state-error k-state-default'>${data.Estadodesc}</span>`
+        }
+        return result
+    }
+
+
+    function BlockTemplate(d){
+
+        return `
+            <div>No. de Serie: <b>${d.Serie}</b></div>
+            <div>No. de boletas: <b>${d.TotalBoletas}</b></div>
+            <div>Inicia / Termina: <b>${d.Rango}</b></div>
+            <div>Disponibles: <b>${d.Disponibles}</b></div>
+        `
+    }
+
+
+    var imgId = {}
+
+
+    function ShowModalImg(i){
+
+        var  imgb64 = imgId[i]
+
+        var img = $('#imageViewerInv')
+        var imgtag = `<img src='${imgb64}' alt='evidencia' class='img-thumbnail' style='max-width: 400px;' />`
+        img.empty().append(imgtag)        
+        $('#archivoInvModal').modal('show');       
+    }
+
+
+    function succes(e){
+        console.log(e)
+        var id = e.id
+        var b64 = e.b64
+        if (b64) {
+            var img = $(`#img${id}`)
+            if (img) {
+                if (e.mime =="1"){
+
+                    imgId[id]=b64
+
+                    var imgtag = `<a onclick="ShowModalImg('${id}')"  ><img src='${b64}' alt='evidencia' class='img-thumbnail' style='max-width: 100px;' /> </a>`
+                    img.empty().append(imgtag)
+                }
+                else{
+                    var imgtag = `<a class="k-button" href="${b64}" download >Descargar </a>`
+                    img.empty().append(imgtag)
+                }                               
+            }
+        }else{
+            $(`#img${id}`).empty()
+        }
+    }
+
+
+    function ImagenTemplate(data){
+        SimpleAjaxPeticion("./GetImg", { idBlock: data.RegistraId }, succes)
+        return `<div id="img${data.RegistraId}"><img src="@Url.Content("~/img/loadingfile.gif")" style='max-width: 50px;' /></div>`
+    }
+    function cerrarIframeInv() {
+        $('#archivoInvModal').modal('hide');
+
+    }
+
+
+</script>
+
+
+
+<div class="modal fade" id="archivoInvModal" tabindex="-1" aria-labelledby="archivoInvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="archivoModalLabel">Vista Previa del Archivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row d-flex justify-content-center " id="imageViewerInv">
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cerrarIframeInv()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.Blocs.BlocListItemModel>()
+                        .Name("gridBlocs")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.Serie).Title("Bloc").Width(200).ClientTemplate("#=BlockTemplate(data)#");
+                            // columns.Bound(c => c.Serie).Title("No. de Serie").Width(80);
+                            // columns.Bound(c => c.TotalBoletas).Title("No. de boletas").Width(100);
+                            //columns.Bound(c => c.Rango).Title("Inicia / Termina").Width(100);
+                            // columns.Bound(c => c.Disponibles).Title("Disponibles").Width(100);                        
+                            columns.Bound(c => c.TipoBlock).Title("Tipo de bloc").Width(80);
+                            columns.Bound(c => c.Asigna).Title("Asigna").Width(100);
+                            columns.Bound(c => c.Oficina).Title("Delegación").Width(90);
+                            columns.Bound(c => c.OficialAsignado).Title("Oficial asignado").Width(100);
+                            columns.Bound(c => c.FechAsignacion).Title("Fecha asignación").Width(100);
+                            columns.Bound(c => c.Serie).Title("Imagen").Width(100).ClientTemplate("#=ImagenTemplate(data)#");
+                            columns.Bound(c => c.OficialAsignado).Title("Asignar").ClientTemplate("#=TemplateAsignar(data)#").Width(100);
+                        columns.Bound(c => c.OficialAsignado).Title("Cancelar").ClientTemplate("#=TemplateCancelar(data)#").Width(100);
+                        columns.Bound(c => c.IsCancelado).Title("Estado").ClientTemplate("#=TemplateEstatus(data)#")
+                        .HtmlAttributes(new { Class = "k-text-center" })
+                        .Width(100);
+                }).HtmlAttributes(new { style = "height:650px" })
+                .Sortable()
+                .Scrollable()
+                .Pageable()
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Read(read => read.Action("getLisGridConsulta", "Blocs"))
+                    .PageSize(5)
+                )
+                .ToolBar(t => t.Search().Text("Buscar..."))
+                .Search(s =>
+                {
+                    s.Field(c => c.Serie);
+                    s.Field(c => c.Asigna);
+                    s.Field(c => c.OficialAsignado);
+                })
+                .Events(e => e.DataBound("onDataBound"))
+        )
+    </div>
+</div>
+
+
+
+
+
+
+<style>
+    .k-state-error {
+        background-color: red;
+        color: white;
+        text-align: center;
+        text-transform: uppercase;
+        font-weight: bold;
+        padding: 5px 10px; /* Ajusta el padding para que coincida con el botón */
+        border-radius: 3px;
+        display: inline-block; /* Asegura que el span se comporte como un botón */
+        margin: 0 auto;
+    }
+
+    .k-state-info {
+        background-color: var(--main-color);
+        color: white;
+        text-align: center;
+        text-transform: uppercase;
+        font-weight: bold;
+        padding: 5px 10px; /* Ajusta el padding para que coincida con el botón */
+        border-radius: 3px;
+        display: inline-block; /* Asegura que el span se comporte como un botón */
+        margin: 0 auto;
+    }
+</style>
+
+<script>
+    function onDataBound() {
+        var grid = $("#gridBlocs").data("kendoGrid");
+        var dataItems = grid.dataSource.view();
+
+        dataItems.forEach(function (item, index) {
+            var row = grid.table.find("tr[data-uid='" + item.uid + "']");
+            if (!item.OficialAsignado) {
+                var cell = row.find("td").eq(6);
+                cell.addClass("k-text-center");
+            }
+        });
+    }
+
+
+    function CancelBlo(blocId, numeroSerie) {
+        showLoading();
+
+        $.ajax({
+            url: '@Url.Action("CancelParcial", "Blocs")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { blocId, numeroSerie }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalCancelBlo').html(result);
+                $('#CancelBloc').modal('show');
+                hideLoading();
+            }, error: function (jqXHR, textStatus, errorThrown) {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function AsigBlo(numeroSerie) {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("AsignarOficialParcial", "Blocs")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { numeroSerie: numeroSerie }, // Datos que se enviarán al controlador
+            success: function (result) {                
+                $('#ModalAsignaBlo').html(result);
+                $('#asigOficial').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }   
+
+</script>
+

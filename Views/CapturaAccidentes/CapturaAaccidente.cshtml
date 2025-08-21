@@ -1,0 +1,1818 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{
+	bool esSoloLectura = ViewBag.EsSoloLectura ?? false;
+	var EsEdicion = ViewBag.EsEdicion;
+	var EtiReq = "Folio Emergencia (obligatorio)";
+}
+<script>
+	function isGoogleMapsScriptLoaded() {
+		const scripts = document.getElementsByTagName('script');
+		for (let i = 0; i < scripts.length; i++) {
+			if (scripts[i].src.includes('https://maps.googleapis.com/maps/api/js')) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	if (!isGoogleMapsScriptLoaded()) {
+		const script = document.createElement('script');
+		script.defer = true;
+		script.src = `https://maps.googleapis.com/maps/api/js?key=@Configuration["AppSettings:GoogleMapsApiKey"]&loading=async&libraries=marker`;
+		document.head.appendChild(script);
+	}
+</script>
+
+<style>
+	#map-canvas {
+		height: 400px;
+	}
+
+	.map-control {
+		position: absolute;
+		top: 30px; /* Separa el botón 20 píxeles desde el borde superior */
+		left: 10px; /* Mantiene el botón 10 píxeles desde el borde izquierdo */
+		z-index: 5;
+		background-color: white;
+		border: 2px solid #ccc;
+		padding: 10px 15px; /* Aumenta el relleno interno para hacer el botón más grande */
+		border-radius: 8px; /* Aumenta el radio del borde para un botón más redondeado */
+		cursor: pointer;
+		font-size: 18px; /* Aumenta el tamaño de la fuente del texto del botón */
+		text-align: center; /* Centra el texto dentro del botón */
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Añade una sombra sutil al botón */
+	}
+</style>
+<script>
+	window.idAccidente = @Model.IdAccidente;
+	window.eseditar = "1"
+	window.DoEditar = "1"
+</script>
+<style>
+	body {
+		font-family: Arial, sans-serif;
+		margin: 0;
+		padding: 0;
+	}
+
+	.col-12 {
+		padding: 0 15px;
+	}
+
+	.drop-area {
+		border: 2px dashed #d3d3d3;
+		border-radius: 10px;
+		padding: 20px;
+		margin: 20px auto;
+		max-width: 600px;
+		position: relative;
+		cursor: pointer;
+		overflow: hidden;
+	}
+
+		.drop-area p {
+			margin: 0;
+			font-size: 16px;
+			color: #d3d3d3;
+		}
+
+	#croquisImage {
+		max-width: 100%;
+		max-height: 400px;
+		display: block;
+		margin: 20px auto 0;
+	}
+
+	.file-name {
+		margin-top: 10px;
+		font-size: 14px;
+		color: #333;
+	}
+
+	.hidden {
+		visibility: hidden;
+	}
+</style>
+
+<div class="mainContainer bg-light">
+	<section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded pb-1">
+		<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+			<div class="col-12 col-md-auto">
+				<div class="row align-items-center justify-content-center justify-content-md-start">
+					<div class="col-auto">
+						<div class="border border-2 border-dark rounded-circle">
+							<h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+								<b>1</b>
+							</h5>
+						</div>
+					</div>
+					<div class="col-auto">
+						<i class="icon-accidentes h1 colorPrimary"></i>
+					</div>
+					<div class="col-auto my-3">
+						<h2 class="m-0 h3"><b>Accidente</b></h2>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<div class="row">
+			<div class="col-12">
+				<div class="bgSuccess py-1"></div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-12 my-4">
+				<h5 class="px-4 colorSuccess d-flex align-items-center"><b class="d-flex align-items-center justify-content-center bgSuccess mb-1 me-2 rounded-circle px-1"><i style="font-size: 10px; padding: 7px 2px;" class="icon-correct text-white"></i></b><b>Accidente capturado en Registro de Infracciones y Accidentes de Guanajuato</b></h5>
+				<h6 class="px-4 text-muted">El accidente ya está capturado en la plataforma. Puede actualizar o corregir la información del vehículo.</h6>
+			</div>
+		</div>
+		<form class="row px-4 align-items-end" id="AccidenteInfoForm">
+			@Html.HiddenFor(m => m.IdEmergencia)
+			<div class="col-auto">
+				<div class="controlForm mb-3">
+					<label class="text-muted">No. de reporte de accidente:</label>
+					<label>@Model.NumeroReporte</label>
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3">
+					<label class="text-muted">Fecha<b> (obligatorio)</b>:</label>
+					@(Html.Kendo().DatePickerFor(t => t.Fecha).Max(DateTime.Now)
+
+						.Label(l => l.Content("Fecha:"))
+						.Format("dd/MM/yyyy")
+						.Culture("es-ES")
+						.Events(e =>
+						{
+							e.Change("validarFecha");
+						})
+						.Enable(!ViewBag.EsSoloLectura)
+						.HtmlAttributes(new { style = "width: 100%", id = "dateF" })
+						)
+					@* <label>@Model.FechaFormateada - @Model.Hora</label> *@
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3">
+					<label class="tex">Hora (formato 24 horas)<b> (obligatorio)</b>:</label>
+					@{
+						string horaFormateada = Model.Hora != null ? Model.Hora.Value.ToString("hh\\:mm") : string.Empty;
+					}
+					<input autocomplete="off" type="text" value="@horaFormateada" id="dateTime" name="HoraStr" onkeydown="validacionHora(event)" onblur="valid5char(event)" style="height: 3.6em;" @(ViewBag.EsSoloLectura ? "disabled" : "") />
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-4">
+				<div class="controlForm mb-3">
+					<label id="LabFolio">Folio Emergencia</label>
+					<div class="input-group">
+						<input autocomplete="off" value="@Model.FolioEmergencia" type="text" id="FolioEmergencia" name="FolioEmergencia" class="form-control" style="height: 3.5em;" @(ViewBag.EsSoloLectura ? "disabled" : "") onkeypress="return event.charCode >= 48 && event.charCode <= 57" />
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3">
+					<label>Municipio<b> (obligatorio)</b>:</label>
+						@if(ViewBag.EsSoloLectura != null && ViewBag.EsSoloLectura)
+					{
+						@(Html.Kendo().DropDownListFor(t => t.IdMunicipio).NoDataTemplate("No se encontraron datos")
+							.Filter(FilterType.Contains)
+							.DataTextField("Text")
+							.DataValueField("Value")
+							.OptionLabel("Selecciona un Municipio")
+							.HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "ddlMunicipios", disabled = "disabled" })
+							.DataSource(source =>
+
+							{
+								source.Read(read =>
+								{
+									read.Action("Municipios_Por_Delegacion_DropActivos", "CapturaAccidentes");
+								});
+							})
+							.Events(e => e.Change("onMunicipioChange"))
+						)
+					}
+					else
+					{
+						@(Html.Kendo().DropDownListFor(t => t.IdMunicipio).NoDataTemplate("No se encontraron datos")
+							.Filter(FilterType.Contains)
+							.DataTextField("Text")
+							.DataValueField("Value")
+							.OptionLabel("Selecciona un Municipio")
+							.HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "ddlMunicipios" })
+							.DataSource(source =>
+							{
+								source.Read(read =>
+								{
+									read.Action("Municipios_Por_Delegacion_DropActivos", "CapturaAccidentes");
+								});
+							})
+							.Events(e => e.Change("onMunicipioChange"))
+						)
+					}
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3">
+					<label>Carretera <b>(obligatorio)</b>:</label>
+				@if(ViewBag.EsSoloLectura != null && ViewBag.EsSoloLectura)
+					{
+						@(Html.Kendo().DropDownListFor(t => t.IdCarretera).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+							.DataTextField("Text")
+							.DataValueField("Value")
+							.OptionLabel("Selecciona una Carretera")						
+							.DataSource(source =>
+							{
+								source.Read(read =>
+								{
+									read.Action("Carreteras_DropTodos", "CapturaAccidentes");
+								});
+							})
+							.Events(e => e.Change("OnCarreteraChange"))
+							//.HtmlAttributes(new { data_required_msg = "El campo Municipio es obligatorio" })
+							.HtmlAttributes(new { style = "width:100%;", Id = "ddlCarreteras", disabled = "disabled" })
+						)
+					}
+					else
+					{
+						@(Html.Kendo().DropDownListFor(t => t.IdCarretera).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+							.DataTextField("Text")
+							.DataValueField("Value")
+							.OptionLabel("Selecciona una Carretera")
+							.DataSource(source =>
+							{
+								source.Read(read =>
+								{
+									read.Action("CarreterasPorDelegacion_DropTodos", "CatCarreteras");
+								});
+							})
+							.Events(e => e.Change("OnCarreteraChange"))
+							//.HtmlAttributes(new { data_required_msg = "El campo Municipio es obligatorio" })
+							.HtmlAttributes(new { style = "width:100%;", Id = "ddlCarreteras" })
+							)
+					}
+				</div>
+			</div>			
+
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3">
+					<label>Tramo <b>(obligatorio)</b>:</label>
+					@if(ViewBag.EsSoloLectura != null && ViewBag.EsSoloLectura)
+					{
+						@(
+							Html.Kendo().DropDownListFor(t => t.IdTramo).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+								.DataTextField("Text")							
+								.DataValueField("Value")
+								.OptionLabel("Selecciona un Tramo")
+								.DataSource(source =>
+								{
+									source.Read(read =>
+									{
+										read.Action("Tramos_Drop", "CapturaAccidentes", new { carreteraDDValue = Model.IdCarretera });
+									});
+							})						
+							//.HtmlAttributes(new { data_required_msg = "El campo Municipio es obligatorio" })
+							.HtmlAttributes(new { style = "width:100%;", Id = "ddlTramos", disabled = "disabled" })
+						)
+					}
+					else
+					{
+						@(
+							Html.Kendo().DropDownListFor(t => t.IdTramo).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+							.DataTextField("Text")						
+
+							.DataValueField("Value")
+							.OptionLabel("Selecciona un Tramo")
+							.DataSource(source =>
+							{
+								source.Read(read =>
+								{
+									read.Action("Tramos_Drop", "CapturaAccidentes", new { carreteraDDValue = Model.IdCarretera });
+								});
+							})
+							//.HtmlAttributes(new { data_required_msg = "El campo Municipio es obligatorio" })
+							.HtmlAttributes(new { style = "width:100%;", Id = "ddlTramos" })
+						)
+}
+
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-4">
+				<div class="controlForm mb-3">
+					<label>Kilómetro <b>(obligatorio)</b>:</label>
+					<div class="input-group">
+						<input autocomplete="off" value="@Model.Kilometro" type="text" id="txtKilometro" name="Kilometro" class="form-control" onkeydown="ValidarKm(event)" onkeyup="validarKm()" style="height: 3.5em;" @(ViewBag.EsSoloLectura ? "disabled" : "") />
+					</div>
+				</div>
+			</div>
+			
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 d-none">
+				<div class="controlForm my-3">
+					<label>Turno:</label>
+					@(Html.Kendo().DropDownListFor(s => s.IdTurno)
+						.NoDataTemplate("No se encontraron datos")
+						.DataTextField("Text")
+						.DataValueField("Value")
+						.DataSource(source =>
+						{
+							source.Read(read =>
+							{
+								read.Action("GetTurnosDropDownList", "CapturaAccidentes").Data("getMunicipioIdSelected");
+							});
+						})
+						.OptionLabel("Selecciona un Turno")
+						.Filter(FilterType.Contains)
+						.HtmlAttributes(new { style = "width:100%;", id = "idTurno" })
+						.Enable(!ViewBag.EsSoloLectura)
+					)
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3">
+					@(Html.Kendo().TextBoxFor(t=>t.lugarCalle)
+						.Label(l => l.Content("Calle:"))
+						.Placeholder("Ingresa calle")
+						.HtmlAttributes(new
+						{
+							style = "width: 100%",
+							type = "text",
+							title = "Ingrese una calle valida."
+						})
+					.Enable(!ViewBag.EsSoloLectura) 
+
+						)
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3">
+					@(Html.Kendo().TextBoxFor(t=>t.lugarNumero)
+						.Label(l => l.Content("Número:"))
+						.Placeholder("Ingresa número")
+						.HtmlAttributes(new
+						{
+							style = "width: 100%",
+							type = "text",
+							title = "Ingrese un número valida."
+						})
+						.Enable(!ViewBag.EsSoloLectura)
+						)
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3">
+					@(Html.Kendo().TextBoxFor(t=>t.lugarColonia)
+						
+						.Label(l => l.Content("Colonia:"))
+						.Placeholder("Ingresa colonia")
+						.HtmlAttributes(new
+						{
+							style = "width: 100%",
+							type = "text",
+							title = "Ingrese una colonia valida."
+						})
+						.Enable(!ViewBag.EsSoloLectura)
+						)
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 d-none">
+				<div class="controlForm my-3">
+					@(Html.Kendo().TextBoxFor(t => t.Direccion)
+						.Label(l => l.Content("Direccion:"))
+						.Placeholder("Ingresa Dirección")
+						.HtmlAttributes(new
+						{
+							style = "width: 100%",
+							type = "text",
+							title = "Ingrese una dirección valida."
+						})
+						.Enable(!ViewBag.EsSoloLectura)
+						)
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3">
+					@(Html.Kendo().TextBoxFor(t => t.Latitud)
+						.Label(l => l.Content("Latitud:"))
+						.Placeholder("Ingresa Latitud")
+						.HtmlAttributes(new
+						{
+							style = "width: 100%",
+							type = "text",
+							pattern = @"^-?\d+(\.\d+)?$",
+							title = "Ingrese un número decimal, puede ser negativo.",
+							inputmode = "decimal", // Ayuda a los navegadores y dispositivos móviles a mostrar el teclado adecuado
+							oninput = "this.value=this.value.replace(/[^0-9.-]/g,'')" // Reemplaza caracteres no permitidos en tiempo real
+						})
+						.Enable(!ViewBag.EsSoloLectura)
+						)
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3">
+					@(Html.Kendo().TextBoxFor(t => t.Longitud)
+						.Label(l => l.Content("Longitud:"))
+						.Placeholder("Ingresa Longitud")
+						.HtmlAttributes(new
+						{
+							style = "width: 100%",
+							type = "text",
+							pattern = @"^-?\d+(\.\d+)?$",
+							title = "Ingrese un número decimal, puede ser negativo.",
+							inputmode = "decimal", // Ayuda a los navegadores y dispositivos móviles a mostrar el teclado adecuado
+							oninput = "this.value=this.value.replace(/[^0-9.-]/g,'')" // Reemplaza caracteres no permitidos en tiempo real
+						})
+						.Enable(!ViewBag.EsSoloLectura)
+						)
+				</div>
+			</div>
+			<div class="col-12">
+				<div class="row">
+					<div class="col-6">
+						<div class="controlForm my-3">
+							<label>Observaciones tramo:</label>
+							<div class="input-group">
+<textarea 
+    autocomplete="off" 
+    name="observacionesTramo" 
+    class="form-control" 
+    rows="2" 
+    @(ViewBag.EsSoloLectura ? "disabled" : "")>@Model.observacionesTramo</textarea>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-12 btnOutline btnOutlinePrimary col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlButton my-3">
+					<button class="btn-info px-3" id="btnGeolocalizacion" onclick="buscarDireccion(event)" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+						<h5 class="m-0"><b>Buscar</b></h5>
+					</button>
+				</div>
+			</div>
+			<div class="col-12 btnOutline btnOutlinePrimary col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlButton my-3">
+					<button class="btn-info px-3" id="btnGeolocalizacion" onclick="getLocation(event)" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+						<h5 class="m-0"><b>Gelocate</b></h5>
+					</button>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-6">
+					<div class="controlForm ">
+						<label class="d-flex align-items-center">
+							<i class="icon-geolocalizacion h1 colorPrimary "></i>
+							<span>Datos de geolocalización</span>
+						</label>
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-12" id="modalBodyCargaGeolocalizacion">
+					<div class="row  ">
+						<div class="form-group col-md-4">
+							<div class="controlForm" hidden>
+								<label>Dirección: <span id="address"></span>       <br /></label>
+								<label>Municipio: <span id="municipioGL"></span>       <br /></label>
+								<label>Longitude: <span id="longitude"></span></label>
+								<label>Latitude: <span id="latitude"></span>       <br /></label>
+							</div>
+						</div>
+					</div>
+					<div id="map-canvas"></div>
+				</div>
+			</div>
+
+
+
+			<div class="row align-items-end my-3">
+				<div class="col-12">
+					@(await Html.PartialAsync("_MultimediaFileManager", new ViewDataDictionary(ViewData) { { "controlClass", "controlForm my-3" } }))
+				</div>
+			</div>
+			<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+				<div class="col-12 col-md-auto">
+					<div class="row align-items-center justify-content-center justify-content-md-start">
+						<div class="col-auto">
+							<div class="border border-2 border-dark rounded-circle">
+								<h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+									<b>2</b>
+								</h5>
+							</div>
+						</div>
+						<div class="col-auto">
+							<i class="icon-clasificacionAccidente h1 colorPrimary"></i>
+						</div>
+						<div class="col-auto my-3">
+							<h2 class="m-0 h3"><b>Croquis</b></h2>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-8 pe-0">
+					<div class="bgSuccess py-1"></div>
+				</div>
+				<div class="col-4 ps-0">
+					<div class="bg-light py-1"></div>
+				</div>
+			</div>
+			<div class="row align-items-center justify-content-md-end">
+				<img style="max-width:130px" width="90%" src="~/img/compass-rose.png" />
+			</div>
+			<div class="col-12">
+				<div class="row">
+					<div id="dropArea" class="drop-area">
+						<p>Arrastra y suelta el archivo aquí o haz clic para seleccionarlo.</p>
+						<input @(ViewBag.EsSoloLectura ? "disabled" : "") type="file" id="archivoCroquis" name="archivoCroquis" accept="image/*" style="display: none;">
+						<img id="croquisImage" src="@Url.Action("GetFile", "CapturaAccidentes", new { fileName = Model.archivoCroquisPath })" alt="" style="max-width: 100%; height: auto;">
+						<div id="fileName" class="file-name hidden">No se ha seleccionado ningún archivo</div>
+					</div>
+				</div>
+			</div>
+
+
+		</form>
+		
+		<div class="row justify-content-center mt-1 px-4 mb-3">
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="row justify-content-around">
+					<div class="col-auto btnOutline my-2 mx-auto p-0 text-center" onclick="ActualizaInformacion()">
+					@if(ViewBag.EsSoloLectura != null && !ViewBag.EsSoloLectura)
+					{
+						@(Html.Kendo().Button()
+							.Name("editInvolucrados")
+							.HtmlAttributes(new { @class = "px-5" })
+							.Enable(!ViewBag.EsSoloLectura) 
+							.Content("<h6 class=\"m-0\"><b>Actualizar información del Accidente</b></h6>"))
+					}
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded pb-1">
+		<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+			<div class="col-12 col-md-auto">
+				<div class="row align-items-center justify-content-center justify-content-md-start">
+					<div class="col-auto">
+						<div class="border border-2 border-dark rounded-circle">
+							<h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+								<b>3</b>
+							</h5>
+						</div>
+					</div>
+					<div class="col-auto p-0">
+						<i class="icon-car h1 colorPrimary"></i>
+					</div>
+					<div class="col-auto my-3">
+						<h2 class="m-0 h3"><b>Vehículos involucrados</b></h2>
+					</div>
+				</div>
+			</div>
+			<div class="col-12 col-lg-auto text-center">
+				<div class="btnOutline btnOutlinePrimary px-4 my-3">
+					<button onclick="mostrarModalAgregarVehiculo()" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+						<h6 class="m-0"><i class="me-2 icon-research"></i><b>Buscar vehículo</b></h6>
+					</button>
+
+				</div>
+			</div>
+
+		</div>
+		<div class="row">
+			<div class="col-12">
+				<div class="bgSuccess py-1"></div>
+			</div>
+		</div>		
+		<div class="row">
+			<div class="col-12 my-4">
+				<div id="detalleVehiculo"></div>
+			</div>
+		</div>
+		<div class="row my-4 px-4">
+			<div id="listadoVehiculosPropietario" class="d-none"></div>
+		</div>
+		<div class="row my-4">
+			<div class="col-12 px-4 rounded mb-4"></div>						
+			<div id="listadoVehiculos">
+				<partial name="_ListaVehiculosInvolucrados" model="Model" esSoloLectura="@ViewBag.EsSoloLectura" />
+			</div>
+			
+		</div>
+		<div class="row mt-1 mb-3">
+			<div class="col-12">
+				<div class="row justify-content-around">
+					<div class="col-auto btnOutline my-2 mx-auto p-0 text-center" onclick="mostrarModalAgregarVehiculo()">
+						@(Html.Kendo().Button()
+							.Name("editInvolucrados")
+							.HtmlAttributes(new { @class = "px-5"})
+							.Enable(!ViewBag.EsSoloLectura) // Desactiva el botón si es solo lectura
+							.Content("<h6 class=\"m-0\"><b>Capturar nuevo vehículo</b></h6>"))
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!--MODAL AGREGAR VEHICULO INVOLUCRADO-->
+		<div class="modal fade modalCustom" id="agregarVehiculoModal" aria-labelledby="agregarVehiculoLabel" aria-hidden="true">
+			<div class="modal-dialog modal-xl" role="document">
+				<div class="modal-content">
+					<div class="modal-body" id="ModalBodyAgregarVehiculo">
+						
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--MODAL AL ANEXO 2-->
+		<div class="modal fade modalCustom" id="anexo2Modal" aria-labelledby="anexo2Label" aria-hidden="true">
+			<div class="modal-dialog modal-xl" role="document">
+				<div class="modal-content">
+					<div class="modal-body" id="BodyModalAnexo2">
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--SECCION CONDUCTOR-->
+		<div id="seccionConaductor" style="display:none;">
+			<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+				<div class="col-12 col-md-auto">
+					<div class="row align-items-center justify-content-center justify-content-md-start">
+						<div class="col-auto">
+							<div class="border border-2 border-dark rounded-circle">
+								<h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+									<b>4</b>
+								</h5>
+							</div>
+						</div>
+						<div class="col-auto p-0">
+							<i class="icon-conductor h1 colorPrimary"></i>
+						</div>
+						<div class="col-auto my-3">
+							<h2 class="m-0 h3"><b>Conductor</b></h2>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+					<div class="row">
+						<div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+							@(Html.Kendo().Button()
+								.Name("editSearchConductor")
+								.HtmlAttributes(new { @class = "px-5" })
+								.Content("<h6 class=\"m-0\"><i class=\"icon-edit me-2\"></i><b>Editar busqueda</b></h6>"))
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div class="row">
+				<div class="col-12 ps-0">
+					<div class="bg-light py-1"></div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12 my-4">
+					<h5 class="px-4"><b>Datos de conductor</b></h5>
+					<h6 class="px-4 text-muted">Propietario o búsqueda / nuevo conductor </h6>
+				</div>
+			</div>
+			<div class="row px-4 align-items-end">
+				<div class="col-12 mt-4 controlForm">
+					<label>Conductor de infracción:</label>
+				</div>
+				<div class="col-12 mb-4">
+					<h5 class="m-0 colorPrimary"><i class="icon-addConductor h4"></i> <b>Búsqueda de conductor</b></h5>
+				</div>
+			</div>
+			<div class="row justify-content-between mb-1">
+				<div class="col-12 col-lg-6 mt-4 mb-2">
+					<h5 class="px-4"><b>Listado de búsqueda</b></h5>
+					<h6 class="px-4 text-muted">Selecciona un conductor para continuar.</h6>
+				</div>
+				<div class="col-12 col-lg-auto text-center">
+					<div class="btnOutline btnOutlinePrimary px-4 my-3">
+						<button data-bs-toggle="modal" data-bs-target="#addConductor">
+							<h5 class="m-0"><i class="me-2 icon-addConductor"></i><b>Agregar un conductor nuevo</b></h5>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12 px-4 rounded mb-4">
+				</div>
+			</div>
+			<div class="row mt-1 mb-3">
+				<div class="col-12 col-md-6 mx-md-auto">
+					<div class="row justify-content-around">
+						<div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+							@(Html.Kendo().Button()
+								.Name("editConductor")
+								.HtmlAttributes(new { @class = "px-5" })
+								.Content("<h6 class=\"m-0\"><b>Editar búsqueda</b></h6>"))
+
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--MODAL AGREGAR CONDUCTOR-->
+		<div class="modal fade modalCustom" id="modalAgregarConductor" aria-labelledby="conductorLabel" aria-hidden="true">
+			<div class="modal-dialog modal-xl" role="document">
+				<div class="modal-content">
+					<div class="modal-body" id="ModalBodyAgregarConductor">
+						
+
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--MODAL COMPLEMENTO-->
+
+		<div class="modal fade modalCustom" id="modalComplementoVehiculo" aria-labelledby="modalComplementoVehiculo" aria-hidden="true" data-controls-modal="modalComplementoVehiculo" data-backdrop="static" data-keyboard="false">				
+			<div class="modal-dialog modal-xl" role="document">
+				<div class="modal-content">
+					<div class="modal-body" id="ModalBodymodalComplementoVehiculo">
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--CLASIFICACION DE ACCIDENTE-->
+		
+		<div class="modal fade modalCustom" id="clasificacionAccidenteModal" aria-labelledby="clasificacionAccidenteLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg" role="document">
+				<div class="modal-content">
+					<div class="modal-body" id="ModalBodyClasificacionAccidente">
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<div id="ClasificacionAccidente" style="display:block;">
+			<section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+				<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+					<div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+						<div class="row align-items-center justify-content-center justify-content-md-start">
+							<div class="col-auto">
+								<div class="border border-2 border-dark rounded-circle">
+									<h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+										<b>4</b>
+									</h5>
+								</div>
+							</div>
+							<div class="col-auto">
+								<i class="icon-clasificacionAccidente h1 colorPrimary"></i>
+							</div>
+							<div class="col-auto my-3">
+								<h2 class="m-0 h3"><b>Clasificación del accidente</b></h2>
+							</div>
+						</div>
+					</div>
+					<div class="col-12 col-lg-auto text-center">
+						<div class="btnOutline btnOutlinePrimary px-4 my-3">
+						<button onclick="mostrarModalCalsificacionAccidente()" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+							<h6 class="m-0"><i class="me-2 icon-addClasificacionAccidente"></i><b>Agregar clasificación</b></h6>
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-8 pe-0">
+						<div class="bgSuccess py-1"></div>
+					</div>
+					<div class="col-4 ps-0">
+						<div class="bg-light py-1"></div>
+					</div>
+				</div>
+				<div class="row justify-content-between align-items-end mb-1 titleCustom">
+					<div class="col-12 col-md-auto mt-4 mb-2">
+						<h5 class="px-4"><b>Listado de clasificación del accidente</b></h5>
+						<h6 class="px-4 text-muted">Da de alta la clasificación del accidente.</h6>
+					</div>
+				</div>
+			<partial name="_ListaClasificacion" model="Model" esSoloLectura="@ViewBag.EsSoloLectura" />
+				<div class="row ">
+					<!--TABLA-->
+					<div class="col-12 col-md-6 mx-md-auto">
+						<div class="row justify-content-around">
+							<div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+								<div class="controlButton my-3">
+								<a class="text-decoration-none d-flex px-5" href="@Url.Action("CapturaBAccidente", "CapturaAccidentes", new { esSoloLectura = esSoloLectura })">
+									<h6 class="m-0"><b>Siguiente</b></h6>
+								</a>
+							</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
+</div>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const dropArea = document.getElementById('dropArea');
+		const fileInput = document.getElementById('archivoCroquis');
+		const croquisImage = document.getElementById('croquisImage');
+		const fileNameDisplay = document.getElementById('fileName');
+
+		// Abrir el selector de archivos cuando se hace clic en el área de arrastre
+		dropArea.addEventListener('click', () => {
+			fileInput.click();
+		});
+
+		// Manejar el archivo seleccionado
+		fileInput.addEventListener('change', handleFile);
+
+		// Manejar el archivo arrastrado y soltado
+		dropArea.addEventListener('dragover', (event) => {
+			event.preventDefault(); // Necesario para permitir el soltar
+			dropArea.classList.add('dragover');
+		});
+
+		dropArea.addEventListener('dragleave', () => {
+			dropArea.classList.remove('dragover');
+		});
+
+		dropArea.addEventListener('drop', (event) => {
+			event.preventDefault();
+			dropArea.classList.remove('dragover');
+			const file = event.dataTransfer.files[0];
+			if (file) {
+				fileInput.files = event.dataTransfer.files; // Actualiza fileInput con el archivo arrastrado
+				handleFile({ target: { files: [file] } });
+			}
+		});
+
+		function handleFile(event) {
+			const file = event.target.files[0];
+			if (file) {
+				const reader = new FileReader();
+				reader.onload = function (e) {
+					croquisImage.src = e.target.result;
+				};
+				reader.readAsDataURL(file);
+				fileNameDisplay.textContent = file.name; // Muestra el nombre del archivo
+			} else {
+				fileNameDisplay.textContent = 'No se ha seleccionado ningún archivo';
+			}
+		}
+	});
+
+	$(document).ready(function () {
+		var urlParams = new URLSearchParams(window.location.search);
+		var showClasificacionAccidente = urlParams.get('showE');
+
+		$("#txtKilometro").on("input", function () {
+			var value = this.value;
+			if (value !== "") {
+				this.value = value.replace(/[^\d.]/g, "");
+			}
+		});
+
+		$("#txtKilometro").on("paste", function (e) {
+			e.preventDefault();
+			var clipboardData = e.originalEvent.clipboardData.getData('text/plain');
+			if (/^\d+$/.test(clipboardData)) {
+				document.execCommand('insertText', false, clipboardData);
+			}
+		});
+
+		FolioVisible();
+
+		if (showClasificacionAccidente === 'true') {
+			$('#ClasificacionAccidente').show();
+		}
+		setTimeout(() => {
+			modalCargaGeolocalizacion();
+		}, 500);
+	});
+
+</script>
+
+<script>
+	$(document).ready(function () {		
+		const accidenteId = @Model.IdAccidente;
+
+		$.ajax({
+			url: '/CapturaAccidentes/GetFiles',
+			type: 'GET',
+			data: { accidenteId: accidenteId },
+			success: function (files) {
+				files.forEach(function (filename) {
+					thumbnailsUIManager.addEmptyThumbnail();
+					fetch(`/CapturaAccidentes/DownloadFile?accidenteId=${accidenteId}&filename=${filename}`)
+						.then(response => {
+							// archivo como blob para manipulación	
+							const mimeType = response.headers.get('Content-Type');
+							return response.blob().then(blob => ({ blob, mimeType }));
+						})  
+						.then( ({ blob, mimeType }) => {
+							let file = new File([blob], filename, { type: mimeType });
+							thumbnailsUIManager.addThumbnail(file);							
+						})
+						.catch(error => {
+							console.error('error loading file from accidente:', error);
+							thumbnailsUIManager.removeEmptyThumbnail();
+						});					
+				});
+			},
+			error: function () {
+				console.error('Error fetching file list');
+			}
+		});		
+	});
+</script>
+
+<script>
+	// invoke backend for crud actions
+	function ActualizaInformacion() {
+		// Crear un objeto FormData
+		var formData = new FormData();
+
+		// Serializar datos del formulario sin los archivos
+		var formSerialized = $("#AccidenteInfoForm").serializeArray();
+		formSerialized.forEach(function (item) {
+			formData.append(item.name, item.value);
+		});
+
+		// Agregar el archivo si está presente
+		var archivoCroquis = $("#archivoCroquis")[0].files[0];
+		if (archivoCroquis) {
+			formData.append("archivoCroquis", archivoCroquis);
+		}
+
+		var controlsValidate = [];
+		var isValid = true;
+
+		controlsValidate.push({ 'controlName': 'dateF' });
+		controlsValidate.push({ 'controlName': 'dateTime' });
+		controlsValidate.push({ 'controlName': 'txtKilometro' });
+
+		let labelFolio = document.getElementById("LabFolio");
+        if (labelFolio.innerText == '@EtiReq') {
+            var ValFolio = $("#FolioEmergencia").val();
+            if (ValFolio == 0) {
+
+                sitteg_warning("Favor de ingresar el Folio Emergencias");
+                return;
+            }
+        }
+
+		// INPUTS
+		if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+		// DROP DOWN LIST
+		controlsValidate = [];
+		controlsValidate.push({ 'controlName': 'ddlMunicipios' });
+		controlsValidate.push({ 'controlName': 'ddlCarreteras' });
+		controlsValidate.push({ 'controlName': 'ddlTramos' });
+
+		if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+		if (!isValid) {
+			sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+			return;
+		}
+		console.log(formData);
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("ActualizarInfoAccidente")',
+			type: 'POST',
+			data: formData,
+			contentType: false, // Necesario para enviar FormData
+			processData: false, // Necesario para enviar FormData
+			success: function (data) {	
+				sitteg_success("Información actualizada con éxito");
+				
+				const accidenteId = @Model.IdAccidente;
+				deleteFilesIfFailContinue(accidenteId, function () { 
+				uploadFilesIfFailContinue(accidenteId, function () {	
+					hideLoading(); 
+				}); 
+				});
+			},
+			error: function (xhr) {
+				if (xhr.responseJSON && xhr.responseJSON.errorMessage) {
+					sitteg_warning("Ocurrieron los siguientes errores:\n" + xhr.responseJSON.errorMessage);
+				} else {
+					sitteg_warning("Ocurrieron los siguientes errores");
+				}
+				hideLoading();
+			}
+		});
+	}
+
+	function uploadFilesIfFailContinue(accidenteId, completedCallback) {
+		try {
+			uploadFiles(accidenteId, completedCallback);
+		}
+		catch (error) {
+			console.log(error);
+			sitteg_warning("Ocurrio un error al cargar las imágenes y videos de evidencias.");
+			completedCallback();
+		}
+	}
+
+	function uploadFiles(accidenteId, completedCallback) {
+		const thumbnailsInfo = thumbnailFileManager.getThumbnails();
+		if (thumbnailsInfo.length === 0) {
+			completedCallback();
+			return;
+		}
+
+		const formData = new FormData();
+		for (let i = 0; i < thumbnailsInfo.length; i++) {
+			if (thumbnailsInfo[i].file instanceof File) {
+				formData.append('files', thumbnailsInfo[i].file);
+			} else if (thumbnailsInfo[i].file.rawFile instanceof File) {
+				formData.append('files', thumbnailsInfo[i].file.rawFile);
+			} else {
+				console.error('Invalid file object:', thumbnailsInfo[i].file);
+			}
+		}
+
+		formData.append('accidenteId', accidenteId);		
+
+		showLoading();
+		$.ajax({
+			url: '/CapturaAccidentes/UploadFiles',
+			type: 'POST',
+			processData: false,
+			contentType: false,
+			data: formData,
+			error: function () {
+				sitteg_warning("Ocurrio un error al cargar las imágenes y videos de evidencias.");
+			},
+			complete: function () {
+				hideLoading();
+				completedCallback();
+			}
+		});
+	}
+
+	function deleteFilesIfFailContinue(accidenteId, completedCallback) {
+		try {
+			deleteFiles(accidenteId, completedCallback);
+		}
+		catch (error) {
+			console.log(error);
+			sitteg_warning("Ocurrio un error al borrar las imágenes y videos de evidencias.");
+			completedCallback();
+		}
+	}
+
+	function deleteFiles(accidenteId, completedCallback) {
+		const thumbnailsInfo = thumbnailFileManager.getDeletedThumbnails();
+		if (thumbnailsInfo.length === 0) {
+			completedCallback();
+			return;
+		}
+
+		const formData = new FormData();
+		for (let i = 0; i < thumbnailsInfo.length; i++) {			
+			formData.append('files', thumbnailsInfo[i]);						
+		}
+
+		formData.append('accidenteId', accidenteId);
+
+		showLoading();
+		$.ajax({
+			url: '/CapturaAccidentes/DeleteFiles',
+			type: 'DELETE',
+			processData: false,
+			contentType: false,
+			data: formData,
+			error: function () {
+				sitteg_warning("Ocurrio un error al borrar las imágenes y videos de evidencias.");
+			},
+			complete: function () {
+				hideLoading();
+				completedCallback();
+			}
+		});
+	}
+
+</script>
+
+<script>
+	function buscarVehiculoPermanencia(pidVehiculo) {
+		showLoading();
+		$.ajax({
+			type: "GET",
+			url: '@Url.Action("ajax_detalleVehiculo2")',
+			data: {
+				"idVehiculo": pidVehiculo,
+				"idAccidente": window.idAccidente
+			},
+			success: function (data) {
+				$("#detalleVehiculo").html(data);
+				$("#idVehiculo").val(pidVehiculo);
+				hideLoading();
+				$('#CambiarPropietario').show();
+
+			}, 
+			error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+	}
+
+	function buscarVehiculo(pidVehiculo) {
+		showLoading();
+		$.ajax({
+			type: "GET",
+			url: '@Url.Action("ajax_detalleVehiculo")',
+			data: {
+				"idVehiculo": pidVehiculo,
+			},
+			success: function (data) {
+				$("#detalleVehiculo").html(data);
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+	}
+
+	function FolioVisible() {
+		$.ajax({
+			url: '/CapturaAccidentes/FolioEmePermitido',
+			type: 'GET',
+			data: {},
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+			success: function (data) {
+				var Jsonstring = JSON.stringify(data);
+				var content = JSON.parse(Jsonstring);
+				if (content.Requerido == 1) {
+					let labelFolio = document.getElementById("LabFolio");
+					labelFolio.innerText = '@EtiReq';
+				}
+			}
+		})
+	}
+
+	function mostrarModalAgregarVehiculo() {
+		if ('@ViewBag.EsSoloLectura' === 'True') {
+			return;
+		}
+		var idAccidente = '@Model.IdAccidente';
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("ModalAgregarVehiculo")',
+			type: 'POST',
+			data: { idAccidente: idAccidente },
+			success: function (result) {
+				$('#ModalBodyAgregarVehiculo').html(result);
+				$('#agregarVehiculoModal').modal({ backdrop: 'static', keyboard: false });
+				$('#agregarVehiculoModal').modal('show');
+				hideLoading();
+			},
+			error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+	}
+
+	function pensionDropDownChange() {
+		var delegacionDDValue = $("#IdDelegacion").data("kendoDropDownList").value();
+		showLoading();
+		$.ajax({
+			url: "/CapturaAccidentes/Pensiones_Drop",
+			type: "POST",
+			data: { delegacionDDValue: delegacionDDValue },
+			success: function (data) {
+				var pensionesDropDown = $("#IdPension").data("kendoDropDownList");
+				pensionesDropDown.dataSource.data(data);
+				hideLoading();
+			},
+			error: function (xhr, status, error) {
+				hideLoading();
+			}
+		});
+	}
+
+	function mostrarModalComplementoVehiculo() {
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("ModalAgregarVehiculo")',
+			type: 'POST',
+			contentType: "application/json; charset=utf-8",
+			dataType: "html",
+			success: function (data) {
+				$('#modalComplementoVehiculo').modal({ backdrop: 'static', keyboard: false });
+				$('#modalBodymodalComplementoVehiculo').html(data);
+				$('#modalComplementoVehiculo').modal('show');
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+	}
+
+	function mostrarModalCalsificacionAccidente() {
+		if ('@ViewBag.EsSoloLectura' === 'True') {
+			return;
+		}
+		$.ajax({
+			url: '@Url.Action("ModalClasificacionAccidente")',
+			type: 'POST',
+			contentType: "application/json; charset=utf-8",
+			dataType: "html",
+			success: function (data) {
+				$('#ModalBodyClasificacionAccidente').html(data);
+				$('#clasificacionAccidenteModal').modal('show');
+
+			}
+		});
+	}
+
+	function abrirModalAnexo2() {
+		$.ajax({
+			url: '@Url.Action("ModalAnexo2")',
+			type: 'POST',
+			contentType: "application/json; charset=utf-8",
+			dataType: "html",
+			success: function (data) {
+				$('#BodyModalAnexo2').html(data);
+				$('#anexo2Modal').modal('show');
+			}
+		});
+	}
+	
+	function OnCarreteraChange(e) {
+		var carreteraDDValue = $("#ddlCarreteras").data("kendoDropDownList").value();
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("Tramos_Drop")',
+			type: "POST",
+			data: { carreteraDDValue: carreteraDDValue },
+			success: function (data) {
+				var TramosDropDown = $("#ddlTramos").data("kendoDropDownList");
+				TramosDropDown.dataSource.data(data);
+				hideLoading();
+			},
+			error: function (xhr, status, error) {
+				console.log("EE", error)
+				hideLoading();
+			}
+		});
+	}
+
+	function subMarcaDropDownChange() {
+		var _idMarca = $("#ddlMarcas").data("kendoDropDownList").value();
+		showLoading();
+		$.ajax({
+			url: "/Vehiculos/SubMarcas_ReadPorMarca",
+			type: "POST",
+			data: { idMarca: _idMarca },
+			success: function (data) {
+				var TramosDropDown = $("#idSubmarca").data("kendoDropDownList");
+				TramosDropDown.dataSource.data(data);
+				hideLoading();
+			},
+			error: function (xhr, status, error) {
+				console.log("EE", error)
+				hideLoading();
+			}
+		});
+	}
+
+
+</script>
+
+<script>
+
+	function onDataBound() {
+		var grid = $("#gridPersonasMorales").data("kendoGrid");
+
+		if (grid.dataSource.total() === 1) {
+			setTimeout(function () {
+				var row = grid.tbody.find("tr:first");
+				grid.select(row);
+				row.find(".k-checkbox").trigger("click");
+			}, 50);
+		}
+	}
+
+	function onMunicipioChange(e) {
+		var municipioId = this.value();
+		var turnoDropDown = $("#idTurno").data("kendoDropDownList");
+
+		if (municipioId) {
+			turnoDropDown.dataSource.read({ municipioId: municipioId });
+		} else {
+			turnoDropDown.dataSource.data([]);
+		}
+	}
+
+	function getMunicipioIdSelected() {
+		return {
+			municipioId: $("#ddlMunicipios").data("kendoDropDownList").value()
+		};
+	}
+
+	function onRowSelect() {
+		var grid = $("#gridPersonasLicencia").data("kendoGrid");
+		var selectedRowData = grid.dataItem(grid.select());
+
+		const tipoLicenciaMapping = {
+			"TIPO A  CHOFER AUTOMOVILISTA": 1,
+			"TIPO B CHOFER SERVICIO PÚBLICO": 2,
+			"TIPO C  Chofer Servicio de Carga": 3,
+			"TIPO D -MOTOCICLISTA": 4,
+			"PERMISO A -AUTOMOVIL-": 6,
+			"PERMISO D -MOTOCICLETA-": 7,
+			"NO APLICA": 8,
+			"TIPO A": 1,
+			"TIPO B": 2,
+			"TIPO C": 3,
+			"TIPO D": 4,
+			"PERMISO A": 6,
+			"PERMISO D": 7,
+			"A-AUTOMOVILISTA": 1,
+			"B-CHOFER DE SERVICIO PÚBLICO": 2,
+			"C-CHOFER DE SERVICIO DE CARGA": 3,
+			"D-MOTOCICLISTA": 4,
+			"PA-PERMISO AUTOMOVILISTA": 6,
+			"PD-PERMISO MOTOCICLISTA": 7,
+
+		};
+
+		const tipoLicenciaNumero = tipoLicenciaMapping[selectedRowData.tipoLicencia] || 0;
+
+		selectedRowData.idTipoLicencia = tipoLicenciaNumero;
+		console.log("4...")
+		console.log("4.1.." + selectedRowData.nombreCompleto)
+		//   showLoading();
+		var fd = new FormData();
+		fd.append("nombre", selectedRowData.nombre);
+		fd.append("apellidoPaterno", selectedRowData.apellidoPaterno);
+		fd.append("apellidoMaterno", selectedRowData.apellidoMaterno);
+		fd.append("CURP", selectedRowData.CURP);
+		fd.append("RFC", selectedRowData.RFC);
+		fd.append("numeroLicencia", selectedRowData.numeroLicencia);
+		fd.append("tipoLicencia", tipoLicenciaNumero);
+		fd.append("idGenero", selectedRowData.idGenero);
+		fd.append("fechaNacimiento", selectedRowData.fechaNacimiento);
+		fd.append("fechaVigencia", selectedRowData.vigenciaLicencia);
+		fd.append("calle", selectedRowData.calle);
+		fd.append("numero", selectedRowData.numero);
+		fd.append("colonia", selectedRowData.colonia);
+
+		fd.append("idMunicipio", selectedRowData.PersonaDireccion.idMunicipio);
+		fd.append("municipio", selectedRowData.PersonaDireccion.municipio);
+		fd.append("codigoPostal", selectedRowData.PersonaDireccion.codigoPostal);
+		fd.append("entidad", selectedRowData.PersonaDireccion.entidad);
+		fd.append("telefono", selectedRowData.PersonaDireccion.telefono);
+		fd.append("correo", selectedRowData.PersonaDireccion.correo);
+
+
+
+		$.ajax({
+			type: 'POST',
+			url: '/Personas/guardaDesdeServicio',
+			contentType: false, // Not to set any content header
+			processData: false, // Not to process data
+			data: fd,
+			success: function (result) {
+				$('#modalLicenciasList').modal('hide');
+				var grid = $("#gridPersonas").data("kendoGrid");
+				if (result && result.data) {
+					var dataArray = [result.data];
+					grid.dataSource.data(dataArray);
+				} else {
+					console.error("La respuesta no tiene la estructura esperada:", result);
+				}
+				sitteg_success('Elemento guardado correctamente')
+				hideLoading();
+			},
+			error: function (error) {
+				sitteg_warning('Error al guardar en la base de datos:');
+				hideLoading();
+			}
+		});
+	}
+
+
+	function getLocation(e) {
+
+		e.preventDefault()
+
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(showPosition);
+		} else {
+			console.log("Geolocation is not supported by this browser.");
+		}
+	}
+
+
+	function showPosition(position) {
+		var ltt = position.coords.latitude
+		var lgd = position.coords.longitude
+		var longltt = parseFloat(ltt)
+		var longlgd = parseFloat(lgd)
+		if (!isNaN(ltt) && !isNaN(lgd)) {
+			searchLocation(1, longltt, longlgd, "");
+			placeMarkerLanLng(longltt, longlgd)
+		}
+
+	}
+
+
+	var map = null;
+	var geocoder = null;
+	var currentMarker = null;  // Variable global para el marcador
+
+	function modalCargaGeolocalizacion() {
+		showLoading();
+		document.getElementById('municipioGL').innerHTML = 'Guanajuato';
+			initMap();
+		hideLoading();
+	}
+
+	function initMap() {
+		var mapOptions = {
+			center: { lat: 0, lng: 0 },
+			zoom: 1,
+			mapId: "DEMO_MAP_ID"
+		};
+		map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+		geocoder = new google.maps.Geocoder();
+
+		google.maps.event.addListener(map, 'click', function (event) {
+			placeMarker(event.latLng);
+		});
+
+		var direccionCompleta = '';
+		if (document.getElementById('latitude').innerHTML.trim() === '' && document.getElementById('longitude').innerHTML.trim() === '')
+			direccionCompleta = 'Guanajuato';
+		if (document.getElementById('address').innerHTML.trim() !== '' || document.getElementById('municipioGL').innerHTML.trim() !== '') {
+			if (document.getElementById('municipioGL').innerHTML.trim() === 'Guanajuato')
+				direccionCompleta = document.getElementById('address').innerHTML + ' Guanajuato';
+			else
+				direccionCompleta = document.getElementById('address').innerHTML + ' ' + document.getElementById('municipioGL').innerHTML + ' Guanajuato';
+		}
+
+		var locationButton = document.createElement("div");
+		locationButton.classList.add("map-control");
+		locationButton.textContent = "Mi Ubicación";
+		locationButton.style.position = "absolute";
+		locationButton.style.left = "190px";
+		locationButton.style.top = "10px";
+		locationButton.onclick = showLocation;
+
+		map.controls[google.maps.ControlPosition.TOP_LEFT].push(locationButton);
+
+		google.maps.event.addListener(map, 'click', function (event) {
+			placeMarker(event.latLng);
+		});
+
+		document.getElementById('latitude').innerHTML = $("#Latitud").data("kendoTextBox").value();
+		document.getElementById('longitude').innerHTML = $("#Longitud").data("kendoTextBox").value();
+
+		searchLocation(0,
+			document.getElementById('latitude').innerHTML,
+			document.getElementById('longitude').innerHTML,
+			direccionCompleta
+		);
+	}
+
+	function buscarDireccion(event) {
+		if (event) {
+			event.preventDefault(); // Evitar el envío del formulario
+		}
+
+		var mun = $("#IdMunicipio").val()
+		var calle = $("#lugarCalle").val()
+		var numero = $("#lugarNumero").val()
+		var colonia = $("#lugarColonia").val()
+		var textMun = $("#IdMunicipio").data("kendoDropDownList").dataSource.data().filter(s => s.Value == mun)[0]?.Text ?? ""
+		var ltt = $("#Latitud").val()
+		var lgd = $("#Longitud").val()
+
+		if (ltt && lgd) {
+
+			var longltt = parseFloat(ltt)
+			var longlgd = parseFloat(lgd)
+			if (!isNaN(ltt) && !isNaN(lgd)) {
+				searchLocation(1, longltt, longlgd, direccionCompleta);
+				placeMarkerLanLng(longltt, longlgd)
+
+			}
+
+			return
+		}
+
+
+		var aux = `${calle} ${numero},${colonia},${textMun},Guanajuato`
+
+		aux = aux.replace(",,", ",")
+		if (aux.indexOf(",") == 0) {
+			aux = aux.substring(1)
+		}
+		if (aux.indexOf(" ,") == 0) {
+			aux = aux.substring(2)
+		}
+		$("#Direccion").data("kendoTextBox").value(aux)
+
+
+
+		var direccionCompleta = '';
+		// document.getElementById('address').innerHTML = $("#Direccion").data("kendoTextBox").value();
+		document.getElementById('address').innerHTML = aux;
+		if (document.getElementById('latitude').innerHTML.trim() === '' && document.getElementById('longitude').innerHTML.trim() === '')
+			direccionCompleta = 'Guanajuato';
+		if (document.getElementById('address').innerHTML.trim() !== '' || document.getElementById('municipioGL').innerHTML.trim() !== '') {
+			if (document.getElementById('municipioGL').innerHTML.trim() === 'Guanajuato')
+				direccionCompleta = document.getElementById('address').innerHTML + ' Guanajuato';
+			else
+				direccionCompleta = document.getElementById('address').innerHTML + ' ' + document.getElementById('municipioGL').innerHTML + ' Guanajuato';
+		}
+		searchLocation(1,
+			'',
+			'',
+			direccionCompleta
+		);
+	}
+
+	function showLocation() {
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(callback, errorCallback);
+		} else {
+			sitteg_warning("Geolocalización no es soportada por este navegador.");
+		}
+	}
+
+	function callback(position) {
+		var lat = position.coords.latitude;
+		var lon = position.coords.longitude;
+
+		document.getElementById('latitude').innerHTML = lat;
+		document.getElementById('longitude').innerHTML = lon;
+
+		var latLng = new google.maps.LatLng(lat, lon);
+
+		if (currentMarker) {
+			currentMarker.position = latLng;
+		} else {
+			currentMarker = new google.maps.marker.AdvancedMarkerElement({
+				position: latLng,
+				map: map,
+				title: 'Mi ubicación'
+			});
+		}
+
+		map.setZoom(12);
+		map.setCenter(latLng);
+	}
+
+	function searchLocation(ope, lat, lon, address) {
+		var latNum = parseFloat(lat);
+		var lonNum = parseFloat(lon);
+		var latLng;
+
+		if (!isNaN(latNum) && !isNaN(lonNum)) {
+			latLng = new google.maps.LatLng(latNum, lonNum);
+			if (currentMarker) {
+				currentMarker.position = latLng;
+			} else {
+				currentMarker = new google.maps.marker.AdvancedMarkerElement({
+					position: latLng,
+					map: map,
+					title: 'Ubicación especificada'
+				});
+			}
+			map.setZoom(12);
+			map.setCenter(latLng);
+			return
+		}
+
+		if (address) {
+			geocoder.geocode({ 'address': address }, function (results, status) {
+				if (status === 'OK') {
+					var result = results[0];
+					map.setZoom(12);
+					map.setCenter(result.geometry.location);
+					if (currentMarker) {
+						currentMarker.position = result.geometry.location;
+					} else {
+						currentMarker = new google.maps.marker.AdvancedMarkerElement({
+							position: result.geometry.location,
+							map: map,
+							title: address
+						});
+					}
+					document.getElementById('latitude').innerHTML = result.geometry.location.lat();
+					document.getElementById('longitude').innerHTML = result.geometry.location.lng();
+					if (ope == 1) {
+						$("#Latitud").data("kendoTextBox").value(document.getElementById('latitude').innerHTML);
+						$("#Longitud").data("kendoTextBox").value(document.getElementById('longitude').innerHTML);
+					}
+
+				} else {
+					sitteg_warning('No se pudo encontrar la dirección: ' + status);
+				}
+			});
+		}
+	}
+
+
+	function placeMarkerLanLng(ltt,lgd){
+        var location = new google.maps.LatLng(ltt, lgd)
+        placeMarker(location)
+    }
+
+
+	function placeMarker(location) {
+		if (currentMarker) {
+			currentMarker.position = location;
+		} else {
+			currentMarker = new google.maps.marker.AdvancedMarkerElement({
+				position: location,
+				map: map,
+				title: 'Marcador personalizado'
+			});
+		}
+		var lat = location.lat();
+		var lng = location.lng();
+		document.getElementById('latitude').innerHTML = lat;
+		document.getElementById('longitude').innerHTML = lng;
+		$("#Latitud").data("kendoTextBox").value(document.getElementById('latitude').innerHTML);
+		$("#Longitud").data("kendoTextBox").value(document.getElementById('longitude').innerHTML);
+	
+		geocoder.geocode({ 'location': location }, function (results, status) {
+			if (status === 'OK' && results[0]) {
+				console.log(results[0])
+				$("#lugarCalle").data("kendoTextBox").value(results[0].address_components[1].long_name)
+				$("#lugarNumero").data("kendoTextBox").value(results[0].address_components[0].long_name)
+				$("#lugarColonia").data("kendoTextBox").value(results[0].address_components[2].long_name)
+
+				document.getElementById('address').innerHTML = results[0].formatted_address;
+				$("#Direccion").data("kendoTextBox").value(document.getElementById('address').innerHTML);
+			} else {
+				document.getElementById('address').innerHTML = 'Dirección no encontrada';
+			}
+		});
+	}
+
+	function errorCallback(error) {
+		switch (error.code) {
+			case error.PERMISSION_DENIED:
+				sitteg_warning("El usuario negó la solicitud de geolocalización.");
+				break;
+			case error.POSITION_UNAVAILABLE:
+				sitteg_warning("La información de ubicación no está disponible.");
+				break;
+			case error.TIMEOUT:
+				sitteg_warning("La solicitud de geolocalización ha expirado.");
+				break;
+			case error.UNKNOWN_ERROR:
+				sitteg_warning("Un error desconocido ocurrió.");
+				break;
+		}
+	}
+</script>
+
+<script>
+
+	function valid5char(e) {
+
+		var value = e.target.value
+		var reg = /[0-2][0-9][\:][0-5][0-9]/g
+		var can = reg.test(value)
+		if (!can) {
+			e.target.value = ""
+		}
+	}
+	
+	function validacionHora(event) {
+		var horaIngresada = event.target.value;
+		var key = event.key
+		var keycode = event.keyCode
+		var horalength = horaIngresada.length
+		if ([8, 46, 37, 38, 39, 40, 9].indexOf(keycode) != -1) {
+			return
+		}
+		event.preventDefault();
+
+		console.log(key, keycode)
+
+		if (horalength == 0) {
+			if ("012".indexOf(key) != -1) {
+				event.target.value = key
+			}
+		}
+		if (horalength == 1) {
+			var lastval = horaIngresada[0]
+			if (":" == key && lastval != "0") {
+				event.target.value = "0" + event.target.value + key
+			}
+			else if (lastval == "2") {
+				if ("0123".indexOf(key) != -1) {
+					event.target.value = event.target.value + key
+				}
+			} else if ("0123456789".indexOf(key) != -1) {
+				event.target.value = event.target.value + key
+			}
+		}
+		if (horalength == 2) {
+			if (key == ":") {
+				event.target.value = event.target.value + key
+			}
+			else if ("012345".indexOf(key) != -1) {
+				event.target.value = event.target.value + ":" + key
+			}
+		}
+		if (horalength == 3) {
+			if ("012345".indexOf(key) != -1) {
+				event.target.value = event.target.value + key
+			}
+		}
+		if (horalength == 4) {
+			var lastval = horaIngresada[3]
+			var hours = parseInt(horaIngresada[0] + horaIngresada[1])
+
+			if (lastval == "0" && hours == 0) {
+				if ("0123456789".indexOf(key) != -1) {
+					event.target.value = event.target.value + key
+					setTimeout(validarFecha, 2)
+				}
+			} else {
+				if ("0123456789".indexOf(key) != -1) {
+					event.target.value = event.target.value + key
+					setTimeout(validarFecha, 2)
+				}
+			}
+
+		}
+	}
+	
+	function validarFecha() {
+		// Obtener la fecha actual
+		var fechaActual = new Date();
+		var fechaParseo = new Date(parseInt(fechaActual.getFullYear()), parseInt(fechaActual.getMonth()), parseInt(fechaActual.getDate()));
+
+
+		var fechaSeleccionadaString = $("#dateF").val();
+		var splitFechaSeleccion = fechaSeleccionadaString.split('/')
+		var objetoFecha = !fechaSeleccionadaString ? fechaParseo : new Date(parseInt(splitFechaSeleccion[2]), parseInt(splitFechaSeleccion[1]) - 1, parseInt(splitFechaSeleccion[0]));
+		console.log("objetoFecha:", objetoFecha)
+		console.log("fechaParseo:", fechaParseo)
+		// Comparar la fecha seleccionada con la fecha actual
+		if (fechaParseo.getTime() === objetoFecha.getTime()) {
+			// Si la fecha seleccionada es la fecha actual, verificar la hora ingresada
+			console.log("SI Entra")
+			var horaIngresada = $("#dateTime").val();
+			var horaActual = fechaActual.getHours() * 60 + fechaActual.getMinutes();
+			var horaIngresadaSplit = horaIngresada.split(':');
+			var horaIngresadaEnMinutos = parseInt(horaIngresadaSplit[0]) * 60 + parseInt(horaIngresadaSplit[1]);
+			console.log("horaIngresada", horaIngresada)
+			console.log("horaActual", horaActual)
+			console.log("horaSplit", horaIngresadaSplit)
+
+			console.log("horaIngresadaEnMinutos", horaIngresadaEnMinutos)
+
+			if (horaIngresadaEnMinutos > horaActual) {
+
+				$("#dateTime").val('');
+				event.preventDefault();
+			}
+		}
+	}
+
+	function validarKm() {
+        let x = document.getElementById("Kilometro");
+        var valor=x.value;
+        var regexp = /^(\d{0,5})(\.\d{0,3})?$/;
+
+        if(!regexp.test(x.value)){
+            x.value = valor.substring(0, valor.length - 1);
+            console.log("invalido");
+            if(valor.length>9){ //por si deja apretado el boton hasta llenar muchos numeros, regresara a su maximo
+                
+                if(valor.includes(".")){
+                    x.value=valor.slice(0, 9);
+                    if(valor.includes("..")){
+                    	x.value=valor.slice(0, 6);
+                	}
+                } else {
+                    x.value=valor.slice(0, 5);
+                }                    
+            }
+        } else{
+            console.log("valido ");
+        }
+    }
+
+</script>
+
+

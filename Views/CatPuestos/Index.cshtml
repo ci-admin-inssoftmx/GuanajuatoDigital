@@ -1,0 +1,207 @@
+﻿@using GuanajuatoAdminUsuarios.Models.Catalogos.Puestos
+@model PuestosIndexViewModel
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    @inject GuanajuatoAdminUsuarios.Helpers.UserSession UserSession;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+    var isAdmin = UserSession.IsAdmin();
+}
+
+<script>
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡EL usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡EL usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+</script>
+
+<div class="mainContainer bg-light">
+    
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-puestos h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Catálogo de puestos</b></h2>
+                    </div>
+                </div>
+            </div>        
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">        
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnCrear" onclick="mostrarCrearModal()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-puestos h5 mb-0 me-2"></i><b>Agregar nuevo puesto</b></h6>
+                        </button>
+                    </div>
+                </div>        
+            </div>                
+        </div>
+
+        <div class="row">        
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>        
+        </div>
+                       
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        
+            <form id="filterForm">
+                <div class="row">
+                    <div class="controlForm my-3 col-12 col-md-6 col-lg-3">
+                        <span>
+                            @(Html.Kendo().TextBoxFor(t => t.Filter.Nombre)
+                                .Label(l => l.Content("Nombre del puesto:"))
+                                .Placeholder("Ingrese el nombre del puesto")
+                                .HtmlAttributes(new { style = "width: 100%", Id = "filterNombre" })
+                                )
+                        </span>
+                    </div>   
+                    @if (isAdmin)
+                    {
+                        <div class="controlForm my-3 col-12 col-md-6 col-lg-3">
+                            <label>Delegación:</label>
+                            @(Html.Kendo().DropDownListFor(t => t.Filter.IdDelegacion)
+                                .NoDataTemplate("No se encontraron datos")
+                                .Filter(FilterType.Contains)
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Seleccione la delegación")
+                                .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "filter-idDelegacion" })
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetDelegacionesOficinasDropDownList", "CatPuestos");
+                                    });
+                                }))
+                        </div>
+                    }
+                    <div class="controlButton col-12 my-3 col-md-6 col-lg-3 align-self-end">
+                        <button class="btnPrimary" type="button" onclick="submitSearch()">
+                            <h5 class="m-0"><b>Buscar</b></h5>
+                        </button>
+                    </div>                    
+                </div>                                                                               
+            </form>        
+        </div>
+        <div class="row">
+            <div class="col-12 mb-4 px-4 rounded gridCustom">
+                <div class="row justify-content-between mb-1 titleCustom">
+                    <div class="col-12 col-md-auto mt-4 mb-2">
+                        <h5 class="px-4"><b>Listado de puestos</b></h5>
+                        <h6 class="px-4 text-muted">Edita o elimina un puesto.</h6>
+                    </div>
+                </div>
+                <div class="row">
+                    <div id="tablaPuestos">                        
+                        <partial name="_ListaPuestos" model="Model.Lista" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- create modal -->
+    <div class="modal fade modalCustom" id="crearPuestoModal" aria-labelledby="crearPuestoModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="crearPuestoModalBody">
+                </div>
+            </div>
+        </div>
+    </div>    
+    <!-- edit modal -->
+    <div class="modal fade modalCustom" id="editarPuestoModal" aria-labelledby="editarPuestoModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="editarPuestoModalBody">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- delete modal -->
+    <div class="modal fade modalCustom" id="eliminarPuestoModal" aria-labelledby="eliminarPuestoModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="eliminarPuestoModalBody">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+<script>
+    function mostrarCrearModal() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("LoadCrearPartial", "CatPuestos")',
+            type: 'GET',
+            success: function (data) {
+                $('#crearPuestoModalBody').html(data);
+                $('#crearPuestoModal').modal('show');
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+			},
+            complete: function () {
+				hideLoading();
+			}
+        });
+	}
+
+    function handlePaste(e) {
+        let clipboardData = e.clipboardData || window.clipboardData;
+        let pastedData = clipboardData.getData('Text');
+        if (!validateTime(pastedData)) {
+            e.preventDefault();
+        }
+    }
+
+    function submitSearch() {
+        let form = document.getElementById('filterForm');
+        let formData = new FormData(form);
+
+        currentFilter = {
+            Nombre: formData.get('Filter.Nombre'),
+            IdDelegacion: formData.get('Filter.IdDelegacion')
+        };
+        
+        console.log(currentFilter);
+
+        let grid = $("#puestosGrid").data("kendoGrid");
+        grid.dataSource.read();                
+    }
+
+    function applyFilter() {
+        console.log("Current Filter:", currentFilter);
+        return { filterParameters: currentFilter };
+    }
+
+    let currentFilter = {};
+
+</script>

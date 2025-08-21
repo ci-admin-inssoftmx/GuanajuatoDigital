@@ -1,0 +1,86 @@
+﻿@model List<CancelarInfraccionModel>
+
+<div class="row">
+    @if (TempData["ErrorNoCoinciencia"] != null || TempData.Count != 0)
+{
+
+        <script>
+            sitteg_warning("No se encontraron infracciones con el folio especificado.");
+        </script>
+    //<div style=" position: absolute; max-width: fit-content; z-index: 1; margin: 22px 2%;" class="alert alert-danger">@TempData["ErrorNoCoinciencia"]</div>
+}
+
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid(Model)
+            .Name("grid")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdInfraccion).Hidden();
+                columns.Bound(c => c.FolioInfraccion).Title("Folio Infracción").Width(90);
+                columns.Bound(c => c.FechaInfraccion).Title("Fecha Infracción").Format("{0:dd/MM/yyyy}").Width(90);
+                columns.Bound(c => c.Conductor).Width(110).Title("Conductor");
+                columns.Bound(c => c.Placas).Width(90).Title("Placas");
+                columns.Bound(c => c.Serie).Width(90).Title("No. de serie");
+                columns.Bound(c => c.Delegacion).Width(90).Title("Delegación");
+                columns.Bound(c => c.Propietario).Width(140).Title("Propietario");
+                columns.Bound(c => c.descEstatusProceso).Title("Estatus Infracción").Width(100);
+                columns.Command(c => c.Custom("Seleccionar").Click("mostrarDetalle")).Width(60);
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            ////.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            .PageSize(5).Model(model => model.Id(p => p.IdInfraccion))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.FolioInfraccion);
+                s.Field(c => c.FechaInfraccion);
+                s.Field(c => c.Serie);
+                s.Field(c => c.Delegacion);
+                s.Field(c => c.Propietario);
+                s.Field(c => c.Conductor);
+                s.Field(c => c.Placas);
+                s.Field(c => c.descEstatusProceso);
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(x => x.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            )
+
+    </div>
+</div>
+
+
+
+<script>
+    function mostrarDetalle(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var Id = dataItem.IdInfraccion;
+        //console.log(Id);
+    showLoading();
+        $.ajax({
+            url: '@Url.Action("MostrarDetalle", "CancelarInfraccion")',
+            type: 'POST',
+            data: { Id: Id },
+            success: function (result) {
+                $("#detalle").html(result);
+            $("#detalle").show();
+            hideLoading();
+                  },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+</script>

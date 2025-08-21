@@ -1,0 +1,99 @@
+﻿@{
+	bool esSoloLectura = ViewBag.EsSoloLectura ?? false;
+	string claseColorEliminar = esSoloLectura ? "colorDisabled" : "colorDanger";
+	string claseColorOtroBoton = esSoloLectura ? "colorDisabled" : "colorPrimary";
+}
+<script>
+	function modalAgregarmonto(event) {
+		event.preventDefault();
+		if ('@ViewBag.EsSoloLectura' === 'True') {
+			return;
+		}
+		var grid = $("#gridVehiculosDanos").data("kendoGrid");
+		var row = $(event.target).closest("tr");
+		var dataItem = grid.dataItem(row);
+		var IdAccidente = dataItem.IdAccidente;
+		var IdVehiculoInvolucrado = dataItem.IdVehiculoInvolucrado;
+		var IdPropietarioInvolucrado = dataItem.IdPropietarioInvolucrado;
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("MostrarModalAgregarMonto", "CapturaAccidentes")',
+			type: 'POST',
+			data: {
+				IdAccidente: IdAccidente,
+				IdVehiculoInvolucrado: IdVehiculoInvolucrado,
+				IdPropietarioInvolucrado: IdPropietarioInvolucrado
+			},
+			success: function (result) {
+				$('#ModalBodyAgregarMontoAccidente').html(result);
+				$('#agregarMontoModal').modal('show');
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		})
+	}
+
+</script>
+<div class="row">
+	<div class="col-12 mb-4 px-4 rounded gridCustom">
+
+		@(
+			Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel>()
+			.Name("gridVehiculosDanos")
+			.Columns(columns =>
+			{
+				columns.Bound(c => c.IdAccidente).Hidden();
+				columns.Bound(c => c.VehiculoCompleto).Title("Vehículo").Width(90);
+				columns.Bound(c => c.Placa).Width(90);
+				columns.Bound(c => c.Serie).Width(90);
+				columns.Bound(c => c.Color).Width(90);
+				columns.Bound(c => c.montoVehiculo).Title("Monto").Width(90);
+				//columns.Command(c => c.Custom("Agregar monto").Click("modalAgregarmonto")).Width(100);
+				columns.Template(
+				"<button class='w-100 btn " + claseColorOtroBoton + " ' type='button'>" +
+				"<h6 class='m-0' onclick='modalAgregarmonto(event)'>" +
+				"<i class='h5'></i><b>Agregar monto</b>" +
+				"</h6></button>"
+				).Width(100);
+
+			}).HtmlAttributes(new { style = "height:400px" })
+			.Sortable()
+			//.Groupable()
+			.Scrollable()
+			.Pageable()
+			.DataSource(dataSource => dataSource
+			.Ajax()
+			.Read(read => read.Action("ObtVehiculosInvol", "CapturaAccidentes"))
+			)
+			.ToolBar(t => t.Search().Text("Buscar..."))
+			.Search(s =>
+			{
+				s.Field(c => c.TipoVehiculo);
+				s.Field(c => c.Serie);
+				s.Field(c => c.EstatusReporte);
+				s.Field(c => c.Marca);
+				s.Field(c => c.Color);
+				s.Field(c => c.Placa);
+
+
+			})
+
+			.Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+			.Type(GridSelectionType.Row)
+			)
+			.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+			)
+
+	</div>
+</div>
+<div class="modal fade modalCustom" id="agregarMontoModal" aria-labelledby="agregarMontoLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-body" id="ModalBodyAgregarMontoAccidente">
+			</div>
+		</div>
+	</div>
+</div>

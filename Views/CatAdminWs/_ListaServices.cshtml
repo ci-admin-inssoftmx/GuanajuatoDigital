@@ -1,0 +1,66 @@
+﻿<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.AppSettingsModel>()
+            .Name("gridCatWS")
+            .Columns(columns =>
+            {
+                columns.Bound(i => i.id).Hidden();
+                columns.Bound(c => c.SettingName).Title("Nombre").Width(100);
+                columns.Bound(c => c.SettingValue).Title("EndPoint").Width(100);
+                columns.Bound(c => c.IsActive).Title("Estatus en sistema").Width(100).ClientTemplate("#= IsActive ? 'Activo' : 'Inactivo' #");
+                columns.Command(c => c.Custom("Editar").Click("editarInfo")).Width(100);
+                // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(100);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetServices", "CatAdminWS"))
+            .PageSize(5).Model(model => model.Id(p => p.id))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.SettingName);
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            )
+    </div>
+</div>
+
+<script>
+    function editarInfo(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var idService = dataItem.id;
+        var endPoint = dataItem.SettingValue;
+        showLoading();
+
+        $.ajax({
+            url: '@Url.Action("EditarServiceModal", "CatAdminWS")',
+            type: 'POST',
+            data: { idService: idService },
+            success: function (result) {
+                $('#ModalBodyWS').html(result);
+                $('#modalWS').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+
+
+</script>

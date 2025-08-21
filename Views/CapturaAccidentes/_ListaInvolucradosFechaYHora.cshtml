@@ -1,0 +1,112 @@
+﻿@{
+    bool esSoloLectura = ViewBag.EsSoloLectura ?? false;
+    string claseColorEliminar = esSoloLectura ? "colorDisabled" : "colorDanger";
+    string claseColorOtroBoton = esSoloLectura ? "colorDisabled" : "colorPrimary";
+}
+<script>
+    function FormatDate(date) {
+        var cdate = convertDate(date);
+        cdate = cdate == "01/01/0001" ? "" : cdate;
+        return cdate;
+    }
+</script>
+<div class="row">
+<div class="col-12 mb-4 px-4 rounded gridCustom">
+
+    @(
+        Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel>()
+        .Name("gridInvolucradosFechaYHora")
+                    .Columns(columns =>
+                    {
+            columns.Bound(c => c.IdPersona).Hidden();
+            columns.Bound(c => c.nombre).Title("Nombre").Width(100);
+            columns.Bound(c => c.apellidoPaterno).Title("Apellido Paterno").Width(100);
+            columns.Bound(c => c.apellidoMaterno).Title("Apellido Materno").Width(100);
+            columns.Bound(c => c.FechaIngreso).Title("Fecha de ingreso:").ClientTemplate("#= FormatDate(FechaIngreso) #").Format("{0:dd/MM/yyyy}").Width(100);
+            columns.Bound(c => c.HoraIngreso).Title("Hora de ingreso:").Width(100);
+            columns.Bound(c => c.FolioDetencion).Title("Folio Detención").Width(100);
+            //columns.Template("<button onclick='abrirModalFechaHora(event)'><h6 class='m-0 colorPrimary'><i class='icon-plus me-2'></i><b>Fecha y hora</b></h6></button>").Width(120);
+               columns.Template(
+                "<button type='button' class='w-100 btn " + claseColorOtroBoton + "'>" +
+                "<h6 class='m-0' onclick='abrirModalFechaHora(event)'>" +
+                "<i  class='icon-plus me-2'></i><b>Fecha y hora</b>" +
+                "</h6></button>"
+                ).Width(120);
+
+
+        }).HtmlAttributes(new { style = "height:400px" })
+        .Sortable()
+        //.Groupable()
+        .Scrollable()
+        .Pageable()
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .Read(read => read.Action("ObtInvolucradosAccidente", "CapturaAccidentes"))
+        )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+        .Search(s =>
+        {
+            s.Field(c => c.nombre);
+            s.Field(c => c.apellidoPaterno);
+            s.Field(c => c.apellidoMaterno);
+          
+        })
+
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+        .Type(GridSelectionType.Row)
+        )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+        )
+</div>
+</div>
+<div class="modal fade modalCustom" id="agregarFechaHoraModal" aria-labelledby="agregarFechaHoraLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyAgregarFechaHora">
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script>
+    function abrirModalFechaHora(event) {
+                event.preventDefault();
+                         if ('@ViewBag.EsSoloLectura' === 'True') {
+            return;
+        }
+        var grid = $("#gridInvolucradosFechaYHora").data("kendoGrid");
+        var row = $(event.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        console.log(dataItem);
+        var IdPersona = dataItem.IdPersona;
+        var FechaIngreso = FormatDate(dataItem.FechaIngreso);
+        var HoraIngreso = dataItem.HoraIngreso
+
+        var folio = dataItem.FolioDetencion
+        showLoading();
+     $.ajax({
+            url: '@Url.Action("MostrarModalFechaHora", "CapturaAccidentes")',
+            type: 'POST',           
+            data: {
+                IdPersona: IdPersona,
+                FechaIngreso: FechaIngreso,
+                Folio:folio,
+                Hora:HoraIngreso
+            },
+            success: (data) => {
+                $('#ModalBodyAgregarFechaHora').html(data);
+                $('#agregarFechaHoraModal').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+
+</script>
+
+
+

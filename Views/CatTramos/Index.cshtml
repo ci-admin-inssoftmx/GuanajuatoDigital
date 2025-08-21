@@ -1,0 +1,219 @@
+﻿@model List<GuanajuatoAdminUsuarios.Models.CatTramosModel>
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+    function delegacion(){
+     var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡EL usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡EL usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+</script>
+<div class="mainContainer bg-light">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-tramo h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Catálogo de tramos</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button onclick="mostrarModalAgregarTramo()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addTramo h5 mb-0 me-2"></i><b>Agregar nuevo tramo</b></h6>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="row mb-4 px-4 rounded align-items-end">
+            <div class="controlForm my-3 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <label><b>Delegación</b>:</label>
+                @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                    .Name("idDelegacion")
+                    .Filter(FilterType.Contains)
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Selecciona una delegación")
+                    .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "idDelegacion" })
+                    .Events(e => e.Change("delegacionDropDownChange"))
+                    .DataSource(source =>
+
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetDelegaciones", "Catalogos").Data("delegacion");
+                        });
+                    }))
+            </div>
+
+            <div class="controlForm my-3 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <label><b>Carretera</b>:</label>
+                @(Html.Kendo().DropDownList()
+                    .NoDataTemplate("No se encontraron datos")
+                    .Name("idCarretera")
+                    .Filter(FilterType.Contains)
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Selecciona una carretera")
+                    .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "idCarretera" })
+                    .DataSource(source =>
+
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("CarreterasPorDelegacion_DropTodos", "CatCarreteras");
+                        });
+                    }))
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlButton my-3">
+                    <button class="btnPrimary" type="button" onclick="submitSearchTramo()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12 mb-4 px-4 rounded gridCustom">
+                <div class="row justify-content-between mb-1 titleCustom">
+                    <div class="col-12 col-md-auto mt-4 mb-2">
+                        <h5 class="px-4"><b>Listado de tramos</b></h5>
+                        <h6 class="px-4 text-muted">Edita o elimina tramos de carretera.</h6>
+                    </div>
+                </div>
+                <div id="tablaTramos">
+                    <partial name="_ListaTramos" model="@ViewBag.ListadoTramos" />
+                </div>
+            </div>
+
+        </div>
+    </section>
+</div>
+<div class="modal fade modalCustom" id="agregarTramo"  aria-labelledby="agregarTramoLabel" aria-hidden="true">
+<div class="modal-dialog modal-xl boxShadow modal-dialog-centered" role="document">
+    <div class="modal-content">
+        <div class="modal-body" id="ModalBodyTramo">
+        </div>
+    </div>
+</div>
+</div>
+
+
+
+<!-----------------------------------------------------------UPDATE--------------------------------------------------------------------------------------------->
+<div class="modal fade modalCustom" id="editarTramo"  aria-labelledby="editarTramoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyEditarTramo">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function mostrarModalAgregarTramo() {
+        $.ajax({
+            url: '@Url.Action("MostrarModalAgregarTramo")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyTramo').html(data);
+                $('#agregarTramo').modal('show');
+            }
+        });
+    }
+
+    function delegacionDropDownChange() {
+        var idDelegacion = $("#idDelegacion").data("kendoDropDownList").value();
+
+        showLoading();
+        $.ajax({
+            url: "/Catalogos/GetCarreterasFiltroDelegacion",
+            type: "POST",
+            data: { idDelegacion: idDelegacion },
+            success: function (data) {
+                var CarreterasDropDown = $("#idCarretera").data("kendoDropDownList");
+                CarreterasDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+    function submitSearchTramo() {
+        var idCarreteraFiltro = $("#idCarretera").val();
+        var idDelegacionFiltro = $("#idDelegacion").val();
+
+        console.log("F", idDelegacionFiltro)
+        showLoading();
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ajax_BuscarTramos")',
+            data: {
+                "idCarreteraFiltro": idCarreteraFiltro,
+            "idDelegacionFiltro": idDelegacionFiltro 
+            },
+            success: function (data) {
+                console.log(data);
+                var grid = $("#gridTramos").data("kendoGrid");
+
+                grid.dataSource.data([]);
+
+                for (var i = 0; i < data.length; i++) {
+                    grid.dataSource.add(data[i]);
+                }
+
+                grid.dataSource.page(1);
+                hideLoading();
+            },
+            error: function (xhr, status) {
+                hideLoading();
+            }
+        });
+    }
+</script>
+

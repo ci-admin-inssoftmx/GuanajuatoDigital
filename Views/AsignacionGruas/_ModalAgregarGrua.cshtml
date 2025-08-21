@@ -1,0 +1,816 @@
+﻿    @model GuanajuatoAdminUsuarios.Models.SeleccionGruaModel
+<script>
+     function updateDifference() {
+        var fechaInicioPicker = $("#fechaInicioInsert").data("kendoDatePicker");
+        var fechaFinalPicker = $("#fechaFinalInsert").data("kendoDatePicker");
+        var horaInicioString = $("#horaInicioInsert").val();
+        var horaTerminoString = $("#horaTerminoInsert").val();
+        console.log("HORAINICIO",horaInicioString)
+        console.log("HORAFIN", horaTerminoString)
+
+        // Verificar si los pickers de fecha están inicializados
+        if (fechaInicioPicker && fechaFinalPicker && horaInicioString && horaTerminoString) {
+            var fechaInicio = fechaInicioPicker.value();
+            var fechaFinal = fechaFinalPicker.value();
+
+            var horaInicioParts = horaInicioString.split(':');
+            var horaInicioHour = parseInt(horaInicioParts[0]);
+            var horaInicioMinute = parseInt(horaInicioParts[1]);
+             console.log("HORAINH", horaInicioHour)
+            console.log("HORAINMIN", horaInicioMinute)
+            var horaTerminoParts = horaTerminoString.split(':');
+            var horaTerminoHour = parseInt(horaTerminoParts[0]);
+            var horaTerminoMinute = parseInt(horaTerminoParts[1]);
+            console.log("HORTERHO", horaTerminoHour)
+            console.log("HORTERMIN", horaTerminoMinute)
+            // Verificar si las fechas no son null
+            if (fechaInicio !== null && fechaFinal !== null) {
+                // Crear objetos de fecha con las fechas seleccionadas y las horas obtenidas
+                var startDateTime = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), fechaInicio.getDate(), horaInicioHour, horaInicioMinute);
+                var endDateTime = new Date(fechaFinal.getFullYear(), fechaFinal.getMonth(), fechaFinal.getDate(), horaTerminoHour, horaTerminoMinute);
+
+                // Calcular la diferencia en milisegundos
+                var timeDifferenceMilliseconds = Math.abs(endDateTime - startDateTime);
+
+                // Convertir la diferencia a minutos
+                var timeDifferenceMinutes = Math.round(timeDifferenceMilliseconds / 60000);
+                            console.log("TIMEDIFf", timeDifferenceMinutes)
+
+                if (isNaN(timeDifferenceMinutes)) {
+                    timeDifferenceMinutes = 0;
+                }
+
+                $("#tiempoManiobrasInsert").val(timeDifferenceMinutes);
+            } else {
+                // Si alguna de las fechas es null, establecer el valor de tiempo en 0
+                $("#tiempoManiobrasInsert").val(0);
+            }
+        }
+    }
+
+
+     $(document).ready(function () {
+        updateDifference();
+    });
+
+    function valid5char(e) {
+
+        var value = e.target.value
+        var reg = /[0-2][0-9][\:][0-5][0-9]/g
+        var can = reg.test(value)
+        if (!can) {
+            e.target.value = ""
+        }
+    }
+
+    function validacionHoraArribo(event) {
+        var horaIngresada = event.target.value;
+        var key = event.key
+        var keycode = event.keyCode
+        var horalength = horaIngresada.length
+        if ([8, 46, 37, 38, 39, 40, 9].indexOf(keycode) != -1) {
+            return
+        }
+        event.preventDefault();
+
+
+
+        console.log(key, keycode)
+
+
+        if (horalength == 0) {
+            if ("012".indexOf(key) != -1) {
+                event.target.value = key
+            }
+        }
+        if (horalength == 1) {
+            var lastval = horaIngresada[0]
+            if (":" == key && lastval != "0") {
+                event.target.value = "0" + event.target.value + key
+            }
+            else if (lastval == "2") {
+                if ("0123".indexOf(key) != -1) {
+                    event.target.value = event.target.value + key
+                }
+            } else if ("0123456789".indexOf(key) != -1) {
+                event.target.value = event.target.value + key
+            }
+        }
+        if (horalength == 2) {
+            if (key == ":") {
+                event.target.value = event.target.value + key
+            }
+            else if ("012345".indexOf(key) != -1) {
+                event.target.value = event.target.value + ":" + key
+            }
+        }
+        if (horalength == 3) {
+            if ("012345".indexOf(key) != -1) {
+                event.target.value = event.target.value + key
+            }
+        }
+        if (horalength == 4) {
+            var lastval = horaIngresada[3]
+            var hours = parseInt(horaIngresada[0] + horaIngresada[1])
+
+            if (lastval == "0" && hours == 0) {
+                if ("0123456789".indexOf(key) != -1) {
+                    event.target.value = event.target.value + key
+                    setTimeout(validarFechaArribo, 2)
+                }
+            } else {
+                if ("0123456789".indexOf(key) != -1) {
+                    event.target.value = event.target.value + key
+                    setTimeout(validarFechaArribo, 2)
+                }
+            }
+
+        }
+     }
+
+
+
+    function validarFechaArribo() {
+        var fechareal = $("#fechaArriboInsert").val()
+        // Obtener la fecha actual
+        var fechaActual = new Date();
+        var fechaParseo = new Date(parseInt(fechaActual.getFullYear()), parseInt(fechaActual.getMonth()), parseInt(fechaActual.getDate()));
+
+
+        var fechaSeleccionadaString = $("#fechaArriboInsert").val();
+        var splitFechaSeleccion = fechaSeleccionadaString.split('/')
+        var objetoFecha = !fechaSeleccionadaString ? fechaParseo : new Date(parseInt(splitFechaSeleccion[2]), parseInt(splitFechaSeleccion[1]) - 1, parseInt(splitFechaSeleccion[0]));
+
+        var datepicker = $("#fechaInicioInsert").data("kendoDatePicker");        
+        datepicker.setOptions({ min: objetoFecha })
+        datepicker.value(fechareal);
+        datepicker.trigger("change");
+        
+        
+        
+        var datepicker2 = $("#fechaFinalInsert").data("kendoDatePicker");        
+        datepicker2.setOptions({ min: objetoFecha })
+        datepicker2.value(fechareal);
+        datepicker2.trigger("change");
+        
+
+
+
+
+        console.log("objetoFecha:", objetoFecha)
+        console.log("fechaParseo:", fechaParseo)
+        // Comparar la fecha seleccionada con la fecha actual
+        if (fechaParseo.getTime() === objetoFecha.getTime()) {
+            // Si la fecha seleccionada es la fecha actual, verificar la hora ingresada
+            console.log("SI Entra")
+            var horaIngresada = $("#horaArriboInsert").val();
+            var horaActual = fechaActual.getHours() * 60 + fechaActual.getMinutes();
+            var horaIngresadaSplit = horaIngresada.split(':');
+            var horaIngresadaEnMinutos = parseInt(horaIngresadaSplit[0]) * 60 + parseInt(horaIngresadaSplit[1]);
+            console.log("horaIngresada", horaIngresada)
+            console.log("horaActual", horaActual)
+            console.log("horaSplit", horaIngresadaSplit)
+
+            console.log("horaIngresadaEnMinutos", horaIngresadaEnMinutos)
+
+            if (horaIngresadaEnMinutos > horaActual) {
+
+                $("#horaArriboInsert").val('');
+              //  event.preventDefault();
+            }
+        }
+    }
+
+    function validacionHoraInicio(event) {
+        var horaIngresada = event.target.value;
+        var key = event.key
+        var keycode = event.keyCode
+        var horalength = horaIngresada.length
+        if ([8, 46, 37, 38, 39, 40, 9].indexOf(keycode) != -1) {
+            return
+        }
+        event.preventDefault();
+
+
+
+        console.log(key, keycode)
+
+
+        if (horalength == 0) {
+            if ("012".indexOf(key) != -1) {
+                event.target.value = key
+            }
+        }
+        if (horalength == 1) {
+            var lastval = horaIngresada[0]
+            if (":" == key && lastval != "0") {
+                event.target.value = "0" + event.target.value + key
+            }
+            else if (lastval == "2") {
+                if ("0123".indexOf(key) != -1) {
+                    event.target.value = event.target.value + key
+                }
+            } else if ("0123456789".indexOf(key) != -1) {
+                event.target.value = event.target.value + key
+            }
+        }
+        if (horalength == 2) {
+            if (key == ":") {
+                event.target.value = event.target.value + key
+            }
+            else if ("012345".indexOf(key) != -1) {
+                event.target.value = event.target.value + ":" + key
+            }
+        }
+        if (horalength == 3) {
+            if ("012345".indexOf(key) != -1) {
+                event.target.value = event.target.value + key
+            }
+        }
+        if (horalength == 4) {
+            var lastval = horaIngresada[3]
+            var hours = parseInt(horaIngresada[0] + horaIngresada[1])
+
+            if (lastval == "0" && hours == 0) {
+                if ("0123456789".indexOf(key) != -1) {
+                    event.target.value = event.target.value + key
+                    setTimeout(validarFechaInicio, 2)
+                }
+            } else {
+                if ("0123456789".indexOf(key) != -1) {
+                    event.target.value = event.target.value + key
+                    setTimeout(validarFechaInicio, 2)
+                }
+            }
+
+        }
+     }
+
+
+    function validarFechaInicio() {
+
+        // Obtener la fecha actual
+        var fechaActual = new Date();
+        var fechaParseo = new Date(parseInt(fechaActual.getFullYear()), parseInt(fechaActual.getMonth()), parseInt(fechaActual.getDate()));
+
+
+        var fechaSeleccionadaString = $("#fechaInicioInsert").val();
+        var splitFechaSeleccion = fechaSeleccionadaString.split('/')
+		var objetoFecha = !fechaSeleccionadaString ? fechaParseo: new Date(parseInt(splitFechaSeleccion[2]), parseInt(splitFechaSeleccion[1]) - 1, parseInt(splitFechaSeleccion[0]));
+     
+        
+        var datepicker2 = $("#fechaFinalInsert").data("kendoDatePicker");
+        datepicker2.value(fechaSeleccionadaString);
+        datepicker2.trigger("change");
+        datepicker2.setOptions({ min: objetoFecha })
+
+        
+        
+        console.log("objetoFecha:", objetoFecha)
+        console.log("fechaParseo:", fechaParseo)
+        // Comparar la fecha seleccionada con la fecha actual
+        if (fechaParseo.getTime() === objetoFecha.getTime()) {
+            // Si la fecha seleccionada es la fecha actual, verificar la hora ingresada
+            console.log("SI Entra")
+            var horaIngresada = $("#horaInicioInsert").val();
+            var horaActual = fechaActual.getHours() * 60 + fechaActual.getMinutes();
+            var horaIngresadaSplit = horaIngresada.split(':');
+            var horaIngresadaEnMinutos = parseInt(horaIngresadaSplit[0]) * 60 + parseInt(horaIngresadaSplit[1]);
+            console.log("horaIngresada", horaIngresada)
+            console.log("horaActual", horaActual)
+            console.log("horaSplit", horaIngresadaSplit)
+
+            console.log("horaIngresadaEnMinutos", horaIngresadaEnMinutos)
+
+            if (horaIngresadaEnMinutos > horaActual) {
+
+                $("#horaInicioInsert").val('');
+               // event.preventDefault();
+            }
+        }
+
+
+        ///////Validar fecha minima
+        var fechaSeleccionadaStringMin = $("#fechaArriboInsert").val();
+        var splitFechaSeleccionMin = fechaSeleccionadaStringMin.split('/')
+        var objetoFechaMin = !fechaSeleccionadaStringMin ? fechaParseo : new Date(parseInt(splitFechaSeleccionMin[2]), parseInt(splitFechaSeleccionMin[1]) - 1, parseInt(splitFechaSeleccionMin[0]));
+
+
+
+        if (objetoFechaMin.getTime() === objetoFecha.getTime()) {
+            // Si la fecha seleccionada es la fecha actual, verificar la hora ingresada
+            console.log("SI Entra")
+            var horaIngresada = $("#horaInicioInsert").val();
+            var horaMinima =$("#horaArriboInsert").val()
+            
+            var horaIngresadaSplitMin = horaMinima.split(':');
+            var horaIngresadaEnMinutosMin = parseInt(horaIngresadaSplitMin[0]) * 60 + parseInt(horaIngresadaSplitMin[1]);
+
+            var horaIngresadaSplit = horaIngresada.split(':');
+            var horaIngresadaEnMinutos = parseInt(horaIngresadaSplit[0]) * 60 + parseInt(horaIngresadaSplit[1]);
+
+
+            if (horaIngresadaEnMinutosMin > horaIngresadaEnMinutos ) {
+
+                $("#horaInicioInsert").val('');
+              //  event.preventDefault();
+            }
+        }
+
+
+
+
+    }
+
+ function validacionHoraFin(event) {
+        var horaIngresada = event.target.value;
+        var key = event.key
+        var keycode = event.keyCode
+        var horalength = horaIngresada.length
+        if ([8, 46, 37, 38, 39, 40, 9].indexOf(keycode) != -1) {
+            return
+        }
+        event.preventDefault();
+
+
+
+        console.log(key, keycode)
+
+
+        if (horalength == 0) {
+            if ("012".indexOf(key) != -1) {
+                event.target.value = key
+            }
+        }
+        if (horalength == 1) {
+            var lastval = horaIngresada[0]
+            if (":" == key && lastval != "0") {
+                event.target.value = "0" + event.target.value + key
+            }
+            else if (lastval == "2") {
+                if ("0123".indexOf(key) != -1) {
+                    event.target.value = event.target.value + key
+                }
+            } else if ("0123456789".indexOf(key) != -1) {
+                event.target.value = event.target.value + key
+            }
+        }
+        if (horalength == 2) {
+            if (key == ":") {
+                event.target.value = event.target.value + key
+            }
+            else if ("012345".indexOf(key) != -1) {
+                event.target.value = event.target.value + ":" + key
+            }
+        }
+        if (horalength == 3) {
+            if ("012345".indexOf(key) != -1) {
+                event.target.value = event.target.value + key
+            }
+        }
+        if (horalength == 4) {
+            var lastval = horaIngresada[3]
+            var hours = parseInt(horaIngresada[0] + horaIngresada[1])
+
+            if (lastval == "0" && hours == 0) {
+                if ("0123456789".indexOf(key) != -1) {
+                    event.target.value = event.target.value + key
+                    setTimeout(validarFechaFin, 2)
+                }
+            } else {
+                if ("0123456789".indexOf(key) != -1) {
+                    event.target.value = event.target.value + key
+                    setTimeout(validarFechaFin, 2)
+                }
+            }
+
+        }
+     }
+
+
+    function validarFechaFin() {
+        // Obtener la fecha actual
+        var fechaActual = new Date();
+        var fechaParseo = new Date(parseInt(fechaActual.getFullYear()), parseInt(fechaActual.getMonth()), parseInt(fechaActual.getDate()));
+
+
+        var fechaSeleccionadaString = $("#fechaFinalInsert").val();
+        var splitFechaSeleccion = fechaSeleccionadaString.split('/')
+		var objetoFecha = !fechaSeleccionadaString ? fechaParseo: new Date(parseInt(splitFechaSeleccion[2]), parseInt(splitFechaSeleccion[1]) - 1, parseInt(splitFechaSeleccion[0]));
+        console.log("objetoFecha:", objetoFecha)
+        console.log("fechaParseo:", fechaParseo)
+
+
+       
+        /////Valida fecha minima
+        var fechaSeleccionadaStringMin = $("#fechaInicioInsert").val();
+        var splitFechaSeleccionMin = fechaSeleccionadaStringMin.split('/')
+        var objetoFechaMin = !fechaSeleccionadaStringMin ? fechaParseo : new Date(parseInt(splitFechaSeleccionMin[2]), parseInt(splitFechaSeleccionMin[1]) - 1, parseInt(splitFechaSeleccionMin[0]));
+
+
+
+        
+        if (objetoFechaMin.getTime() === objetoFecha.getTime()) {
+            // Si la fecha seleccionada es la fecha actual, verificar la hora ingresada
+            console.log("SI Entra")
+            var horaIngresada = $("#horaTerminoInsert").val();
+            var horaMinima = $("#horaInicioInsert").val() 
+                horaMinima = horaMinima? horaMinima: $("#horaArriboInsert").val()
+            console.log("AAAAAAQQQQQUUUUUIIIIIII", horaMinima)
+            var horaIngresadaSplitMin = horaMinima.split(':');
+            var horaIngresadaEnMinutosMin = parseInt(horaIngresadaSplitMin[0]) * 60 + parseInt(horaIngresadaSplitMin[1]);
+
+
+
+            var horaIngresadaSplit = horaIngresada.split(':');
+            var horaIngresadaEnMinutos = parseInt(horaIngresadaSplit[0]) * 60 + parseInt(horaIngresadaSplit[1]);
+
+
+            console.log("horaIngresadaEnMinutos", horaIngresadaEnMinutos)
+
+            if (horaIngresadaEnMinutosMin > horaIngresadaEnMinutos ) {
+
+                $("#horaTerminoInsert").val('');
+               // event.preventDefault();
+            }
+            else {
+                updateDifference()
+            }
+        }
+        
+        
+        
+        
+        
+        
+        // Comparar la fecha seleccionada con la fecha actual
+     else   if (fechaParseo.getTime() === objetoFecha.getTime()) {
+            // Si la fecha seleccionada es la fecha actual, verificar la hora ingresada
+            console.log("SI Entra")
+            var horaIngresada = $("#horaTerminoInsert").val();
+            var horaActual = fechaActual.getHours() * 60 + fechaActual.getMinutes();
+            var horaIngresadaSplit = horaIngresada.split(':');
+            var horaIngresadaEnMinutos = parseInt(horaIngresadaSplit[0]) * 60 + parseInt(horaIngresadaSplit[1]);
+            console.log("horaIngresada", horaIngresada)
+            console.log("horaActual", horaActual)
+            console.log("horaSplit", horaIngresadaSplit)
+
+            console.log("horaIngresadaEnMinutos", horaIngresadaEnMinutos)
+
+            if (horaIngresadaEnMinutos > horaActual) {
+
+                $("#horaTerminoInsert").val('');
+               // event.preventDefault();
+            }
+            else{
+                updateDifference()
+            }
+        }
+        else{
+            updateDifference()
+        }
+
+
+
+
+
+
+
+
+    }
+
+</script>
+<div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+    <div class="modal-content">
+        <section class=" bg-white rounded">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-12 col-md-auto">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto p-0">
+                            <i class="icon-addGrua me-2  h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                            <h2 class="m-0 h3"><b>Datos de Grúa Asignada</b></h2>
+                        </div>
+                    </div>
+                </div>
+               <div class="col-auto">
+                        <div class="row">
+                            <div class="col-auto my-3">
+                                <button class="btn-close" type="button" onclick="goBack()"></button>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="row">
+                <div class="col-5 pe-0">
+                    <div class="bgSuccess py-1"></div>
+                </div>
+                <div class="col-7 ps-0">
+                    <div class="bg-light py-1"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 my-4">
+                    <h5 class="px-4"><b>Datos de grúa asignada</b></h5>
+                    <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                </div>
+            </div>
+            <div class="row justify-content-start align-items-center py-2">
+               
+            </div>
+            <form id="datosGruaForm">
+                <input type="hidden" id="Accion" value="Add" />
+                <div class="row px-4 align-items-end " id="contenedor">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label for="ddgrua">Número económico <b>(obligatorio)</b>:</label>
+                            @(Html.Kendo().DropDownListFor(d => d.idGrua)
+                                .NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                           
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("Gruas_Drop", "AsignacionGruas");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:100%;", id = "idGruaInsert", required = "required" })
+                                )
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label for="datepicker1">Fecha de arribo <b>(obligatorio)</b>:</label>
+                            @(Html.Kendo().DatePickerFor(t => t.fechaArribo).Max(DateTime.Now)
+                                .Format("dd/MM/yyyy")
+                                .Events(e =>
+                                {
+                                    e.Change("validarFechaArribo");
+                                })
+                                .HtmlAttributes(new { style = "width: 90%", id = "fechaArriboInsert", required = "required" })
+                                )
+                        </div>
+                        </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3" >
+
+                       @* <div class="controlForm my-3">
+                            <label for="timepicker1">Hora de arribo <b>(obligatorio)</b>:</label>
+                            @(Html.Kendo().TimePickerFor(t => t.horaArribo).Interval(1)
+                                .Format("HH:mm")
+                                .Events(e =>
+                                {
+                                    e.Change("validacionHoraArribo");
+                                })
+                                .HtmlAttributes(new { style = "width: 90%", id = "horaArriboInsert", required = "required" })
+                                )
+                        </div>*@
+                            <label class="tex">Hora formato 24 horas <b>(obligatorio)</b>:</label>
+                            <input style="height:60px" autocomplete="off" type="text" id="horaArriboInsert" name="horaArriboInsertStr" onkeydown="validacionHoraArribo(event)" onblur="valid5char(event)" />
+                    </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label for="datepicker2">Fecha de inicio <b>(obligatorio)</b>:</label>
+                            @(Html.Kendo().DatePickerFor(t => t.fechaInicio).Max(DateTime.Now)
+                                .Format("dd/MM/yyyy")
+                                 .Events(e =>
+											{
+                                    e.Change("validarFechaInicio");
+											})
+                                .HtmlAttributes(new { style = "width: 90%", id = "fechaInicioInsert", required = "required" })
+                                )
+                        </div>
+                    </div>
+                     <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                       @* <div class="controlForm my-3">
+                            <label for="timepicker2">Hora de inicio <b>(obligatorio)</b>:</label>
+                            @(Html.Kendo().TimePickerFor(t => t.horaInicio).Interval(1)
+                                .Events(e =>
+                                {
+                                    e.Change("validacionHoraInicio");
+                                })
+                                .Format("HH:mm")
+                                .HtmlAttributes(new { style = "width: 90%", id = "horaInicioInsert",required = "required" })
+                              
+                                )
+                        </div>*@
+                            <label class="tex">Hora formato 24 horas <b>(obligatorio)</b>:</label>
+                            <input style="height:60px" autocomplete="off" type="text" id="horaInicioInsert" name="horaInicioInsertStr" onkeydown="validacionHoraInicio(event)" onblur="valid5char(event)" step="60" />
+                    </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label for="datepicker3">Fecha de término <b>(obligatorio)</b>:</label>
+                            @(Html.Kendo().DatePickerFor(t => t.fechaFinal).Max(DateTime.Now)
+                                .Format("dd/MM/yyyy")
+                                .HtmlAttributes(new { style = "width: 90%", id = "fechaFinalInsert", required = "required" })
+                                .Events(e =>
+                                {
+                                    e.Change("validarFechaFin");
+                                })
+                                )
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                                <div class="controlForm my-3" >
+
+                       @* <div class="controlForm my-3">
+                            <label for="timepicker3">Hora de término <b>(obligatorio)</b>:</label>
+                            @(Html.Kendo().TimePickerFor(t => t.horaTermino).Interval(1)
+                                .Format("HH:mm")
+                                .Events(e =>
+                                {   e.Change("validacionHoraFinal");   })
+                                .HtmlAttributes(new { style = "width: 90%", id = "horaTerminoInsert",required = "required" }) )
+                        </div>*@
+
+                            <label class="tex">Hora formato 24 horas <b>(obligatorio)</b>:</label>
+                            <input style="height:60px" autocomplete="off" type="text" id="horaTerminoInsert" name="horaFinInsertStr" onkeydown="validacionHoraFin(event)" onblur="valid5char(event)" step="60" />
+                    </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label for="timeDifference">Diferencia en minutos <b>(obligatorio)</b>:</label>
+                            @(Html.Kendo().TextBoxFor(t => t.tiempoManiobras)
+                                .HtmlAttributes(new { style = "width: 100%", @readonly = "readonly", id="tiempoManiobrasInsert" }) // Marcar como solo lectura
+                                )
+                        </div>
+                    </div>
+                    <div class="row align-items-end px-4" id="contenedor">
+                        <!-- Otras columnas aquí -->
+
+
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="controlForm my-3">
+                                <label for="switch2">Abanderamiento :</label>
+                                <div class="btnToggleActive">
+                                    @(Html.Kendo().SwitchFor(t => t.AbanderamientoBool)
+                                                .Name("abanderamientoSwitch1")
+                                                .Checked(false)
+                                                .Messages(c => c.Checked("Si").Unchecked("No"))
+                                                .HtmlAttributes(new { data_checked = "true" })
+                                                )
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="controlForm my-3">
+                                <label for="switch2">Salvamento:</label>
+                                <div class="btnToggleActive">
+                                    @(Html.Kendo().SwitchFor(t => t.SalvamentoBool)
+                                                .Name("salvamentoSwitch1")
+                                                .Checked(false)
+                                                .Messages(c => c.Checked("Si").Unchecked("No"))
+                                                .HtmlAttributes(new { data_valor = "true" })
+                                                )
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="controlForm my-3">
+                                <label for="switch3">Arrastre:</label>
+                                <div class="btnToggleActive">
+                                    @(Html.Kendo().SwitchFor(t => t.ArrastreBool)
+                                                .Name("arrastreSwitch1")
+                                                .Checked(false)
+                                                .Messages(c => c.Checked("Si").Unchecked("No"))
+                                                .HtmlAttributes(new { data_checked = "true" })
+                                                )
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Otras columnas aquí -->
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBoxFor(t => t.operadorGrua)
+                                .Label(label => label.Content("Operador de la grúa <b>(obligatorio)</b>:"))
+                                .Placeholder("Escribe el operador de la grúa")
+                                .HtmlAttributes(new { style = "width: 100%", required = "required", id="operadorGruaInsert" })
+                                )
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                </div>
+
+            </form>
+            <!-- Botones -->
+            <div class="row my-4">
+                <div class="col-12 col-md-6 mx-md-auto">
+                    <div class="row justify-content-around">
+                        <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                            <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                                <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                            </button>
+                        </div>
+                        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                            <div class="controlButton" onclick="enviarDatos()">
+                                @(Html.Kendo().Button()
+                                    .Name("AddFactor")
+                                    .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                    .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+function enviarDatos() {
+
+        var formData = new FormData($("#datosGruaForm")[0]);
+        var formData2 = $("#datosGruaForm");
+        var Mydata = $("#datosGruaForm").serialize();
+
+
+        var abanderamientoValue = $("#abanderamientoSwitch1").prop("checked") ? 1 : 0;
+        var arrastreValue = $("#arrastreSwitch1").prop("checked") ? 1 : 0;
+        var salvamentoValue = $("#salvamentoSwitch1").prop("checked") ? 1 : 0;
+
+        formData.append("abanderamiento", abanderamientoValue);
+        formData.append("arrastre", arrastreValue);
+            formData.append("salvamento", salvamentoValue);
+
+            formData.append("horaInicioInsert", $("#horaInicioInsert").val());
+            formData.append("horaArriboInsert", $("#horaArriboInsert").val());
+            formData.append("horaTerminoInsert", $("#horaTerminoInsert").val());
+
+
+        console.log("formData:", formData);
+         var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'horaInicioInsert' });
+        controlsValidate.push({ 'controlName': 'horaArriboInsert' });
+        controlsValidate.push({ 'controlName': 'horaTerminoInsert' });
+        controlsValidate.push({ 'controlName': 'tiempoManiobrasInsert' });
+
+        controlsValidate.push({ 'controlName': 'fechaArriboInsert' });
+        controlsValidate.push({ 'controlName': 'fechaInicioInsert' });
+        controlsValidate.push({ 'controlName': 'fechaFinalInsert' });
+        controlsValidate.push({ 'controlName': 'operadorGruaInsert' });
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+        // DROP DOWN LIST
+        controlsValidate = [];
+        controlsValidate.push({ 'controlName': 'idGruaInsert' });
+       
+        if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+            showLoading();
+        $.ajax({
+                url: '/AsignacionGruas/InsertarDatos',
+            type: 'POST',
+                data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                sitteg_success("Se ha actualizado la información");
+                $('#modalAgregarGrua').modal('hide');
+                var grid = $("#gridGruas").data("kendoGrid");
+                grid.dataSource.data(data);
+                grid.refresh();
+                    hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning("!Sucedió un error, inténtalo de nuevo más tarde...");
+                hideLoading();
+            }
+        });
+}
+
+
+    $("input[name='horaInicioInsertStr'], input[name='horaFinInsertStr'], #fechaInicioInsert, #fechaFinalInsert").on("change input blur", function () {
+        updateDifference();
+        console.log("LLAMA")
+    });
+
+
+   
+
+    function goBack() {
+        
+        $('#modalAgregarGrua').modal('hide');
+        $('#ModalBodyEditarGrua').modal('');
+    }
+
+  
+</script>
+

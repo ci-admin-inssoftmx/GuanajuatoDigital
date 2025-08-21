@@ -1,0 +1,10 @@
+﻿@{
+    var errorMessage = TempData["ErrorMessage"] as string;
+}
+
+<div>
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+</div>

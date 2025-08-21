@@ -1,0 +1,128 @@
+﻿@model List<PadronDepositosGruasModel>
+
+@*<div class="row justify-content-between mb-1 titleCustom">*@
+
+<script>
+
+    function Penciones(data){
+
+        var spl = data.Pension.split('|')
+        console.log(spl)
+
+        var aux=""
+
+
+        for(var it of spl){
+            if (it == ""){
+                continue
+            }
+            
+
+            var aux = `${aux}   
+                        <li>
+                        ${it}
+                        </li>
+            `
+        }
+
+        var t =`<ul>
+                ${aux}                
+                </ul>`
+        
+                console.log(t)
+
+        return t
+
+    }
+
+    </script>
+
+
+<div class="row mb-2 mt-4 titleCustom">
+    <div class="col-12">
+        <h5 class="px-4"><b>Listado de Padrón de depósitos y grúas</b></h5>
+        <h6 class="px-4 text-muted">Edita o ajusta el listado de padrón.</h6>
+    </div>
+</div>
+<br />
+<br />
+<br />
+<div class="row">
+    @if (ViewBag.NoResultsMessage != null)
+    {
+        <div class="alert alert-info">
+            @ViewBag.NoResultsMessage
+        </div>
+        <br/>
+        <br/>
+        <br/>
+        <br />
+
+    }
+
+    @*<column template="<button data-bs-toggle=modal data-bs-target=\#editVehiculo class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>" width="100" />*@
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(Html.Kendo().Grid(Model)
+            .Name("Grid")
+            .Columns(columns =>
+            {
+                columns.Bound(p => p.Municipio).Title("Municipio").Width(90);
+                columns.Bound(p => p.Concesionario).Title("Concesionario").Width(90);
+                columns.Bound(p => p.Pension).ClientTemplate("#= Penciones(data) #").Title("Depósito").Width(150);
+                columns.Bound(c => c.noEconomico).Title("No. Económico").Width(90);
+                columns.Bound(c => c.Modelo).Title("Modelo").Width(90);
+                columns.Bound(c => c.Placas).Title("Placas").Width(90);
+                columns.Bound(c => c.TipoGrua).Title("Tipo de grúa").Width(90);
+            }).HtmlAttributes(new { style = "height:350" })
+            @*.Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Bottom).PageSizes(true))*@
+            .Pageable()
+            .Sortable()
+            .Scrollable(scr => scr.Height(350))
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.Municipio);
+                s.Field(c => c.Concesionario);
+                s.Field(c => c.fullPension);
+                s.Field(c => c.noEconomico);
+                s.Field(c => c.Modelo);
+                s.Field(c => c.Placas);
+                s.Field(c => c.TipoGrua);
+            })
+            //.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            .Events(events => events.DataBinding("replaceLegend"))
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#Grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+    </div>
+
+</div>
+
+<script>
+  @*  $(document).ready(function () {
+        var grid = $("#Grid").data("kendoGrid");
+
+        var position = "top";
+        grid.setOptions({
+            pageable: {
+                position: position
+            }
+        });
+    });*@
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+
+</script>

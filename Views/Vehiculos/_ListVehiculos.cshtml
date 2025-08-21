@@ -1,0 +1,148 @@
+﻿@model List<VehiculoModel>
+
+
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+@*
+   <div class="row">
+
+   </div>
+*@
+<div class="row">
+    <div class="col-12 mb-4 px-4">
+        <h5><b>Listado de vehículos</b></h5>
+        <h6 class="text-muted">Editar los datos de vehículo.</h6>
+    </div>
+
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        
+        @(Html.Kendo().Grid(Model)
+            .Name("Grid")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.idVehiculo).Hidden();
+                columns.Bound(p => p.NumeroSecuencial).Title("No.").Width(40);
+                columns.Bound(p => p.placas).Title("Placas").Width(90);
+                columns.Bound(p => p.serie).Title("No.Serie").Width(90);
+                columns.Bound(c => c.marca).Title("Marca").Width(90);
+                columns.Bound(c => c.submarca).Title("SubMarca").Width(90);
+                columns.Bound(c => c.tipoVehiculo).Title("Tipo Vehículo").Width(90);
+                columns.Bound(c => c.propietario).Title("Propietario").Width(90);
+                columns.Bound(c => c.tarjeta).Title("Tarjeta").Width(90);
+                columns.Bound(c => c.vigenciaTarjeta)
+                .Title("Vigencia tarjeta")
+                .ClientTemplate("#= formatVigenciaTarjeta(vigenciaTarjeta) #")
+                .Width(90);
+                columns.Bound(c => c.motor).Title(" No. Motor").Width(90);
+                columns.Bound(c => c.modelo).Title("Modelo").Width(90);
+                columns.Bound(c => c.color).Title("Color").Width(90);
+                columns.Bound(c => c.entidadRegistro).Title("Entidad").Width(90);
+                columns.Bound(c => c.subTipoServicio).Title("SubTipo Servicio").Width(90);
+                columns.Bound(c => c.numeroEconomico).Title("Numero económico").Width(90);
+
+
+                columns.Bound(p => p.idVehiculo).ClientTemplate(
+                "<button onclick=\"ShowUpdate('#= idVehiculo #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>"
+                ).Title("Acciones").Sortable(false).Width(100);
+
+            }).HtmlAttributes(new { style = "height:350" })
+            @*.Pageable(p => p.Enabled(true).PageSizes(new[] { 10, 20, 30 }))*@
+            .Pageable(p => p.Enabled(true))
+            .EnableCustomBinding(true)
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read("ajax_BuscarVehiculos", "Vehiculos")
+            .PageSize(10)
+            )
+            .Scrollable(scr => scr.Height(350)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            @*.ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.placas);
+                s.Field(c => c.serie);
+                s.Field(c => c.marca);
+                s.Field(c => c.submarca);
+                s.Field(c => c.tipoVehiculo);
+                s.Field(c => c.propietario);
+                s.Field(c => c.tarjeta);
+                s.Field(c => c.motor);
+                s.Field(c => c.modelo);
+                s.Field(c => c.color);
+                s.Field(c => c.entidadRegistro);
+                s.Field(c => c.subTipoServicio);
+                s.Field(c => c.numeroEconomico);
+
+
+            })*@
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#Grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+
+        <script>
+
+            $(document).ready(function () {
+                var auth = @autorizaciones;
+                var grid = $("#Grid").data("kendoGrid");
+
+
+
+            });
+
+        </script>
+    </div>
+
+</div>
+
+<script>
+    function ShowUpdate(Id) {
+        window.location = '/Vehiculos/EditarVehiculo?id=' + Id;
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+
+        function formatVigenciaTarjeta(vigenciaTarjeta) {
+            if (!vigenciaTarjeta || (vigenciaTarjeta && vigenciaTarjeta.getFullYear() === 1900)) {
+                return "-";
+            } else {
+                return kendo.toString(vigenciaTarjeta, "dd/MM/yyyy");
+            }
+        }
+
+
+  /*   $(document).ready(function () {
+            // Función para numerar las filas
+            function updateRowNumbers() {
+                var grid = $("#Grid").data("kendoGrid");
+                var rows = grid.tbody.children();
+                for (var i = 0; i < rows.length; i++) {
+                    var row = $(rows[i]);
+                    var rowNumber = i + 1;
+                    row.find(".row-number").text(rowNumber);
+                }
+            }
+
+            // Llama a la función para numerar las filas cuando el grid se carga o se actualiza
+            var grid = $("#Grid").data("kendoGrid");
+            grid.bind("dataBound", function () {
+                updateRowNumbers();
+            });
+
+            // Llama a la función inicialmente para numerar las filas
+            updateRowNumbers();
+        });*/
+</script>

@@ -1,0 +1,257 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+    var nombreUsuario = User.FindFirst(CustomClaims.Nombre).Value;
+}
+
+<script>
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡EL usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡EL usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+</script>
+<div class="mainContainer bg-light">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-addBloc h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Alta de nuevo bloc</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto d-none">
+                @*<div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnNuevabol" >
+                            <h6 class="m-0 d-flex align-items-center">
+                                <i class="icon-addBloc h5 mb-0 me-2"></i><b>Nueva bloc</b>
+                            </h6>
+                        </button>
+                    </div>
+                </div>*@
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 mb-4 px-4 rounded gridCustom">
+                <div class="col-12 col-md-auto mt-4 mb-2">
+                    <h5 class="px-4"><b>Datos del bloc</b></h5>
+                    <h6 class="px-4 text-muted">Completa los datos obligatorios para dar de alta.</h6>
+                </div>
+            </div>
+           
+         </div>
+            
+            <div class="row ustify-content-md-center">
+
+@*                <div class="col-6 col-md-4">
+                    <h6 class="px-4">Delegación:</h6>
+                </div>*@
+                <div class="col-6 col-md-4">
+                    <h6 class="px-4">Asigna:</h6>
+                </div>
+            </div>
+            <div class="row">
+
+@*                <div class="col-6 col-md-4">
+                    <h6 class="px-4">
+                    @(Html.Kendo().DropDownList()
+                        .Name("delegacion")
+                        .DataTextField("text")
+                        .DataValueField("value")
+                        .AutoWidth(true)
+                        .Enable(true)
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetDelegacionesCorp", "Catalogos");
+                            });
+                        })
+                        )
+                    </h6>
+                </div>
+       *@
+                <div class="col-6 col-md-4">
+                    <h6 class="px-4">
+                        @(Html.Kendo().TextBox()
+                            .Name("txAsigna")
+                            .Readonly(true)
+                             .Value(nombreUsuario)
+                            .HtmlAttributes(new { style = "width: 300px;" })
+                            )
+                    </h6>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6 col-md-4">
+                    <h6 class="px-4"><b>Tipo de bloc (obligatorio):</b></h6>
+                </div>         
+                <div class="col-6 col-md-4">
+                    <h6 class="px-4"><b>Folio Inicio (obligatorio):</b></h6>
+                </div>
+                <div class="col-6 col-md-4">
+                    <h6 class="px-4"><b>Folio Fin (obligatorio):</b></h6>
+                </div>
+        </div>
+            <div class="row">
+                <div class="col-6 col-md-4">
+                    <h6 class="px-4">
+                        <span>
+                            @(Html.Kendo().DropDownList()
+                                .Name("CatBlocs")
+                                .DataTextField("Tipo")
+                                .DataValueField("TipoBlocId")
+                                .AutoWidth(true)
+                                .Enable(true)
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetCatalogoBlocs", "Blocs");
+                                    });
+                                })
+                                )
+                        </span>
+                    </h6>
+                </div>
+            <div class="col-6 col-md-4">
+                <h6 class="px-4">
+                    <span>
+                        @(Html.Kendo().NumericTextBox().Min(1)
+                            .Decimals(0)
+                            .Format("n0")
+                            .Step(1)
+                            .Spinners(false)
+                            .Name("folioInicio")
+                            .Placeholder("Ingresa folio")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                    </span>
+                </h6>
+            </div>
+            <div class="col-6 col-md-4">
+                <h6 class="px-4">
+                    <span>
+                        @(Html.Kendo().NumericTextBox().Min(1)
+                            .Decimals(0)
+                            .Format("n0")
+                            .Step(1)
+                            .Spinners(false)
+                            .Name("foliofin")
+                            .Placeholder("Ingresa folio")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                    </span>
+                </h6>
+            </div>
+            </div>
+            <div class="col-6 col-md-4">
+                    <h6 class="px-4">
+                        <div class="controlButton my-3">
+                            @(Html.Kendo().Button()
+                                .Name("addBloc")                                
+                                .Events(e => e.Click("GuardaBloc"))
+                                .HtmlAttributes(new { @class = "btnPrimary" })
+                                .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                        </div>                                                          
+                    </h6>
+                </div>
+           
+        
+        <div class="row">
+            <div class="col-12 mb-4 px-4 rounded gridCustom">
+                <div id="tablablocs">
+                    <partial name="_BlocsListaAlta" model="Model" />
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+</div>
+
+<script>  
+
+    function GuardaBloc(e) {     
+        showLoading();
+        var flujo = $("#CatBlocs").data("kendoDropDownList").value();  
+        //var idDeleg = $("#delegacion").data("kendoDropDownList").value();
+        var folioi = $("#folioInicio").data("kendoNumericTextBox").value();
+        var foliof = $("#foliofin").data("kendoNumericTextBox").value();
+        //var deleg = $("#delegacion").data("kendoDropDownList").dataSource.data().filter(e => e.value == idDeleg)[0]?.text;
+
+
+        if (!folioi || !foliof){
+            sitteg_warning("falta agregar datos");
+            hideLoading();
+            return
+        }
+
+        if (parseInt(folioi) >= parseInt(foliof)){
+            sitteg_warning("El folio inicial es mayor que el final");
+            hideLoading();
+            return
+        }
+
+
+        var data = {idflujo:flujo , idDelegacio:"0",folioInicio:folioi,folioFin:foliof,delegacion:""}
+        
+
+        $.ajax({
+            url: '@Url.Action("GuardaBloc", "Blocs")',
+            type: 'POST',            
+            data: data,
+            success: function (data) { 
+                
+                if (data.menaje){
+                    sitteg_warning("Los folios se sobreponen");
+                    return
+                }
+
+                sitteg_success('Bloc Agregado correctamente con  numero de serie: ' + data.Serie)
+                var grid = $("#gridBlocs").data("kendoGrid");
+                grid.dataSource.read();
+                $("#folioInicio").data("kendoNumericTextBox").value(undefined);
+                $("#foliofin").data("kendoNumericTextBox").value(undefined);
+                
+            },
+            error: function () {
+                sitteg_warning("Registro Agregado con errores");
+            }
+        })
+        hideLoading();       
+    }
+        
+
+</script>

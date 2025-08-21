@@ -1,0 +1,307 @@
+﻿@model PDFLiberacionVehiculoModel
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Liberación de Vehículo</title>
+    <style>
+        body {
+            font-family: 'Proxima Nova Bold', sans-serif;
+        }
+
+        .container-header, .container, .container-child {
+            background-color: #E9F0FA;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 20px;
+        }
+
+        .body-pdf, .body-pdf-images {
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 0px;
+        }
+
+        .body-pdf-images {
+            text-align: center;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .header-left img {
+            max-width: 150px;
+            max-height: 150px;
+        }
+
+        .info-table {
+            width: 100%;
+            border-spacing: 0 5px;
+        }
+
+            .info-table td {
+                padding: 5px;
+            }
+
+                .info-table td:first-child {
+                    text-align: right;
+                    padding-right: 10px;
+                    font-weight: bold;
+                }
+
+                .info-table td:last-child {
+                    text-align: right;
+                }
+
+        .highlight {
+            color: #1A73E8;
+        }
+
+        .vehicle-info {
+            width: 100%;
+            margin-top: 0px;
+        }
+
+            .vehicle-info td {
+                text-align: center;
+                vertical-align: middle;
+                padding: 5px 10px;
+            }
+
+            .vehicle-info h3 {
+                margin: 5px 0;
+                color: #0E248E;
+                font-size: 15px;
+            }
+
+            .vehicle-info p {
+                margin: 0;
+                font-size: 14px;
+            }
+
+            .vehicle-info .value {
+                color: #0E248E;
+                font-weight: bold;
+            }
+
+        .footer {
+            display: table;
+            width: 100%;
+            padding: 10px;
+            background-color: white;
+            position: absolute;
+        }
+
+        .footer-left {
+            display: table-cell;
+            text-align: right;
+            font-size: 18px;
+            color: rgb(0,15,159);
+        }
+
+        .footer-right {
+            display: table-cell;
+            text-align: center;
+        }
+
+            .footer-right img {
+                width: 40px;
+                height: 40px;
+            }
+
+        .column-space {
+            width: 30px;
+        }
+
+        .image-adjust {
+            width: 400px;
+            height: 400px;
+        }
+
+        .image-large-adjust {
+            width: 700px;
+            height: 700px;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+
+    <div style="background-color: #E9F0FA;">
+        <table class="main-table" style="width:100%">
+            <tr>
+                <td style="width: 80%; vertical-align: top;">
+                    <img src="data:image/png;base64,@Model.LogoBase64" alt="Logo GTO" />
+                </td>
+                <td class="column-space"></td>
+                <td style="width: 60%; vertical-align: top;">
+                    <table class="info-table">
+                        <tr>
+                            <td align="right">FECHA INGRESO:</td>
+                            <td class="highlight">
+                                <strong>@(Model.FechaIngreso.ToString("dd/MM/yyyy") ?? "Fecha no disponible")</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">PENSIÓN:</td>
+                            <td class="highlight"><strong>@(string.IsNullOrEmpty(Model.Pension) ? "Pensión no disponible" : Model.Pension)</strong></td>
+                        </tr>
+                        <tr>
+                            <td align="right">FOLIO:</td>
+                            <td class="highlight"><strong>@(string.IsNullOrEmpty(Model.Folio) ? "Folio no disponible" : Model.Folio)</strong></td>
+                        </tr>
+                        <tr>
+                            <td align="right">ID:</td>
+                            <td class="highlight"><strong>@(Model.Id.ToString() ?? "ID no disponible")</strong></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        <p style="margin-left: 20px; font-size: 12px; margin-bottom:2px"><strong>PROPIETARIO:</strong></p>
+        <h4 style="margin-left: 23px; margin-top: 1px; margin-bottom:10px;">
+            @(!string.IsNullOrEmpty(Model.Propietario) ? Model.Propietario : "Propietario no disponible")
+        </h4>
+        <table class="vehicle-info">
+            <tr>
+                <td>
+                    <p>PLACAS:</p>
+                    <h3 class="value">@(!string.IsNullOrEmpty(Model.Placas) ? Model.Placas : "Placas no disponibles")</h3>
+                </td>
+                <td>
+                    <p>MARCA:</p>
+                    <h3 class="value">@(!string.IsNullOrEmpty(Model.Marca) ? Model.Marca : "Marca no disponible")</h3>
+                </td>
+                <td>
+                    <p>SUB MARCA:</p>
+                    <h3 class="value">@(!string.IsNullOrEmpty(Model.SubMarca) ? Model.SubMarca : "Sub Marca no disponible")</h3>
+                </td>
+                <td>
+                    <p>SERIE:</p>
+                    <h3 class="value">@(!string.IsNullOrEmpty(Model.Serie) ? Model.Serie : "Serie no disponible")</h3>
+                </td>
+                <td>
+                    <p>COLOR:</p>
+                    <h3 class="value">@(!string.IsNullOrEmpty(Model.Color) ? Model.Color : "Color no disponible")</h3>
+                </td>
+            </tr>
+        </table>
+
+    </div>
+
+    <div class="body-pdf">
+        <p style="font-size:12px; color: rgb(0,15,159);"><strong>NOMBRE DE QUIEN AUTORIZA:</strong></p>
+        <h4 style="margin-top: 3px; margin-left:2px"><strong>@Model.Autoriza</strong></h4>
+        <p style="font-size:11px; margin-bottom:0px"><strong>OBSERVACIONES:</strong></p>
+        <p>@Model.Observaciones</p>
+    </div>
+    <div class="body-pdf-images" style="margin-top:0px">
+        <p style="font-size:15px; text-align:left;"><strong>Acreditación de Personalidad:</strong></p>
+        <img class="image-adjust" src="data:image/png;base64,@Model.AcreditacionPersonalidadBase64" alt="Acreditación de Personalidad" />
+    </div>
+
+
+    <div class="footer">
+        <div class="footer-left">
+            LIBERACIÓN DE VEHÍCULO DEL CORRALÓN / PENSIÓN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <img src="data:image/png;base64,@Model.Paginador164" style="width: 40px;height: 40px; margin-left:20px;" alt="Número de página" />
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="container-child">
+        <table width="100%">
+            <tr>
+                <td width="40%">
+                    <img src="data:image/png;base64,@Model.LogoBase64" alt="Logo GTO" style="width: 100%; max-width: 300px;" />
+                </td>
+                <td width="60%">
+                    <table class="info-table">
+                        <tr>
+                            <td align="right">FECHA INGRESO:</td>
+                            <td class="highlight">
+                                <strong>@(Model.FechaIngreso.ToString("dd/MM/yyyy") ?? "Fecha no disponible")</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">PENSIÓN:</td>
+                            <td class="highlight"><strong>@(string.IsNullOrEmpty(Model.Pension) ? "Pensión no disponible" : Model.Pension)</strong></td>
+                        </tr>
+                        <tr>
+                            <td align="right">FOLIO:</td>
+                            <td class="highlight"><strong>@(string.IsNullOrEmpty(Model.Folio) ? "Folio no disponible" : Model.Folio)</strong></td>
+                        </tr>
+                        <tr>
+                            <td align="right">ID:</td>
+                            <td class="highlight"><strong>@(Model.Id.ToString() ?? "ID no disponible")</strong></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="body-pdf-images">
+        <p style="font-size:15px; text-align:left;"><strong>Acreditación de Propiedad:</strong></p>
+        <img src="data:image/png;base64,@Model.AcreditacionPropiedadBase64" alt="Acreditación de Propiedad" />
+    </div>
+
+    <div class="footer">
+        <div class="footer-left">
+            LIBERACIÓN DE VEHÍCULO DEL CORRALÓN / PENSIÓN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <img class="image-large-adjust" src="data:image/png;base64,@Model.Paginador264" style="width: 40px;height: 40px; margin-left:20px;" alt="Número de página" />
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+    <div class="container-child">
+        <table width="100%">
+            <tr>
+                <td width="40%">
+                    <img src="data:image/png;base64,@Model.LogoBase64" alt="Logo GTO" style="width: 100%; max-width: 300px;" />
+                </td>
+                <td width="60%">
+                    <table class="info-table">
+                        <tr>
+                            <td align="right">FECHA INGRESO:</td>
+                            <td class="highlight">
+                                <strong>@(Model.FechaIngreso.ToString("dd/MM/yyyy") ?? "Fecha no disponible")</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">PENSIÓN:</td>
+                            <td class="highlight"><strong>@(string.IsNullOrEmpty(Model.Pension) ? "Pensión no disponible" : Model.Pension)</strong></td>
+                        </tr>
+                        <tr>
+                            <td align="right">FOLIO:</td>
+                            <td class="highlight"><strong>@(string.IsNullOrEmpty(Model.Folio) ? "Folio no disponible" : Model.Folio)</strong></td>
+                        </tr>
+                        <tr>
+                            <td align="right">ID:</td>
+                            <td class="highlight"><strong>@(Model.Id.ToString() ?? "ID no disponible")</strong></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="body-pdf-images">
+        <p style="font-size:15px; text-align:left;"><strong>Recibo de Infracción:</strong></p>
+        <img class="image-large-adjust" src="data:image/png;base64,@Model.ReciboInfraccionBase64" alt="Recibo de Infracción" />
+    </div>
+
+    <div class="footer">
+        <div class="footer-left">
+            LIBERACIÓN DE VEHÍCULO DEL CORRALÓN / PENSIÓN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <img src="data:image/png;base64,@Model.Paginador364" style="width: 40px;height: 40px; margin-left:20px;" alt="Número de página" />
+        </div>
+    </div>
+</body>
+</html>

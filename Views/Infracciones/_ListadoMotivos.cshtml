@@ -1,0 +1,204 @@
+﻿@model List<MotivosInfraccionVistaModel>
+@{
+    
+    bool esSoloLectura = ViewBag.EsSoloLectura ?? false;
+    string claseColorEliminar = esSoloLectura ? "colorDisabled" : "colorDanger";
+    string claseColorOtroBoton = esSoloLectura ? "colorDisabled" : "colorPrimary";
+}
+<script>
+    
+
+    var esSoloLecturaGrid = @Html.Raw(esSoloLectura.ToString().ToLower());
+</script>
+
+<div class="row justify-content-between my-2 mb-1 titleCustom">
+    <div class="offset-1 col-12 mt-4 mb-2">
+        <h5 class="px-4"><b>Listado de motivos</b></h5>
+        <h6 class="px-4 text-muted">Agregue los motivos de la infracción.</h6>
+    </div>
+</div>
+
+<div class="col-12 rounded gridCustom">
+    @(
+        Html.Kendo().Grid(Model)
+            .Name("gridMotivosInfraccion")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.idInfraccion).Hidden();
+                columns.Bound(c => c.idMotivoInfraccion).Title("Clave motivo");
+                columns.Bound(p => p.Nombre).Title("Motivo");
+                columns.Bound(p => p.Fundamento).Title("Fundamento legal");
+                columns.Bound(p => p.NumeroContinuo).Title("Prioridad");
+                columns.Bound(p => p.CalificacionMinima).Title("Calif. Min.");
+                columns.Bound(c => c.CalificacionMaxima).Title("Calif. Max.");
+            columns.Template(
+            "<div class='custom-number-input' style='height: 50px;'>" +
+            "<span class='k-input2 custom-input' " +
+            "style='width: calc(100% - 50px); height: 100%;'>" +
+            "#=calificacion#" +
+            "</span>" +
+            "</div>"
+
+
+
+            ).Title("Calificación").Width(190);
+
+
+
+            @*columns.Bound(p => p.idMotivoInfraccion).ClientTemplate(
+    "<button onclick=\"btnModalEditarConcesionario('#= idMotivoInfraccion #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>"
+    ).Title("Acciones").Sortable(false).Width(100);*@
+            columns.Template(
+        "<button type ='button' class='w-100 btn " + claseColorEliminar + "'>" +
+        "<h6 class='m-0' onclick='eliminarMotivo(event)'>" +
+        "<i class='h5 icon-delete me-2'></i><b>Eliminar</b>" +
+        "</h6></button>"
+    ).Width(150);
+        }).HtmlAttributes(new { style = "height:auto" })
+        @*.Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Bottom).PageSizes(true))*@
+        .Pageable(p => p.Enabled(true))
+        .Sortable()
+        .Scrollable(scr => scr.Enabled(true))
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .ServerOperation(false)
+        .Aggregates(aggregates =>
+        {
+            aggregates.Add(p => p.calificacion).Sum();
+        })
+        .PageSize(5)
+        )
+        .ToolBar(t => t.Custom().Text("Buscar...").Name("search"))
+        .Search(s =>
+        {
+            s.Field(c => c.idMotivoInfraccion);
+            s.Field(c => c.Nombre);
+            s.Field(c => c.Fundamento);
+            s.Field(c => c.CalificacionMinima);
+            s.Field(c => c.CalificacionMaxima);
+            s.Field(c => c.calificacion);
+        })
+        .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+        )
+
+</div>
+<br />
+<br />
+<br />
+<label>Total (UMAS): @ViewBag.totalUMAS</label>
+<br />
+<br />
+
+<label>UMAS: </label><label id="lblUmas">
+    @{
+        if (ViewBag.Umas != null)
+        {
+            @string.Format("{0:C2}", ViewBag.Umas)
+        }
+    }
+</label>
+<br />
+<br />
+<label>Total: </label><label id="lblTotales">
+    @{
+        if (ViewBag.Totales != null)
+        {
+            @string.Format("{0:C2}", ViewBag.Totales);
+        }
+    }
+</label>
+<div class="modal fade modalCustom" id="EliminarMotivoModal" aria-labelledby="agregarVehiculoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyEliminarMotivo">
+            </div>
+        </div>
+    </div>
+</div>
+ <script>
+    function eliminarMotivo(event) { 
+        event.preventDefault();
+        if ('@ViewBag.EsSoloLectura' === 'True') {
+            return;
+        }
+        var grid = $("#gridMotivosInfraccion").data("kendoGrid");
+        var row = $(event.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        var idMotivoInfraccion = dataItem.idMotivoInfraccion;
+        var idInfraccion = dataItem.idInfraccion;
+        var Nombre = dataItem.Nombre;
+        var numElements = $("#gridMotivosInfraccion").data("kendoGrid").dataSource.view().length
+
+
+        if(numElements>1){
+                showLoading();
+                $.ajax({
+                    url: '@Url.Action("ModalEliminarMotivo", "Infracciones")',
+                    type: 'POST',
+                    data: { idMotivoInfraccion: idMotivoInfraccion, idInfraccion: idInfraccion, Nombre : Nombre },
+                    success: function (data) {
+                        $('#ModalBodyEliminarMotivo').html(data);
+                        $('#EliminarMotivoModal').modal('show');
+                        hideLoading();
+                    }, error: function () {
+                        sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                        hideLoading();
+                    }
+                });
+        }
+        else{
+            sitteg_warning("Debe de tener almenos un motivo la infraccion");
+        }
+    }
+    $(document).ready(function () {
+        // Maneja el clic en el botón de incremento
+        $(document).on("click", ".custom-number-input .increase", function () {
+            var input = $(this).closest('.custom-number-input').find('.custom-input');
+            validarAntesDeIncrementar(input);
+        });
+
+        // Maneja el clic en el botón de decremento
+        $(document).on("click", ".custom-number-input .decrease", function () {
+            var input = $(this).closest('.custom-number-input').find('.custom-input');
+            validarAntesDeDecrementar(input);
+        });
+
+       function validarAntesDeIncrementar(input) {
+    if ('@ViewBag.EsSoloLectura' === 'True') {
+        return;
+    }
+    var currentValue = parseInt(input.val(), 10);
+
+    if (!isNaN(currentValue)) {
+        input.val(currentValue + 1);
+    }
+}
+
+
+        function validarAntesDeDecrementar(input) {
+            if ('@ViewBag.EsSoloLectura' === 'True') {
+                return;
+            }
+            var currentValue = parseInt(input.val(), 10);
+            var minLimit = parseInt(input.attr('min'), 10);
+
+            if (isNaN(currentValue) || currentValue > minLimit) {
+                input.val(currentValue - 1);
+            }
+        }
+    });
+   
+    $(document).on("change", ".custom-number-input .custom-input", function () {
+        var input = $(this);
+        var minValue = parseInt(input.attr("min"));
+        var enteredValue = parseInt(input.val());
+
+        if (!isNaN(minValue) && !isNaN(enteredValue) && enteredValue < minValue) {
+            input.val(minValue);
+        }
+    });
+</script>
+
+
+

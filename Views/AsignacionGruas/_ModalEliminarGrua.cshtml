@@ -1,0 +1,72 @@
+﻿@model GuanajuatoAdminUsuarios.Models.SeleccionGruaModel
+
+<div class="modal-dialog modal-lg boxShadow modal-dialog-centered">
+    <div class="modal-content">
+        <section class=" bg-white rounded">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-auto pe-0">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto pe-0">
+                            <i class="icon-addClasificacionAccidente h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                            <h2 class="m-0 h3"><b>Eliminar clasificación</b></h2>
+                            <h4>¿Esta seguro que quiere eliminar esta grúa del listado?</h4>
+                            <form id="eliminarGruaForm">
+                                @Html.HiddenFor(m=>m.idAsignacion)
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="row my-4">
+                    <div class="col-12 col-md-6 mx-md-auto">
+                        <div class="row justify-content-around">
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                    <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                </button>
+                            </div>
+                            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                <div class="controlButton" onclick="eliminarGrua()">
+                                    @(Html.Kendo().Button()
+                                        .Name("DelClasificacion")
+                                        .HtmlAttributes(new { @class = "btn-danger px-3" })
+                                        .Content("<h5 class=\"m-0\"><b>Eliminar</b></h5>"))
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+<script>
+    function eliminarGrua() {
+        var Mydata = $("#eliminarGruaForm").serialize();
+        showLoading();
+        $.ajax({
+            url: "/AsignacionGruas/EliminarGrua",
+            type: "POST",
+            data: Mydata,
+            success: function (data) {
+                sitteg_success("Se ha actualizado la información");
+                $('#eliminarGruaModal').modal('hide');
+                var grid = $("#gridGruas").data("kendoGrid");
+                grid.dataSource.data(data);
+                grid.refresh();
+                hideLoading();
+            },
+            error: function (error) {
+                // Maneja el error en caso de que ocurra
+                console.log("Error: " + error);
+                hideLoading();
+            }
+        });
+    }
+
+
+
+</script>

@@ -1,0 +1,49 @@
+﻿@model GuanajuatoAdminUsuarios.Models.SubmarcasVehiculosModel
+@{
+    Layout = null;
+}
+
+
+<div class="row">
+    <div class="col-md-10">
+        <h2>Eliminar Submarca</h2>
+    </div>
+    <br />
+    <div class="col-md-2">
+        @Html.ActionLink("Cancelar","Index",null,new{@class="btn btn-info"})
+    </div>
+</div>
+<hr />
+<br />
+
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("Delete", "SubmarcasVehiculos"))
+        {
+            @Html.HiddenFor(m=>m.IdSubmarca)
+            ;
+
+            @(Html.Kendo().TextBoxFor(t => t.NombreSubmarca)
+                .HtmlAttributes(new
+                {
+                    placeholder = "Nombre submarca",
+                    required = "required",
+                    validationmessage = "Enter Category Name",
+                    @readonly = "readonly"
+                })
+                .Label(l => l.Content("Nombre submarca <b>(obligatorio)</b>:"))
+                )
+            <br />  <br />
+
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <a href='@Url.Action("Index")' class="btn btn-default">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </div>
+
+        }
+
+    </div>
+</div>

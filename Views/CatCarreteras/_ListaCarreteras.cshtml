@@ -1,0 +1,119 @@
+﻿
+<script>
+    function filtroCarretera() {
+        var idDelegacion = $("#idDelegacionFiltroCar").val();
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDelegacion: idDelegacion,
+            idDependencia: idDependencia
+        };
+    }
+
+</script>
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @if (ViewBag.Admin == true)
+        {
+        <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+            <div class="row">
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <button onclick="mostrarModalAgregarCarretera()">
+                        <h6 class="m-0 d-flex align-items-center"><i class="icon-addCarretera h5 mb-0 me-2"></i><b>Agregar nueva carretera</b></h6>
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+        <div>
+            <br/>
+                        <br/>
+            <br />
+
+        </div>
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatCarreterasModel>()
+            .Name("gridCatCarreteras")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdCarretera).Width(20).Title("Id");
+                columns.Bound(c => c.Carretera)
+                .Title("Carretera")
+                .Width(80)
+                .ClientTemplate("#= Carretera.toUpperCase() #");
+                    columns.Bound(c => c.nombreOficina).Title("Delegación").Width(100);
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(100);
+                columns.Command(c => c.Custom("Editar").Click("editarCarreteraMod")).Width(100);
+                // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(100);
+
+
+            }).HtmlAttributes(new { style = "height:550px"})
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetCarr", "CatCarreteras").Data("filtroCarretera"))
+            .PageSize(5).Model(model => model.Id(p => p.IdCarretera))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.Carretera);
+                s.Field(c => c.nombreOficina);
+
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+    </div>
+</div>
+<div class="modal fade modalCustom" id="agregarCarretera" aria-labelledby="agregarCarreteraLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyCarretera">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function editarCarreteraMod(e) {
+        console.log("Frlis");
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdCarretera = dataItem.IdCarretera;
+        console.log(IdCarretera);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarCarreteraModal", "CatCarreteras")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdCarretera: IdCarretera }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCarretera').html(result);
+                $('#agregarCarretera').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

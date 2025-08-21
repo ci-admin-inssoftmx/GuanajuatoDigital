@@ -1,0 +1,137 @@
+﻿
+<script>
+function cerrarModalV()
+{
+        $('#ModalBodyAgregarEditarConductor').html("");
+        $('#ModalAgregarEditarConductor').modal('hide');
+}
+</script>
+
+
+<section id="sectionCap" class="bg-white mb-5 rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+
+        <div class="col-12 col-md-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto p-0">
+                    <i class="icon-oficial h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Captura de conductor</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+            <div class="row">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0" onclick="cerrarModalV()">
+                    @(Html.Kendo().Button()
+                        .Name("editBusqueda")
+                        .HtmlAttributes(new { @class = "btnPrimary" })
+                        .Content("<h6 class=\"m-0\"><b>Cerrar</b></h6>"))
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row px-4 mb-4 align-items-end">
+
+		<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+			<div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+				<div class="row align-items-center justify-content-center justify-content-md-start">
+					<div class="col-auto">
+						<i class="icon-conductor h1 colorPrimary"></i>
+					</div>
+					<div class="col-auto my-3">
+						<h5 class="px-4"><b>Conductor de la infracción</b></h5>
+						<h6 class="px-4 text-muted" id="textoConductor"></h6>
+					</div>
+				</div>
+			</div>
+			<div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+				<div class="row">
+
+
+					<div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+						<button type="button" href="#" id="btnNuevoConductor" onclick="GuardarNuevoConductor2()">
+							<h6 class="m-0 d-flex align-items-center"><i class="icon-addConductor h5 mb-0 me-2"></i><b>Guarda conductor</b></h6>
+						</button>
+					</div>
+
+					<div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+						<button type="button" href="#" id="btnNuevoConductor" onclick="mostrarModalAgregarConductor()">
+							<h6 class="m-0 d-flex align-items-center"><i class="icon-addConductor h5 mb-0 me-2"></i><b>Agregar nuevo conductor</b></h6>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		<input class="d-none" id="idPersona" />
+
+		<div class="row my-4 px-4">
+			<div id="detallePersonas2">
+			</div>
+		</div>
+		<input type="hidden" id="hdnIdPersonaTemp" value="" />
+		<div class="row my-4 px-4">
+			<div id="listadoPersonas">
+				<partial name="_ListaAgregarConductor"  />
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-12">
+				<div class="tabCustomEnd"></div>
+			</div>
+		</div>
+
+    </div>
+
+
+</section>
+
+
+
+<script>
+
+
+	$(document).ready(()=>{
+		
+	})
+
+
+
+	function getListadoPersonasInfracciones() {
+		$("#listadoPersonas").show();
+		showLoading();
+		$.ajax({
+			type: "GET",
+			url: '@Url.Action("ajax_listadoPersonasInfracciones")',
+			success: function (data) {
+				$("#listadoPersonas").html(data);
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+
+		});
+	}
+
+	function mostrarModalAgregarConductor() {
+		$.ajax({
+			url: '@Url.Action("ajax_ModalCrearPersonaConductor","Infracciones")',
+			type: 'GET',
+			contentType: "application/json; charset=utf-8",
+			dataType: "html",
+			success: function (data) {
+				$("#CerrarmodalCond").trigger("click");
+
+				$('#modalBodyCrearPersona').html(data);
+				$('#modalCrearPersona').modal('show');
+
+			}
+		});
+	}
+</script>

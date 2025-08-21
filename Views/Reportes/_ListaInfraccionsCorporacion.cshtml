@@ -1,0 +1,66 @@
+﻿
+<script>
+    function filtroCarretera() {
+        var idDelegacion = $("#idDelegacionFiltroCar").val();
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDelegacion: idDelegacion,
+            idDependencia: idDependencia
+        };
+    }
+
+</script>
+<div class="row">
+    <div class="col-6 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.ReportesModel>()
+            .Name("gridReprorteInfCorps")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Corporacion).Title("Corporación");
+                columns.Bound(c => c.cantidad).Title("Infracciones").ClientFooterTemplate("Total Infracciones : #=sum#");
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetInfraccionesCorporacion", "Reportes").Data("filtroCarretera"))
+            .PageSize(10).Model(model => model.Id(p => p.Corporacion))
+            .Aggregates(aggregates =>
+            {
+                aggregates.Add(c => c.cantidad).Sum();
+
+            })
+            )
+
+            .ToolBar(tools =>
+            {
+                tools.Excel();
+                tools.Search().Text("Buscar...");
+            })
+
+            .Excel(excel => excel
+            .FileName("Reporte_Infracciones_Corporación.xlsx")
+            .Filterable(true)
+            .AllPages(true)
+            .ProxyURL(Url.Action("Excel_Export_Save", "Grid"))
+
+            )
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+    </div>
+</div>
+

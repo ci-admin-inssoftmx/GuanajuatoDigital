@@ -1,0 +1,129 @@
+﻿@{
+    bool esSoloLectura = ViewBag.EsSoloLectura ?? false;
+    string claseColor = esSoloLectura ? "colorDisabled" : "colorDanger";
+}
+
+<script>
+    //var legend =  $("#gridClasificacion").data("kendoGrid").pager.element.find(".k-pager-sizes").append("items per page");
+    //console.log(legend);
+
+    //function replaceLegend2() {
+    //    setTimeout(() => {
+    //        var t = document.querySelector("span.k-pager-info.k-label")
+    //        var ps = document.querySelector("span.k-pager-sizes.k-label")
+
+    //        console.log(t);
+    //        console.log(ps);
+    //        if (t.innerHTML == "No items to display") {
+    //            t.innerHTML = "No hay elementos a desplegar"
+    //        }
+
+    //        if (t.innerHTML.toString().includes("items"))
+    //            t.innerHTML = t.innerHTML.replace("item", "registro");
+    //        if (t.innerHTML.toString().includes("of"))
+    //            t.innerHTML = t.innerHTML.replace("of", "de");
+
+    //        if (ps != null) {
+    //            if (ps.innerHTML.toString().includes("items per page"))
+    //                ps.innerHTML = ps.innerHTML.replace("items per page", "Registros por página");
+    //        }
+
+    //    }, 500)
+
+    //}
+</script>
+<div class="row">
+<div class="col-12 mb-4 px-4 rounded gridCustom">
+
+    @(
+        Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel>()
+        .Name("gridClasificacion")
+        
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.IdAccidente).Hidden();
+            //columns.Command(c => c.Custom("Eliminar").Click("eliminarClasificacion")).Width(80);
+                columns.Bound(c => c.NombreClasificacion).Title("Nombre clasificación").Width(90);
+            columns.Bound(c=>c.IdAccidente).ClientTemplate("#=  EliminarBtnClacificatoria(data) #").Width(150).Title("Acción");
+
+        }).HtmlAttributes(new { style = "height:500px" })
+        .Sortable()
+        
+        //.Groupable()
+        .Scrollable()
+        .Pageable()
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .Read(read => read.Action("ObtClasificacionAccidente", "CapturaAccidentes"))
+        .PageSize(5).Model(model => model.Id(p => p.IdClasificacionAccidente))
+        )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+        .Search(s =>
+        {
+                s.Field(c => c.NombreClasificacion);
+
+        })
+
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+        .Type(GridSelectionType.Row)
+
+        )
+        .Events(x => x.DataBound("replaceLegend"))
+            
+        )
+
+</div>
+
+
+</div>
+<div class="modal fade modalCustom" id="eliminarClasificacionModal" aria-labelledby="clasificacionAccidenteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyEliminarClasificacion">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function eliminarClasificacion(d,q) {
+          if ('@ViewBag.EsSoloLectura' === 'True') {
+            return;
+        }
+        var IdAccidente = d
+        var IdClasf = q
+
+
+        window.IdAccidente= IdAccidente
+        window.idClasif= IdClasf
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ModalEliminarClasificacion", "CapturaAccidentes")',
+            type: 'POST',           
+            data: {
+                IdAccidente: IdAccidente,
+                idClasif: IdClasf
+            },
+            success: (data) => {
+                $('#ModalBodyEliminarClasificacion').html(data);
+                $('#eliminarClasificacionModal').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+
+    function EliminarBtnClacificatoria(data) {
+
+        return `<button class='w-100 btn @claseColor'>
+                    <h6 class='m-0' onclick="eliminarClasificacion('${data.IdAccidente}','${data.IdClasificacionAccidente}')">
+            <i class='h5 icon-delete me-2'></i><b>Eliminar</b>
+            </h6></button>`
+
+    }
+
+
+</script>

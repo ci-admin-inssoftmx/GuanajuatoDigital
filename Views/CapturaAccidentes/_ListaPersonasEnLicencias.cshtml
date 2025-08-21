@@ -1,0 +1,137 @@
+﻿@model IEnumerable<CapturaAccidentesModel>
+
+    <div class="modal-header">
+        <h5 class="modal-title">Datos encontrados en el sistema de licencias</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="cerrarModalBtnlistPerLicHeader">
+          <span aria-hidden="true">&times;</span>
+    </button>
+    </div>
+    
+<div col-12 mb-4 px-4 rounded gridCustom>
+@(
+        Html.Kendo().Grid(Model)
+        .Name("gridPersonasLicencia")
+        .Events(events => events.Change("onRowSelect"))
+        .Columns(columns =>
+        {
+            columns.Select().Width(50).ClientHeaderTemplate(" ");
+           // columns.Bound(c => c.idPersona).Hidden();
+            columns.Bound(c => c.nombre).Title("Nombre");
+             columns.Bound(c => c.apellidoPaterno).Title("Apellido Paterno");
+              columns.Bound(c => c.apellidoMaterno).Title("Apellido Materno");
+            columns.Bound(p => p.CURP).Title("CURP");
+           // columns.Bound(p => p.RFC).Title("RFC");
+            columns.Bound(p => p.numeroLicencia).Title("No. Licencia");
+          //  columns.Bound(p => p.tipoLicencia).Title("Tipo de Licencia");
+         //   columns.Bound(c => c.tipoPersona).Title("Tipo persona");
+        })
+
+        .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+        )
+
+
+        </div>
+
+            <div class="modal-footer">
+                            <button type="button" id="cerrarModalBtnlistPerLic" class="btn btn-secondary controlButton" data-dismiss="modal"  onclick="btnCerrar()">Cerrar</button>
+                           
+             </div>
+
+
+           <script>
+               const cerrarModalBtn = document.getElementById('cerrarModalBtnlistPerLic');
+        cerrarModalBtn.addEventListener('click', () => {
+            $('#modalLicenciasList').modal('hide');
+        });
+
+
+        const cerrarModalBtnHeader = document.getElementById('cerrarModalBtnlistPerLicHeader');
+        cerrarModalBtnHeader.addEventListener('click', () => {
+            $('#modalLicenciasList').modal('hide');
+        });
+        
+
+        function onRowSelect() {
+        var grid = $("#gridPersonasLicencia").data("kendoGrid");
+        var selectedRowData = grid.dataItem(grid.select());
+
+        console.log("EE", selectedRowData);
+        
+        const tipoLicenciaMapping = {
+                "TIPO A  CHOFER AUTOMOVILISTA": 1,
+                "TIPO B CHOFER SERVICIO PÚBLICO": 2,
+                "TIPO C  Chofer Servicio de Carga": 3,
+                "TIPO D -MOTOCICLISTA": 4,
+                "PERMISO A -AUTOMOVIL-": 6,
+                "PERMISO D -MOTOCICLETA-": 7,
+                "NO APLICA": 8,
+                "TIPO A": 1,
+                "TIPO B": 2,
+                "TIPO C": 3,
+                "TIPO D": 4,
+                "PERMISO A": 6,
+                "PERMISO D": 7,
+                "A-AUTOMOVILISTA": 1,
+                "B-CHOFER DE SERVICIO PÚBLICO": 2,
+                "C-CHOFER DE SERVICIO DE CARGA": 3,
+                "D-MOTOCICLISTA": 4,
+                "PA-PERMISO AUTOMOVILISTA": 6,
+                "PD-PERMISO MOTOCICLISTA": 7,
+
+            };
+           
+            const tipoLicenciaNumero = tipoLicenciaMapping[selectedRowData.tipoLicencia] || 0;
+           
+            selectedRowData.idTipoLicencia = tipoLicenciaNumero;
+         console.log("4..." )
+          console.log("4.1.." + selectedRowData.nombreCompleto)
+         //   showLoading();
+            var fd = new FormData();
+            fd.append("nombre", selectedRowData.nombre);
+            fd.append("apellidoPaterno", selectedRowData.apellidoPaterno);
+            fd.append("apellidoMaterno", selectedRowData.apellidoMaterno);
+            fd.append("CURP", selectedRowData.CURP);
+        //    fd.append("RFC", selectedRowData.RFC);
+            fd.append("NUM_LICENCIA", selectedRowData.numeroLicencia);
+            fd.append("id_tipo_licencia", tipoLicenciaNumero);
+          // fd.append("idGenero", selectedRowData.idGenero);
+           //fd.append("fechaNacimiento", selectedRowData.fechaNacimiento);
+           //fd.append("fechaVigencia", selectedRowData.vigenciaLicencia);
+           fd.append("idVehiculo",$("#IdVehiculoH").val());
+
+           
+            $.ajax({
+                type: 'POST',
+                 url: '/CapturaAccidentes/guardaDesdeServicio',
+                  contentType: false, // Not to set any content header
+                    processData: false, // Not to process data
+                 data: fd,
+                 success: function (result) {
+                     console.log("RESPUESTA:", result)
+                       $('#modalLicenciasList').modal('hide');
+                     var grid = $("#gridConductores").data("kendoGrid");
+                if (result) {
+                    grid.dataSource.data([result]);
+                    sitteg_success('Elemento guardado correctamente');
+                } else {
+                    console.error("La respuesta no tiene la estructura esperada:", result);
+                    sitteg_warning('Ocurrio un error en la importación de los datos');
+
+                }
+                    // sitteg_success('Elemento guardado correctamente')
+                     hideLoading();
+                 },
+                 error: function (error) {
+                     sitteg_warning('Error al guardar en la base de datos:');
+                     hideLoading();
+                 }
+            });
+        
+
+
+
+
+        }
+           </script>

@@ -1,0 +1,86 @@
+﻿@model GuanajuatoAdminUsuarios.Models.Catalogos.Turnos.TurnoDetailsModel
+@{
+}
+
+<section class="bg-white rounded">
+	<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-addTramo h1 colorPrimary"></i>
+                </div>                                                                                                                                                                                  
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Eliminar turno</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>            
+        </div>
+	</div>
+	<div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+    </div>
+    <div class="row  px-4 px-md-4 pt-3 pb-2">
+        <div class="col-12 my-4">
+            <h4>
+                ¿Está seguro que quiere eliminar el turno No. @Model.IdTurno <b>@Model.Nombre</b> (@Model.HoraInicio.ToString(@"hh\:mm") - @Model.HoraFin.ToString(@"hh\:mm")), 
+                de la corporación <b>@Model.Delegacion</b>?
+            </h4>            
+        </div>
+    </div>
+	<div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="eliminarTurno()">
+                        @(Html.Kendo().Button()
+                            .Name("elmininarTurnoCommand")
+                            .HtmlAttributes(new { @class = "btn-danger px-3" })
+                            .Content("<h5 class=\"m-0\"><b>Eliminar</b></h5>"))
+                    </div>
+                </div>
+            </div>        
+        </div>
+    </div>
+</section>
+
+
+<script>
+    
+    function eliminarTurno() {
+        let turnoId = '@Model.IdTurno';
+
+        showLoading();
+        $.ajax({
+            url: `@Url.Action("Delete", "CatTurnos")/${turnoId}`,
+            type: 'DELETE',
+            success: function (result) {
+                var grid = $("#turnosGrid").data("kendoGrid");
+                grid.dataSource.read();
+                $('#eliminarTurnoModal').modal('hide');                
+                sitteg_success('Se ha actualizado la información');
+            }, error: function (xhr) {
+                if (xhr.status === 400) {
+                    // reemplaza el contenido del modal con la vista parcial devuelta
+                    $("#eliminarTurnoModalBody").html(xhr.responseText);                    
+                }
+                sitteg_warning("Ocurrió un error al procesar su solicitud.");
+            },
+            complete: function() {
+                hideLoading();
+            }
+        });
+    }    
+</script>

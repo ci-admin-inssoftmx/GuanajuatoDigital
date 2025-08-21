@@ -1,0 +1,146 @@
+﻿@model NuevaInfraccionModel
+
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-addInfracion h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Agregar folio de infracción</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" onclick="cerrarAgInfra()"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-12 my-4">
+            <h5 class="px-4"><b>Folio y propietario</b></h5>
+            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+        </div>
+    </div>
+    <form id="nuevaInfraccionForm" class="row justify-content-center px-4 mb-4 align-items-end">
+                  
+
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                @Html.HiddenFor(m => m.IdVehiculo)
+                @Html.HiddenFor(m => m.IdPersona)
+                @Html.HiddenFor(m => m.IdPersonaInfraccion)
+                @Html.HiddenFor(m => m.Placa)
+                @Html.HiddenFor(m => m.IdAccidente)
+                @Html.HiddenFor(m => m.Tarjeta)
+                @Html.HiddenFor(m => m.IdDelegacion)
+
+                @(Html.Kendo().TextBoxFor(m=>m.folioInfraccion)
+                            .Label(l => l.Content("Folio de infracción <b>(obligatorio)</b>:"))
+                            .Placeholder("Ingresa folio de infracción")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            )
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                <label>Oficial de infracción:</label>
+                <span>
+                    @(Html.Kendo().DropDownListFor(m => m.idOficial).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona una opción")
+                        .Filter(FilterType.Contains)
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+									   read.Action("OficialesDependencia_Drop", "Oficiales");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                )
+                </span>
+            </div>
+        </div>
+    </form>
+    <div class="row px-4 my-2 align-items-end">
+        <div class="col-12 col-md-10 mx-md-auto text-center">
+            <h4><b>Al guardar folio el sistema te mandará</b></h4>
+            <h5 class="fw-normal">a la segunda parte de captura de infracción   </h5>
+
+        </div>
+    </div>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" onclick="cerrarAgInfra()">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="crearInfraccion()">
+                        @(Html.Kendo().Button()
+                                    .Name("AddFolio")
+                                    .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                    .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    function crearInfraccion() {
+        var Mydata = $("#nuevaInfraccionForm").serialize();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_CrearInfraccion", "CapturaAccidentes")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                if (!result.error) {
+                    if (result.id) {
+                        sitteg_success("Se ha creado una nueva infracción, proporcione los datos requeridos");
+                        $('#crearInfraccionModal').modal('hide');
+                        sessionStorage.setItem('redirectTo', '/CapturaAccidentes/CapturaAccidenteC/' + result.id + '?fromAcc=true');
+                        window.setTimeout(function () {
+                            window.location.href = '/Infracciones/Editar/' + result.id + '?edit=1';
+                        }, 500);
+                        hideLoading();
+                    } else {
+                        sitteg_warning('El folio ya existe.');
+                        hideLoading();
+                    }
+                } else {
+                    sitteg_warning(result.error);
+                   hideLoading();
+
+                }
+            },
+            error: function () {
+                sitteg_warning("Ocurrió un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+
+    function cerrarAgInfra() {
+        $('#crearInfraccionModal').modal('hide');
+        $('body').removeClass('model-open');
+        $('.modal-backdrop').remove();
+
+    }
+</script>

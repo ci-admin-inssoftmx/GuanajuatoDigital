@@ -1,0 +1,114 @@
+﻿@model Gruas2Model
+<div class="col-auto pe-0">
+    <div class="row align-items-center justify-content-center justify-content-md-start">
+        <div class="col-auto pe-0">
+            <i class="icon-editGrua h1 colorPrimary"></i>
+        </div>
+        <div class="col-auto my-3">
+            <h2 class="m-0 h3"><b>Desactivar Vehículo Grúa</b></h2>
+        </div>
+    </div>
+</div>
+<div class="panel">
+    <div class="panel-body container-fluid">
+        <div class="row row-lg">
+            <div class="col-md-12">
+                <section class=" bg-white rounded">
+                    <div class="row">
+                        <div class="col-12 my-4">
+                            <h5 class="px-4"><b>Datos de grúa</b></h5>
+                            <h6 class="px-4 text-muted">Confirma que deseas DESACTIVAR el registro:</h6>
+                        </div>
+                    </div>
+                    <form id="desactivarGruaForm">
+                        @Html.HiddenFor(f=> f.idGrua)
+                        <div class="row align-items-end">
+                            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+
+                                    <label><b>Delegación:</b></label>
+                                    @Html.TextBoxFor(f => f.Delegacion, new { @readonly = "readonly", @class = "form-control", id = "txtDelegacion" })
+
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <label><b>Concesionario:</b></label>
+                                    @Html.TextBoxFor(f => f.concesionario, new { @readonly = "readonly", @class = "form-control", id = "txtConcesionario" })
+
+
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <label><b>Número económico:</b></label>
+
+                                    @Html.TextBoxFor(f => f.noEconomico, new { @readonly = "readonly", @class = "form-control", id = "txtnoEconomico" })
+
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <label><b>Placas:</b></label>
+
+                                    @Html.TextBoxFor(f => f.placas, new { @readonly = "readonly", @class = "form-control", id = "txtnoEconomico" })
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row my-12">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                    <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                                <div class="col-auto btnOutline btnOutlineDanger my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton">
+                                        <button class="btnPrimary px-3" onclick="cambiarEstatus()">
+                                            <h5 class="m-0"><b>Desactivar</b></h5>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function cambiarEstatus() {
+        var formData = $("#desactivarGruaForm").serialize();
+       
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_desactivarGrua")',
+            type: 'POST',
+            data: formData,
+            success: function (result) {
+                $("#listadoGruas").html(result);
+                $('#addGrua').modal('hide');
+                sitteg_success('Elemento modificado correctamente')
+                hideLoading();
+            },
+            error: function (xhr, status) {
+                var errmsg = xhr.responseText;
+                console.log(errmsg)
+                sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                hideLoading();
+            }
+        });
+
+        //$('#addDependencia').modal('hide');
+        //$('body').removeClass('model-open');
+        //$('.modal-backdrop').remove();
+    }
+
+
+
+</script>

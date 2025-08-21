@@ -1,0 +1,97 @@
+@model List<FirmasModel>
+@{
+	@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+	var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+	var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+
+	$(document).ready(function () {
+		var access = @listaIdsPermitidosJson;
+		var auth = @autorizaciones;
+
+		if (access != undefined && access != '') {
+			if (!access.toString().includes(localStorage.getItem("menuId"))) {
+				Swal.fire({
+					icon: "error",
+					title: "¡El usuario no tiene acceso a esta opción!"
+				});
+				setTimeout(() => {
+					window.location.href = "/Principal";
+				}, 200);
+			} else {
+
+			}
+		} else {
+			Swal.fire({
+				icon: "error",
+				title: "¡El usuario no tiene acceso a esta opción!"
+			});
+			setTimeout(() => {
+				window.location.href = "/Principal";
+			}, 200);
+		}
+	});
+
+	function TemplateEditar(a){
+		return `<button onclick="ShowUpdate('${a.Id}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>`
+	}
+
+</script>
+
+<div class="row">
+	@if (ViewBag.NoResultsMessage != null)
+	{
+		<div class="alert alert-info">
+			@ViewBag.NoResultsMessage
+		</div>
+	}
+	<div class="col-12 mb-4 px-4 rounded gridCustom">
+		@(
+			Html.Kendo().Grid(Model)
+				.Name("GridInf")
+				.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+				.Columns(columns =>
+				{
+					columns.Bound(x => x.Id).Title("ID").Width(100);
+					columns.Bound(x => x.DependenciaNombre).Title("Dependencia").Width(100);
+					columns.Bound(x => x.CargoNombre).Title("Cargo").Width(100);
+					columns.Bound(x => x.Nombre).Title("Nombre").Width(100);
+					columns.Bound(x => x.Estatus).Title("Estado").Width(100);
+					columns.Bound(x => x.FechaInicio).Title("Inicio").Width(100);
+					columns.Bound(x => x.FechaFin).Title("Vigente").Width(100);
+					columns.Bound(x => x.Id).ClientTemplate("#= TemplateEditar(data) #").Title("Editar").Sortable(false).Width(90);
+				}).HtmlAttributes(new { style = "height:450" })
+			.Pageable(p => p.Enabled(true))
+			.EnableCustomBinding(true)
+			.DataSource(dataSource => dataSource
+			.Ajax()
+			.Read("GetAllFirmasPagination", "Firmas")
+			.PageSize(10)
+			)
+			.Scrollable(scr => scr.Height(350)
+			))
+
+		@(Html.Kendo().Tooltip()
+				.For("#GridInf")
+				.Filter("th")
+				.Position(TooltipPosition.Top)
+				.ContentHandler("tooltipContent")
+
+				)
+	</div>
+</div>
+
+<script>
+
+	function ShowUpdate(Id) {
+		window.location = '/Firmas/Editar?id=' + Id;
+	}
+
+	function tooltipContent(e) {
+		var titulo = e.target.context.dataset.title;
+		return titulo;
+	}
+
+</script>

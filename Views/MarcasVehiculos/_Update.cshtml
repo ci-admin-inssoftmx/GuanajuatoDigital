@@ -1,0 +1,55 @@
+﻿@model GuanajuatoAdminUsuarios.Models.MarcaVehiculoModel
+@{
+}
+
+
+
+
+<div class="row">
+    <div class="col-md-12">
+        <form id="EditarMarcaForm" novalidate class="needs-validation">
+
+            @Html.HiddenFor(m=>m.IdMarcaVehiculo)
+            @(Html.Kendo().TextBoxFor(t => t.MarcaVehiculo)
+                .HtmlAttributes(new { placeholder = "Marca de Vehículo", required = "required", validationmessage = "Enter Category Name" })
+                .Label(l => l.Content("Marca de Vehículo <b>(obligatorio)</b>:"))
+                )
+
+        </form>
+
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <a href='@Url.Action("IndexModal")' class="btn btn-default">Cancelar</a>
+                <button class="btn btn-success" onclick="editarMarca()">Guardar</button>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+    function editarMarca() {
+
+        var Mydata = $("#EditarMarcaForm").serialize();
+        console.log(Mydata);
+        $('#editarMarca').modal('hide');
+        $('body').removeClass('model-open');
+        $('.modal-backdrop').remove();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("UpdatePartialModal")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                $("#tablaMarcas").html(result);
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+</script>

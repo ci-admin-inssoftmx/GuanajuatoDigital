@@ -1,0 +1,127 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CancelarInfraccionModel
+
+<script>
+
+
+    function guardarCancelacion(callback) {
+        var folio = $("#folio_infraccion").val();
+        var id_delegacion = $("#id_delegacion").val();
+        var Mydata = $("#cancelarInfraccionForm").serialize();
+        console.log("first" + folio);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("IniciarCancelacionFinanzas", "CancelarInfraccion")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                sitteg_info('Se ha cancelado la infracción en el sistema.');
+                callback(folio, id_delegacion);
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Sucedió un error, intente mas tarde...');
+                hideLoading();
+            }
+        });
+    }
+
+    function cancelarFinanzas(folio_infraccion, id_delegacion) {
+        var folio = $("#folio_infraccion").val();
+        var id_delegacion = $("#id_delegacion").val();
+        showLoading();
+        $.ajax({
+            url: '/CancelarInfraccion/EliminarFinanzas',
+            type: 'POST',
+            data: { folio_infraccion: folio_infraccion, idOficina: id_delegacion },
+            success: function (response) {
+                console.log(response);
+
+                if (response == null) {
+                    sitteg_warning('No se pudo cancelar en Finanzas. El servicio no tiene respuesta.');
+
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 5000);
+                }
+                else {
+                    var wType = response.MT_AnulacionDocumento_res.result.WTYPE;
+                    var wMessage = response.MT_AnulacionDocumento_res.result.WMESSAGE;
+                    var wDoctoCancel = response.MT_AnulacionDocumento_res.result.DOCTO_CANCEL;
+
+                    if (wType === "E") {
+
+                        sitteg_warning('No se pudo cancelar en Finanzas. ' + wMessage + '.');
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 5000);
+
+                    } else if (wType === "S") {
+
+                        sitteg_success('Infracción cancelada en Finanzas. ' + wMessage);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 5000);
+                    }
+                }
+                hideLoading();
+            },
+            error: function (response) {
+                console.error('Error en la llamada AJAX:', response);
+                hideLoading();
+            }
+        });
+    }
+
+</script>
+<div class="row align-items-center justify-content-center">
+
+    <div class="col-12 col-md-8 col-lg-6">
+
+        @if (Model != null)
+        {
+            <input type="hidden" id="folio_infraccion" value="@Model.FolioInfraccion" />
+            <input type="hidden" id="id_delegacion" value="@Model.IdDelegacion" />
+            <div class="row">
+                <div class="col-12 col-md-auto mt-4 mb-2">
+                    <h5 class="px-4"><b>Datos de revocación del folio: </b> @Model.FolioInfraccion</h5>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="px-4 text-muted"><b>Folio:  </b>@Model.FolioInfraccion</h6>
+                        <h6 class="px-4 text-muted"><b>Fecha:  </b> @Model.FechaInfraccion.ToString("dd/MM/yyyy")</h6>
+                        <h6 class="px-4 text-muted"><b>Placas: </b>@Model.Placas</h6>
+                        <h6 class="px-4 text-muted"><b>Serie:  </b>@Model.Serie</h6>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="px-4 text-muted"><b>Conductor:  </b>@Model.Conductor</h6>
+                        <h6 class="px-4 text-muted"><b>Propietario:  </b>@Model.Propietario</h6>
+                        <h6 class="px-4 text-muted"><b>Estatus:  </b>@Model.descEstatusProceso</h6>
+                    </div>
+                </div>
+            </div>
+
+        }
+
+        <form id="cancelarInfraccionForm" class="col-12 col-md-12 col-lg-8" style="display:none">
+                @Html.HiddenFor(m => m.IdInfraccion)
+                @Html.HiddenFor(m => m.FolioInfraccion)
+            @Html.HiddenFor(m => m.descEstatusProceso)
+
+
+               
+        </form>
+
+        <div class="row px-4 mb-4 align-items-end justify-content-center">
+           
+
+            <div class="col-12 col-md-12 col-lg-6 btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <div class="controlButton">
+                    <button class="btnPrimary px-3" onclick="guardarCancelacion(cancelarFinanzas)">
+                        <h5 class="m-0"><b>Cancelar en Finanzas</b></h5>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

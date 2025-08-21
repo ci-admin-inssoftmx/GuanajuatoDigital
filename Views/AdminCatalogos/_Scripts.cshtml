@@ -1,0 +1,1338 @@
+﻿<div class="modal fade modalCustom" id="catalogosModal" aria-labelledby="catalogosModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="catalogosModalBody">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    //**CARRETERAS */
+    function mostrarModalAgregarCarretera() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("MostrarModalAgregarCarretera", "CatCarreteras")', 
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyCarretera').html(data);
+                $('#agregarCarretera').modal('show');
+                hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+
+    function editarCarreteraMod(e) {
+        console.log("2da")
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdCarretera = dataItem.IdCarretera;
+        console.log(IdCarretera);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarCarreteraModal", "CatCarreteras")', 
+            type: 'POST', 
+            data: { IdCarretera: IdCarretera },
+            success: function (result) {
+                $('#ModalBodyCarretera').html(result);
+                $('#agregarCarretera').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+        //**TRAMOS */
+     function mostrarModalAgregarTramo() {
+         showLoading(); 
+         $.ajax({
+            url: '@Url.Action("MostrarModalAgregarTramo", "CatTramos")', 
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (result) {
+                $('#ModalBodyTramo').html(result);
+                $('#agregarTramo').modal('show');
+            hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+
+    function editarTramoMod(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdTramo = dataItem.IdTramo;
+        console.log(IdTramo);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarTramoModal", "CatTramos")',
+            type: 'POST',
+            data: { IdTramo: IdTramo },
+            success: function (result) {
+                $('#ModalBodyTramo').html(result);
+                $('#agregarTramo').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+            //**DEPENDENCIA */
+    function mostrarModalDep() {
+                showLoading();
+
+        $.ajax({
+             url: '@Url.Action("AgregarPacial", "Dependencias")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyUpdateDep').html(data);
+                $('#editDependencia').modal('show');
+           hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+    function getIdDep(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        console.log(dataItem);
+
+        var IdDependencia = dataItem.IdDependencia;
+        console.log(IdDependencia);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcial", "Dependencias")',
+            type: 'POST',
+            data: { IdDependencia: IdDependencia },
+            success: function (result) {
+                $('#ModalBodyUpdateDep').html(result);
+                $('#editDependencia').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+       //**MUNICIPIO */
+      function mostrarModalAgregarMunicipio() {
+             showLoading();
+          $.ajax({
+            url: '@Url.Action("AgregarMunicipioModal", "CatMunicipios")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyMunicipio').html(data);
+                $('#agregarMunicipio').modal('show');
+            hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+    function editarMunicipioMod(event) {
+        var grid = $("#gridMunicipios").data("kendoGrid");
+        var row = $(event.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        var IdMunicipio = dataItem.IdMunicipio;
+        console.log("UJ",dataItem);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarMunicipioModal", "CatMunicipios")',
+            type: 'POST', 
+            data: { IdMunicipio: IdMunicipio }, 
+            success: function (result) {
+                $('#catalogosModalBody').html(result);
+                $('#catalogosModal').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+       //**ENTIDAD */
+        function mostrarModalAgregar() {
+                    showLoading();
+
+        $.ajax({
+            url: '@Url.Action("MostrarModalAgregarEntidad", "CatEntidades")', 
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyEntidad').html(data);
+                $('#agregarEntidad').modal('show');
+             hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+    function editarEntidadMod(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var idEntidad = dataItem.idEntidad;
+        console.log(idEntidad);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarEntidadModal", "CatEntidades")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { idEntidad: idEntidad }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyEntidad').html(result);
+                $('#agregarEntidad').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**Ofiacles */
+
+    function mostrarModal() {
+                showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarOficialParcial", "Oficiales")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyCrearOficial').html(data);
+                $('#agregarOficial').modal('show');
+             hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+
+    function getIdOfi(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdOficial = dataItem.IdOficial;
+        console.log(IdOficial);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarOficialParcial", "Oficiales")',
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdOficial: IdOficial }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCrearOficial').html(result);
+                $('#agregarOficial').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    //**Marcas Vehiculos*/
+
+      function mostrarModalMv() {
+                  showLoading();
+
+        $.ajax({
+            url: '@Url.Action("AgregarPacial", "CatMarcasVehiculos")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyCreate').html(data);
+                $('#addMarca').modal('show');
+            hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+
+    function getIdMV(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdMarcaVehiculo = dataItem.IdMarcaVehiculo;
+        console.log(IdMarcaVehiculo);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcial", "CatMarcasVehiculos")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdMarcaVehiculo: IdMarcaVehiculo }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCreate').html(result);
+                $('#addMarca').modal('show');
+                hideLoading();
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**SUBMARCAS */
+      function mostrarModalSub() {
+         showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarSubmarcaParcial", "CatSubmarcasVehiculos")', 
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#agregarSubmarcaBody').html(data);
+                $('#agregarSubmarca').modal('show');
+            hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+
+
+
+     function getIdSubM(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdSubmarca = dataItem.IdSubmarca;
+        console.log(IdSubmarca);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarSubmarcaParcial", "CatSubmarcasVehiculos")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdSubmarca: IdSubmarca }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#agregarSubmarcaBody').html(result);
+                $('#agregarSubmarca').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**TIPOS DE VEHICULO*/
+
+     function mostrarModalTipoV() {
+         showLoading();
+        $.ajax({
+             url: '@Url.Action("AgregarTipoVehiculo", "TiposVehiculos")',  
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyCreateTipo').html(data);
+                $('#addTipo').modal('show');
+                       hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+
+
+    function getIdTipoV(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdTipoVehiculo = dataItem.IdTipoVehiculo;
+        console.log(IdTipoVehiculo);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarTipoVehiculo", "TiposVehiculos")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdTipoVehiculo: IdTipoVehiculo }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCreateTipo').html(result);
+                $('#addTipo').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**UMAS */
+     function mostrarModalSalarios() {
+         showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarSalarioPacial", "SalariosMinimos")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                    $('#ModalBodyCreate').html(data);
+                $('#addUdiSalario').modal('show');
+                       hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+     function editarSalarioMinimo(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdSalario = dataItem.IdSalario;
+        console.log(IdSalario);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarSalarioParcial", "SalariosMinimos")',
+            type: 'POST',
+            data: { IdSalario: IdSalario },
+            success: function (result) {
+                $('#ModalBodyCreate').html(result);
+                $('#addUdiSalario').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    /**COLORES */
+
+     function mostrarModalColor() {
+                 showLoading();
+
+        $.ajax({
+             url: '@Url.Action("AgregarPacial", "Colores")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyCreate').html(data);
+                $('#addColor').modal('show');
+                          hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+    function getIdgetIdColor(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var Id = dataItem.IdColor;
+        console.log(Id);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcial", "Colores")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { Id: Id }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCreate').html(result);
+                $('#addColor').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**DIAS INHABILES*/
+      function mostrarModalAgregarDia() {
+            showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarParcialDiaInhabil", "DiasInhabiles")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyCreateDiaInhabil').html(data);
+                $('#addDateInhabil').modal('show');
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.error('Error en la solicitud AJAX:', status, error);
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+    function getIdDia(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var idDiaInhabil = dataItem.idDiaInhabil;
+        console.log(idDiaInhabil);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcial", "DiasInhabiles")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { idDiaInhabil: idDiaInhabil }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCreateDiaInhabil').html(result);
+                $('#addDateInhabil').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**Motivos de infraccion*/
+     function mostrarModalMotivos() {
+                 showLoading();
+
+        $.ajax({
+            url: '@Url.Action("AgregarMotivoParcial", "MotivosInfraccion")', // URL de la acción del controlador
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#addMotivoBody').html(data);
+                $('#addMotivo').modal('show');
+                 hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+    function getIdMotivo(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdCatMotivoInfraccion = dataItem.IdCatMotivoInfraccion;
+        var Corp = dataItem.Corp;
+
+        console.log("DAT2",dataItem)
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcial", "MotivosInfraccion")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdCatMotivoInfraccion: IdCatMotivoInfraccion, Corp: Corp }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#addMotivoBody').html(result);
+                $('#addMotivo').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**AGENCIAS MIISTERIO*/
+
+      function mostrarModalAgencias() {
+        showLoading();
+        $.ajax({
+             url: '@Url.Action("AgregarAgenciaMinisterioModal", "CatAgenciasMinisterio")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                if (data.error) {
+                    sitteg_warning("El usuario no tienen los permisos para esta acción");
+                } else {
+                    $('#ModalBodEditarAgenciaministerio').html(data);
+                    $('#editarAgenciaministerio').modal('show');
+                }
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+    function getIdAgencia(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdAgenciaMinisterio = dataItem.IdAgenciaMinisterio;
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarAgenciaMinisterioModal", "CatAgenciasMinisterio")',
+            type: 'POST',
+            data: { IdAgenciaMinisterio: IdAgenciaMinisterio },
+            success: function (result) {
+                if (result.error) {
+                    sitteg_warning("El usuario no tienen los permisos para esta acción");
+                } else {
+                    $('#ModalBodEditarAgenciaministerio').html(result);
+                    $('#editarAgenciaministerio').modal('show');
+                }
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    //**AUTORIDADES DISPOSICION*/
+        function mostrarModalAutDisp() {
+            showLoading();
+        $.ajax({
+             url: '@Url.Action("AgregarAutoridadDisposicionPacial", "CatAutoridadesDisposicion")',          
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyCrearAutoridadDisp').html(data);
+                $('#agregarAutoridadDisp').modal('show');
+            hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+
+    function getIdAutDis(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdAutoridadDisposicion = dataItem.IdAutoridadDisposicion;
+        console.log(IdAutoridadDisposicion);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarAutoridadDisposicionParcial", "CatAutoridadesDisposicion")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdAutoridadDisposicion: IdAutoridadDisposicion }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCrearAutoridadDisp').html(result);
+                $('#agregarAutoridadDisp').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //***AUTORIDADES ENTREGA*/
+        function mostrarModalAutEnt() {
+            showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarAutoridadEntregaModal", "CatAutoridadesEntrega")', 
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyaAgregarAutEntrega').html(data);
+                $('#agregarAutEntrega').modal('show');
+            hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+
+    function getIdAutEnt(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdAutoridadEntrega = dataItem.IdAutoridadEntrega;
+        console.log(IdAutoridadEntrega);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarAutoridadEntregaModal", "CatAutoridadesEntrega")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdAutoridadEntrega: IdAutoridadEntrega }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyaAgregarAutEntrega').html(result);
+                $('#agregarAutEntrega').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**INSTITUCIONES TRASLADO*/
+    function mostrarModalInstTraslado() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarInstitucionTrasladoModal", "CatInstitucionesTraslado")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyaAgregarInstTraslado').html(data);
+                $('#agregarInstTraslado').modal('show');
+            hideLoading();
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', status, error);
+        },
+        complete: function () {
+            hideLoading();
+        }
+    });
+}
+
+
+    function getIdInst(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdInstitucionTraslado = dataItem.IdInstitucionTraslado;
+        var Corp = dataItem.Corp;
+
+        console.log(dataItem);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarInstitucionTrasladoModal", "CatInstitucionesTraslado")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdInstitucionTraslado: IdInstitucionTraslado, Corp : Corp }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyaAgregarInstTraslado').html(result);
+                $('#agregarInstTraslado').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**Clasificaciones de accidentes*/
+    function mostrarModalClasificacion() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarClasificacionAccidenteModal", "CatClasificacionAccidentes")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyaAgregarClasificacionAccidente').html(data);
+                $('#agregarClasificacionAccidente').modal('show');
+                $('#agregarInstTraslado').modal('show');
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.error('Error en la solicitud AJAX:', status, error);
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+
+    function getIdClas(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdClasificacionAccidente = dataItem.IdClasificacionAccidente;
+        console.log(IdClasificacionAccidente);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarClasificacionAccidenteModal", "CatClasificacionAccidentes")',
+            type: 'POST',
+            data: { IdClasificacionAccidente: IdClasificacionAccidente },
+            success: function (result) {
+                $('#ModalBodyaAgregarClasificacionAccidente').html(result);
+                $('#agregarClasificacionAccidente').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    //**Causas de accidentes*/
+        function mostrarModalCausa() {
+            showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarCausasAccidenteModal", "CatCausasAccidentes")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyaAgregarCausaAccidente').html(data);
+                $('#agregarCausaAccidente').modal('show');
+             hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.error('Error en la solicitud AJAX:', status, error);
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+
+    function getIdCausa(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdCausaAccidente = dataItem.IdCausaAccidente;
+        console.log(IdCausaAccidente);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarCausasAccidenteModal", "CatCausasAccidentes")',
+            type: 'POST',
+            data: { IdCausaAccidente: IdCausaAccidente },
+            success: function (result) {
+                $('#ModalBodyaAgregarCausaAccidente').html(result);
+                $('#agregarCausaAccidente').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    function getIdOficina(e) {
+        console.log("POR")
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdOficinaTransporte = dataItem.IdOficinaTransporte;
+        console.log(IdOficinaTransporte);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarDelegacionOficinaModal", "CatDelegacionesOficinasTransporte")',
+            type: 'POST',
+            data: { IdOficinaTransporte: IdOficinaTransporte },
+            success: function (result) {
+                $('#ModalBodyaAgregarDelegacionOficina').html(result);
+                $('#agregarDelegacionOficina').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**HOSPITALES */
+     function mostrarModalHopsitales() {
+          showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarHospitalModal", "CatHospitales")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyaAgregarHospital').html(data);
+                $('#agregarHospital').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function getIdHospital(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+        var IdHospital = dataItem.IdHospital;
+        var Corp = dataItem.Corp;
+
+        console.log(IdHospital);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarHospitalModal", "CatHospitales")',
+            type: 'POST',
+            data: { IdHospital: IdHospital, Corp:Corp },
+            success: function (result) {
+                $('#ModalBodyaAgregarHospital').html(result);
+                $('#agregarHospital').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**FACTORES ACCIDNTE*/
+        function mostrarModalFactores() {
+            showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarFactoresAccidenteModal", "CatFactoresAccidentes")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyaAgregarFactorAccidente').html(data);
+                $('#agregarFactornAccidente').modal('show');
+             hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.error('Error en la solicitud AJAX:', status, error);
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+
+    function getIdFact(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdFactorAccidente = dataItem.IdFactorAccidente;
+        console.log(IdFactorAccidente);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarFactoresAccidenteModal", "CatFactoresAccidentes")',
+            type: 'POST',
+            data: { IdFactorAccidente: IdFactorAccidente },
+            success: function (result) {
+                $('#ModalBodyaAgregarFactorAccidente').html(result);
+                $('#agregarFactornAccidente').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**FACTORES OPCIONES ACCIDNTES*/
+        function mostrarModalOpcion() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarFactoresOpcionesAccidenteModal", "CatFactoresOpcionesAccidentes")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyaAgregarFactorOpcAccidente').html(data);
+                $('#agregarFactorOpcAccidente').modal('show');
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.error('Error en la solicitud AJAX:', status, error);
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+
+    function getIdOpcion(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdFactorOpcionAccidente = dataItem.IdFactorOpcionAccidente;
+                        var Corp = dataItem.Corp;
+
+        console.log(dataItem);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarFactoresOpcionesAccidenteModal", "CatFactoresOpcionesAccidentes")',
+            type: 'POST',
+            data: { IdFactorOpcionAccidente: IdFactorOpcionAccidente, Corp : Corp },
+            success: function (result) {
+                $('#ModalBodyaAgregarFactorOpcAccidente').html(result);
+                $('#agregarFactorOpcAccidente').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**COLORES */
+     function getIdColor(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var Id = dataItem.IdColor;
+        console.log(Id);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcial", "Colores")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data:  {Id:Id}, // Datos que se enviarán al controlador
+            success: function(result) {
+                $('#ModalBodyCreate').html(result);
+                $('#addColor').modal('show');
+            hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+    })
+    }
+    //**OFICINAS RENTA*/
+     function mostrarModalOfiRenta() {
+        $.ajax({
+            url: '@Url.Action("AgregarOficinaRentaModal", "CatOficinasRenta")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyaAgregarOficinasRenta').html(data);
+                $('#agregarOficinasRenta').modal('show');
+            }
+        });
+    }
+     function getIdOficinaRenta(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdOficinaRenta = dataItem.IdOficinaRenta;
+        var IdDelegacion = dataItem.IdDelegacion;
+
+        console.log(IdDelegacion);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarOficinaRentaModal", "CatOficinasRenta")',
+            type: 'POST', 
+            data: { IdOficinaRenta: IdOficinaRenta, IdDelegacion: IdDelegacion },
+            success: function (result) {
+                $('#ModalBodyaAgregarOficinasRenta').html(result);
+                $('#agregarOficinasRenta').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**TIPOS DE CARGA*/
+     function mostrarModalTCarga() {
+            $.ajax({
+                url: '@Url.Action("AgregarTipoCargaParcial", "TiposCarga")', 
+                type: 'POST',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                success: function (data) {
+                $('#ModalBodyCreateTipo').html(data);
+                $('#addTipoCarga').modal('show');
+                }
+            });
+        }
+
+         function getIdCarga(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdTipoCarga = dataItem.IdTipoCarga;
+        console.log(IdTipoCarga);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcial", "TiposCarga")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdTipoCarga: IdTipoCarga }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCreateTipo').html(result);
+                $('#addTipoCarga').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+//**TIPO D SERVICIO*/
+    function mostrarModalAgregarTipoS() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarTipoServicioModal", "CatTipoServicio")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyAgregarTipoServicio').html(data);
+                $('#agregarTipoServicio').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+ function getIdTipoServicio(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var idTipoServicio = dataItem.idCatTipoServicio;
+        console.log(idTipoServicio);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarCausasAccidenteModal", "CatTipoServicio")',
+            type: 'POST',
+            data: { idTipoServicio: idTipoServicio },
+            success: function (result) {
+                $('#ModalBodyAgregarTipoServicio').html(result);
+                $('#agregarTipoServicio').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    //**Subtipo servicio*/
+      function mostrarModalSubServicio() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("AgregarSubtipoServicioModal", "CatSubtipoServicio")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+
+                $('#ModalBodyaAgregarSubtipoServicio').html(data);
+                    $('#agregarSubtipo').modal('show');
+                
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+     function getIdSubservicio(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var idSubtipoServicio = dataItem.idSubTipoServicio;
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarSubtipoServicioModal", "CatSubtipoServicio")',
+            type: 'POST',
+            data: { idSubtipoServicio: idSubtipoServicio },
+            success: function (result) {
+
+                $('#ModalBodyaAgregarSubtipoServicio').html(result);
+                    $('#agregarSubtipo').modal('show');
+                
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    //**TURNOS */
+    function mostrarCrearTurnoModal() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("LoadCrearPartial", "CatTurnos")',
+            type: 'GET',
+            success: function (data) {
+                $('#crearTurnoModalBody').html(data);
+                $('#crearTurnoModal').modal('show');
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+			},
+            complete: function () {
+				hideLoading();
+			}
+        });
+	}
+
+    function valid5char(e) {
+                
+        let value = e.target.value;
+        console.log(value);
+        
+        let isValid = true;
+
+        switch (value.length) {
+            case 1:
+                isValid = /^[0-2]$/.test(value);
+                break;
+            case 2:
+                isValid = /^([01][0-9]|2[0-3])$/.test(value);
+                break;
+            case 3:
+                isValid = /^([01][0-9]|2[0-3]):$/.test(value);
+                break;
+            case 4:
+                isValid = /^([01][0-9]|2[0-3]):[0-5]$/.test(value);
+                break;
+            case 5:
+                isValid = /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(value);
+                break;
+            default:
+                isValid = false;
+        }
+
+        if (!isValid) {
+            e.target.value = value.slice(0, -1); // Elimina el último carácter si no es válido
+        }               
+    }
+
+    function validateTime(value) {
+        let reg = /^[0-2][0-9]:[0-5][0-9]$/;
+        return reg.test(value);
+    }
+
+    function handlePaste(e) {
+        let clipboardData = e.clipboardData || window.clipboardData;
+        let pastedData = clipboardData.getData('Text');
+        if (!validateTime(pastedData)) {
+            e.preventDefault();
+        }
+    }
+
+    function handleBlur(e) {
+        if (!validateTime(e.target.value)) {
+            console.log('fail x blur');
+            e.target.value = "";
+        }
+    }
+
+   
+
+    function applyFilter() {
+        console.log("Current Filter:", currentFilter); // Verifica los datos en la consola
+        return { filterParameters: currentFilter };
+;
+    }
+
+    let timePickers = [document.getElementById('filterHoraInicio'), document.getElementById('filterHoraFin')];
+    timePickers.forEach(function (timePicker) {
+        if (timePicker) {
+            timePicker.addEventListener('input', valid5char);
+            timePicker.addEventListener('paste', handlePaste);
+            timePicker.addEventListener('blur', handleBlur);
+        }
+    });
+
+    let currentFilter = {};
+
+  function mostrarEditarModal(e) {
+        let dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        let turnoId= dataItem.IdTurno;
+                
+        showLoading();
+        $.ajax({
+            url: `@Url.Action("LoadEditarPartial","CatTurnos")/${turnoId}`,
+            type: 'GET',
+            success: function (data) {
+                $('#editarTurnoModalBody').html(data);
+                $('#editarTurnoModal').modal('show');
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+    function mostrarEliminarModal(e) {
+        let dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        let turnoId = dataItem.IdTurno;
+
+        let formData = new FormData();
+        formData.append('IdTurno', turnoId);
+        formData.append('Nombre', dataItem.Nombre);
+        formData.append('HoraInicio', dataItem.HoraInicio);
+        formData.append('HoraFin', dataItem.HoraFin);
+        formData.append('Delegacion', dataItem.Delegacion);
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("LoadEliminarPartial", "CatTurnos")',
+            type: 'POST',
+            data: formData,
+            processData: false, // Necesario para enviar FormData
+            contentType: false,
+            success: function (data) {
+                $('#eliminarTurnoModalBody').html(data);
+                $('#eliminarTurnoModal').modal('show');
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+    //**ASEGURADORAS */
+    function mostrarCrearModalAseuradora() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("LoadCrearPartial", "CatAseguradoras")',
+            type: 'GET',
+            success: function (data) {
+                $('#crearAseguradoraModalBody').html(data);
+                $('#crearAseguradoraModal').modal('show');
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+    function mostrarEditarModalAse(e) {
+        let dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        let AseguradoraId = dataItem.IdAseguradora;
+
+        showLoading();
+        $.ajax({
+            url: `@Url.Action("LoadEditarPartial","CatAseguradoras")/${AseguradoraId}`,
+            type: 'GET',
+            success: function (data) {
+                $('#editarAseguradoraModalBody').html(data);
+                $('#editarAseguradoraModal').modal('show');
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+
+    function mostrarEliminarModalAse(e) {
+        let dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        let AseguradoraId = dataItem.IdAseguradora;
+
+        let formData = new FormData();
+        formData.append('IdAseguradora', AseguradoraId);
+        formData.append('NombreAseguradora', dataItem.NombreAseguradora);
+        formData.append('Estatus', dataItem.Estatus);
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("LoadEliminarPartial", "CatAseguradoras")',
+            type: 'POST',
+            data: formData,
+            processData: false, // Necesario para enviar FormData
+            contentType: false,
+            success: function (data) {
+                $('#eliminarAseguradoraModalBody').html(data);
+                $('#eliminarAseguradoraModal').modal('show');
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+    </script>

@@ -1,0 +1,110 @@
+﻿<script id="responsive-column-template" type="text/x-kendo-template">
+    <strong>Folio</strong>
+    <p class="col-template-val">#=data.NumeroReporte#</p>
+
+    <strong>Fecha</strong>
+    <p class="col-template-val">#=data.Fecha#</p>
+
+    <strong>Municipio</strong>
+    <p class="col-template-val">#=data.Municipio#</p>
+
+    <strong>Estatus</strong>
+    <p class="col-template-val">#=data.EstatusReporte#</p>
+</script>
+
+<script>
+    function quitData() {
+        setTimeout(() => {
+            var t = document.querySelector("span.k-pager-info.k-label")
+
+            if (t.innerHTML == "No items to display") {
+                t.innerHTML = ""
+            }
+            else if (t.innerHTML.indexOf("of")){
+                t.innerHTML = t.innerHTML.replace("of","de")
+            }
+        }, 500)
+
+    }
+
+
+
+    var resColTemplate;
+
+    $(document).ready(function () {
+        resColTemplate = kendo.template($("#responsive-column-template").html());
+    });
+</script>
+<div class="row">
+    <div class="col-12 mb-4 rounded gridCustom">
+
+    @(
+        Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel>()
+        .Name("gridAciidentesIncompletos")
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            
+            .Columns(columns =>
+            {
+                columns.Bound(i => i.IdAccidente).Hidden();
+
+                columns.Bound(c => c.NumeroReporte).Title("Número de Reporte").Width(100);
+                columns.Bound(c => c.Fecha).Format("{0:dd/MM/yyyy}").Width(90);
+                columns.Bound(c => c.Hora).Width(90);
+                columns.Bound(c => c.Municipio).Width(120);
+                columns.Bound(c => c.Carretera).Width(100);
+                columns.Bound(c => c.Tramo).Title("Tramo").Width(100);
+                columns.Bound(c => c.EstatusReporte).Title("Estatus de Reporte").Width(100);
+                columns.Bound(c => c.FolioEmergencia).Title("Folio Emergencia").Width(100);
+                // columns.Template("<button onclick='completarAccidente(e)'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Continuar</b></h6></button>").Width(90);
+            columns.Bound(p => p.IdAccidente).ClientTemplate(
+            "<button onclick=\"editarAccidente('#= IdAccidente #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Continuar</b></h6></button>"
+                ).Title("Editar").Sortable(false).Media("(min-width: 350px)");
+                columns.Template("#=resColTemplate(data)#").Title("Items").Media("(max-width: 350px)");
+                
+
+            }).HtmlAttributes(new { style = "height:550px" })
+         
+            //.Groupable()
+            .Sortable()
+            .Scrollable()
+            .Pageable()
+            .EnableCustomBinding(true)
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("BuscarAccidentesListaPagination", "CapturaAccidentes"))
+            .Create(read => read.Action("BuscarAccidentesListaPagination", "CapturaAccidentes"))
+            @*.PageSize(10).Model(model => model.Id(p => p.IdAccidente))*@
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            @*.Search(s =>
+            {                
+                s.Field(c => c.NumeroReporte, "contains");
+            })*@
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            )
+
+    </div>
+</div>
+
+
+<script>
+    function editarAccidente(idAccidente) {
+        $.ajax({
+            url: '/CapturaAccidentes/SetLastInsertedIdCapt',
+            type: 'POST',
+            data: { idAccidente: idAccidente },
+            success: function (result) {
+                if (result.includes("no tiene permisos")) {
+                    sitteg_warning("El usuario no tiene permisos suficientes para esta acción.");
+                    hideLoading();
+                }else{
+                window.location.href = '/CapturaAccidentes/CapturaAaccidente/?showE=false'
+                }
+            },
+
+        });
+    }
+</script>

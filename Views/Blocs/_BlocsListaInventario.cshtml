@@ -1,0 +1,132 @@
+﻿<script>
+
+
+        function CancelBlo(id){             
+            showLoading();
+            var formData = new FormData();
+                    formData.append('id', id);            
+
+            $.ajax({
+                    url: '@Url.Action("CancelarFolioDetalle", "Blocs")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (result) {
+                    sitteg_success('Se ha cancelado el folio');
+                        var grid = $("#gridBlocs").data("kendoGrid");
+                    grid.dataSource.read();
+                    hideLoading();
+                },
+                error: function (error) {
+                    sitteg_warning('Sucedio um error, intente mas tarde...');
+                    hideLoading();
+                }
+            });
+        }
+
+
+        function TemplateCancelar(data) {
+            var result = ""
+        if (data.idEstatusDetalle == 1) {
+                    result = `<button class='k-button' onclick='CancelBlo("${data.idDetalle}")'>Cancelar</button>`
+            } else {
+                result = ""
+            }
+            return result
+        }
+</script>
+
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.Blocs.BlocsInventarioModel>()
+                            .Name("gridBlocs")
+                            .Columns(columns =>
+                            {
+                                columns.Bound(c => c.Serie).Title("No. de Serie").Width(80);
+                                columns.Bound(c => c.Folio).Title("Folio").Width(100);
+                                columns.Bound(c => c.Oficina).Title("Delegación").Width(90);
+                                columns.Bound(c => c.TipoBlock).Title("Tipo de bloc").Width(80);
+                                columns.Bound(c => c.Asigna).Title("Asigna").Width(100);
+                                columns.Bound(c => c.FechAsignacion).Title("Fecha asignación").Width(100);
+                                columns.Bound(c => c.OficialAsignado).Title("Oficial asignado").Width(100);
+                                columns.Bound(c => c.FechaCarga).Width(100).Format("{0: dd/MM/yyyy HH.mm.ss}").Title("fecha carga");
+                                columns.Bound(c => c.idDetalle).Width(100).ClientTemplate("#=TemplateCancelar(data)#").Title("Cancelar");
+
+                                columns.Bound(c => c.Estado)
+                                .Title("Estado")
+                                .ClientTemplate(
+                                "# if(idEstatusDetalle == 3) { #" +
+                                "<span class='k-label k-state-error k-state-default'>#=Estado#</span>" +
+                                "# } else if(idEstatusDetalle  == 2) { #" +
+                                "<span class='k-label k-state-info k-state-default'>#=Estado#</span>" +
+                                "# } else { #" +
+                                "<span class='k-label k-state-normal k-state-default'>#=Estado#</span>" +
+                                "# } #"
+                                )
+                                .HtmlAttributes(new { Class = "k-text-center" })
+                                .Width(100);
+                            }
+                            ).HtmlAttributes(new { style = "height:650px" })
+            .Sortable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("getLisGridInventario", "Blocs"))
+            .PageSize(5)
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.Serie);
+                s.Field(c => c.Asigna);                
+                s.Field(c => c.OficialAsignado);                
+                s.Field(c => c.Estado);
+                s.Field(c => c.FechaCarga);
+            })            
+            )
+    </div>
+</div>
+<style>
+    .k-state-error {
+        background-color: red;
+        color: white;
+        text-align: center;
+        text-transform: uppercase;
+        font-weight: bold;
+        padding: 5px 10px; /* Ajusta el padding para que coincida con el botón */
+        border-radius: 3px;
+        display: inline-block; /* Asegura que el span se comporte como un botón */
+        margin: 0 auto;
+    }
+
+    .k-state-info {
+        background-color: var(--main-color);
+        color: white;
+        text-align: center;
+        text-transform: uppercase;
+        font-weight: bold;
+        padding: 5px 10px; /* Ajusta el padding para que coincida con el botón */
+        border-radius: 3px;
+        display: inline-block; /* Asegura que el span se comporte como un botón */
+        margin: 0 auto;
+    }
+
+    .k-state-normal {
+        background-color: black;
+        color: white;
+        text-align: center;
+        text-transform: uppercase;
+        font-weight: bold;
+        padding: 5px 10px; /* Ajusta el padding para que coincida con el botón */
+        border-radius: 3px;
+        display: inline-block; /* Asegura que el span se comporte como un botón */
+        margin: 0 auto;
+    }
+</style>
+
+<script>   
+</script>
+

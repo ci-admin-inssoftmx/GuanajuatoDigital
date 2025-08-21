@@ -1,0 +1,252 @@
+﻿@model IEnumerable<Gruas2Model>
+@{
+    var errorMessage = TempData["ErrorMessage"] as string;
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        var auth = @autorizaciones;
+
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡El usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(function () {
+                    window.location.href = "/Principal";
+                }, 200);
+            } else {
+                // BUSQUEDA
+                //if (!auth.toString().includes("281")) {
+                //    $("#btnBuscarGrua").prop('disabled', true).css({ "opacity": "0.3" });
+                //}
+                ////AGREGAR
+                //if (!auth.toString().includes("283")) {
+                //    $("#btnNuevaGrua").prop('disabled', true).css({ "opacity": "0.3" });
+                //}
+
+
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡El usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(function () {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+
+</script>
+<head>
+    <script></script>
+</head>
+<div class="mainContainer bg-light">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon icon-grua h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Padrón de grúas</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnNuevaGrua" onclick="mostrarModal()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon icon-grua h5 mb-0 me-2"></i><b>Agregar nueva grúa</b></h6>
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-auto mt-4 mb-2">
+                <h5 class="px-4"><b>Búsqueda de Padrón</b></h5>
+                <h6 class="px-4 text-muted">Realiza una búsqueda del padrón de grúas.</h6>
+            </div>
+        </div>
+        <div class="row align-items-end px-4">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBox()
+                    .Name("placas")
+                    .Label(l => l.Content("Placas:"))
+                    .Placeholder("Ingresa las placas válidas")
+                    .HtmlAttributes(new { style = "width: 100%", id = "txtPlacas" }))
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBox()
+                    .Name("noEconomico")
+                    .Label(l => l.Content("No. Económico:"))
+                    .Placeholder("Ingresa las placas válidas")
+                    .HtmlAttributes(new { style = "width: 100%", id = "txtNoEconomico" }))
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Tipo Grúa:</label>
+                @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                    .Name("idTipoGruas")
+                    .BindTo((SelectList)ViewBag.CatTipoGruas)
+                    .OptionLabel("-- Seleccione --")
+                    .Filter(FilterType.Contains)
+
+                    .HtmlAttributes(new { style = "width:100%;", id = "ddlTipoGrua" })
+                    .Filter(FilterType.Contains))
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Municipio:</label>
+                @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                    .Name("idDelegacion")
+                    .BindTo((SelectList)ViewBag.CatDelegaciones)
+                    .OptionLabel("-- Seleccione --")
+
+                    .HtmlAttributes(new { style = "width:100%;", id = "ddlDelegaciones" })
+                    .Filter(FilterType.Contains))
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+
+            <div class="controlForm my-3">
+                <label>Concesionario:</label>
+                @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                    .Name("idConcesionario")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Selecciona un concesionario")
+                    .Filter(FilterType.Contains)
+                    .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "ddlConcesionario" })
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("Concesionarios_Drop", "PadronGruas");
+                        });
+                    }))
+            </div>
+        </div>
+
+
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 my-3">
+            <div class="controlButton">
+                <button id="btnBuscarGrua" class="btnPrimary" type="button" onclick="submitSearch()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+            </div>
+        </div>
+</div>
+        <div class="row mb-2 mt-4 titleCustom">
+            <div class="col-12">
+                <h5 class="px-4"><b>Listado de Padrón de Grúas</b></h5>
+                <h6 class="px-4 text-muted">Edita o ajusta el listado de grúas.</h6>
+            </div>
+        </div>
+
+        <div id="listadoGruas">
+            <partial name="_ListadoGruas" model="Model" />
+        </div>
+    </section>
+
+</div>
+
+<div class="modal fade modalCustom" id="addGrua" aria-labelledby="addGruaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- Botón de Cerrar a la izquierda -->
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="ModalBodyCreate">
+                <!-- Contenido del modal -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#addGrua").on("show.bs.modal shown.bs.modal", function (e) {
+            $("body").removeClass("modal-open").find(".modal-backdrop").remove();
+        });
+        $("#addGrua").on('hide.bs.modal', function () {
+            $('#ModalBodyCreate').html('');
+        });
+    });
+    function mostrarModal() {
+        $.ajax({
+            url: '@Url.Action("ajax_create")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                if (data.includes("no tiene permisos")) {
+                    sitteg_warning("El usuario no tiene permisos suficientes para esta acción.");
+                    hideLoading();
+                } else {
+                $('#ModalBodyCreate').html(data);
+                $('#addGrua').modal('show');
+                }
+            }
+        });
+    }
+
+    function submitSearch() {
+        var placas = $("#txtPlacas").val();
+        var noEconomico = $("#txtNoEconomico").val();
+        var idTipoGrua = $("#ddlTipoGrua").val();
+        var idDelegacion = $("#ddlDelegaciones").val();
+        var idConcesionario = $("#ddlConcesionario").val();
+        showLoading();
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ajax_BuscarGruas")',
+            data: {
+                "placas": placas,
+                "noEconomico": noEconomico,
+                "idTipoGrua": idTipoGrua,
+                "idDelegacion": idDelegacion,
+                "idConcesionario": idConcesionario
+            },
+            success: function (data) {
+                if (data.includes("no tiene permisos")) {
+                    sitteg_warning("El usuario no tiene permisos suficientes para esta acción.");
+                    hideLoading();
+                } else {
+                $("#listadoGruas").html(data);
+                hideLoading();
+                }
+            },
+            error: function (xhr, status) {
+                hideLoading();
+            }
+        });
+    }
+
+</script>
+
+
+
+

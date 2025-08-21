@@ -1,0 +1,468 @@
+﻿@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        var auth = @autorizaciones;
+
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡El usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            } else {
+                // BUSCAR - CONSULTAR
+                //if (!auth.toString().includes("481")) {
+                //    $("#btnBuscar").prop('disabled', true).css({ "opacity": "0.3" });
+                //}
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡El usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+</script>
+
+<div class="mainContainer bg-light">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-research h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Búsqueda especial de infracción</b></h2>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-auto mt-4 mb-2">
+            <h5 class="px-4"><b>Filtros de Búsqueda</b></h5>
+            <h6 class="px-4 text-muted">Filtros de búsqueda para localizar la infracción. Se pueden combinar filtros, por ejemplo se puede combinar fecha y garantía.</h6>
+        </div>
+
+         <form class="row px-4 mb-4 align-items-end" id="frmSearch" >
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Folio:</label>
+                    @(Html.Kendo().TextBox()
+                        .Name("folio")
+                        .Placeholder("Ingresa el número de folio de infracción")
+                        .HtmlAttributes(new{style="width:100%;"})
+                        )
+                </div>
+            </div>
+
+
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Placas:</label>
+                    @(Html.Kendo().TextBox()
+                        .Name("placas")
+                        .Placeholder("Ingresa el número de placa del vehículo")
+                        .HtmlAttributes(new { style = "width:100%;" })
+                        )
+                </div>
+            </div>
+
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Delegación/Oficina:</label>
+                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                        .Name("oficinas")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .Filter(FilterType.Contains)
+                        .OptionLabel("Selecciona Oficina")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("Delegaciones_Read", "Infracciones");
+                            });
+                        })
+                        .HtmlAttributes(new { style = "width:100%;" })
+                        )
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Propietario:</label>
+                    @(Html.Kendo().TextBox()
+                        .Name("propietario")
+                        .Placeholder("Ingresa un propietario")
+                        .HtmlAttributes(new { style = "width:100%;" })
+                        )
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Conductor:</label>
+                    @(Html.Kendo().TextBox()
+                        .Name("conductor")
+                        .Placeholder("Ingresa el conductor")
+                        .HtmlAttributes(new { style = "width:100%;" })
+                        )
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Estatus:</label>
+                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                        .Name("estatus")
+                        .DataTextField("text")
+                        .DataValueField("value")
+                        .Filter(FilterType.Contains)
+                        .OptionLabel("Selecciona")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("Overview_GetTerritories", "Infracciones");
+                            });
+                        })
+                        .HtmlAttributes(new { style = "width:100%;" })
+                        )
+                </div>
+            </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Inicio:</label>
+                            @(Html.Kendo().DatePicker()
+                                .Name("FechaInicio").Max(DateTime.Now)
+                                .Culture("es-ES")
+                                .HtmlAttributes(new { style = "width: 100%", title = "startDate", id = "startDate", onkeydown = "testKeyDown(event)" })
+                                .Events(e =>
+                                {
+                                    e.Change("validarFecha");
+                                })
+                                )
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Fin:</label>
+                            @(Html.Kendo().DatePicker()
+                                .Name("FechaFin").Max(DateTime.Now)
+                                .Culture("es-ES")
+                                .HtmlAttributes(new { style = "width: 100%", title = "endDate", id = "endDate", onkeydown = "testKeyDown2(event)" })
+                                .Events(e =>
+                                {
+                                    e.Change("validarFecha");
+                                })
+                                )
+                        </div>
+                    </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>No. Licencia:</label>
+                    @(Html.Kendo().TextBox()
+                        .Name("noLicencia")
+                        .Placeholder("Ingresa el Número de licencia")
+                        .HtmlAttributes(new { style = "width:100%;" })
+
+                        )
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>No. Económico:</label>
+                    @(Html.Kendo().TextBox()
+                        .Name("noEconomico")
+                        .Placeholder("Ingresa el Número económico")
+                        .HtmlAttributes(new { style = "width:100%;" })
+
+                        )
+                </div>
+            </div>
+         <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>No. de serie:</label>
+                @(Html.Kendo().TextBox()
+                    .Name("serie")
+                    .Placeholder("Ingresa el Número de serie")
+                    .HtmlAttributes(new { style = "width:100%;" })
+
+                    )
+            </div>
+        </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlButton my-3">
+                    <button class="btnPrimary" type="submit" id="btnBuscar">  <h5 class="m-0"><b>Buscar</b></h5></button>
+                </div>
+            </div>
+        </form>
+
+        <div id="listadoInfracciones">
+            
+
+        </div>
+       
+
+    </section>
+
+</div>
+
+<div class="modal fade modalCustom" id="mostrardetalle" aria-labelledby="mostrardetalleLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalle Infracción</h5>
+                <button type="button" onclick="cerrarDetalle()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="ModalBodyMostrarDetalle">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Folio</th>
+                            <th>Fecha y Hora</th>
+                            <th>Nombre del usuario</th>
+                            <th>Tipo Modificación</th>
+                            <th>Descripción</th>
+                            <th>Ip</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabdata">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEliminar" tabindex="-1" role="dialog" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEliminarLabel">Confirmar eliminación</h5>
+                <button type="button" onclick="cerrarModalEliminar()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que quieres eliminar este elemento?
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="cerrarModalEliminar()">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="EliminarInfraccion()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="modalUpdateFolio" tabindex="-1" role="dialog" aria-labelledby="modalUpdateFolioLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEliminarLabel">Actualizar Folio</h5>
+                <button type="button" onclick="cerrarModal()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-control">
+                    <label class="form-label">Folio: </label>
+                    <input type="text" class="form-control" id="newFolio" />
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" onclick="cerrarModal()">Cancelar</button>
+                <button type="button" class="btn btn-succes" onclick="ActualizarFolio()">Actualizar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts{
+
+    <script src="~/js/Infracciones/BusquedaEspecial/BusquedaEspecial.js" type="module"></script>
+
+}
+<script>
+
+    function validarFecha() {
+        var fechaInicioPicker = $("#startDate").data("kendoDatePicker");
+        var fechaFinPicker = $("#endDate").data("kendoDatePicker");
+
+        var fechaInicio = fechaInicioPicker.value();
+        var fechaFin = fechaFinPicker.value();
+        var currentDate = new Date();
+
+        if (fechaInicio > currentDate || (fechaInicio && fechaFin && fechaFin < fechaInicio)) {
+            if (fechaInicio > currentDate) {
+                mostrarMensajeError("La fecha de inicio no puede ser futura. Por favor, seleccione una fecha válida.");
+                fechaInicioPicker.value(null);
+            } else {
+                mostrarMensajeError("La fecha de fin no puede ser anterior a la fecha de inicio.");
+                fechaFinPicker.value(null);
+            }
+        } else {
+            limpiarMensajeError();
+            if (fechaInicio) {
+                fechaFinPicker.min(fechaInicio);
+            }
+        }
+    }
+
+    function testKeyDown(e) {
+        var value = e.target.value
+        var key = e.key
+        var keyCode = e.keyCode
+        var pattern = /^[0-3]([0-9](\/([0-1]([0-9](\/([1-2]([0-9]([0-9]([0-9])?)?)?)?)?)?)?)?)?$/
+        var date = value + key
+        var can = pattern.test(date)
+
+        if ([8, 46, 37, 38, 39, 40, 9].indexOf(keyCode) != -1) {
+            return
+        }
+
+        if (can) {
+            if (date.length == 10) {
+                var splDate = date.split('/')
+                var newDate = new Date(parseInt(splDate[2]), parseInt(splDate[1]) - 1, parseInt(splDate[0]))
+                var day = newDate.getDate() < 10 ? "0" + newDate.getDate() : newDate.getDate()
+                var month = newDate.getMonth() < 9 ? "0" + (parseInt(newDate.getMonth()) + parseInt(1)) : (parseInt(newDate.getMonth()) + parseInt(1))
+                var year = newDate.getFullYear()
+                var newStringDate = `${day}/${month}/${year}`
+                if (day == splDate[0] && month == splDate[1] && year == splDate[2]) {
+                    var NowStr = $("#" + e.target.id).data("kendoDatePicker").dateView._current
+                    console.log(NowStr)
+                    var selectetDay = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+
+                    if (selectetDay > NowStr) {
+                        $("#startDate").val("")
+                        e.preventDefault()
+                    }
+                }
+                else {
+                    $("#startDate").val("")
+                    e.preventDefault()
+                }
+            } else if (date.length > 10) e.preventDefault()
+            return
+        }
+        e.preventDefault()
+    }
+
+    function testKeyDown2(e) {
+        var value = e.target.value
+        var key = e.key
+        var keyCode = e.keyCode
+        var pattern = /^[0-3]([0-9](\/([0-1]([0-9](\/([1-2]([0-9]([0-9]([0-9])?)?)?)?)?)?)?)?)?$/
+        var date = value + key
+        var can = pattern.test(date)
+
+        if ([8, 46, 37, 38, 39, 40, 9].indexOf(keyCode) != -1) {
+            return
+        }
+
+        if (can) {
+            if (date.length == 10) {
+                var splDate = date.split('/')
+                var newDate = new Date(parseInt(splDate[2]), parseInt(splDate[1]) - 1, parseInt(splDate[0]))
+                var day = newDate.getDate() < 10 ? "0" + newDate.getDate() : newDate.getDate()
+                var month = newDate.getMonth() < 9 ? "0" + (parseInt(newDate.getMonth()) + parseInt(1)) : (parseInt(newDate.getMonth()) + parseInt(1))
+                var year = newDate.getFullYear()
+                var newStringDate = `${day}/${month}/${year}`
+                if (day == splDate[0] && month == splDate[1] && year == splDate[2]) {
+                    var NowStr = $("#" + e.target.id).data("kendoDatePicker").dateView._current
+                    console.log(NowStr)
+                    var selectetDay = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+
+                    if (selectetDay > NowStr) {
+                        $("#startDate").val("")
+                        e.preventDefault()
+                    }
+                }
+                else {
+                    $("#startDate").val("")
+                    e.preventDefault()
+                }
+            } else if (date.length > 10) e.preventDefault()
+            return
+        }
+        e.preventDefault()
+    }
+
+    function cerrarDetalle(){
+     $('#mostrardetalle').modal('hide');
+
+    }
+
+    function cerrarModalEliminar(){
+     $('#modalEliminar').modal('hide');
+
+    }
+
+
+
+    function SetIdInfraccion(id) {
+        $('#modalEliminar').data('id-infraccion-to-delete', id);
+    }
+
+    function EliminarInfraccion() {
+        var idToDelete = $('#modalEliminar').data('id-infraccion-to-delete');
+    showLoading
+    $.ajax({
+            type: 'POST',
+            url: '/Infracciones/RemoveData',
+            data: { id: idToDelete },
+            success: function (data) {
+                sitteg_success('Elemento eliminado con éxito');
+                  var grid = $("#GridInf").data("kendoGrid");
+                    grid.dataSource.read();
+                hideLoading
+            },
+            error: function (error) {
+                sitteg_warning('Error al intentar eliminar el elemento');
+                hideLoading
+            }
+        });
+
+        $('#modalEliminar').modal('hide');
+    }
+</script>
+
+
+
+
+
+

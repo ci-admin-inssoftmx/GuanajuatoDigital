@@ -1,0 +1,266 @@
+﻿@model LiberacionVehiculoBusquedaModel
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡EL usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡EL usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+  
+
+</script>
+<head>
+    <script>
+        function submitSearch() {
+
+            var Mydata = $("#frmSearch").serialize();
+           /* var controlsValidate = [];
+            var isValid = true;
+
+            controlsValidate.push({ 'controlName': 'FechaIngreso' });
+            controlsValidate.push({ 'controlName': 'Folio' });
+
+            // INPUTS
+            if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+            if (!isValid) {
+                sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+                return;
+            }*/
+
+            showLoading();
+            $.ajax({
+                url: '@Url.Action("ajax_BuscarVehiculo")',
+                type: 'POST',
+                data: Mydata,
+                success: function (result) {              
+                    $("#listadoLiberacionVehiculos").html(result);
+                    hideLoading();
+                    },
+                error: function () {
+                    sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                    hideLoading();
+                }
+            });
+        }
+      
+    </script>
+</head>
+<div class="mainContainer bg-light">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-entrega h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Liberación de Vehículos</b></h2>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-auto mt-4 mb-2">
+            <h5 class="px-4"><b>Búsqueda del vehículo</b></h5>
+            <h6 class="px-4 text-muted">Realiza una búsqueda del vehículo para su liberación.</h6>
+        </div>
+        <form id="frmSearch" class="row px-4 mb-4 align-items-end" method="post">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Placas:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(d => d.Placas).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Text")
+                            .OptionLabel("Seleccione Placa...")
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .Filter(FilterType.Contains)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Placas_Read", "LiberacionVehiculo");
+                                });
+                            }))
+                    </span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Marca:</label>
+                    @(Html.Kendo().DropDownListFor(d => d.IdMarcaVehiculo).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("Seleccione Marca...")
+                        .HtmlAttributes(new { style = "width:100%;" })
+                        .Filter(FilterType.Contains)
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("Marcas_Read", "LiberacionVehiculo");
+                            });
+                        })
+                        )
+
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.Serie)
+                        .Label(l => l.Content("Número de Serie:"))
+                        .Placeholder("Ingresa el número de serie válido")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label> Fecha de ingreso:</label>
+                    @(Html.Kendo().DatePickerFor(t => t.FechaIngreso).Max(DateTime.Now)
+                        .Format("dd/MM/yyyy")
+                        .Culture("es-ES")
+                        .Events(e => e.Change("validarFecha"))
+                        .HtmlAttributes(new
+                        {
+                            style = "width: 100%",
+                            id = "fechaIngreso",
+                            onkeydown = "testKeyDown(event)"
+                        })
+                        ) 
+                </div>
+            </div>
+
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.Folio)
+
+                        .Label(l => l.Content("Folio de solicitud de depósito:"))
+                        .Placeholder("Ingresa el número de folio")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlButton my-3">
+                    <button id="busquedaLiberacion" class="btnPrimary" type="button" onclick="submitSearch()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+                    @* @(Html.Kendo().Button()
+                    .Name("BuscarVehiculo")
+                    .HtmlAttributes(new { @class = "btnPrimary" })
+                    .Content("<h5 class=\"m-0\"><b>Buscar</b></h5>"))*@
+                </div>
+            </div>
+
+        </form>
+        @*//Aqui*@
+
+      
+
+        <!-- Aquí continúa el contenido de la lista de vehículos -->
+
+        <div id="listadoLiberacionVehiculos">
+            <partial name="_ListadoVehiculos" model="Model.ListDepositosLiberacion" />
+        </div>
+    </section>
+</div>
+
+<script>
+    // $(document).ready(function () {
+    //     var datePicker = $("#FechaIngreso").data("kendoDatePicker");
+    //     datePicker.value(null);
+    // });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('fechaIngreso').addEventListener('change', validarFecha);
+    });
+
+    function validarFecha() {
+        // Obtener la fecha actual
+        var fechaActual = new Date();
+        var fechaParseo = new Date(parseInt(fechaActual.getFullYear()), parseInt(fechaActual.getMonth()), parseInt(fechaActual.getDate()));
+
+
+        var fechaSeleccionadaString = $("#fechaIngreso").val();
+        var splitFechaSeleccion = fechaSeleccionadaString.split('/')
+        var objetoFecha = !fechaSeleccionadaString ? fechaParseo : new Date(parseInt(splitFechaSeleccion[2]), parseInt(splitFechaSeleccion[1]) - 1, parseInt(splitFechaSeleccion[0]));
+        console.log("objetoFecha:", objetoFecha)
+        console.log("fechaParseo:", fechaParseo)
+       
+        
+    }
+
+    function testKeyDown(e) {
+        var value = e.target.value
+        var key = e.key
+        var keyCode = e.keyCode
+        var pattern = /^[0-3]([0-9](\/([0-1]([0-9](\/([1-2]([0-9]([0-9]([0-9])?)?)?)?)?)?)?)?)?$/
+        var date = value + key
+        var can = pattern.test(date)
+
+        if ([8, 46, 37, 38, 39, 40, 9].indexOf(keyCode) != -1) {
+            return
+        }
+
+        if (can) {
+            if (date.length == 10) {
+                var splDate = date.split('/')
+                var newDate = new Date(parseInt(splDate[2]), parseInt(splDate[1]) - 1, parseInt(splDate[0]))
+                var day = newDate.getDate() < 10 ? "0" + newDate.getDate() : newDate.getDate()
+                var month = newDate.getMonth() < 9 ? "0" + (parseInt(newDate.getMonth()) + parseInt(1)) : (parseInt(newDate.getMonth()) + parseInt(1))
+                var year = newDate.getFullYear()
+                var newStringDate = `${day}/${month}/${year}`
+                if (day == splDate[0] && month == splDate[1] && year == splDate[2]) {
+                    var NowStr = $("#" + e.target.id).data("kendoDatePicker").dateView._current
+                    console.log(NowStr)
+                    var selectetDay = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+
+                    if (selectetDay > NowStr) {
+                        $("#fechaIngreso").val("")
+                        e.preventDefault()
+                    }
+                }
+                else {
+                    $("#fechaIngreso").val("")
+                    e.preventDefault()
+                }
+            } else if (date.length > 10) e.preventDefault()
+            return
+        }
+        e.preventDefault()
+    }
+
+</script>
+
+

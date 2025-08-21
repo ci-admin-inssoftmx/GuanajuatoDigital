@@ -1,0 +1,560 @@
+﻿@model TransitoTransporteBusquedaModel
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+    var oficinadelegacion = User.FindFirst(CustomClaims.OficinaDelegacion).Value;
+    
+
+	var EditarPlus = autorizaciones.Contains("207") ? true : false;
+}
+
+<script>
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        var auth = @autorizaciones;
+        console.log(auth);
+
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡El usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(function () {
+                    window.location.href = "/Principal";
+                }, 200);
+            } else {
+                //if (!auth.toString().includes("203")) {
+                //    $("#btnExcelTransito").prop('disabled', true).css({ "opacity": "0.3" });
+                //    $("#btnPDFTransito").prop('disabled', true).css({ "opacity": "0.3" });
+                //}
+
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡El usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(function () {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+</script>
+
+
+<script>
+
+
+
+    function downLoadPdfFiltered() {
+
+        var data = {
+            Placas: $('#txtPlacas').val(),
+            Serie: $('#txtSerie').val(),
+            FolioSolicitud: $('#txtFolioSolicitud').val(),
+            FolioInfraccion: $('#txtFolioInfraccion').val(),
+            Propietario: $('#txtPropietario').val(),
+            NumeroEconomico: $('#txtNumeroEconomico').val(),
+            IdDelegacion: parseInt($('#txtDelegacion').val()),
+            IdPension: $('#txtPension').val(),
+            IdEstatus: $('#txtEstatus').val(),
+            IdDependenciaGenera: $('#txtDependenciaGenera').val(),
+            IdDependenciaTransito: $('#txtDependenciaTransito').val(),
+            IdDependenciaNoTransito: $('#txtDependenciaNoTransito').val(),
+            FechaIngreso: $('#start').val(),
+            FechaIngresoFin: $('#end').val()
+        };
+        var json = JSON.stringify(data);
+        window.location = '/TransitoTransporte/CreatePdf?data=' + json;
+
+    }
+
+
+    function validarFecha() {
+        var fechaInicioPicker = $("#start").data("kendoDatePicker");
+        var fechaFinPicker = $("#end").data("kendoDatePicker");
+
+        var fechaInicio = fechaInicioPicker.value();
+        var fechaFin = fechaFinPicker.value();
+        var currentDate = new Date();
+
+        if (fechaInicio > currentDate || (fechaInicio && fechaFin && fechaFin < fechaInicio)) {
+            if (fechaInicio > currentDate) {
+                mostrarMensajeError("La fecha de inicio no puede ser futura. Por favor, seleccione una fecha válida.");
+                fechaInicioPicker.value(null);
+            } else {
+                mostrarMensajeError("La fecha de fin no puede ser anterior a la fecha de inicio.");
+                fechaFinPicker.value(null);
+            }
+        } else {
+            limpiarMensajeError();
+            if (fechaInicio) {
+                fechaFinPicker.min(fechaInicio);
+            }
+        }
+    }
+
+    function testKeyDown(e) {
+        var value = e.target.value
+        var key = e.key
+        var keyCode = e.keyCode
+        var pattern = /^[0-3]([0-9](\/([0-1]([0-9](\/([1-2]([0-9]([0-9]([0-9])?)?)?)?)?)?)?)?)?$/
+        var date = value + key
+        var can = pattern.test(date)
+
+        if ([8, 46, 37, 38, 39, 40, 9].indexOf(keyCode) != -1) {
+            return
+        }
+
+        if (can) {
+            if (date.length == 10) {
+                var splDate = date.split('/')
+                var newDate = new Date(parseInt(splDate[2]), parseInt(splDate[1]) - 1, parseInt(splDate[0]))
+                var day = newDate.getDate() < 10 ? "0" + newDate.getDate() : newDate.getDate()
+                var month = newDate.getMonth() < 9 ? "0" + (parseInt(newDate.getMonth()) + parseInt(1)) : (parseInt(newDate.getMonth()) + parseInt(1))
+                var year = newDate.getFullYear()
+                var newStringDate = `${day}/${month}/${year}`
+                if (day == splDate[0] && month == splDate[1] && year == splDate[2]) {
+                    var NowStr = $("#" + e.target.id).data("kendoDatePicker").dateView._current
+                    console.log(NowStr)
+                    var selectetDay = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+
+                    if (selectetDay > NowStr) {
+                        $("#start").val("")
+                        e.preventDefault()
+                    }
+                }
+                else {
+                    $("#start").val("")
+                    e.preventDefault()
+                }
+            } else if (date.length > 10) e.preventDefault()
+            return
+        }
+        e.preventDefault()
+    }
+
+    function testKeyDown2(e) {
+        var value = e.target.value
+        var key = e.key
+        var keyCode = e.keyCode
+        var pattern = /^[0-3]([0-9](\/([0-1]([0-9](\/([1-2]([0-9]([0-9]([0-9])?)?)?)?)?)?)?)?)?$/
+        var date = value + key
+        var can = pattern.test(date)
+
+        if ([8, 46, 37, 38, 39, 40, 9].indexOf(keyCode) != -1) {
+            return
+        }
+
+        if (can) {
+            if (date.length == 10) {
+                var splDate = date.split('/')
+                var newDate = new Date(parseInt(splDate[2]), parseInt(splDate[1]) - 1, parseInt(splDate[0]))
+                var day = newDate.getDate() < 10 ? "0" + newDate.getDate() : newDate.getDate()
+                var month = newDate.getMonth() < 9 ? "0" + (parseInt(newDate.getMonth()) + parseInt(1)) : (parseInt(newDate.getMonth()) + parseInt(1))
+                var year = newDate.getFullYear()
+                var newStringDate = `${day}/${month}/${year}`
+                if (day == splDate[0] && month == splDate[1] && year == splDate[2]) {
+                    var NowStr = $("#" + e.target.id).data("kendoDatePicker").dateView._current
+                    console.log(NowStr)
+                    var selectetDay = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+
+                    if (selectetDay > NowStr) {
+                        $("#end").val("")
+                        e.preventDefault()
+                    }
+                }
+                else {
+                    $("#end").val("")
+                    e.preventDefault()
+                }
+            } else if (date.length > 10) e.preventDefault()
+            return
+        }
+        e.preventDefault()
+    }
+
+
+</script>
+
+
+<div class="mainContainer bg-light">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-research h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Búsqueda de Solicitud de Depósitos</b></h2>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-auto mt-4 mb-2">
+            <h5 class="px-4"><b>Búsqueda de Solicitud de Depósitos</b></h5>
+            <h6 class="px-4 text-muted">Realiza una búsqueda personalizada de Solicitud de Depósitos.</h6>
+        </div>
+        <form id="frmSearch" class="row px-4 mb-4 align-items-end" method="post">
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <span>
+                        @(Html.Kendo().TextBoxFor(t => t.Placas)
+                            .Label(l => l.Content("Placas:"))
+                            .Placeholder("Ingresa placas")
+                            .HtmlAttributes(new { style = "width: 100%", Id = "txtPlacas", data_query = "Prueba", data_name = "Placas", autocomplete="off" })
+                            )
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.FolioSolicitud)
+                        .Label(l => l.Content("Folio de Solicitud:"))
+                        .Placeholder("Ingresa folio de solicitud")
+                        .HtmlAttributes(new { style = "width: 100%", Id = "txtFolioSolicitud" })
+                        )
+
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.FolioInfraccion)
+                        .Label(l => l.Content("Folio de Infracción:"))
+                        .Placeholder("Ingresa folio de infracción:")
+                        .HtmlAttributes(new { style = "width: 100%", Id = "txtFolioInfraccion" })
+                        )
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.Serie)
+                        .Label(l => l.Content("No. de serie del Vehículo:"))
+                        .Placeholder("Ingresa no. de serie del vehículo:")
+                        .HtmlAttributes(new { style = "width: 100%", Id = "txtSerie" })
+                        )
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.NumeroEconomico)
+                        .Label(l => l.Content("No. Económico:"))
+                        .Placeholder("Ingresa No. Económico")
+                        .HtmlAttributes(new { style = "width: 100%", Id = "txtNumeroEconomico" })
+                        )
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Delegación/Oficina:</label>
+                    <span>
+                        @(
+                            Html.Kendo().DropDownListFor(d => d.IdDelegacion)
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .Value(oficinadelegacion)
+                            .Enable(EditarPlus)
+                            .OptionLabel("Seleccione Delegación...")
+                            .HtmlAttributes(new { style = "width:100%;", Id = "txtDelegacion" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Delegacion_Read", "TransitoTransporte");
+                                });
+                            })
+                            .Filter(FilterType.Contains)
+
+                            )
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Pensión:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(d => d.IdPension).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Seleccione Pensión...")
+                            .HtmlAttributes(new { style = "width:100%;", Id = "txtPension" })
+                            .Filter(FilterType.Contains)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Pension_Read", "TransitoTransporte");
+                                });
+                            }))
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Estatus:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(d => d.IdEstatus).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Seleccione Estatus...")
+                            .HtmlAttributes(new { style = "width:100%;", Id = "txtEstatus" })
+                            .Filter(FilterType.Contains)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Estatus_Read", "TransitoTransporte");
+                                });
+                            }))
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>TTO_TTE/Otras:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(d => d.IdDependenciaGenera).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Todas")
+                            .HtmlAttributes(new { style = "width:100%;", Id = "txtDependenciaGenera" })
+                            .Filter(FilterType.Contains)
+                            .Events(e => e.Change("OnChange"))
+                            .BindTo(new List<SelectListItem>
+
+                        {
+                        new SelectListItem { Text = "Tránsito/Transporte", Value = "1" },
+                        new SelectListItem { Text = "Otras", Value = "0" }
+                        })
+                            )
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2" id="dataDep">
+                <div class="controlForm my-3">
+                    <label>Dependencia(TTO_TTE):</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(d => d.IdDependenciaTransito).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Todas")
+                            .HtmlAttributes(new { style = "width:100%;", Id = "txtDependenciaTransito" })
+                            .Filter(FilterType.Contains)
+                            .BindTo(new List<SelectListItem>
+                        {
+                        new SelectListItem { Text = "De Movilidad", Value = "0" },
+                        new SelectListItem { Text = "De Tránsito", Value = "1" }
+                        })
+                            )
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2" id="dataEnv">
+                <div class="controlForm my-3">
+                    <label>Dependencia Envía:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(d => d.IdDependenciaNoTransito).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Seleccione Dependencia Envía...")
+                            .HtmlAttributes(new { style = "width:100%;", Id = "txtDependenciaNoTransito" })
+                            .Filter(FilterType.Contains)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("DependenciaEnvia_Read", "TransitoTransporte");
+                                });
+                            }))
+                    </span>
+                </div>
+            </div>
+               <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.Propietario)
+                        .Label(l => l.Content("Propietario del Vehículo:"))
+                        .Placeholder("Ingresa propietario del vehículo:")
+                        .HtmlAttributes(new { style = "width: 100%", Id = "txtPropietario" })
+                        )
+                </div>
+            </div>           
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Fecha de Ingreso:</label>
+                    @(Html.Kendo().DatePickerFor(t => t.FechaIngreso).Max(DateTime.Now)
+                        .Format("dd/MM/yyyy")
+                        .Culture("es-ES")
+                        .Events(e => e.Change("validarFecha"))
+                        .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "start", onkeydown = "testKeyDown(event)" })
+                        )
+
+                    @*@(Html.Kendo().DatePickerFor(t => t.FechaIngreso)
+                    .Value(DateTime.Now)
+                    .HtmlAttributes(new { style = "width: 100%", title = "datetimepicker" })
+                    .DateInput()
+                    )*@
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Fecha Hasta:</label>
+
+                    @(Html.Kendo().DatePickerFor(t => t.FechaIngresoFin).Max(DateTime.Now)
+                        .Format("dd/MM/yyyy")
+                        .Culture("es-ES")
+                        .Events(e => e.Change("validarFecha"))
+                        .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "end", onkeydown = "testKeyDown2(event)" })
+                        )
+
+                    @* @(Html.Kendo().DatePickerFor(t => t.FechaLiberacion)
+                    .Value(DateTime.Now)
+                    .HtmlAttributes(new { style = "width: 100%", title = "datetimepicker" })
+                    .DateInput()
+                    )*@
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Descripción del evento:</label>
+                    <span>
+                            @(Html.Kendo().DropDownListFor(t => t.Evento).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una opción")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Descripcion_Drop", "Depositos");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:100%;", Id = "txtEvento" })
+                            )
+                    </span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlButton my-3">
+                    <button id="btnBuscar" class="btnPrimary" type="button" onclick="submitSearch()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+                    @* @(Html.Kendo().Button()
+                    .Name("BuscarVehiculo")
+                    .HtmlAttributes(new { @class = "btnPrimary" })
+                    .Content("<h5 class=\"m-0\"><b>Buscar</b></h5>"))*@
+                </div>
+            </div>
+            @*
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class=" btnOutline btnOutlinePrimary controlButton my-3">
+                    <button id="btnPDFTransito" class=" " type="button" onclick="downLoadPdfFiltered()">  <h5 class="m-0"><i class='icon-data m-0'></i>&nbsp;&nbsp<b>Reporte</b></h5></button>
+
+                    <button type="button" class='btnPrimary'>@Html.ActionLink("Reporte",  "CreatePdf","TransitoTransporte", new{Placas=Model.Placas}, new {@class="m-0"})</button>
+
+                </div>
+            </div>
+            *@
+        </form>
+        @*//Aqui*@
+
+
+        <div id="listadoTransitoTransporte">
+            <partial name="_ListadoTransitoTransporte" model="Model.ListTransitoTransporte" />
+        </div>
+    </section>
+</div>
+<script>
+
+
+    function OnChange(data) {
+        var val = data.sender.element.context.value
+        var Dep = document.getElementById("dataDep")
+        var Env = document.getElementById("dataEnv")
+        console.log(val + "")
+
+        if (val === "1") {
+            $(Dep).removeClass("d-none")
+            $(Env).addClass("d-none")
+
+            var test = $("#txtDependenciaNoTransito").data("kendoDropDownList");
+            test.text(test.options.optionLabel);
+            test.element.val(-1);
+            test.selectedIndex = -1;
+            test._oldIndex = 0;
+
+        }
+        else if (val === "0") {
+            console.log(val + "--")
+
+            var test = $("#txtDependenciaTransito").data("kendoDropDownList");
+            test.text(test.options.optionLabel);
+            test.element.val(-1);
+            test.selectedIndex = -1;
+            test._oldIndex = 0;
+
+            $(Dep).addClass("d-none")
+            $(Env).removeClass("d-none")
+        }
+        else {
+            $(Dep).removeClass("d-none")
+            $(Env).removeClass("d-none")
+        }
+    }
+
+    $(document).ready(function () {
+        var datePicker = $("#end").data("kendoDatePicker");
+        datePicker.value(null);
+    });
+
+    $(document).ready(function () {
+        var datePicker = $("#start").data("kendoDatePicker");
+        datePicker.value(null);
+    });
+    $(document).ready(function () {
+        var auth = @autorizaciones;
+        var grid = $("#Grid").data("kendoGrid");
+
+
+    });
+
+    function submitSearch() {
+                $("#message").css("display", "none");
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("SetBuscar")',
+            type: 'POST',
+
+            success: function (result) {
+                setTimeout(function () {
+                    var grid = $("#Grid").data("kendoGrid").dataSource;
+                    grid.read();
+                    hideLoading();
+                }, 3500);
+            },
+            error: function (error) {
+                hideLoading();
+            }
+        });
+    }
+
+</script>

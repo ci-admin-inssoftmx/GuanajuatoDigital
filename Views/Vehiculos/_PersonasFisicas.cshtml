@@ -1,0 +1,120 @@
+﻿@model List<PersonaModel>
+<script>
+    function onDataBound() {
+        var grid = $("#gridPersonasFisicas").data("kendoGrid");
+       
+    }
+</script>
+<div class="row justify-content-between mb-1">
+    <div class="col-12 col-lg-6 mt-4 mb-2">
+        <h5 class="px-4"><b>Listado de personas físicas</b></h5>
+        <h6 class="px-4 text-muted">Selecciona una persona para completar el registro.</h6>
+    </div>
+    <div class="col-12 col-lg-auto text-center">
+        <div class="btnOutline btnOutlinePrimary px-4 my-3">
+            <button data-bs-toggle="modal" data-bs-target="#addFisico">
+                <h5 class="m-0"><i class="me-2 icon-addFisica"></i><b>Agregar nueva persona física</b></h5>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(Html.Kendo().Grid(Model)
+            .Name("gridPersonasFisicas")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.idPersona).Hidden();
+                columns.Bound(c => c.idCatTipoPersona).Hidden();
+                columns.Select().ClientHeaderTemplate(" ");
+                columns.Bound(c => c.nombreCompleto).Title("Nombre");
+                columns.Bound(p => p.CURP).Title("CURP");
+                columns.Bound(p => p.RFC).Title("RFC");
+                columns.Bound(p => p.numeroLicencia).Title("No. Licencia");
+                columns.Bound(c => c.tipoPersona).Title("Tipo persona");
+            }).HtmlAttributes(new { style = "height:250" })
+
+            .Events(events => events
+            .DataBound("onDataBound")
+            )
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single).Type(GridSelectionType.Row))
+            @*.Pageable(p => p.Enabled(true).PageSizes(new[] { 10, 20, 30 }))*@
+            .Pageable(p => p.Enabled(true))
+            .EnableCustomBinding(false)
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(ev => ev.Action("ajax_BuscarPersonasFiscasPagination", "Vehiculos"))
+            .PageSize(10)
+            )
+            .Scrollable(scr => scr.Height(350)
+            )
+            .ToolBar(t => t.Custom().Text("Buscar...").Name("search"))
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            )
+            @*.ServerOperation(false)
+            .PageSize(5)
+            )
+            .ToolBar(t => t.Custom().Text("Buscar...").Name("search"))
+             .Search(s =>
+            {
+                s.Field(c => c.nombreCompleto);
+                s.Field(c => c.CURP); 
+                s.Field(c => c.RFC);
+                s.Field(c => c.numeroLicencia);
+
+            })
+            )*@
+    </div>
+
+</div>
+
+<div class="row my-5">
+    <div class="col-12 col-md-6 mx-md-auto">
+        <div class="row justify-content-around">
+            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                <button class="btn btnOutline btn-sm btnClose" type="button" onclick="cerrarModalV()">
+                    <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                </button>
+            </div>
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <div class="controlButton" onclick="submitCreateVehiculo()">
+                    @(Html.Kendo().Button()
+                        .Name("saveFisico")
+                        .HtmlAttributes(new { @class = "btnPrimary px-5" })
+                        .Content("<h5 class=\"m-0\"><b>Finalizar captura</b></h5>"))
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        var grid = $("#gridPersonasFisicas").data("kendoGrid");
+        grid.tbody.on("click", ".k-checkbox", onClickPersonasFisicas);
+        function onClickPersonasFisicas(e) {
+            var grid = $("#gridPersonasFisicas").data("kendoGrid");
+            var row = $(e.target).closest("tr");
+            var dataItem = grid.dataItem(row);
+            var idPersona = dataItem.idPersona;
+            var idCatTipoPersona = dataItem.idCatTipoPersona;
+            $("#ddlIdPersona").val(idPersona);
+            $("#ddlIdCatTipoPersona").val(idCatTipoPersona);
+            console.log("Persona Fisica: ", idPersona);
+            if (row.hasClass("k-selected")) {
+                setTimeout(function (e) {
+                    var grid = $("#gridPersonasFisicas").data("kendoGrid");
+                    grid.clearSelection();
+                    var gridMoral = $("#gridPersonasMorales").data("kendoGrid");
+                    gridMoral.clearSelection();
+                })
+            } else {
+                grid.clearSelection();
+            };
+        };
+    })
+
+</script>

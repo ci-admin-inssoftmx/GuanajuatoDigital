@@ -1,0 +1,63 @@
+﻿<h1>Administración de Oficinas</h1>
+@(Html.Kendo()
+             .Button()
+             .Name("agregar")
+             .Content("Agregar")
+               .Size(ComponentSize.Large)
+              .ThemeColor(ThemeColor.Primary)
+               .Tag("a")
+             .HtmlAttributes(new { @href = Url.Action("Crear", "Oficina") })
+ )
+
+
+<button id="btn" type="button" class="btn btn-primary" onclick="Agregar()">Agregar</button>
+
+@{ var dvdTemplate = "#=Estatus ? 'Activo' : 'Inactivo' #";}
+
+
+@(Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.Oficina>
+    ()
+    .Name("grid")
+    .Columns(columns =>
+    {
+        columns.Bound(cm => cm.Id);
+        columns.Bound(cm => cm.Descripcion);
+        columns.Bound(cm => cm.Estatus).ClientTemplate(dvdTemplate).EditorTemplateName("Estatus");
+        columns.Command(command =>
+        {
+            command.Custom("Editar").Click("EditValues").IconClass("k-icon k-i-pencil").Text(" ");
+     
+        });
+
+    })
+    .DataSource(dataSource => dataSource
+    .Ajax()
+    .Read(read => read.Action("GetOficinas", "Oficina", new { area = "Administracion" }).Type(HttpVerbs.Get))
+    .Model(model => model.Id(cm => cm.Id))
+    .PageSize(10)
+    )
+    .ColumnMenu()
+    .Navigatable()
+    .Resizable(r => r.Columns(true))
+    .Reorderable(r => r.Columns(true))
+    .Groupable(g => g.ShowFooter(false))
+    .Pageable()
+    .Editable(editable => editable.Mode(GridEditMode.PopUp))
+    .Filterable()
+    .Scrollable()
+    .Sortable(sortable =>
+    {
+        sortable.SortMode(GridSortMode.MultipleColumn);
+    })
+    .Selectable(selectable => selectable
+    .Mode(GridSelectionMode.Single))
+    .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+)
+<script>
+    function EditValues(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var redirect = '/administracion/oficinas/editar/' + dataItem.Id;
+        window.location.href = redirect;
+    }</script>

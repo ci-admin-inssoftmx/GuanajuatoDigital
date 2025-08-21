@@ -1,0 +1,58 @@
+﻿@model List<PersonaModel>
+
+<div class="col-12 mb-4 px-4 rounded gridCustom">
+    @(
+        Html.Kendo().Grid(Model)
+        .Name("gridPersonas")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.idPersona).Hidden();
+            columns.Bound(c => c.nombreCompleto).Title("Nombre");
+            columns.Bound(p => p.CURP).Title("CURP");
+            columns.Bound(p => p.RFC).Title("RFC");
+            columns.Bound(p => p.numeroLicencia).Title("No. Licencia");
+            columns.Bound(p => p.tipoLicencia).Title("Tipo de Licencia");
+            columns.Bound(c => c.tipoPersona).Title("Tipo persona");
+            columns.Bound(p => p.idPersona).ClientTemplate(
+            "<button onclick=\"btnModalEditarPersona('#= idPersona #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>"
+            ).Title("Acciones").Sortable(false).Width(100);
+        })
+        @*.Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Bottom).PageSizes(true))*@
+        .Pageable(p => p.Enabled(true))
+        .EnableCustomBinding(true)
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .Read("BuscarPorParametroPaginado", "Personas")
+        .PageSize(10)
+        )
+        .Scrollable(scr => scr.Height(350)
+        )
+        .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+        @*.Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Bottom).PageSizes(true))
+    .Sortable()
+    .Scrollable(scr => scr.Enabled(true))
+    .DataSource(dataSource => dataSource
+    .Ajax()
+    .ServerOperation(false)
+    .PageSize(10)
+    )*@
+        @*.ToolBar(t => t.Custom().Text("Buscar...").Name("search"))*@
+        )
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+        $("#gridPersonas").on("change", function () {
+            alert("Handler for `change` called.");
+        });
+    });
+
+    $("#gridPersonas").on("change", function () {
+        alert("Handler for `change` called.");
+    });
+</script>
+

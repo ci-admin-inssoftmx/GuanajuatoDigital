@@ -1,0 +1,447 @@
+﻿@model List<GuanajuatoAdminUsuarios.Models.ColoresModel>
+@*RazorCoder*@
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡EL usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡EL usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+
+    function UpdateGrid(){
+        var grd = $("#gridCatalogosConPadre").data("kendoGrid").dataSource
+        var grd2 = $("#gridCatalogosSinPadre").data("kendoGrid").dataSource
+
+        grd.read()
+        grd2.read()
+
+    }
+
+    function GetDataCPadre(){
+        var val = $("#ddlCatalogos").val()
+        var val2 = $("#ddlParentCatalog").val()
+        return {id:val,IdC:val2}
+    }
+
+
+    function UpdateCatalogData(){
+
+        var val = $("#ddlCatalogos").val()
+
+        if(val == 10){
+            $("#descvalue").removeClass("d-none")
+        }else{
+            $("#descvalue").addClass("d-none")
+        }
+
+
+        var dl = $("#ddlParentCatalog").data("kendoDropDownList").dataSource
+        dl.read()
+
+    }
+
+    function GetDataCatalog(){
+        var values = $("#ddlCatalogos").val()
+
+        return {Id:values}
+
+    }
+
+
+    function createParent(){
+        $("#crearPadreModal").modal('show');
+    }
+
+    function createParentAjax(){
+
+         var controlsValidate = [];
+         var isValid = true;
+
+         var desc = $("#desc").val()
+         var desc2 = $("#desc2").val()
+         var id = $("#ddlCatalogos").val()
+
+         if(id==0){
+            sitteg_warning('Seleccione un catalogo.');
+            return;
+         }
+
+         controlsValidate.push({ 'controlName': 'desc' });
+         if (!isControlsValid(controlsValidate)) { isValid = false; }
+         if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+        var Mydata ={
+            id:id,desc:desc,desc2:desc2
+        }
+
+        showLoading();
+        $.ajax({
+            url: './CreateParent',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                $("#crearPadreModal").modal('hide');
+                UpdateCatalogData()
+                hideLoading();
+            }, error: function () {
+
+                hideLoading();
+            }
+        });
+
+
+    }
+
+
+    function addPArent(id){
+        var val = $("#ddlCatalogos").val()
+        var val2 = $("#ddlParentCatalog").val()
+
+
+        var Mydata = {
+            id: val, idP: val2, idO: id
+        }
+
+        showLoading();
+        $.ajax({
+            url: './AddParent',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                UpdateGrid()
+                hideLoading();
+            }, error: function () {
+
+                hideLoading();
+            }
+        });
+
+    }
+
+    function removeParent(id){
+        var val = $("#ddlCatalogos").val()
+        var val2 = $("#ddlParentCatalog").val()
+        var Mydata = {
+            id: val, idP: val2, idO: id
+        }
+
+        showLoading();
+        $.ajax({
+            url: './AddParentnull',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                UpdateGrid()
+                hideLoading();
+            }, error: function () {
+
+                hideLoading();
+            }
+        });
+    }
+
+
+</script>
+<div class="mainContainer bg-light">
+
+
+
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-color h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Relación de catálogos</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnNuevaRel" onclick="createParent()">
+                            <h6 class="m-0 d-flex align-items-center">
+                                <i class="icon-addColor h5 mb-0 me-2"></i><b>Crear Padre </b>
+                            </h6>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+
+        <br><br>
+        <div class="row">
+            <div class="col-6 col-md-4">
+                <h6 class="px-4">
+                    <label>Seleccione el catálogo</b></label>
+                    <span>
+                        @(Html.Kendo().DropDownList()
+                            .Name("CatCatalogos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .AutoWidth(true)
+                            .Enable(true)
+                            .Events(e=>e.Change("UpdateCatalogData"))
+                            .BindTo(new List<SelectListItem>() {
+                        new SelectListItem() {
+                        Text = "Seleccione un catálogo",
+                        Value = "0"
+                        },
+                        new SelectListItem() {
+                        Text = "Autoridades disposición",
+                        Value = "1"
+                        },
+                        new SelectListItem() {
+                        Text = "Autoridades entrega",
+                        Value = "2"
+                        },
+                        new SelectListItem() {
+                        Text = "Carreteras",
+                        Value = "3"
+                        },
+                        new SelectListItem() {
+                        Text = "Causas",
+                        Value = "4"
+                        },
+                        new SelectListItem() {
+                        Text = "Colores",
+                        Value = "5"
+                        },
+                        new SelectListItem() {
+                        Text = "Factores accidentes",
+                        Value = "6"
+                        },
+                        new SelectListItem() {
+                        Text = "Hospitales",
+                        Value = "7"
+                        },
+                        new SelectListItem() {
+                        Text = "Instituciones traslado",
+                        Value = "8"
+                        },
+                        new SelectListItem() {
+                        Text = "Motivos",
+                        Value = "9"
+                        },
+                        new SelectListItem() {
+                        Text = "Oficiales",
+                        Value = "10"
+                        }
+                        ,
+                        new SelectListItem() {
+                        Text = "Tramos",
+                        Value = "12"
+                        }
+                        })
+                            .Value("0")
+                            .HtmlAttributes(new { style = "width:100%;", Id = "ddlCatalogos" })
+                            )
+                    </span>
+                </h6>
+            </div>
+        </div>
+        <br /><br />
+
+        <div class="row">
+              <div class="col-6 col-md-4">
+                <h6 class="px-4">
+                    <label>Seleccione el valor origen:</b></label>
+                    <span>
+                        @(Html.Kendo().DropDownList()
+                                .Name("CatAutoridadesD")
+                                .NoDataTemplate("No se encontraron datos")
+                                .Label(l => l.Content("Carretera:"))
+                                .Filter(FilterType.Contains)
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                    .OptionLabel("Selecciona una opción")
+                                .DataTextField("text")
+                                .DataValueField("value")
+
+                                .Events(e => e.Change("UpdateGrid"))
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetCatalogParents", "Relaciones").Data("GetDataCatalog");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:100%;", Id = "ddlParentCatalog" })
+                                .Filter(FilterType.Contains)
+                                )
+                    </span>
+                </h6>
+            </div>
+        </div>
+          <br /><br />
+        <div class="row">
+            <div class="col-6 col-md-6 col-sm-12">
+            @(
+                          Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.AdminRelasionCatalogos>()
+                  .Name("gridCatalogosConPadre")
+                  .Columns(columns =>
+                  {
+                          columns.Bound(c => c.Descripcion).Title("Descripcion");
+                          columns.Bound(p => p.Corporacion).Title("Corporacion");
+                          columns.Bound(p => p.Padre).Title("Padre");
+                        columns.Template("<button onclick=\"removeParent('#= Id #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-delete me-2'></i></h6></button>"
+                      ).Title("Acciones").Width(190);
+                  }).HtmlAttributes(new { style = "height:auto" })
+              .Pageable(p => p.Enabled(true))
+              .Sortable()
+              .Scrollable(scr => scr.Enabled(true))
+              .DataSource(dataSource => 
+              dataSource
+              .Ajax()
+                    .Read(read => read.Action("GetDataParent", "Relaciones").Data("GetDataCPadre")))
+              )
+        </div>
+         <div class="col-6 col-md-6 col-sm-12">
+                        @(
+                                  Html.Kendo().Grid<AdminRelasionCatalogos>()
+                              .Name("gridCatalogosSinPadre")
+                                  .Columns(columns =>
+                                  {
+                                      columns.Bound(c => c.Descripcion).Title("Descripcion");
+                                      columns.Bound(p => p.Corporacion).Title("Corporacion");
+                                      columns.Bound(p => p.Padre).Title("Padre");
+                        columns.Template("<button onclick=\"addPArent('#= Id #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-plus me-2'></i></h6></button>"
+                        ).Title("Acciones").Width(190);
+                                  }).HtmlAttributes(new { style = "height:auto" })
+                              .Pageable(p => p.Enabled(true))
+                              .Sortable()
+                              .Scrollable(scr => scr.Enabled(true))
+                    .DataSource(dataSource =>
+                    dataSource
+                    .Ajax()
+                    .Read(read => read.Action("GetData", "Relaciones").Data("GetDataCPadre")))
+                    )
+                              
+        </div>
+        
+        </div>
+
+    </section>
+
+</div>
+    <!-- create modal -->
+    <div class="modal fade modalCustom" id="crearPadreModal" aria-labelledby="crearPadreModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="crearPadreModalBody">
+                    <section class="bg-white rounded">
+                        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                            <div class="col-auto pe-0">
+                                <div class="row align-items-center justify-content-center justify-content-md-start">
+                                    <div class="col-auto pe-0">
+                                        <i class="icon-puestos h1 colorPrimary"></i>
+                                    </div>                                                                                                                                                                                  
+                                    <div class="col-auto my-3">
+                                        <h2 class="m-0 h3"><b>Agregar un nuevo padre</b></h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="row">
+                                    <div class="col-auto my-3">
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                </div>            
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="bg-light py-1"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 my-2">
+                                <h5 class="px-4"><b> Datos del padre.</b></h5>
+                                <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                            </div>
+                        </div>
+                        <form id="crearPuestoForm">
+                            <div class="row justify-content-between px-4 px-md-4 pt-3 pb-2">
+                                <div class="col-12">
+                                    <div id="errorMessages" class="alert alert-danger d-none"></div>
+                                </div>
+                                <div class=" col-12 col-md-6  col-lg-4 px-4 px-md-4 pt-3 pb-2">
+                                     <div class="controlForm my-3">
+                                        @(Html.Kendo().TextBox()
+                                                .Name("desc")
+                                                .Label(label => label.Content("Inserte la descripción."))
+                                                .Placeholder("...")
+                                                .Value("")                                        
+                                                )
+                                    </div>
+                               </div>   
+                                <div class=" col-12 col-md-6  col-lg-4 px-4 px-md-4 pt-3 pb-2 d-none" id="descvalue">
+                                    <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBox()
+                                                .Name("desc2")
+                                                .Label(label => label.Content("Inserte la descripción."))
+                                                .Placeholder("...")
+                                                .Value("")
+                                                )
+                                     </div>            
+                               </div>
+                          </div>
+                        </form>
+                        <div class="row my-4">
+                            <div class="col-12 col-md-6 mx-md-auto">
+                                <div class="row justify-content-around">
+                                    <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                        <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                                            <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                        </button>
+                                    </div>
+                                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                        <div class="controlButton" onclick="createParentAjax()">
+                                                            @(Html.Kendo().Button()
+                                                                    .Name("crearPuestoCommand")
+                                                                    .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                                                    .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                                        </div>
+                                    </div>
+                                </div>        
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>    
+
+

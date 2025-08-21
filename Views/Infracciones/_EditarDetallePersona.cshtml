@@ -1,0 +1,324 @@
+﻿@model PersonaModel
+@{
+
+    var text = Model;
+
+    bool esSoloLectura = ViewBag.EsSoloLectura ?? false;
+}
+
+<script>
+    window.idPersonaConductor = "@Model.idPersona"
+</script>
+
+<div>
+@*<form id="frmEditarConductor">*@
+
+    @Html.HiddenFor(m=> m.idPersona)
+
+
+   @* <div class="row my-4 px-4">
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.nombreCompleto)
+                    .Label(l => l.Content("Nombre: "))
+                    .Placeholder("Ingresa el nombre")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.tipoPersona)
+                    .Label(l => l.Content("Tipo Persona:"))
+                    .Placeholder("Ingresa número")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row my-4 px-4">
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.CURP)
+                    .Label(l => l.Content("CURP: "))
+                    .Placeholder("Ingresa el CURP")
+                    .Enable(!ViewBag.EsSoloLectura)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.RFC)
+                    .Label(l => l.Content("RFC:"))
+                    .Placeholder("Ingresa el RFC")
+                    .Enable(!ViewBag.EsSoloLectura)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.genero)
+                    .Label(l => l.Content("SEXO: "))
+                    .Placeholder("Ingresa el SEXO")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                <label>Fecha Nacimiento:</label>
+                @(Html.Kendo().DateTimePickerFor(t => t.fechaNacimiento).Max(DateTime.Now)
+                                                .Label(l => l.Content("Fecha Nacimiento:"))
+                                                .Format("dd/MM/yyyy")
+                                                .Enable(!ViewBag.EsSoloLectura)
+                                                .HtmlAttributes(new { style = "width: 100%"})
+                                                )
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row my-4 px-4">
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.entidad)
+                    .Label(l => l.Content("Entidad:"))
+                    .Placeholder("Ingresa la entidad")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.municipio)
+                    .Label(l => l.Content("Municipio: "))
+                    .Placeholder("Ingresa el Municipio")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+                
+    
+            </div>
+        </div>
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.calle)
+                    .Label(l => l.Content("Calle: "))
+                    .Placeholder("Ingresa la calle")
+                    .Enable(!ViewBag.EsSoloLectura)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.numero)
+                    .Label(l => l.Content("Número:"))
+                    .Placeholder("Ingresa el número")
+                    .Enable(!ViewBag.EsSoloLectura)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row my-4 px-4">
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.colonia)
+                    .Label(l => l.Content("Colonia: "))
+                    .Placeholder("Ingresa la colonia")
+                    .Enable(!ViewBag.EsSoloLectura)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.telefono)
+                    .Label(l => l.Content("Teléfono:"))
+                    .Placeholder("Ingresa el teléfono")
+                    .Enable(!ViewBag.EsSoloLectura)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.correo)
+                    .Label(l => l.Content("Correo: "))
+                    .Placeholder("Ingresa el correo")
+                   .Enable(!ViewBag.EsSoloLectura)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="row my-4 px-4">
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.tipoLicencia)
+                    .Label(l => l.Content("Tipo Licencia: "))
+                    .Placeholder("Ingresa la licencia")
+                    .Enable(false)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                @(Html.Kendo().TextBoxFor(t => t.numeroLicencia)
+                    .Label(l => l.Content("Licencia:"))
+                    .Placeholder("Ingresa la Licencia")
+                    .Enable(!ViewBag.EsSoloLectura)
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+            </div>
+        </div>
+        <div class="form-group col-md-3">
+            <div class="controlForm">
+                <label>Vigencia Licencia:</label>
+                @(Html.Kendo().DateTimePickerFor(t => t.vigenciaLicencia)
+                                                .Label(l => l.Content("Vigencia Licencia:"))
+                                                .Format("dd/MM/yyyy")
+                                                .Enable(!ViewBag.EsSoloLectura)
+                                                .HtmlAttributes(new { style = "width: 100%", required = "required" })
+                                                )
+            </div>
+        </div>
+
+
+    </div
+
+</form>*@
+    <div class="row my-4 px-4 align-items-end">
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Nombre:</label>&nbsp;@(Model.nombreCompleto != null ? Model.nombreCompleto : "-")
+
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Tipo de persona:</label>&nbsp;@(Model.tipoPersona != null ? Model.tipoPersona : "-")
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>CURP:</label>
+                <p>@(Model.CURP != null ? Model.CURP : "-")</p>
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>RFC:</label>
+                <p>@(Model.RFC != null ? Model.RFC : "-")</p>
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>SEXO:</label>&nbsp;@(Model.genero != null ? Model.genero : "-")
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Fecha nacimiento:</label>
+                @if (Model.fechaNacimiento.HasValue)
+                {
+                    <p>@(Model.fechaNacimiento > DateTime.MinValue ? Model.fechaNacimiento.Value.ToString("dd/MM/yyyy") : "-")</p>
+                }
+                else
+                {
+                    <p>-</p>
+                }
+
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Municipio:</label>
+                <p>@(Model.PersonaDireccion.municipio != null ? Model.PersonaDireccion.municipio : "-")</p>
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Entidad:</label>
+                <p>@(Model.PersonaDireccion.entidad != null ? Model.PersonaDireccion.entidad : "-")</p>
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Calle:</label>
+                <p>@(Model.PersonaDireccion.calle != null ? Model.PersonaDireccion.calle : "-")</p>
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Número:</label>
+                <p>@(Model.PersonaDireccion.numero != null ? Model.PersonaDireccion.numero : "-")</p>
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Colonia:</label>
+                <p>@(Model.PersonaDireccion.colonia != null ? Model.PersonaDireccion.colonia : "-")</p>
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Teléfono:</label>
+                <p>@(Model.PersonaDireccion.telefono != null ? Model.PersonaDireccion.telefono : "-")</p>
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Correo:</label>
+                <p>@(Model.PersonaDireccion.correo != null ? Model.PersonaDireccion.correo : "-")</p>
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Tipo licencia:</label>
+                <p>@(Model.tipoLicencia != null ? Model.tipoLicencia : "-")</p>
+
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Licencia:</label>
+                <p>@(Model.numeroLicencia != null ? Model.numeroLicencia : "-")</p>
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Vigencia licencia:</label>
+                <p>
+                    @((Model.vigenciaLicencia.HasValue && Model.vigenciaLicencia.Value != new DateTime(1900, 1, 1) && Model.vigenciaLicencia.Value != DateTime.MinValue)
+                        ? Model.vigenciaLicencia.Value.ToString("dd/MM/yyyy")
+                        : "-")
+
+
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+

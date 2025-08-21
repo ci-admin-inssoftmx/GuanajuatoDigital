@@ -1,0 +1,435 @@
+﻿@model GuanajuatoAdminUsuarios.Models.IngresoVehiculosModel
+<script>
+
+
+    function valid5char(e) {
+
+        var value = e.target.value
+        var reg = /[0-2][0-9][\:][0-5][0-9]/g
+        var can = reg.test(value)
+        if (!can) {
+            e.target.value = ""
+        }
+    }
+
+
+
+    function validacionHora(event) {
+        var horaIngresada = event.target.value;
+        var key = event.key
+        var keycode = event.keyCode
+        var horalength = horaIngresada.length
+        if ([8, 46, 37, 38, 39, 40, 9].indexOf(keycode) != -1) {
+            return
+        }
+        event.preventDefault();
+
+
+
+        console.log(key, keycode)
+
+
+        if (horalength == 0) {
+            if ("012".indexOf(key) != -1) {
+                event.target.value = key
+            }
+        }
+        if (horalength == 1) {
+            var lastval = horaIngresada[0]
+            if (":" == key && lastval != "0") {
+                event.target.value = "0" + event.target.value + key
+            }
+            else if (lastval == "2") {
+                if ("0123".indexOf(key) != -1) {
+                    event.target.value = event.target.value + key
+                }
+            } else if ("0123456789".indexOf(key) != -1) {
+                event.target.value = event.target.value + key
+            }
+        }
+        if (horalength == 2) {
+            if (key == ":") {
+                event.target.value = event.target.value + key
+            }
+            else if ("012345".indexOf(key) != -1) {
+                event.target.value = event.target.value + ":" + key
+            }
+        }
+        if (horalength == 3) {
+            if ("012345".indexOf(key) != -1) {
+                event.target.value = event.target.value + key
+            }
+        }
+        if (horalength == 4) {
+            var lastval = horaIngresada[3]
+            var hours = parseInt(horaIngresada[0] + horaIngresada[1])
+
+            if (lastval == "0" && hours == 0) {
+                if ("0123456789".indexOf(key) != -1) {
+                    event.target.value = event.target.value + key
+                    setTimeout(validarFecha, 2)
+                }
+            } else {
+                if ("0123456789".indexOf(key) != -1) {
+                    event.target.value = event.target.value + key
+                    setTimeout(validarFecha, 2)
+                }
+            }
+
+        }
+    }
+
+    function validarFecha() {
+        // Obtener la fecha actual
+        var fechaActual = new Date();
+        var fechaParseo = new Date(parseInt(fechaActual.getFullYear()), parseInt(fechaActual.getMonth()), parseInt(fechaActual.getDate()));
+
+
+        var fechaSeleccionadaString = $("#ingreso").val();
+        var splitFechaSeleccion = fechaSeleccionadaString.split('/')
+        var objetoFecha = !fechaSeleccionadaString ? fechaParseo : new Date(parseInt(splitFechaSeleccion[2]), parseInt(splitFechaSeleccion[1]) - 1, parseInt(splitFechaSeleccion[0]));
+        console.log("objetoFecha:", objetoFecha)
+        console.log("fechaParseo:", fechaParseo)
+        // Comparar la fecha seleccionada con la fecha actual
+        if (fechaParseo.getTime() === objetoFecha.getTime()) {
+            // Si la fecha seleccionada es la fecha actual, verificar la hora ingresada
+            var horaIngresada = $("#horaIngreso").val();
+            var horaActual = fechaActual.getHours() * 60 + fechaActual.getMinutes();
+            var horaIngresadaSplit = horaIngresada.split(':');
+            var horaIngresadaEnMinutos = parseInt(horaIngresadaSplit[0]) * 60 + parseInt(horaIngresadaSplit[1]);
+            console.log("horaIngresada", horaIngresada)
+            console.log("horaActual", horaActual)
+            console.log("horaSplit", horaIngresadaSplit)
+
+            console.log("horaIngresadaEnMinutos", horaIngresadaEnMinutos)
+
+            if (horaIngresadaEnMinutos > horaActual) {
+
+                $("#horaIngreso").val('');
+                event.preventDefault();
+            }
+        }
+    }
+
+    </script>
+<div class="mainContainer bg-light">
+
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    
+                    <div class="col-auto">
+                        <i class="icon-deposito h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Ingreso de Vehículos</b></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-4 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-auto mt-4 mb-2">
+            <h5 class="px-4"><b>Búsqueda de vehículos</b></h5>
+        </div>
+        <form id="busquedaIngresoForm" class="row px-4 mb-4 align-items-end">
+            <div class="col-12">
+                <div class="row align-items-end">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Marca:</label>
+                            @(Html.Kendo().DropDownListFor(t => t.idMarca).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                .Label(l => l.Content("Marca:"))
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona una Marca")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("Marcas_Drop", "IngresarVehiculo");
+                                    });
+                                })
+                                .Filter(FilterType.Contains)
+                                )
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBoxFor(t => t.serie)
+                                .Label(l => l.Content("No. de serie:"))
+                                .Placeholder("Ingresa el número de serie")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBoxFor(t => t.folioInventario)
+                                    .Label(l => l.Content("Folio de inventario:"))
+                                    .Placeholder("Ingresa el número folio")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Placas:</label>
+                            <span>
+                                @(Html.Kendo().DropDownListFor(t => t.placa).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Text")
+                            .OptionLabel("Seleccione Placa...")
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .Filter(FilterType.Contains)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Placas_Read", "IngresarVehiculo");
+                                });
+                            }))
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlButton my-3" onclick="buscarVehiculo()">
+                            @(Html.Kendo().Button()
+                    .Name("buscarVehiculo")
+                    .HtmlAttributes(new { @class = "btnPrimary" })
+                    .Content("<h5 class=\"m-0\"><b>Buscar</b></h5>"))
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <partial name="_ListadoDepositos" model="Model" />
+        
+    </section>
+    <form id="fechaForm" style="display:none;">
+
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-end">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3 selecciondeFecha">
+                    <label>Fecha Ingreso (obligatorio):</label>
+                        @(Html.Kendo().DatePickerFor(t => t.fechaIngreso).Max(DateTime.Now)
+                        .Label(l => l.Content("Fecha Ingreso:"))
+                            .Value("")
+                            .Culture("es-ES")
+                            .Events(e =>
+                            {
+                                e.Change("validarFecha");
+                            })
+                        .Format("dd/MM/yyyy") 
+                        .HtmlAttributes(new { style = "width: 100%", id="ingreso" })
+                        )            
+                </div>
+            </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">           
+                    <div class="controlForm my-3">
+                        <label class="tex">Hora (formato 24 horas):</label>
+                        <input autocomplete="off" type="text" id="horaIngreso" onkeydown="validacionHora(event)" onblur="valid5char(event)" style="height: 3.6em;" />
+                    </div>
+                </div>
+            </div>
+    </section>
+    <section class="px-4">
+        <div id="datosContainer" >
+            <div style="width: 50%; float: left;">
+                <h4 class="colorPrimary"><b>Vehículo</b></h4>
+                <p><b>Folio Inventario:</b> <span id="folioInventario">-</span></p>
+                <p><b>Modelo:</b> <span id="modelo">-</span></p>
+                <p><b>Marca:</b> <span id="marca">-</span></p>
+                <p><b>Tipo de Vehículo:</b> <span id="tipoVehiculo">-</span></p>
+                <p><b>Color:</b> <span id="color">-</span></p>
+            </div>
+            <div style="width: 50%; float: left;">
+                <h4 class="colorPrimary"><b>Propietario</b></h4>
+                <p><b>Nombre:</b> <span id="propietario">-</span></p>
+                <h5 class="colorPrimary"><b>Solicitante</b></h5>
+                <p><b>Nombre solicitante:</b> <span id="solicitante">-</span></p>
+            </div>
+            <div style="width: 50%; float: left;">
+                <h4 class="colorPrimary"><b>Evento</b></h4>
+                <p><b>Servicio:</b> <span id="evento">-</span></p>
+                <p><b>Propietario Grúa:</b> <span id="propietarioGrua">-</span></p>
+                <p><b>Hora Solicitud:</b> <span id="horaSolicitud">-</span></p>
+                <p><b>Hora de término:</b> <span id="horaTermino">-</span></p>
+            </div>
+            <div style="width: 50%; float: left;">
+                <h4 class="colorPrimary"><b>Ubicación</b></h4>
+                <p><b>Tramo:</b> <span id="tramo">-</span></p>
+                <p><b>Carretera:</b> <span id="carretera">-</span></p>
+                <p><b>Kilómetro:</b> <span id="kilometro">-</span></p>
+                <p><b>Colonia:</b> <span id="colonia">-</span></p>
+                <p><b>Calle:</b> <span id="calle">-</span></p>
+                <p><b>Número:</b> <span id="numero">-</span></p>
+                <p><b>Municipio:</b> <span id="municipio">-</span></p>
+                <p><b>Intersección:</b> <span id="interseccion">-</span></p>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+        <div id="idDepositoContainer" style="display:none"></div>
+
+    </section>
+    <div class="row align-items-end">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="controlForm form-control my-3">
+                <label>Anexar imágenes:</label>
+                <span>
+                    <input type="file" name="AnexarImagen1" id="AnexarImagen1" required>
+                </span>
+            </div>
+        </div>
+    </div>
+    </form>
+    <section>
+        <div class="row align-items-end justify-content-center">
+
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="controlButton my-3" onclick="guardarDatos()">
+                    @(Html.Kendo().Button()
+                    .Name("guardarData")
+                    .HtmlAttributes(new { @class = "btnPrimary" })
+                    .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>
+<script>
+
+    $(document).ready(() => {
+
+        $("#busquedaIngresoForm").on('submit', (e) => {e.preventDefault() })
+
+    })
+
+    function buscarVehiculo() {
+        console.log("buscar") 
+        console.log('buscar')
+        var Mydata = $("#busquedaIngresoForm").serialize();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_BusquedaDepositos", "IngresarVehiculo")',
+            type: 'POST',
+            data: Mydata,
+            success: (data) => {
+                console.log(data)
+                var grid = $("#gridBusquedIngresos").data("kendoGrid");
+                grid.dataSource.data(data);
+                grid.dataSource.page(1);
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+    function guardarDatos() {
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'ingreso' });
+        controlsValidate.push({ 'controlName': 'horaIngreso' });
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+        var fechaIngresoPicker = $("#ingreso").data("kendoDatePicker");
+        var horaIngreso = $("#horaIngreso").val(); // Obtener el valor del input de hora
+        console.log("HOR", horaIngreso)
+        var fechaIngreso = fechaIngresoPicker.value(); // Obtener la fecha seleccionada del datepicker
+        fechaIngreso.setHours(0, 0, 0, 0); // Ajustar la hora de la fecha a 00:00:00 para borrar la hora actual
+
+        // Crear una nueva fecha con la hora seleccionada
+        var fechaCompleta = new Date(fechaIngreso);
+        var hora = horaIngreso.split(':');
+        fechaCompleta.setHours(hora[0], hora[1], 0, 0);
+        var fechaUTC = new Date(fechaCompleta.getTime() - (fechaCompleta.getTimezoneOffset() * 60000));
+        // Validar que se haya seleccionado una fecha y una hora
+        if (!fechaIngreso || !horaIngreso) {
+            sitteg_warning("Por favor, seleccione una fecha y hora válida.");
+            return;
+        }
+
+        var idDepositoText = $("#idDepositoContainer").text();
+        var idDeposito = parseInt(idDepositoText, 10);
+
+        var data = {
+            idDeposito: idDeposito,
+            fechaIngreso: fechaUTC.toISOString() // Convertir la fecha completa a formato ISO        
+        };
+
+
+        var formData = new FormData();
+        formData.append("data", JSON.stringify(data));  // Aquí se agrega "data" como nombre del campo
+
+        // Obtiene el archivo seleccionado por el usuario
+        var fileInput = document.getElementById("AnexarImagen1");
+        var file = fileInput.files[0];
+
+        formData.append("AnexarImagen1", file);
+        showLoading();
+        $.ajax({
+            url: '/IngresarVehiculo/ajax_GuardarDatos',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                sitteg_success("Se ha guardado la información correctamente");
+                location.reload();
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_error("Lo sentimos, ha sucedido un error");
+                hideLoading();
+            }
+        });
+    }
+    function cambiaFecha() {
+        var timepickerControl = $("#horaIngreso").data("kendoTimePicker");
+        var varFechaInfraccion = kendo.toString(this.value(), 'd');
+        var dia = varFechaInfraccion.slice(0, varFechaInfraccion.indexOf("/"));
+        varFechaInfraccion = varFechaInfraccion.slice(varFechaInfraccion.indexOf("/") + 1, varFechaInfraccion.length);
+        var mes = varFechaInfraccion.slice(0, varFechaInfraccion.indexOf("/"));
+        varFechaInfraccion = varFechaInfraccion.slice(varFechaInfraccion.indexOf("/") + 1, varFechaInfraccion.length);
+        let date = new Date();
+
+        if (varFechaInfraccion == date.getFullYear() && mes == (date.getMonth() + 1) && dia == date.getDate()) {
+            timepickerControl.max(date.getHours() + ":" + date.getMinutes());
+
+            timepickerControl.bind("change", function (e) {
+                var hora = timepickerControl.value();
+                if (hora != null && hora.getHours() > date.getHours()) {
+                    if (hora.getMinutes() > date.getMinutes()) {
+                        timepickerControl.value("");
+                    }
+                }
+            });
+        } else {
+            timepickerControl.max("23:59");
+        }
+    }
+
+</script>

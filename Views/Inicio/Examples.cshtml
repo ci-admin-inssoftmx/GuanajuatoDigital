@@ -1,0 +1,51 @@
+@model GuanajuatoAdminUsuarios.Models.SubmarcasVehiculosModel
+@{
+}
+
+
+<div class="row">
+    <div class="col-md-10">
+        <h2>Ejemplos Componentes</h2>
+    </div>
+    <br />
+    <div class="col-md-2">
+        @Html.ActionLink("Cancelar","Index",null,new{@class="btn btn-info"})
+    </div>
+</div>
+<hr />
+<br />
+
+
+@*creacion de Kendo DDL*@
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("MarcasDDL", "SubmarcasVehiculos"))
+        {
+
+            @(
+
+
+                Html.Kendo().DropDownListFor(d => d.IdMarcaVehiculo).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                .DataTextField("CategoryName")
+                .DataValueField("CategoryId")
+                .OptionLabel("---Seleccione Category---")
+                .HtmlAttributes(new { style = "width:80%", required = "required" })
+                .Filter(FilterType.Contains)
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("MarcasDDL", "SubmarcasVehiculos");
+
+                    });
+                })
+                )
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <a href='@Url.Action("Index")' class="btn btn-default">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>

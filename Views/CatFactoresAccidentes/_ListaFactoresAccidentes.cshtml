@@ -1,0 +1,130 @@
+﻿<script>
+    function filtroFactores() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+
+</script>
+  @if (ViewBag.Admin == true)
+{
+       <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <button href="#" id="btnNuevoFact" onclick="mostrarModalFactores()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addFactores h5 mb-0 me-2"></i><b>Agregar nuevo factor de accidente</b></h6>
+                        </button>
+                    </div>
+                </div>
+            </div>    
+}
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatFactoresAccidentesModel>()
+            .Name("gridCatFactoresAccidentes")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdFactorAccidente).Title("Id").Width(40);
+                columns.Bound(c => c.FactorAccidente).Title("Factor de accidente").Width(100);
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(100);
+                columns.Command(c => c.Custom("Editar").Click("getIdFact")).Width(100);
+               // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+
+                //columns.Command(c => c.Custom("Delete").Click("redirectDelete")).Width(180);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetFactores", "CatFactoresAccidentes").Data("filtroFactores"))
+            .PageSize(5).Model(model => model.Id(p => p.IdFactorAccidente))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.FactorAccidente);
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+
+    </div>
+</div>
+<div class="modal fade modalCustom" id="agregarFactornAccidente" aria-labelledby="agregarFactorAccidenteoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyaAgregarFactorAccidente">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getIdFact(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdFactorAccidente = dataItem.IdFactorAccidente;
+        console.log(IdFactorAccidente);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarFactoresAccidenteModal", "CatFactoresAccidentes")',
+            type: 'POST',
+            data: { IdFactorAccidente: IdFactorAccidente },
+            success: function (result) {
+                $('#ModalBodyaAgregarFactorAccidente').html(result);
+                $('#agregarFactornAccidente').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdFactorAccidente = dataItem.IdFactorAccidente;
+        console.log(IdFactorAccidente);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarFactoresAccidenteModal", "CatFactoresAccidentes")',
+            type: 'POST',
+            data: { IdFactorAccidente: IdFactorAccidente },
+            success: function (result) {
+                $('#ModalBodyaAgregarFactorAccidente').html(result);
+                $('#agregarFactornAccidente').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

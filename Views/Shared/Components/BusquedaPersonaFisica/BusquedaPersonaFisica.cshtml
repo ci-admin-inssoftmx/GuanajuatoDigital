@@ -1,0 +1,497 @@
+@model GuanajuatoAdminUsuarios.Models.BusquedaPersonaModel
+@{
+    var headerAlign = Model.Config.IsModal ? "align-items-center justify-content-between" : "align-items-end justify-content-end";
+}
+<script>
+function buscarPersonaFisica(){
+        ocultarMensajeError();
+        //$('#ddlIdPersona').val('');
+        //$('#ddlIdPersona').change();
+        var licenciaBusqueda = $("#PersonaModel_numeroLicenciaBusqueda").val().trim();
+        var rfcBusqueda = $("#PersonaModel_RFCBusqueda").val().trim();
+        var curpBusqueda = $("#PersonaModel_CURPBusqueda").val().trim();
+        var nombreBusqueda = $("#PersonaModel_nombreBusqueda").val().trim();
+        var apellidoPaternoBusqueda = $("#PersonaModel_apellidoPaternoBusqueda").val().trim();
+   
+
+        if (licenciaBusqueda !== "") {
+            if (licenciaBusqueda.length < 10) {
+               mostrarMensajeError("El número de licencia debe tener al menos 10 caracteres.");
+                return;
+            }
+        }
+        if (rfcBusqueda !== "") {
+            if (rfcBusqueda.length < 10) {
+                mostrarMensajeError("El RFC debe tener al menos 10 caracteres.");
+                return;
+            }
+        }
+        if (curpBusqueda !== "") {
+            if (curpBusqueda.length < 10) {
+                mostrarMensajeError("El CURP debe tener al menos 10 caracteres.");
+                return;
+            }
+        }
+        if ((nombreBusqueda !== "" || apellidoPaternoBusqueda !== "") &&
+            (nombreBusqueda.length < 3 || apellidoPaternoBusqueda.length < 3)) {
+            mostrarMensajeError("El nombre y el apellido paterno deben tener al menos 3 caracteres.");
+            return;
+        }
+
+        mostrarMensajeBuscando('Buscando personas en RIAG...');
+       resetPersonasContainer();
+        var formData = $("#buscarPersonaFisicaForm").serialize();
+
+        $.ajax({
+            url: '@Url.Action("BuscarPersonaFisicaWithPaginado","BusquedaVehiculoPropietario")',
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                console.log("Rt676676",response)
+                resetMensajeBuscando();
+                if (!response.encontrada) {
+                    resetMensajeBuscando();
+                    buscaEnLicencias()
+                    return;
+                }
+                cargaListaPersonasRiagEncontradas(response.result);              
+            },
+            error: function (error) {
+                sitteg_warning('Ocurrió un error en la búsqueda.');
+                resetMensajeBuscando();
+            }
+        });
+    }
+
+     function cargaListaPersonasRiagEncontradas(model){
+        showLoading();
+             ocultarMensajeError();
+         resetPersonasContainer();
+        mostrarMensajeBuscando('Cargando personas de RIAG...');
+         $.ajax({
+          url: '@Url.Action("MostrarListaPersonasRiagEncontradas","BusquedaVehiculoPropietario")',
+            type: 'POST',
+            data: model,
+            success: function (response) {
+                console.log("response cargaListaPersonasRiagEncontradas",response)
+                $("#listadoPersonasContainer").fadeIn();
+                 $("#listadoPersonasRiagContainer").html(response);
+                  $("#listadoPersonasRiagContainer").show();
+                  resetMensajeBuscando();
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Ocurrió un error en la búsqueda.');
+                resetMensajeBuscando();
+                hideLoading();
+            }
+        });
+    }
+
+    function cargaListaPersonasLicenciasEncontradas(model){
+             ocultarMensajeError();
+         resetPersonasContainer();
+        mostrarMensajeBuscando('Cargando personas de Licencias...');
+         $.ajax({
+          url: '@Url.Action("MostrarListaPersonasLicenciasEncontradas","BusquedaVehiculoPropietario")',
+            type: 'POST',
+            data: model,
+            success: function (response) {
+                $("#listadoPersonasContainer").fadeIn();
+                 $("#listadoPersonasOtrasContainer").html(response);
+                 $("#listadoPersonasOtrasContainer").show();
+                resetMensajeBuscando();
+            },
+            error: function (error) {
+                sitteg_warning('Ocurrió un error en la búsqueda.');
+                resetMensajeBuscando();
+            }
+        });
+    }
+
+    function buscaEnLicencias() {
+        ocultarMensajeError();
+        mostrarMensajeBuscando('Buscando personas en Licencias...');
+        resetPersonasContainer();
+
+        var formData = $("#buscarPersonaFisicaForm").serialize();
+
+        $.ajax({
+            url: '@Url.Action("PersonasEnLicencias", "Personas")',
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                resetMensajeBuscando();
+
+                if (Array.isArray(response) && response.length > 0) {
+                    cargaListaPersonasLicenciasEncontradas({ ListadoPersonasOtras: response });
+
+                } else {
+                    mostrarMensajeBuscando('No se encontraron personas con los datos introducidos, intenta con otros o agrega a la persona');
+                    $('#btnBuscarPersonasFisicas').prop('disabled', false);
+                }
+            },
+            error: function (error) {
+                sitteg_warning('Ocurrió un error en la búsqueda.');
+                resetMensajeBuscando();
+            }
+        });
+    }
+
+
+     function abrirModalPersonaFisica(idPersona,itemPersona){
+         console.log("P",idPersona)
+        var persona={};
+        //Si no se obtiene un id, se obtiene el objeto del grid
+        if(idPersona===0){
+        persona=JSON.parse(JSON.stringify(itemPersona));
+        }
+        else{
+            persona['idPersona']=idPersona;
+        }
+        var modeloBusqueda=JSON.parse(JSON.stringify(@Json.Serialize(@Model)));
+        modeloBusqueda['PersonaModel']=persona;
+    $.ajax({
+            url: '@Url.Action("MostrarPersonaFisica","BusquedaVehiculoPropietario")',
+        type: 'POST',
+        data: JSON.parse(JSON.stringify(modeloBusqueda)),
+        success: function (result) {
+            $('#personaFisicaContainer').html(result);
+            $('#addFisico').modal('show');
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.error("Error en la solicitud AJAX:", textStatus, errorThrown);
+        }
+    });
+    }
+
+     function mostrarMensajeBuscando(mensaje){
+     $('#divMensajeBuscando').show();
+     $('#spanMensajeBuscando').html(`<b>${mensaje}</b>`);
+     $('#btnBuscarPersonasFisicas').prop('disabled', true);
+    }
+
+    function resetMensajeBuscando(){
+     $('#divMensajeBuscando').hide();
+     $('#spanMensajeBuscando').html('');
+      $('#btnBuscarPersonasFisicas').prop('disabled', false);
+    }
+    function mostrarMensajeError(mensaje){
+        $('#divMensajeError').fadeIn();
+        $('#spanMensajeError').text(mensaje);
+    }
+     function ocultarMensajeError(){
+        $('#divMensajeError').fadeOut();
+        $('#spanMensajeError').text('');
+    }
+
+    function resetPersonasContainer(){
+        $("#listadoPersonasContainer").fadeOut();
+        $("#listadoPersonasOtrasContainer").html('');
+        $("#listadoPersonasRiagContainer").html('');
+    }
+</script>
+
+<section class="bg-white boxShadow rounded">
+    <div class="row @headerAlign px-4 px-md-4 pt-3 pb-2">
+        @if (Model.Config.IsModal)
+        {
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+            <div class="row">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0" onclick="cerrarModalConductor()">
+                    @(
+                            Html.Kendo().Button()
+                                .Name("backPersonaFisicaComponent")
+                                .HtmlAttributes(new { @class = "px-5" })
+                                .Content("<h6 class=\"m-0\"><i class=\"icon-back me-2\" data-bs-dismiss=\"modal\" aria - label = \"Close\" ></i><b>Regresar</b></h6>")
+                            )
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-auto">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto p-0">
+                    <i class="icon-oficial h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Personas</b></h2>
+                </div>
+            </div>
+        </div>
+        }
+        <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+            <div class="row">
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <button href="#" id="btnCrearPersona" onclick="abrirModalPersonaFisica()">
+                        <h6 class="m-0 d-flex align-items-center"><i class="icon-addFisica h3 mb-0 me-2"></i><b>@Model.Config.TextoBotonAgregarPersona</b></h6>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <form id="buscarPersonaFisicaForm">
+    @Html.HiddenFor(m=> m.Config.NombreVariableToChange)
+    @Html.HiddenFor(m=> m.Config.NombreMetodoToTrigger)
+    
+        <div class="row px-4 mb-4 align-items-end justify-content-start">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.PersonaModel.numeroLicenciaBusqueda)
+                        .Label(l => l.Content("No. de licencia:"))
+                        .Placeholder("Ingresa el número de licencia válido")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.PersonaModel.CURPBusqueda)
+                        .Label(l => l.Content("CURP:"))
+                        .Placeholder("Ingresa el CURP del propietario")
+                        .HtmlAttributes(new { style = "width: 100%", onkeydown = "validaCurp(event)" })
+                        )
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.PersonaModel.RFCBusqueda)
+                        .Label(l => l.Content("RFC:"))
+                        .Placeholder("Ingresa el RFC del propietario")
+                        .HtmlAttributes(new { style = "width: 100%", onkeydown = "validaRfc(event)" })
+                        )
+
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.PersonaModel.nombreBusqueda)
+                        .Label(l => l.Content("Nombre(s):"))
+                        .Placeholder("Ingresa el nombre(s) del propietario")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.PersonaModel.apellidoPaternoBusqueda)
+                        .Label(l => l.Content("Apellido paterno:"))
+                        .Placeholder("Ingresa el apellido paterno")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBoxFor(t => t.PersonaModel.apellidoMaternoBusqueda)
+                        .Label(l => l.Content("Apellido materno:"))
+                        .Placeholder("Ingresa el apellido materno")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+
+                </div>
+            </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlButton my-3">
+                @(Html.Kendo().Button()
+                    .Name("buscarOtroConductor")
+                    .HtmlAttributes(new {id="btnBuscarPersonasFisicas",type = "button", @class = "btnPrimary" })
+                     .Events(ev => ev.Click("buscarPersonaFisica"))
+                    .Content("<h5 class=\"m-0\"><b>Buscar</b></h5>"))
+        </div>
+    </div>
+        </div>
+        <div class="row" id="divMensajeError">
+            <div class="col-md-10 my-2 px-4 mx-2">
+                    <span id="spanMensajeError" class="colorDanger"></span>
+            </div>
+        </div>
+    </form>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+    </div>
+           <div id="divMensajeBuscando" class="col-md-10 my-2 py-3 mx-2 px-4">
+                        <span id="spanMensajeBuscando"></span>
+            </div>
+        @*Table*@
+        <div id="listadoPersonasContainer">
+            <div id="listadoPersonasOtrasContainer">
+                @if(Model.ListadoPersonasOtras.Count>0){
+                     @await Component.InvokeAsync("ListaPersonasEncontradasOtras",new{listaPersonas=Model.ListadoPersonasOtras})
+                }
+            </div>
+            <div id="listadoPersonasRiagContainer"></div>
+       </div>
+    <div id="resultadoLicencia" style="display: none;">
+        <p>Nombre: <span id="nombreSpan"></span></p>
+        <label for="tipoLicenciaDropdown">Tipo de Licencia:</label>
+        <select id="tipoLicenciaDropdown">
+            <!-- Aquí se agregarán las opciones del dropdown -->
+        </select>
+        <br>
+        <p>Fecha de Expedición: <span id="fechaExpedicionSpan"></span></p>
+        <p>Fecha de Vigencia: <span id="fechaVigenciaSpan"></span></p>
+        <div class="col-12 col-md-6 mx-md-auto col-lg-3 mx-lg-0">
+            <div class="controlButton my-3">
+                <div class="controlButton my-3" onclick="guardarRegistro()">
+                    @(Html.Kendo().Button()
+                        .Name("seleccionarLicencia")
+                        .HtmlAttributes(new { @class = "btnPrimary" })
+                        .Content("<h5 class=\"m-0\"><b>Seleccionar</b></h5>"))
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+ <div id="personaFisicaContainer"></div>
+
+
+    <div class="modal fade" id="confirmacionModal"  aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Confirmación</h5>
+                <button type="button"  onclick="cancelarConfirmacion()">X</button>
+            </div>
+            <div class="modal-body">
+                ¿Está seguro de que desea cerrar la ventana y perder la información ingresada?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="confirmarCerrar">Aceptar</button>
+                <button type="button" class="btn btn-primary" id="cancelarConfirmacion" onclick="cancelarConfirmacion()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+       $('#divMensajeBuscando').hide();
+       $('#divMensajeError').hide();
+    });
+
+    function btnModalEditarPersona(id) {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_ModalEditarPersona","Personas")',
+            type: 'GET',
+            data: { id: id },
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (value) {
+                $('#modalBodyEditarPersona').html(value);
+                $('#modalEditarPersona').modal({ backdrop: 'static', keyboard: false });
+                $('#modalEditarPersona').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+ function guadarPersonaLicenciasEnRiag() {
+        var grid = $("#gridPersonasLicencia").data("kendoGrid");
+        var selectedRowData = grid.dataItem(grid.select());
+   
+           var tipoLicenciaMapping = {
+                "TIPO A  CHOFER AUTOMOVILISTA": 1,
+                "TIPO B CHOFER SERVICIO PÚBLICO": 2,
+                "TIPO C  CHOFER SERVICIO DE CARGA": 3,
+                "TIPO D -MOTOCICLISTA": 4,
+                "PERMISO A -AUTOMOVIL-": 6,
+                "PERMISO D -MOTOCICLETA-": 7,
+                "NO APLICA": 8,
+                "TIPO A": 1,
+                "TIPO B": 2,
+                "TIPO C": 3,
+                "TIPO D": 4,
+                "PERMISO A": 6,
+                "PERMISO D": 7,
+                "A-AUTOMOVILISTA": 1,
+                "B-CHOFER DE SERVICIO PÚBLICO": 2,
+                "C-CHOFER DE SERVICIO DE CARGA": 3,
+                "D-MOTOCICLISTA": 4,
+                "PA-PERMISO AUTOMOVILISTA": 6,
+                "PD-PERMISO MOTOCICLISTA": 7,
+
+            }
+       
+            const tipoLicenciaNumero = tipoLicenciaMapping[selectedRowData.TipoLicencia] || 0;
+           
+          
+            var fd = new FormData();
+            fd.append("NombreCompleto", selectedRowData.NombreCompleto);
+            fd.append("Nombre", selectedRowData.Nombre);
+            fd.append("PrimerApellido", selectedRowData.PrimerApellido);
+            fd.append("SegundoApellido", selectedRowData.SegundoApellido);
+            fd.append("Curp", selectedRowData.Curp);
+            fd.append("Rfc", selectedRowData.Rfc);
+            fd.append("NumeroLicencia", selectedRowData.NumeroLicencia);
+            fd.append("IdTipoLicencia", tipoLicenciaNumero);
+           fd.append("IdGenero", selectedRowData.IdGenero);
+           fd.append("FechaNacimiento", selectedRowData.FechaNacimiento);
+           fd.append("FechaTerminoVigencia", selectedRowData.FechaTerminoVigencia);
+           fd.append("Calle", selectedRowData.Calle);
+           fd.append("NumExt", selectedRowData.NumExt);
+           fd.append("Colonia", selectedRowData.Colonia);
+            fd.append("Cp", selectedRowData.Cp);
+           fd.append("IdMunicipio", selectedRowData.IdMunicipio);
+           fd.append("Municipio", selectedRowData.Municipio);
+           fd.append("EstadoNacimiento", selectedRowData.EstadoNacimiento);
+             fd.append("Telefono", selectedRowData.Telefono);
+               fd.append("Email", selectedRowData.Email);
+
+
+            mostrarMensajeBuscando('Guardando persona en RIAG...');
+        
+            $.ajax({
+                type: 'POST',
+                  url: '@Url.Action("GuardaPersonaLicenciasEnRiag","BusquedaVehiculoPropietario")',
+                  contentType: false, // Not to set any content header
+                    processData: false, // Not to process data
+                 data: fd,
+                 success: function (result) {
+                    sitteg_success('Persona registrada exitosamente')
+                    resetMensajeBuscando();
+                    var model ={ListadoPersonas:result.data.ListadoPersonas};
+                     cargaListaPersonasRiagEncontradas(model);
+                 },
+                 error: function (error) {
+                     sitteg_warning('Error al guardar persona');
+                     resetMensajeBuscando();
+                     resetPersonasContainer();
+                 }
+            });
+        }
+   
+
+
+   
+   
+    function cerrarModalP() {
+        $('#confirmacionModal').modal('show');
+
+        $('#confirmarCerrar').on('click', function () {
+            $('#confirmacionModal').modal('hide');
+            window.close(); 
+        });
+    }
+    function cerrarModalConductor() {
+        $('#agregarConductorModal').modal('hide');
+
+    }
+    function cerrarModalPer(){
+     $('#modalCrearPersona').modal('hide');
+     $('#confirmacionModal').modal('hide');
+
+    }
+    function cancelarConfirmacion(){
+     $('#confirmacionModal').modal('hide');
+    }
+</script>

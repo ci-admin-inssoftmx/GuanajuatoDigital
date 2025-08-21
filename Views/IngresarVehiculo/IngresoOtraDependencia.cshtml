@@ -1,0 +1,412 @@
+﻿@model GuanajuatoAdminUsuarios.Models.IngresoOtraDependenciaModel
+<script>
+    function cambiaFecha() {
+        var timepickerControl = $("#HoraIngreso").data("kendoTimePicker");
+        var fechaSeleccionada = $("#FechaIngreso").data("kendoDatePicker").value();
+        var horaSeleccionada = timepickerControl.value(); 
+        var fechaActual = new Date();
+
+        if (fechaSeleccionada.getDate() == fechaActual.getDate() &&
+            fechaSeleccionada.getMonth() == fechaActual.getMonth() &&
+            fechaSeleccionada.getFullYear() == fechaActual.getFullYear()) {
+
+            var horaActual = fechaActual.getHours() * 60 + fechaActual.getMinutes();
+
+            if (horaSeleccionada != null && horaSeleccionada.getHours() * 60 + horaSeleccionada.getMinutes() > horaActual) {
+                timepickerControl.value(""); 
+            }
+        }
+
+        timepickerControl.max(fechaActual);
+    }
+</script>
+<div class="mainContainer bg-light">
+
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <div class="border border-2 border-dark rounded-circle">
+                            <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                <b>1</b>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="icon-deposito h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Ingreso de vehículo </b></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-4 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+       
+        <form id="nuevoAccidente1Form" class="row px-4 mb-4 align-items-end">
+            <div class="col-12">
+                <div class="row align-items-end">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Fecha <b>(obligatorio)</b>:</label>
+                            <span>
+                                @(Html.Kendo().DatePickerFor(t => t.FechaIngreso)
+                                    .Label(l => l.Content("Fecha <b>(obligatorio)</b>:"))
+                                    .Culture("es-ES")
+                                    .Events(e =>
+                                    {
+                                        e.Change("cambiaFecha");
+                                    })
+                                    .HtmlAttributes(new { style = "width: 100%", title = "please enter date", id = "FechaIngreso" })
+                                    )
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Hora <b>(obligatorio)</b>:</label>
+                            <span>
+                                @(Html.Kendo().TimePickerFor(t => t.HoraIngreso)
+                                    .Format("HH:mm")
+                                    .Interval(1)
+                                    .Label(l => l.Content("Hora <b>(obligatorio)</b>:"))
+                                    .Value((DateTime?)null)
+                                    .HtmlAttributes(new { style = "width: 100%", title = "timepicker",id ="HoraIngreso" })
+                                    )
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Envía vehículo:</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(t => t.IdEnvia).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una opción")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Municipios_Drop", "CapturaAccidentes");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            )
+                    </span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Municipio</label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(t => t.IdMunicipio).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .Label(l => l.Content("Municipio:"))
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("No aplica")
+                            //.Events(e => e.Change("carreteraDropDownChange"))
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Municipios_Drop", "IngresarVehiculo");
+                                });
+                            })
+                            .Filter(FilterType.Contains)
+                            )
+                    </span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label><b>Motivo de ingreso:</b></label>
+                    <span>
+                        @(Html.Kendo().DropDownListFor(t => t.IdMotivo).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .Label(l => l.Content("Motivo de ingreso:"))
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona un Tramo")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Descripcion_Drop", "IngresarVehiculo");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            .Filter(FilterType.Contains)
+                            )
+                    </span>
+                </div>
+            </div>
+        </form>
+       
+    </section>
+    <section>
+        
+        <div class="col-auto p-0">
+            <i class="icon-ubicacion h1 colorPrimary"></i>
+        </div>
+        <div class="col-auto my-3">
+            <h2 class="m-0 h3"><b>Lugar donde se recogio el vehículo</b></h2>
+        </div>
+           
+<div class="row">
+    <div class="col-8 pe-0">
+        <div class="bgSuccess py-1"></div>
+    </div>
+    <div class="col-4 ps-0">
+        <div class="bg-light py-1"></div>
+    </div>
+</div>
+<div class="row align-items-end px-4">
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.numeroUbicacion)
+                .Label(l => l.Content("Número:"))
+                .Placeholder("Número de recolección")
+                .HtmlAttributes(new { style = "width: 100%" })
+                )
+
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.calleUbicacion)
+                .Label(l => l.Content("Calle:"))
+                .Placeholder("Ingrese la calle de recolección")
+                .HtmlAttributes(new { style = "width: 100%" })
+                )
+
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.coloniaUbicacion)
+                .Label(l => l.Content("Colonia:"))
+                .Placeholder("Ingrese la colonia de recolección")
+                .HtmlAttributes(new { style = "width: 100%" })
+                )
+
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <!--/*@(Html.Kendo().TextBoxFor(t => t.kilometroUbicacion)
+                .Label(l => l.Content("Kilómetro:"))
+                .Placeholder("Kilómetro de recolección")
+                .HtmlAttributes(new { style = "width: 100%" })
+                )*/-->
+
+
+            <label>Kilómetro:</label>
+            <div class="input-group">
+                <input placeholder="Kilómetro de recolección" value="@Model.kilometroUbicacion" type="text" id="kilometroUbicacion" name="kilometroUbicacion" class="form-control"  onkeydown="ValidarKm(event)"  style="height: 3.5em;" />
+            </div>
+
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Carretera <b>(obligatorio)</b>:</label>
+            <span>
+                        @(Html.Kendo().DropDownListFor(t => t.IdCarretera).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .Label(l => l.Content("Carretera <b>(obligatorio)</b>:"))
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Selecciona una Carretera")
+                    .Events(e => e.Change("carreteraDropDownChange"))
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("Carreteras_Drop", "Depositos");
+                        });
+                    })
+                    )
+            </span>
+
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Tramo <b>(obligatorio)</b>:</label>
+            <span>
+                        @(Html.Kendo().DropDownListFor(t => t.IdTramo).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .Label(l => l.Content("Tramo <b>(obligatorio)</b>:"))
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Selecciona un Tramo")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("Tramos_Drop", "Depositos");
+                        });
+                    })
+                    .HtmlAttributes(new { style = "width:100%;" })
+                    .Filter(FilterType.Contains)
+                    )
+            </span>
+
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Entidad:</label>
+            <span>
+                        @(Html.Kendo().DropDownListFor(m => m.idEntidadUbicacion).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Selecciona una opción")
+                    .Events(e => e.Change("EntidadDropDownChange2"))
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("Entidades_Drop", "Depositos");
+                        });
+                    })
+                    .HtmlAttributes(new { style = "width:100%;" })
+                    )
+            </span>
+
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Municipio <b>(obligatorio)</b>:</label>
+            <span>
+                        @(Html.Kendo().DropDownListFor(t => t.idMunicipioUbicacion).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Selecciona un Municipio")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("Municipios_Drop", "Depositos");
+                        });
+                    })
+                    .HtmlAttributes(new { style = "width:100%;" })
+                    )
+            </span>
+
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Pensión <b>(obligatorio)</b>:</label>
+            <span>
+                        @(Html.Kendo().DropDownListFor(t => t.idPensionUbicacion).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Selecciona una Pensión")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("Pensiones_Drop", "Depositos");
+                        });
+                    })
+                    .HtmlAttributes(new { style = "width:100%;" })
+                    )
+            </span>
+
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBoxFor(t => t.interseccion)
+                .Label(l => l.Content("Intersección:"))
+                .Placeholder("Ingrese la intersección de recolección")
+                .HtmlAttributes(new { style = "width: 100%" })
+                )
+
+        </div>
+    </div>
+</div>
+    </section>
+    <section id="sec0" class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow mt-3 mb-5 rounded" style="display:block">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-auto pe-0">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto p-0">
+                        <i class="icon-car h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Captura de vehículos</b></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-6 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 my-4">
+                <h5 class="px-4 colorSuccess d-flex align-items-center"><b class="d-flex align-items-center justify-content-center bgSuccess mb-1 me-2 rounded-circle px-1"><i style="font-size: 10px; padding: 7px 2px;" class="icon-correct text-white"></i></b><b>Búsqueda del vehículo</b></h5>
+                <h6 class="px-4 text-muted">Realiza una búsqueda del vehículo para conocer si ya está capturado en Registro de Infracciones y Accidentes de Guanajuato o de lo contrario importar los datos del registro estatal.</h6>
+            </div>
+        </div>
+
+
+        <div class="row px-4 mb-4 align-items-end">
+            <!--todo select -->
+            <form id="frmSearch" class="row px-4 mb-4 align-items-end" method="post">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.PlacasBusqueda)
+                            .Label(l => l.Content("Placas:"))
+                            .Placeholder("Ingresa Placas")
+                            .HtmlAttributes(new { style = "width: 100%", autocomplete="off" })
+                            )
+                    </div>
+                    <div id="ErrorMessageContainer" class="error-container"></div>
+
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.SerieBusqueda)
+                            .Label(l => l.Content("Serie:"))
+                            .Placeholder("Ingresa serie")
+                            .HtmlAttributes(new { style = "width: 100%", autocomplete="off" })
+                            )
+
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6 mx-md-auto col-lg-4 mx-lg-0 ">
+                    @*<div class="controlButton my-3" onclick="closeForm()">*@
+                    <div class="controlButton my-3">
+                        <button class="btnPrimary" type="button" onclick="submitSearch()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+
+

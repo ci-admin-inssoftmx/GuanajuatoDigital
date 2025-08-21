@@ -1,0 +1,69 @@
+﻿
+
+<div class="col-12 mb-4 px-4 rounded gridCustom">
+    @(Html.Kendo().Grid<PersonaModel>()
+        .Name("gridInfraccionesPersonas2")
+        .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+        .EnableCustomBinding(false)
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .Read("GetAllPersonasPagination", "Infracciones")
+        .PageSize(10)
+        @*.PageSize(10)*@
+        )
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.idPersona).Hidden();
+            columns.Select().ClientHeaderTemplate(" ");
+            columns.Bound(c => c.nombreCompleto).Title("Nombre");
+            columns.Bound(p => p.CURP).Title("CURP");
+            columns.Bound(p => p.RFC).Title("RFC");
+            columns.Bound(p => p.numeroLicencia).Title("No. Licencia");
+            columns.Bound(c => c.tipoPersona).Title("Tipo persona");
+        }).HtmlAttributes(new { style = "height:auto" })
+        @*.Pageable(p => p.Enabled(true).PageSizes(new[] { 10, 20, 30 }))*@
+        .Pageable(p => p.Enabled(true))
+        .Sortable(scr => scr.Enabled(true))
+        .Scrollable(scr => scr.Height(350))
+        .ToolBar(t => t.Custom().Text("Buscar...").Name("search"))
+        
+
+        )
+
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        var grid = $("#gridInfraccionesPersonas2").data("kendoGrid");
+        grid.tbody.on("click", ".k-checkbox", onClickPersonas);
+
+        function onClickPersonas(e) {
+            var grid = $("#gridInfraccionesPersonas2").data("kendoGrid");
+            var row = $(e.target).closest("tr");
+            var dataItem = grid.dataItem(row);
+            var idPersona = dataItem.idPersona;
+            var nombre = dataItem.nombre + ' ' + dataItem.apellidoPaterno + ' ' + dataItem.apellidoMaterno;
+            
+            window.idPersona=idPersona;
+
+            if (row.hasClass("k-selected")) {
+                setTimeout(function (e) {
+                    var grid = $("#gridInfraccionesPersonas2").data("kendoGrid");
+                    grid.clearSelection();
+                })
+            } else {
+                grid.clearSelection();
+            };
+
+            $("#textoConductor").empty()
+
+            //alert(idPersona);
+            buscarPersona2(idPersona);
+            $('#ModalBodyAgregarEditarConductor').html("");
+            $('#ModalAgregarEditarConductor').modal('hide');
+        };
+      
+    })
+</script>
+

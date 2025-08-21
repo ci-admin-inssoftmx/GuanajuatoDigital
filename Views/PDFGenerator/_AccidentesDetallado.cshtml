@@ -1,0 +1,702 @@
+﻿@model PDFAccidenteDetalladoModel
+
+@{
+	Layout = null;
+	int contadorVehiculo = 0;
+}
+<html>
+<head>
+	<style>
+		.firma-oficial {
+			width: 200px;
+			height: 100px;
+			object-fit: contain;
+		}
+
+		.croquis-style {
+			width: 200px;
+			height: 200px;
+			object-fit: contain;
+		}
+
+		.involucrado-style {
+			width: 82px;
+			height: 100px;
+			object-fit: contain;
+		}
+
+		.no-border {
+			border: none;
+			border-width: 0px;
+			border-style: none;
+		}
+	</style>
+</head>
+<body>
+	<div id="accidenteDetallado" class="col-xl-11 col-lg-12 col-md-12 container center">
+		<table class="table">
+			<thead>
+				<tr style="background-color:#e7e7e7">
+					<td colspan="9">
+						<p class="s3">
+							PARTE DE ACCIDENTE
+						</p>
+					</td>
+				</tr>
+			</thead>
+			@*DATOS*@
+			<tr style="background-color:#e7e7e7">
+				<td colspan="6"><p class="s1">@Model.ParteNombre</p></td>
+				<td colspan="3"><p class="s1">ACC. No.: @Model.ParteAccidente.NumeroReporte</p></td>
+			</tr>
+			<tr style="background-color:#e7e7e7">
+				<td colspan="6"><p class="s1">@Model.PartePuesto</p></td>
+				<td colspan="3"><p class="s1">@Model.ParteAccidente.DelegacionOficina LAT: @Model.ParteAccidenteComplemento.Latitud ° LONG: @Model.ParteAccidenteComplemento.Longitud °</p></td>
+			</tr>
+			<tr style="background-color:#e7e7e7">
+				<td colspan="6"><p class="s1">CARR. @Model.ParteAccidente.Carretera KM. @Model.ParteAccidente.Kilometro</p></td>
+				<td colspan="3"><p class="s1">@Model.ParteAccidente.jefeOficina</p></td>
+			</tr>
+			<tr style="background-color:#e7e7e7">
+				<td colspan="6"><p class="s1">@Model.ParteAccidente.DelegacionOficina , GTO.</p></td>
+				<td colspan="3"><p class="s1">DELEGADO DE: @Model.ParteAccidente.DelegacionOficina</p></td>
+			</tr>
+			@*Columnas*@
+			<tr>
+				<td><p class="s5">HORA</p></td>
+				<td><p class="s5">DÍA</p></td>
+				<td><p class="s5">MES</p></td>
+				<td><p class="s5">AÑO</p></td>
+				<td><p class="s5">DIA DE LA SEMANA</p></td>
+				<td><p class="s5">KM.</p></td>
+				<td><p class="s5">CAMINO ESTATAL</p></td>
+				<td><p class="s5">TRAMO</p></td>
+				<td><p class="s5">FOLIO EMERGENCIA</p></td>
+			</tr>
+			@*DATOS*@
+			<tr>
+				<td><p class="s2">@Model.ParteAccidente.Fecha.Value.ToString("HH:mm")</p></td>
+				<td><p class="s2">@Model.ParteAccidente.Fecha.Value.ToString("dd")</p></td>
+				<td><p class="s2">@Model.ParteAccidente.Fecha.Value.ToString("MM")</p></td>
+				<td><p class="s2">@Model.ParteAccidente.Fecha.Value.ToString("yyyy")</p></td>
+				<td><p class="s2">@Model.ParteAccidente.Fecha.Value.ToString("dddd").ToUpper()</p></td>
+				<td><p class="s2">@Model.ParteAccidente.Kilometro</p></td>
+				<td><p class="s2">@Model.ParteAccidente.Carretera</p></td>
+				<td><p class="s2">@Model.ParteAccidente.Tramo</p></td>
+				<td><p class="s2">@Model.ParteAccidente.FolioEmergencia</p></td>
+			</tr>
+			<tr style="background-color:#e7e7e7">
+				<td colspan="6"><p class="s5">FOLIO ACCIDENTE</p></td>
+				<td colspan="3"><p class="s5">OBSERVACIONES DEL TRAMO</p></td>
+			</tr>
+			<tr>
+				<td colspan="6"><p class="s2">
+						@if (!string.IsNullOrEmpty(Model.ParteAccidente.NumeroReporte.ToString()))
+						{
+							@Model.ParteAccidente.NumeroReporte
+						}else{
+							@: 
+						}
+					</p>
+				</td>
+				<td colspan="3"><p class="s2">
+						@if (!string.IsNullOrEmpty(Model.ParteAccidente.observacionesTramo))
+						{
+							@Model.ParteAccidente.observacionesTramo
+						}
+						else
+						{
+							@: 
+						}
+					</p>
+				</td>
+			</tr>
+			<tr style="background-color:#e7e7e7">
+				<td colspan="6"><p class="s5">IMAGEN DE ACCIDENTE</p></td>
+				<td colspan="3"><p class="s5">CROQUIS</p></td>
+			</tr>
+			<tr>
+				<td colspan="6"><p class="s2">
+						@if (!string.IsNullOrEmpty(Model.ParteAccidente.archivoLugarPath))
+						{
+							<img class="croquis-style" src="data:image/png;base64,@Model.ArchivoLugarBase64" />
+						}
+						else
+						{
+							@: &nbsp;
+						}
+					</p>
+				</td>
+				<td colspan="3"><p class="s2">
+						@if (!string.IsNullOrEmpty(Model.ParteAccidente.archivoCroquisPath))
+						{
+							<img class="croquis-style" src="data:image/png;base64,@Model.ArchivoCroquisBase64" />
+						}
+						else
+						{
+							@: &nbsp;
+						}
+					</p>
+				</td>
+			</tr>
+		</table>
+		<br /><br />
+		@*VEHICULOS*@
+		<table class="table">
+			<thead>
+				<tr style="background-color:#e7e7e7">
+					<td colspan="8">
+						<p class="s3">
+							VEHÍCULOS
+						</p>
+					</td>
+				</tr>
+			</thead>
+			@foreach (var item in Model.VehiculosInvolucrados)
+			{
+				contadorVehiculo++;
+				@*Columnas*@
+				<tr>
+					<td style="background-color:azure" rowspan="2"><p class="s3">VEH.@item.numeroConsecutivo</p></td>
+					<td><p class="s5">TIPO</p></td>
+					<td><p class="s5">MARCA</p></td>
+					<td><p class="s5">SUBMARCA</p></td>
+					<td><p class="s5">MODELO</p></td>
+					<td><p class="s5">COLOR</p></td>
+					<td><p class="s5">No. DE SERIE</p></td>
+					<td><p class="s5">PLACAS</p></td>
+				</tr>
+				@*Datos*@
+				<tr>
+					<td><p class="s2">@item.TipoVehiculo</p></td>
+					<td><p class="s2">@item.Marca</p></td>
+					<td><p class="s2">@(item.Submarca==null?"":item.Submarca.ToUpper())</p></td>
+					<td><p class="s2">@item.Modelo</p></td>
+					<td><p class="s2">@item.Color</p></td>
+					<td><p class="s2">@item.Serie</p></td>
+					<td><p class="s2">@item.Placa</p></td>
+				</tr>
+				@*Columnas*@
+				<tr>
+					<td colspan="3"><p class="s5">TARJETA CIRCULACIÓN</p></td>
+					<td><p class="s5">VIGENCIA</p></td>
+					<td><p class="s5">ENTIDAD</p></td>
+					<td><p class="s5">CAPACIDAD</p></td>
+					<td><p class="s5">No. ECON.</p></td>
+					<td><p class="s5">PÓLIZA CARGA</p></td>
+				</tr>
+				@*Datos*@
+				<tr>
+					<td colspan="3"><p class="s2">@item.Tarjeta</p></td>
+					<td><p class="s2">@item.VigenciaTarjetaFormateada</p></td>
+					<td><p class="s2">@(item.Entidad==null?"":item.Entidad.ToUpper())</p></td>
+					<td><p class="s2">@item.Capacidad</p></td>
+					<td><p class="s2">@item.NumeroEconomico</p></td>
+					<td><p class="s2">@item.Poliza</p></td>
+				</tr>
+				@*Columnas*@
+				<tr>
+					<td colspan="3"><p class="s5">TIPO DE SERVICIO</p></td>
+					<td><p class="s5">PROPIETARIO O EMPRESA</p></td>
+					<td colspan="4"><p class="s5">DOMICILIO PROP.</p></td>
+				</tr>
+				@*Datos*@
+				<tr>
+					<td colspan="3"><p class="s2">  @(string.IsNullOrEmpty(item.TipoServicio) ? "-" : item.TipoServicio.ToUpper())</p></td>
+					<td><p class="s2">@item.PropietarioInvolucrado</p></td>
+					<td colspan="4"><p class="s2">@(item.Direccion==null?"":item.Direccion.Trim().ToUpper())</p></td>
+				</tr>
+				@*Columnas*@
+				<tr>
+					<td colspan="3"><p class="s5">CONDUCTOR</p></td>
+					<td colspan="3"><p class="s5">DOMICILIO COND.</p></td>
+					<td><p class="s5">EDAD</p></td>
+					<td><p class="s5">SEXO</p></td>
+				</tr>
+				@*Datos*@
+				<tr>
+					<td colspan="3"><p class="s2">@item.ConductorInvolucrado</p></td>
+					<td colspan="3"><p class="s2">@(item.DireccionConductor==null?"":item.DireccionConductor.Trim().ToUpper())</p></td>
+					<td><p class="s2">@item.Edad</p></td>
+					<td><p class="s2">@item.Sexo</p></td>
+				</tr>
+
+				@*Columnas*@
+				<tr>
+					<td colspan="2"><p class="s5">FECHA DE NAC.</p></td>
+					<td colspan="2"><p class="s5">TIPO DE LICENCIA</p></td>
+					<td><p class="s5">No. DE LICENCIA</p></td>
+					<td colspan="3"><p class="s5">VENCIMIENTO DE LIC.</p></td>
+				</tr>
+				@*Datos*@
+				<tr>
+					<td colspan="2"><p class="s2">@item.FechaNacimientoTexto</p></td>
+					<td colspan="2"><p class="s2">@item.TipoLicencia</p></td>
+					<td><p class="s2">@item.numeroLicencia</p></td>
+					<td colspan="3"><p class="s2">@item.FechaVigenciaLicenciaTexto</p></td>
+				</tr>
+			}
+		</table>
+		<br /><br />
+		<table class="table">
+			<thead>
+				<tr style="background-color:#e7e7e7">
+					<td>
+						<p class="s3">
+							CLASIFICACIÓN DEL ACCIDENTE
+						</p>
+					</td>
+				</tr>
+			</thead>
+			@*Datos*@
+			@foreach (var item in Model.Clasificaciones)
+			{
+				<tr>
+					<td><p class="s2">@item.NombreClasificacion</p></td>
+				</tr>
+			}
+		</table>
+		<br /><br />
+		<table class="table">
+			<thead>
+				<tr style="background-color:#e7e7e7">
+					<td colspan="2">
+						<p class="s3">
+							FACTORES QUE INTERVINIERON
+						</p>
+					</td>
+				</tr>
+			</thead>
+			<tr>
+				<td><p class="s5">FACTOR</p></td>
+				<td>
+					<p class="s5">OPCIÓN</p>
+				</td>
+			</tr>
+			@foreach (var item in Model.Factores)
+			{
+				<tr>
+					<td><p class="s2">@(item.FactorAccidente==null?"":item.FactorAccidente.ToUpper())</p></td>
+					<td><p class="s2">@item.FactorOpcionAccidente</p></td>
+				</tr>
+			}
+		</table>
+		<br /><br />
+		<table class="table">
+			<thead>
+				<tr style="background-color:#e7e7e7">
+					<td>
+						<p class="s3">
+							CAUSAS DETERMINANTES
+						</p>
+					</td>
+				</tr>
+			</thead>
+			<tbody>
+				
+				
+					<tr>
+					<td><p class="s5">@( string.Join( ",", Model.CausasDeterminantes.Select(s=> s.indice+" "+(s.CausaAccidente==null?"":s.CausaAccidente.ToUpper())).ToArray()))</p></td>
+					</tr>
+					<tr>
+					<td><p class="s2">@(Model.CausasDeterminantes == null || Model.CausasDeterminantes.Count() == 0 || string.IsNullOrEmpty(Model.CausasDeterminantes.First().DescripcionCausa) ? "S/C" : Model.CausasDeterminantes.First().DescripcionCausa)</p></td>
+					</tr>
+				
+			</tbody>
+		</table>
+		<br /><br />
+		<table class="table">
+			<thead>
+				<tr style="background-color:#e7e7e7">
+					<td colspan="8">
+						<p class="s3">
+							VICTIMAS
+						</p>
+					</td>
+				</tr>
+			</thead>
+			@{
+				contadorVehiculo = 0;
+				int totaLesionados = Model.Involucrados.Where(w => w.EstadoVictima.ToUpper().Trim() == "LESIONADO").Count();
+				int totalMuertos = Model.Involucrados.Where(w => w.EstadoVictima.ToUpper().Trim() == "MUERTO").Count();
+				int totalSinLesion = Model.Involucrados.Where(w => w.EstadoVictima == "Sin lesión").Count();
+			}
+			@foreach (var item in Model.Involucrados)
+			{
+				int rowspan = Model.Involucrados.Where(w => w.Placa == item.Placa).Count();
+				contadorVehiculo++;
+
+				@if (Model.Involucrados.Count() > 0)
+				{
+					<tr>
+						<td><p class="s5">VEH.</p></td>
+						<td><p class="s5">TIPO</p></td>
+						<td><p class="s5">NOMBRE</p></td>
+						<td colspan="5"><p class="s5">IMAGEN</p></td>
+					</tr>
+					<tr>
+						@if (item.IdTipoInvolucrado != 3)
+						{
+							<td><p class="s2">@((item.numeroConsecutivo == 0) ? "" : item.numeroConsecutivo)</p></td>
+						}
+						else
+						{
+							<td><p class="s2"></p></td>
+						}
+						@*<td><p class="s2">@item.numeroConsecutivo</p></td>*@
+						<td><p class="s2">@item.TipoInvolucrado.ToUpper()</p></td>
+						<td><p class="s2">@item.NombreCompleto</p></td>
+						<td colspan="5" rowspan="5"><p class="s2">
+								@if (!string.IsNullOrEmpty(item.archivoInvolucradoPath))
+								{
+									<img class="involucrado-style" src="data:image/png;base64,@item.ArchivoInvolucradoBase64" />
+								}
+								else
+								{
+									@:
+								}
+						</p></td>
+					</tr>
+					<tr>
+						<td><p class="s5">SEXO</p></td>
+						<td><p class="s5">EDAD</p></td>
+						<td><p class="s5">DOMICILIO</p></td>
+					</tr>
+					<tr>
+						<td><p class="s2">@item.Sexo</p></td>
+						<td>
+							<p class="s2">
+								@(
+									string.IsNullOrEmpty(item.FormatDateNacimiento) ? "-" : item.FormatDateNacimiento)
+									
+							</p>
+						</td>
+						<td><p class="s2">@item.Direccion</p></td>
+					</tr>
+					<tr>
+						<td><p class="s5">ESTADO</p></td>
+						<td colspan="2"><p class="s5">LLEVADO A</p></td>
+					</tr>
+					<tr>
+						<td><p class="s2">@item.EstadoVictima.ToUpper()</p></td>
+						<td colspan="2"><p class="s2">@item.NombreHospital</p></td>
+					</tr>
+				}
+				else
+				{
+					<tr>
+						<td><p class="s2">@contadorVehiculo</p></td>
+						@*<td><p class="s2">@item.numeroConsecutivo</p></td>*@
+						<td><p class="s2">@item.TipoVehiculo</p></td>
+						<td><p class="s2">-</p></td>
+						<td><p class="s2">-</p></td>
+						<td><p class="s2">-</p></td>
+						<td><p class="s2">-</p></td>
+						<td><p class="s2">-</p></td>
+						<td><p class="s2">-</p></td>
+					</tr>
+				}
+
+				@*@if (Model.Involucrados.Where(w => w.Placa == item.Placa).Count() > 0)
+			{
+			int contadorInvolucrados = 0;
+			foreach (var involucrado in Model.Involucrados.Where(w => w.Placa == item.Placa))
+			{
+			if (contadorInvolucrados == 0)
+			{
+			<tr>
+			<td rowspan="@rowspan"><p class="s2">@contadorVehiculo</p></td>
+			<td rowspan="@rowspan"><p class="s2">@item.TipoVehiculo</p></td>
+			<td><p class="s2">@involucrado.nombre</p></td>
+			<td><p class="s2">@involucrado.Sexo</p></td>
+			<td><p class="s2">@(string.IsNullOrEmpty(involucrado.FormatDateNacimiento) ? "-" : (DateTime.Now.Year - Convert.ToDateTime(involucrado.FormatDateNacimiento).Year))</p></td>
+			<td><p class="s2">@involucrado.Direccion</p></td>
+			<td><p class="s2">@involucrado.EstadoVictima</p></td>
+			<td><p class="s2">@involucrado.NombreHospital</p></td>
+			</tr>
+			contadorInvolucrados++;
+			}
+			else
+			{
+			<tr>
+			<td><p class="s2">@involucrado.nombre</p></td>
+			<td><p class="s2">@involucrado.Sexo</p></td>
+			<td><p class="s2">@(string.IsNullOrEmpty(involucrado.FormatDateNacimiento) ? "-" : (DateTime.Now.Year - Convert.ToDateTime(involucrado.FormatDateNacimiento).Year))</p></td>
+			<td><p class="s2">@involucrado.Direccion</p></td>
+			<td><p class="s2">@involucrado.EstadoVictima</p></td>
+			<td><p class="s2">@involucrado.NombreHospital</p></td>
+			</tr>
+			}
+			}
+			}
+			else
+			{
+			<tr>
+			<td><p class="s2">@contadorVehiculo</p></td>
+			<td><p class="s2">@item.TipoVehiculo</p></td>
+			<td><p class="s2">-</p></td>
+			<td><p class="s2">-</p></td>
+			<td><p class="s2">-</p></td>
+			<td><p class="s2">-</p></td>
+			<td><p class="s2">-</p></td>
+			<td><p class="s2">-</p></td>
+			</tr>
+			}
+			*@
+			}
+
+		</table>
+		<table class="table">
+			<thead>
+				<tr style="background-color:#e7e7e7">
+					<td colspan="8">
+						<p class="s3">
+							
+						</p>
+					</td>
+				</tr>
+			</thead>
+			<tr>
+				<td><p class="s5">TOTAL DE LESIONADOS</p></td>
+				<td><p class="s2">@totaLesionados</p></td>
+				<td><p class="s5">TOTAL DE MUERTOS</p></td>
+				<td colspan="2"><p class="s2">@totalMuertos</p></td>
+				<td colspan="2"><p class="s5">TOTAL SIN LESIÓN</p></td>
+				<td><p class="s2">@totalSinLesion</p></td>
+			</tr>
+		</table>
+		<br /><br />
+		<table class="table">
+			<thead>
+				<tr style="background-color:#e7e7e7">
+					<td colspan="8">
+						<p class="s3">
+							DAÑOS MATERIALES
+						</p>
+					</td>
+				</tr>
+			</thead>
+			<tr>
+				<td><p class="s5">VEH.</p></td>
+				<td><p class="s5">PLACAS</p></td>
+				<td><p class="s5">SERIE</p></td>
+				<td><p class="s5">MARCA</p></td>
+				<td><p class="s5">SUBMARCA</p></td>
+				<td><p class="s5">TIPO</p></td>
+				<td><p class="s5">COLOR</p></td>
+				<td><p class="s5">MONTO DAÑOS</p></td>
+			</tr>
+			@{
+				contadorVehiculo = 0;
+			}
+			@foreach (var item in Model.VehiculosInvolucrados)
+			{
+				contadorVehiculo++;
+				<tr>
+					<td><p class="s2">@item.numeroConsecutivo</p></td>
+					<td><p class="s2">@item.Placa</p></td>
+					<td><p class="s2">@item.Serie</p></td>
+					<td><p class="s2">@item.Marca</p></td>
+					<td><p class="s2">@(item.Submarca==null?"":item.Submarca.ToUpper())</p></td>
+					<td><p class="s2">@item.TipoVehiculo</p></td>
+					<td><p class="s2">@item.Color</p></td>
+					<td><p class="s2">@(String.Format("{0:C}", item.montoVehiculo))</p></td>
+				</tr>
+			}
+			<tr>
+				<td colspan="6"><p><br /><br /></p></td>
+				<td><p class="s5">TOTAL DE DAÑOS A VEHÍCULOS:</p></td>
+				<td><p class="s2">@(String.Format("{0:C}", Model.VehiculosInvolucrados.Sum(s => s.montoVehiculo)))</p></td>
+			</tr>
+			<tr>
+				<td><p class="s5">DAÑOS AL CAMINO:</p></td>
+				<td><p class="s2">@($"{Model.ParteAccidenteComplemento.montoCamino:n}")</p></td>
+				<td><p class="s5">DAÑOS A LA CARGA:</p></td>
+				<td><p class="s2">@($"{Model.ParteAccidenteComplemento.montoCarga:n}")</p></td>
+				<td><p class="s5">DAÑOS PROPIETARIOS:</p></td>
+				<td><p class="s2">@($"{Model.ParteAccidenteComplemento.montoPropietarios:n}")</p></td>
+				<td><p class="s5">OTROS DAÑOS:</p></td>
+				<td><p class="s2">@($"{Model.ParteAccidenteComplemento.montoOtros:n}")</p></td>
+			</tr>
+		</table>
+		<br /><br />
+
+		<table class="table">
+			<thead>
+				<tr style="background-color:#e7e7e7">
+					<td colspan="3">
+						<p class="s3">
+							INFRACCIONES
+						</p>
+					</td>
+				</tr>
+			</thead>
+			@{
+				contadorVehiculo = 0;
+			}
+			<tr>
+				<td><p style="width:10px!important">VEH.</p></td>
+				<td><p style="width:100px!important">No. DE FOLIO Y GARANTÍA</p></td>
+				<td><p style="width:100px!important">CONCEPTO</p></td>
+			</tr>
+
+			@foreach (var item in Model.Infracciones)
+			{
+				int rowspan = Model.MotivosInfraccion.Where(w => w.idInfraccion == item.IdInfraccion).SelectMany(sm => sm.Motivos).Count();
+				contadorVehiculo++;
+
+				@if (Model.MotivosInfraccion.Where(w => w.idInfraccion == item.IdInfraccion).SelectMany(sm => sm.Motivos).Count() > 0)
+				{
+					int contadorInfracciones = 1;
+					foreach (var motivo in Model.MotivosInfraccion.Where(w => w.idInfraccion == item.IdInfraccion).SelectMany(sm => sm.Motivos))
+					{
+						if (contadorInfracciones == 1)
+						{
+							<tr>
+								<td rowspan="@rowspan" style="width:12px!important"><p>@item.numeroConsecutivo</p></td>
+								<td rowspan="@rowspan" style="width:100px!important"><p>@item.folioInfraccion (@(item.garantia==null?"":item.garantia.ToUpper()))</p></td>
+								<td><p style="width:100px!important">@(contadorInfracciones+". "+(motivo==null?"":motivo.ToUpper()))</p></td>
+							</tr>
+							contadorInfracciones++;
+						}
+						else
+						{
+							<tr>
+								<td><p>@(contadorInfracciones+". "+(motivo==null?"":motivo.ToUpper()))</p></td>
+							</tr>
+						}
+					}
+				}
+				else
+				{
+					<tr>
+						<td><p style="width:10px!important">@item.numeroConsecutivo</p></td>
+						<td><p style="width:100px!important">@item.folioInfraccion (@(item.garantia==null?"":item.garantia.ToUpper()))</p></td>
+						<td><p  style="width:100px!important">---</p></td>
+					</tr>
+				}
+
+			}
+		</table>
+		<br />
+
+		<br />
+		<table class="table">
+			<thead>
+				<tr style="background-color:#e7e7e7">
+					<td colspan="8">
+						<p class="s3">
+							COMPETENCIA MINISTERIAL
+						</p>
+					</td>
+				</tr>
+			</thead>
+			<tr>
+				<td colspan="2"><p class="text-start s5">A DISPOSICIÓN DE:</p></td>
+				<td colspan="2"><p class="s2">@(string.IsNullOrEmpty(Model.ADisposicion) ? "-" : Model.ADisposicion.ToUpper())</p></td>
+				<td colspan="2"><p class="text-start s5">ENTREGADO A:</p></td>
+				<td colspan="2"><p class="s2">@(string.IsNullOrEmpty(Model.entregadoA) ? "-" : Model.entregadoA.ToUpper())</p></td>
+			</tr>
+			<tr>
+				<td colspan="2"><p class="text-start s5">PROCEDE LA CONSIGNACIÓN DE LOS HECHOS AL C:</p></td>
+				<td colspan="2"><p class="s2">@(!string.IsNullOrEmpty(Model.ParteAccidenteComplemento.consignacionHechos) ? Model.ParteAccidenteComplemento.consignacionHechos : "-")</p></td>
+				<td colspan="2"><p class="text-start s5">CON SEDE:</p></td>
+				<td colspan="2"><p class="s2">@(string.IsNullOrEmpty(Model.sede) ? "-" : Model.sede)</p></td>
+			</tr>
+			<tr>
+				<td colspan="2"><p class="text-start s5">CONVENIO:</p></td>
+				<td colspan="2"><p class="s2">@(Model.ParteAccidenteComplemento.convenioBool ? "SI" : "NO")</p></td>
+				<td colspan="2"><p class="text-start s5">OBSERVACIONES CONVENIO:</p></td>
+				<td colspan="2"><p>@(!string.IsNullOrEmpty(Model.ParteAccidenteComplemento.observacionesConvenio) ? Model.ParteAccidenteComplemento.observacionesConvenio : "-")</p></td>
+			</tr>
+		</table>
+		<br />
+
+		<br />
+		<table class="table">
+			<thead>
+				<tr style="background-color:#e7e7e7">
+					<td colspan="4">
+						<p class="s3">
+							CONSIGNACIÓN
+						</p>
+					</td>
+				</tr>
+			</thead>
+			<tr>
+				<td><p class="s5">ELABORA CONSIGNACIÓN:</p></td>
+				<td><p class="s2">@(string.IsNullOrEmpty(Model.ElaboraConsignacion) ? "-" : Model.ElaboraConsignacion)</p></td>
+				<td><p class="s5">No. DE OFICIO:</p></td>
+				<td><p class="s2">@(string.IsNullOrEmpty(Model.NoOficio) ? "-" : Model.NoOficio)</p></td>
+			</tr>
+			<tr>
+				<td><p class="s5">AGENCIA DE MINISTERIO QUE RECIBE:</p></td>
+				<td><p class="s2">@(string.IsNullOrEmpty(Model.AgenciaRecibe) ? "-" : Model.AgenciaRecibe)</p></td>
+				<td><p class="s5">RECIBE:</p></td>
+				<td><p class="s2">@(string.IsNullOrEmpty(Model.recibe) ? "-" : Model.recibe)</p></td>
+			</tr>
+		</table>
+		<br />
+
+		<br />
+		<table class="table">
+			<thead>
+				<tr style="background-color:#e7e7e7">
+					<td colspan="2">
+						<p class="s3">
+							VALIDACIÓN DEL PARTE DE ACCIDENTE
+						</p>
+					</td>
+				</tr>
+			</thead>
+			<tr>
+				<td><p class="text-end s5">ELABORA:</p></td>
+				<td><p class="s2">@(string.IsNullOrEmpty(Model.Elabora) ? "-" : Model.Elabora)</p></td>
+			</tr>
+			<tr>
+				<td><p class="text-end s5">SUPERVISOR:</p></td>
+				<td><p class="s2">@(string.IsNullOrEmpty(Model.Supervisor) ? "-" : Model.Supervisor)</p></td>
+			</tr>
+			<tr>
+				<td><p class="text-end s5">AUTORIZA:</p></td>
+				<td><p class="s2">@(string.IsNullOrEmpty(Model.Autoriza) ? "-" : Model.Autoriza)</p></td>
+			</tr>
+		</table>
+		<table class="no-border" style="width: 100%; margin-top:20px">
+			<tr class="no-border">
+				<td class="no-border" colspan="2" style="text-align:center">
+					<h1>RESPETUOSAMENTE</h1>
+					@if (!string.IsNullOrWhiteSpace(Model.ElaboraFirmaBase64))
+					{
+						<span style="padding:5px; margin-top:5px"><img class="firma-oficial" src="data:image/png;base64,@Model.ElaboraFirmaBase64" /></span>
+					}					
+					<h1>@Model.Elabora</h1>					
+					<h1>@Model.ElaboraPuesto</h1>
+				</td>
+			</tr>
+			<tr class="no-border">
+				<td class="no-border" style="text-align: center; vertical-align: top">
+					<h1>SUPERVISÓ</h1>
+					@if (!string.IsNullOrWhiteSpace(Model.SupervisorFirmaBase64))
+					{
+						<span style="padding:5px; margin-top:5px"><img class="firma-oficial" src="data:image/jpg;base64,@Model.SupervisorFirmaBase64" /></span>
+					}
+					<h1>@Model.Supervisor</h1>					
+					<h1>@Model.SupervisorPuesto</h1>
+				</td>
+				<td class="no-border" style="text-align: center; vertical-align: top">
+					<h1>Vo.Bo.</h1>
+					@if (!string.IsNullOrWhiteSpace(Model.AutorizaFirmaBase64))
+					{
+						<span style="padding:5px; margin-top:5px"><img class="firma-oficial" src="data:image/png;base64,@Model.AutorizaFirmaBase64" /></span>
+					}					
+					<h1>@Model.Autoriza</h1>					
+					<h1>@Model.AutorizaPuesto</h1>
+				</td>
+			</tr>
+		</table>				
+	</div>
+
+
+</body>
+</html>

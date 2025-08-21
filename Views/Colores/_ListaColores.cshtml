@@ -1,0 +1,130 @@
+﻿<script>
+    function filtroColores() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+
+</script>
+  @if (ViewBag.Admin == true)
+{
+    <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+        <div class="row">
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnNuevaDep" onclick="mostrarModalColor()">
+                        <h6 class="m-0 d-flex align-items-center">
+                            <i class="icon-addColor h5 mb-0 me-2"></i><b>Agregar nuevo color</b></h6>
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.ColoresModel>()
+            .Name("gridCatColores")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdColor).Title("Id").Width(20);
+                columns.Bound(c => c.color).Title("Color").Width(100);
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(100);
+                columns.Command(c => c.Custom("Editar").Click("getIdColor")).Width(100);
+               // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+
+                //columns.Command(c => c.Custom("Delete").Click("redirectDelete")).Width(180);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetCols", "Colores").Data("filtroColores"))
+            .PageSize(5)
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.color);
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+    </div>
+</div>
+
+ <div class="modal fade modalCustom" id="addColor"  aria-labelledby="addColorLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-body" id="ModalBodyCreate">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+ <script>
+    function getIdColor(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var Id = dataItem.IdColor;
+        console.log(Id);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcial", "Colores")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data:  {Id:Id}, // Datos que se enviarán al controlador
+            success: function(result) {
+                $('#ModalBodyCreate').html(result);
+                $('#addColor').modal('show');
+            hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+    })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdColor = dataItem.IdColor;
+        console.log(IdColor);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarColorParcial", "Colores")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdColor: IdColor }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCreate').html(result);
+                $('#addColor').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+ </script>

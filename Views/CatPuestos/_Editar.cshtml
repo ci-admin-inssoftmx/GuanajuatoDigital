@@ -1,0 +1,187 @@
+﻿@model GuanajuatoAdminUsuarios.Models.Catalogos.Puestos.PuestoModel
+@{
+    @inject GuanajuatoAdminUsuarios.Helpers.UserSession UserSession;
+    var isAdmin = UserSession.IsAdmin();
+}
+
+<section class="bg-white rounded">
+	<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-puestos h1 colorPrimary"></i>
+                </div>                                                                                                                                                                                  
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Editar puesto</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>            
+        </div>
+	</div>
+	<div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+    </div>
+	<div class="row">
+        <div class="col-12 my-2">
+            <h5 class="px-4"><b> Datos del puesto.</b></h5>
+            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+        </div>
+    </div>
+	<form id="editarPuestoForm">
+        @Html.HiddenFor(t => t.Id)
+        <div class="row justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12">
+                <div id="errorMessages" class="alert alert-danger d-none"></div>
+            </div>
+            <div class="controlForm my-3 col-12 col-md-6 col-lg-6">
+                <span>
+                    @(Html.Kendo().TextBoxFor(t => t.Puesto)
+                        .Label(l => l.Content("Nombre del puesto (obligatorio):"))
+                        .Placeholder("Ingrese un nombre")
+                        .HtmlAttributes(new { style = "width: 100%", Id = "nombre", required = "required" })
+                    )
+                    @Html.ValidationMessageFor(t => t.Puesto, "", new { @class = "k-form-error k-invalid-msg field-validation-error" })
+                </span>
+            </div>
+            @if (isAdmin)
+            {
+                <div class="controlForm my-3 col-12 col-md-6 col-lg-6">
+                    <label>Delegación (obligatorio):</label>
+                    @(Html.Kendo().DropDownListFor(x => x.IdDelegacion)
+                        .NoDataTemplate("No se encontraron datos")
+                        .Filter(FilterType.Contains)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("Selecciona la delegación")
+                        .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "idDelegacion", required = "required" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetDelegacionesOficinasDropDownList", "CatPuestos");
+                            });
+                        }))
+                    @Html.ValidationMessageFor(t => t.Delegacion, "", new { @class = "k-form-error k-invalid-msg field-validation-error" })
+                </div>
+            }
+            else
+            {
+                @Html.HiddenFor(t => t.IdDelegacion)
+            }
+        </div>   
+        <div class="row col-12 px-4 px-md-4 pt-3 pb-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextAreaFor(t => t.Descripcion)
+                    .Label(label => label.Content("Descripción del puesto:"))
+                    .Rows(3)
+                    .MaxLength(500)
+                    .HtmlAttributes(new { style = "width: 100%", data_max_msg = "500 caracteres máximo" })
+                    )
+            </div>            
+        </div>
+    </form>
+	<div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="editarPuesto()">
+                        @(Html.Kendo().Button()
+                            .Name("editarPuestoCommand")
+                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                            .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                    </div>
+                </div>
+            </div>        
+        </div>
+    </div>
+</section>
+
+
+<script>
+    $(document).ready(function () {
+        let form = $("#editarPuestoForm");
+        form.kendoValidator({
+            messages: {
+                required: "El campo es obligatorio"                
+            },
+            rules: {
+                required: function (input) {
+                    if (input.is("[required]")) {
+                        return input.val().trim() !== "";
+                    }
+                    return true;
+                }
+            },
+            highlight: function (element) {
+                $(element).addClass("k-invalid"); 
+            },
+            unhighlight: function (element) {
+                $(element).removeClass("k-invalid"); 
+            }
+        }).data("kendoValidator");                 
+    });
+    
+    function editarPuesto() {
+        let form = $("#editarPuestoForm");
+        
+        var validator = form.data("kendoValidator");
+        var isValid = validator.validate();
+        if (!isValid) {
+            form.find("label[for='nombre']").removeClass("k-text-error");
+            return;
+        }
+
+        let errorMessages = $("#errorMessages");
+        errorMessages.empty();
+        errorMessages.addClass("d-none");
+        showLoading();
+
+        $.ajax({
+            url: '@Url.Action("Edit", "CatPuestos")',
+            type: 'PUT',
+            data: form.serialize(),            
+            success: function (result) {
+                sitteg_success(`Puesto '${result.Puesto}' actualizado en delegación ${result.Delegacion}`);
+                var grid = $("#puestosGrid").data("kendoGrid");
+                grid.dataSource.read();
+                $('#editarPuestoModal').modal('hide');                
+            }, error: function (xhr) {
+                if (xhr.status !== 400) {
+                    sitteg_warning("Ocurrió un error al procesar su solicitud.");
+                    return;
+                }
+                try {
+                    var result = JSON.parse(xhr.responseText);
+                    if (result.errors) {
+                        result.errors.forEach(function (error) {
+                            errorMessages.append("<p>" + error + "</p>");
+                        });
+                        errorMessages.removeClass("d-none");
+                        return;
+                    }
+
+                    $("#editarPuestoModalBody").html(xhr.responseText);
+                } catch {
+                    $("#editarPuestoModalBody").html(xhr.responseText);
+                }
+                
+            },
+            complete: function() {
+                hideLoading();
+            }
+        });
+    }    
+</script>

@@ -1,0 +1,114 @@
+﻿@model List<VehiculoModel>
+@using Microsoft.AspNetCore.Http;
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var folioSolicitud = ViewData["folioSolicitud"];   
+}
+<div class="row justify-content-between my-2 mb-1 titleCustom">
+    <div class="col-12 mt-4 mb-2">
+        <h5 class="px-4"><b>Listado de vehículos</b></h5>
+        <h6 class="ps-4 text-muted">Marque el vehículo para ingresar a depósito.</h6>
+    </div>
+</div>
+<div class="col-12 mb-4 rounded gridCustom">
+    @(
+        Html.Kendo().Grid(Model)
+        .Name("gridVehiculos")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.idPersona).Hidden();
+            columns.Bound(c => c.idVehiculo).Hidden();
+            columns.Select().Width(50).ClientHeaderTemplate(" ");
+            columns.Bound(c => c.placas).Title("Placas").Width(100);
+            columns.Bound(p => p.serie).Title("Serie").Width(90);
+            columns.Bound(p => p.tarjeta).Title("Tarjeta").Width(90);
+            columns.Bound(p => p.marca).Title("Marca").Width(90);
+            columns.Bound(c => c.submarca).Title("Submarca").Width(90);
+            columns.Bound(c => c.modelo).Title("Modelo").Width(90);
+            columns.Bound(p => p.propietario).Title("Propietario").Width(90);
+            columns.Bound(c => c.numeroEconomico).Title("Número Económico").Width(90);
+            columns.Bound(c => c.entidadRegistro).Title("Entidad Registro").Width(90);
+            columns.Bound(c => c.tipoVehiculo).Title("Tipo").Width(90);
+        }).HtmlAttributes(new { style = "height:auto" })
+        .EnableCustomBinding(true)
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read
+                .Action("GetAllVehiculosPagination", "Depositos")
+                .Data("applySearchFilter"))
+            .PageSize(10)
+        )
+        .Pageable(p => p.Enabled(true))
+        .Sortable()
+        .Scrollable(scr => scr.Enabled(true))
+        .ToolBar(t => t.Custom().Text("Buscar...").Name("search"))
+        .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+        )
+    @(Html.Kendo().Tooltip()
+        .For("#gridVehiculos")
+        .Filter("th")
+        .Position(TooltipPosition.Top)
+        .ContentHandler("tooltipContent")
+        )
+</div>
+
+<script>
+    function goToAsignacionGrua() {
+        window.location.href = "/AsignacionGruas/DatosGruas?folio=@folioSolicitud&iPg=2";
+    }
+
+    function updateDepositoVehiculo(idVehiculo) {
+        showLoading();
+        $.ajax({
+            url: "/Depositos/CambiarVehiculoSolicitudDeposito",
+            type: "PUT",
+            data: { folioSolicitud: "@folioSolicitud", idVehiculo: idVehiculo },
+            success: function (data) {
+                goToAsignacionGrua();
+            },
+            error: function() {
+                sitteg_warning("Ocurrió un error, inténtelo más tarde");
+            },
+            complete: function() {
+                hideLoading();
+            }
+        });        
+    }
+
+    function onClickVehiculo(e) {
+        var grid = $("#gridVehiculos").data("kendoGrid");
+        var row = $(e.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+
+        var idVehiculo = dataItem.idVehiculo;
+        
+        updateDepositoVehiculo(idVehiculo);                
+    };
+
+
+    $(document).ready(function () {
+        var grid = $("#gridVehiculos").data("kendoGrid");
+        grid.tbody.on("click", ".k-checkbox", onClickVehiculo);        
+        grid.tbody.on("click", ".k-checkbox", function (e) {
+            var row = $(e.target).closest("tr");
+
+            grid.clearSelection();
+            grid.select(row);
+
+            grid.tbody.find(".k-checkbox").each(function () {
+                if ($(this).closest("tr").is(row)) {
+                    $(this).attr("aria-checked", "true");
+                } else {
+                    $(this).attr("aria-checked", "false");
+                }
+            });
+            
+            e.stopPropagation();
+        });
+    })
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }    
+</script>

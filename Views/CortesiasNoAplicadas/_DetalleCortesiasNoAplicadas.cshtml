@@ -1,0 +1,146 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CortesiasNoAplicadasModel
+
+<div class="col-12 col-md-12">
+
+	@if (Model != null)
+	{
+		<input type="hidden" id="folio_infraccion" value="@Model.folioInfraccion" />
+		<div>
+			<div class="col-12 col-md-auto mt-4 mb-2">
+				<h5 class="px-4"><b>Datos de la Infracción:</b> @Model.folioInfraccion</h5>
+			</div>
+			<div class="row">
+
+
+				<div class="col-md-3">
+					<h6 class="px-4 text-muted" id="folio_infraccion"><b>Folio: </b>@Model.folioInfraccion</h6>
+					<h6 class="px-4 text-muted"><b>Municipio: </b> @Model.Municipio</h6>
+					<h6 class="px-4 text-muted"><b>Delegación: </b>@Model.Delegacion</h6>
+					<h6 class="px-4 text-muted"><b>Oficial: </b>@Model.Oficial</h6>
+					<!--<h6 class="px-4 text-muted"><b>Camino:</b>@Model.Camino</h6>-->
+					<h6 class="px-4 text-muted"><b>Tramo: </b> @Model.Tramo</h6>
+					<h6 class="px-4 text-muted"><b>Kilómetro: </b>@Model.KmCarretera</h6>
+					<h6 class="px-4 text-muted"><b>Conductor: </b>@Model.Conductor</h6>
+					<h6 class="px-4 text-muted"><b>Vehículo: </b>@Model.Vehiculo</h6>
+				</div>
+				<div class="col-md-3">
+					<h6 class="px-4 text-muted"><b>Tipo de Aplicación: </b>@Model.TipoAplicacion</h6>
+					<h6 class="px-4 text-muted"><b>Tipo de Cortesía: </b> @Model.TipoCortesia </h6>
+					<h6 class="px-4 text-muted"><b>Calificación total: </b>@Model.CalificacionTotal</h6>
+					<h6 class="px-4 text-muted"><b>Tipo de garantía: </b>@Model.TipoGarantia</h6>
+					<h6 class="px-4 text-muted"><b>Tipo de placa : </b>@Model.TipoPlaca</h6>
+					<h6 class="px-4 text-muted"><b>Placas: </b>@Model.Placas</h6>
+					<h6 class="px-4 text-muted"><b>Tipo de licencia: </b>@Model.TipoLicencia</h6>
+					<h6 class="px-4 text-muted"><b>Licencia: </b>@Model.Licencia</h6>
+					<h6 class="px-4 text-muted"><b>Tarjeta: </b>@Model.Tarjeta</h6>
+					<h6 class="px-4 text-muted"><b>Serie: </b>@Model.Serie</h6>
+				</div>
+				<div class="col-md-3">
+					<h6 class="px-4 text-muted"><b>Archivo inventario: </b>@Model.ArchivoInventario</h6>
+					<h6 class="px-4 text-muted"><b>Fecha vencimiento: </b>
+						@(Model.FechaVencimiento.HasValue && Model.FechaVencimiento != DateTime.MinValue ? Model.FechaVencimiento.Value.ToString("dd/MM/yyyy") : "-")
+						</h6>
+					<h6 class="px-4 text-muted"><b>Monto calificación: </b>$@(Model.totalInfraccion.ToString("###,###,###.00"))</h6>
+					<h6 class="px-4 text-muted"><b>Monto pagado: </b>@Model.MontoPagado</h6>
+					<h6 class="px-4 text-muted"><b>Recibo: </b>@Model.Recibo</h6>
+					<h6 class="px-4 text-muted">
+						<b>Fecha de pago: </b>
+						@(Model.FechaPago.HasValue && Model.FechaPago != DateTime.MinValue ? Model.FechaPago.Value.ToString("dd/MM/yyyy") : "-")
+					</h6>
+					<h6 class="px-4 text-muted"><b>Lugar de pago: </b>@Model.LugarPago</h6>
+					<h6 class="px-4 text-muted"><b>Oficio condonación: </b>@Model.OficioConDonacion</h6>
+					<h6 class="px-4 text-muted"><b>Placas del vehículo: </b>@Model.Placas</h6>
+				</div>
+				<div class="col-md-3">
+					<h6 class="px-4 text-muted"><b>Tarjeta del vehículo:</b>@Model.Tarjeta</h6>
+					<h6 class="px-4 text-muted"><b>Propietario:</b> @Model.Propietario</h6>
+					<h6 class="px-4 text-muted"><b>Concepto infracción:</b>@Model.Observaciones</h6>
+					<h6 class="px-4 text-muted"><b>Estatus:</b>@Model.Estatus</h6>
+					<!--<h6 class="px-4 text-muted"><b>Capturista:</b>@Model.Capturista</h6>-->
+					<!--<h6 class="px-4 text-muted"><b>Baja:</b>@Model.Baja</h6>-->
+					<h6 class="px-4 text-muted"><b>Fecha:</b> @Model.FechaInfraccion</h6>
+
+				</div>
+
+
+			</div>
+
+		</div>
+
+	}
+
+	<form id="ObservacionesForm" class="row px-4 mb-4 align-items-end justify-content-center">
+
+
+		<div class="row">
+			<div class="col-md-6">
+				<h6 class="px-4 text-muted"><b>Concepto infracción:</b> @(Model?.Observaciones ?? "")</h6>
+			</div>
+		</div>
+		<br />
+		<div class="row">
+			@Html.HiddenFor(m => m.folioInfraccion)
+			<div class="col-md-6">
+				<label for="Observaciones">Observaciones</label>
+				<textarea id="ObservacionesSub" name="ObservacionesSub" placeholder="Ingrese sus observaciones" class="form-control"></textarea>
+			</div>
+		</div>
+
+		
+	</form>
+	<div class="col-md-3">
+		<div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+			<div class="controlButton">
+				<button class="btnPrimary my-sm-3" id="btncrearnoInf" onclick="guardar()">
+					<h5><b>Guardar</b></h5>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+
+
+	function guardar() {
+
+		var folio = $("#folio_infraccion").val();
+		var Mydata = $("#ObservacionesForm").serialize();
+		var controlsValidate = [];
+		var isValid = true;
+
+		controlsValidate.push({ 'controlName': 'ObservacionesSub' });
+
+		// INPUTS
+		if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+		if (!isValid) {
+			sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+			return;
+		}
+		$("#btncrearnoInf").prop("disabled",true)
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("GuardarObservaciones", "CortesiasNoAplicadas")',
+			type: 'POST',
+			data: Mydata,
+			success: function (result) {
+				sitteg_success('La observación se ha guardado exitosamenten.');
+				
+				setTimeout(()=>{
+					hideLoading();
+					location.reload()
+
+				},1500)
+				
+
+			},
+			error: function (error) {
+				sitteg_warning('Sucedió un error, intente mas tarde...');
+				hideLoading();
+			}
+		});
+	}
+
+</script>
+

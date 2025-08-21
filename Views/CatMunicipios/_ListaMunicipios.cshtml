@@ -1,0 +1,112 @@
+﻿<script>
+    function returnData() {
+        var nombre = $("#Municipio2").val();
+        var idEntidad = $("#IdEntidad2").val();
+        var IdOficinaTransporte = $("#IdOficinaTransporte2").val();
+        var idDependencia = $("#idDependenciaFiltro").val();
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return { nombre: nombre, idEntidad: idEntidad, IdOficinaTransporte: IdOficinaTransporte, idDependencia: idDependencia }
+    }
+</script>
+
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @if (ViewBag.Admin == true)
+        {
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button onclick="mostrarModalAgregarMunicipio()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addMunicipio h5 mb-0 me-2"></i><b>Agregar nuevo municipio</b></h6>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatMunicipiosModel>()
+            .Name("gridMunicipios")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdMunicipio).Title("Id").Width(80);
+                columns.Bound(c => c.Municipio).Width(100);
+                columns.Bound(c => c.abreviatura).Title("Abreviatura").Width(100);
+                columns.Bound(c => c.nombreEntidad).Title("Entidad").Width(100);
+                columns.Bound(c => c.nombreOficina).Title("Delegación").Width(100);
+
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(100);
+               // columns.Command(c => c.Custom("Editar").Click("editarMunicipio")).Width(100);
+                columns.Template("<button data-bs-toggle='modal' class='w-100 btn'><h6 class='m-0 colorPrimary' onclick='editarMunicipioMod(event)'><i class='h5 icon-edit me-2'></i><b>Editar</b></h6></button>").Width(100);
+
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetMun", "CatMunicipios").Data("returnData"))
+            .PageSize(5)
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.Municipio);
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#gridMunicipios")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+    </div>
+</div>
+<div class="modal fade modalCustom" id="agregarMunicipio" aria-labelledby="agregarMunicipioLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyMunicipio">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function editarMunicipioMod(event) {
+        var grid = $("#gridMunicipios").data("kendoGrid");
+        var row = $(event.target).closest("tr");
+        var dataItem = grid.dataItem(row);
+        var IdMunicipio = dataItem.IdMunicipio;
+        console.log("UJ",dataItem);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarMunicipioModal", "CatMunicipios")',
+            type: 'POST', 
+            data: { IdMunicipio: IdMunicipio }, 
+            success: function (result) {
+                $('#ModalBodyMunicipio').html(result);
+                $('#agregarMunicipio').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

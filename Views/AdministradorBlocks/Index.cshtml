@@ -1,0 +1,152 @@
+﻿@model List<GuanajuatoAdminUsuarios.Models.AppSettingsModel>
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<div class="mainContainer bg-light">
+
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon icon-bloc h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Administración de blocs</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button onclick="mostrarModalAgregar()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addBloc h5 mb-0 me-2"></i><b>Agregar Bloc</b></h6>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 mb-4 px-4 rounded gridCustom">
+                <div class="row justify-content-between mb-1 titleCustom">
+                    <div class="col-12 col-md-auto mt-4 mb-2">
+                        <h5 class="px-4"><b>Listado de Blocs</b></h5>
+                        <h6 class="px-4 text-muted">Edita los Blocs.</h6>
+                    </div>
+                </div>
+                <div id="tablaServices">
+
+                    <div class="row">
+                        <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+                            @(
+                                Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.AdminBlocksModel>()
+                                .Name("gridCatWS")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(i => i.Id).Hidden();
+                                    columns.Bound(c => c.Corporacion).Title("Corporación").Width(100);
+                                    columns.Bound(c => c.prefijoInfracciones).Title("Prefijo Infracciones").Width(100);
+                                    columns.Bound(c => c.infraccion).Title("Infracciones").Width(100);
+                                    columns.Bound(c => c.accidentes).Title("Accidentes").Width(100);
+                                    columns.Bound(c => c.depositos).Title("Depósitos").Width(100);
+                                    columns.Command(c => c.Custom("Editar").Click("editarInfo")).Width(100);
+                                }).HtmlAttributes(new { style = "height:550px" })
+                                .Sortable()
+                                //.Groupable()
+                                .Scrollable()
+                                .Pageable()
+                                .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .Read(read => read.Action("GetDataGrid", "AdministradorBlocks"))
+                                .PageSize(5).Model(model => model.Id(p => p.Id))
+                                )
+                                .ToolBar(t => t.Search().Text("Buscar..."))
+                                .Search(s =>
+                                {
+                                    s.Field(c => c.Corporacion);
+
+                                })
+                                .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+                                )
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade modalCustom" id="modalWS" aria-labelledby="agregarEntidadLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-body" id="ModalBodyWS">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-----------------------------------------------------------UPDATE--------------------------------------------------------------------------------------------->
+        <div class="modal fade modalCustom" id="editarEntidad" aria-labelledby="editarEntidadLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-body" id="ModalBodEditarEntidad">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</div>
+
+<script>
+    function editarInfo(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var idService = dataItem.Id;
+        showLoading();
+
+        $.ajax({
+            url: '@Url.Action("EditarAlertamientoModal", "AdministradorBlocks")',
+            type: 'POST',
+            data: { idService: idService },
+            success: function (result) {
+                $('#ModalBodyWS').html(result);
+                $('#modalWS').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+
+
+</script>
+
+<script>
+    function mostrarModalAgregar() {
+        $.ajax({
+            url: '@Url.Action("CrearServiceModal")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyWS').html(data);
+                $('#modalWS').modal('show');
+            }
+        });
+    }
+
+
+</script>

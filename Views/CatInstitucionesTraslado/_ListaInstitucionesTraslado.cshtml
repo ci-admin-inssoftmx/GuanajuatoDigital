@@ -1,0 +1,131 @@
+﻿<script>
+    function filtroInstituciones() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+
+</script>
+  @if (ViewBag.Admin == true)
+        {
+    <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+        <div class="row">
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <button href="#" id="btnNuevaInst" onclick="mostrarModalInstTraslado()">
+                    <h6 class="m-0 d-flex align-items-center"><i class="icon-addTraslado h5 mb-0 me-2"></i><b>Agregar nueva institución traslado</b></h6>
+                </button>
+            </div>
+        </div>
+    </div>
+        }
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatInstitucionesTrasladoModel>()
+            .Name("gridCatInstitucionesTraslado")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdInstitucionTraslado).Width(20).Title("Id");
+                columns.Bound(c => c.InstitucionTraslado).Title("Institucion").Width(100);
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(100);
+                columns.Command(c => c.Custom("Editar").Click("getIdInst")).Width(100);
+               // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+
+                //columns.Command(c => c.Custom("Delete").Click("redirectDelete")).Width(180);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetInstTraslado", "CatInstitucionesTraslado").Data("filtroInstituciones"))
+            .PageSize(5).Model(model => model.Id(p => p.IdInstitucionTraslado))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.InstitucionTraslado);
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(x => x.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+
+    </div>
+</div>
+
+<div class="modal fade modalCustom" id="agregarInstTraslado" aria-labelledby="agregarInstTrasladoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyaAgregarInstTraslado">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function getIdInst(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdInstitucionTraslado = dataItem.IdInstitucionTraslado;
+                var Corp = dataItem.Corp;
+
+        console.log(IdInstitucionTraslado);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarInstitucionTrasladoModal", "CatInstitucionesTraslado")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdInstitucionTraslado: IdInstitucionTraslado, Corp: Corp }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyaAgregarInstTraslado').html(result);
+                $('#agregarInstTraslado').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdInstitucionTraslado = dataItem.IdInstitucionTraslado;
+        console.log(IdInstitucionTraslado);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarInstitucionTrasladoModal", "CatInstitucionesTraslado")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdInstitucionTraslado: IdInstitucionTraslado }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyaAgregarInstTraslado').html(result);
+                $('#agregarInstTraslado').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

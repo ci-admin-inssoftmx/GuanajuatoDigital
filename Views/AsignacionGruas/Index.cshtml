@@ -1,0 +1,206 @@
+﻿@model GuanajuatoAdminUsuarios.Models.AsignacionGruaModel
+
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+    string folio = ViewBag.FolioSolicitud;
+}
+
+<script>
+
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡El usuario no tiene acceso a esta opción!",
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡El usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+</script>
+
+<head>
+    <script>
+        function submitSearch() {
+            var Mydata = $("#frmSearch").serialize();
+            var data = {
+                dateBusqueda: $("#dateBusqueda").val(),
+                FolioSolicitud: $("#txtFolio").val()
+            }
+            showLoading();
+            $.ajax({
+                url: '@Url.Action("ajax_BuscarSolicitudes")',
+                data: data,
+                success: (data) => {
+                    console.log("DATA",data)
+                    if (data.error) {
+                        sitteg_warning(data.error);
+                    } else {
+                        if(data.length===0){
+                             sitteg_warning("No se encontraron registros con este folio");
+                        }
+                        var grid = $("#gridBusquedaSolicitudes").data("kendoGrid");
+                        grid.dataSource.data(data);
+                        grid.dataSource.page(1); // Vuelve a la página 1
+                        grid.refresh();
+                    }
+                    hideLoading();
+                },
+                error: function () {
+                    sitteg_warning("Ocurrio un error intetnte mas tarde");
+                    hideLoading();
+                }
+            });
+        }
+
+        function validarFecha() {
+            // Obtener la fecha actual
+            var fechaActual = new Date();
+            var fechaParseo = new Date(parseInt(fechaActual.getFullYear()), parseInt(fechaActual.getMonth()), parseInt(fechaActual.getDate()));
+
+
+            var fechaSeleccionadaString = $("#dateBusqueda").val();
+            var splitFechaSeleccion = fechaSeleccionadaString.split('/')
+            var objetoFecha = !fechaSeleccionadaString ? fechaParseo : new Date(parseInt(splitFechaSeleccion[2]), parseInt(splitFechaSeleccion[1]) - 1, parseInt(splitFechaSeleccion[0]));
+            console.log("objetoFecha:", objetoFecha)
+            console.log("fechaParseo:", fechaParseo)
+           
+        }
+
+        function testKeyDown(e) {
+            var value = e.target.value
+            var key = e.key
+            var keyCode = e.keyCode
+            var pattern = /^[0-3]([0-9](\/([0-1]([0-9](\/([1-2]([0-9]([0-9]([0-9])?)?)?)?)?)?)?)?)?$/
+            var date = value + key
+            var can = pattern.test(date)
+
+            if ([8, 46, 37, 38, 39, 40, 9].indexOf(keyCode) != -1) {
+                return
+            }
+
+            if (can) {
+                if (date.length == 10) {
+                    var splDate = date.split('/')
+                    var newDate = new Date(parseInt(splDate[2]), parseInt(splDate[1]) - 1, parseInt(splDate[0]))
+                    var day = newDate.getDate() < 10 ? "0" + newDate.getDate() : newDate.getDate()
+                    var month = newDate.getMonth() < 9 ? "0" + (parseInt(newDate.getMonth()) + parseInt(1)) : (parseInt(newDate.getMonth()) + parseInt(1))
+                    var year = newDate.getFullYear()
+                    var newStringDate = `${day}/${month}/${year}`
+                    if (day == splDate[0] && month == splDate[1] && year == splDate[2]) {
+                        var NowStr = $("#" + e.target.id).data("kendoDatePicker").dateView._current
+                        console.log(NowStr)
+                        var selectetDay = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+
+                        if (selectetDay > NowStr) {
+                            $("#dateBusqueda").val("")
+                            e.preventDefault()
+                        }
+                    }
+                    else {
+                        $("#dateBusqueda").val("")
+                        e.preventDefault()
+                    }
+                } else if (date.length > 10) e.preventDefault()
+                return
+            }
+            e.preventDefault()
+        }
+
+
+    </script>
+</head>
+<div class="mainContainer bg-light">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-addGrua me-2 h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Asignación de grúas</b></h2>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-auto mt-4 mb-2">
+            <h5 class="px-4"><b>Búsqueda de folio</b></h5>
+            <h6 class="px-4 text-muted">Realiza una búsqueda del folio.</h6>
+        </div>
+        <form id="frmSearch" class="row px-4 mb-4 align-items-end" method="post">
+
+            <div class="col-12 col-md-6 col-lg-3 col-xl-2 ">
+                
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.FolioSolicitud)
+                            .Label(l => l.Content("Folio:"))
+                            .Placeholder("Ingresa folio")
+                            .HtmlAttributes(new { value=ViewBag.FolioSolicitud,style = "width: 100%", Id = "txtFolio" })
+                            
+                            )
+
+                    </div>
+                
+            </div>
+            <div class="col-12 col-md-6 col-lg-3 col-xl-2">
+                 <div class="controlForm my-3 selecciondeFecha">
+                            <label>Fecha:</label>
+                            @(Html.Kendo().DatePickerFor(t => t.fecha)
+                                .Label(l => l.Content("Fecha:"))
+                                .Format("dd/MM/yyyy")
+                                .Culture("es-ES")
+                                .Max(DateTime.Now)
+                                .Events(e =>
+                                {
+                                    e.Change("validarFecha");
+                                })
+                        .HtmlAttributes(new { style = "width: 100%", id = "dateBusqueda", onkeydown = "testKeyDown(event)" })
+
+                        )
+                    </div>
+            </div>
+
+
+            <div class="col-12 col-md-6 col-lg-3 col-xl-2">
+                <div class="controlButton my-3">
+                    <button class="btnPrimary" type="button" onclick="submitSearch()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+                </div>
+            </div>
+            
+
+        </form>
+
+        <div id="ListadoSolicitudes">
+            <partial name="_ListaSolicitudes" model="Model" />
+        </div>
+
+    </section>
+</div>
+
+
+
+
+

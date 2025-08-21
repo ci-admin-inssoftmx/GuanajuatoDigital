@@ -1,0 +1,62 @@
+﻿<script>
+    function filtroLicencia() {
+        var txtLicencia = $("#TxtLicencia").val();
+
+        txtLicencia = txtLicencia ? txtLicencia : null;
+
+        return {
+            txtLicencia: txtLicencia
+        };
+    }
+
+</script>
+<div class="row">
+    <div class="col-6 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.ReportesModel>()
+            .Name("gridMunicipiosColoniasMasInfracciones")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.municipo).Title("Municipio");
+                columns.Bound(c => c.colonia).Title("Colonia");
+                columns.Bound(c => c.cantidadInfracciones).Title("Infracciones").ClientFooterTemplate("Total Infracciones : #=sum#");
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetMunicipiosColoniasConMasInfracciones", "Reportes").Data("filtroLicencia"))
+            .PageSize(10)
+            .Aggregates(aggregates =>
+            {
+                aggregates.Add(c => c.cantidadInfracciones).Sum();
+
+            })
+            )
+            .ToolBar(tools =>
+            {
+                tools.Excel();
+                tools.Search().Text("Buscar...");
+            })
+
+            .Excel(excel => excel
+            .FileName("Reporte_Municipios/Colonia_Mas_Infracciones.xlsx")
+            .Filterable(true)
+            .AllPages(true)
+            .ProxyURL(Url.Action("Excel_Export_Save", "Grid"))
+
+            )
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+    </div>
+</div>

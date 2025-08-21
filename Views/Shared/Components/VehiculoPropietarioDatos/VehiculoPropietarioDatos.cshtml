@@ -1,0 +1,23 @@
+@model GuanajuatoAdminUsuarios.Models.VehiculoModel
+<section>
+        <div id="datosVehiculoPropUbContainer">
+            <div style="width: 50%; float: left;">
+                <h4 class="colorPrimary"><b>Vehículo</b></h4>
+                <p><b>Placa:</b> @Model.placas</p>
+                <p><b>Serie:</b> @Model.serie</p>
+                <p><b>Modelo:</b> @Model.modelo</p>
+                <p><b>Marca:</b> @Model.marca</p>
+                <p><b>Submarca:</b> @Model.submarca</p>
+                <p><b>Tipo de Vehículo:</b> @Model.tipoVehiculo</p>
+                <p><b>Color:</b> @Model.color</p>
+            </div>
+            <div style="width: 50%; float: left;">
+                <h4 class="colorPrimary"><b>Propietario</b></h4>
+                <p><b>Nombre:</b> @Model.propietario</p>
+            <p><b>CURP:</b> @Model.Persona.CURP</p>
+            <p><b>RFC:</b> @Model.Persona.RFC</p>
+
+
+            </div>
+        </div>
+    </section>

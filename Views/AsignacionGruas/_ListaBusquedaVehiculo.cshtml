@@ -1,0 +1,96 @@
+﻿<script>
+    function onRowSelect() {
+        var grid = $("#gridVehiculosDeposito").data("kendoGrid");
+        var selectedRowData = grid.dataItem(grid.select());
+
+        console.log("EE", selectedRowData);
+        document.getElementById("datosVehiculo").style.display = "block";
+        $('#modalVehiculos').modal('hide');
+
+        var jsonData = JSON.stringify(selectedRowData);
+        showLoading();
+        $.ajax({
+            type: 'POST',
+            url: '/AsignacionGruas/ActualizarDatosVehiculo',
+            contentType: 'application/json', 
+            data: jsonData,
+            success: function (result) {
+                console.log("Actualización exitosa", result);
+                document.getElementById("PlacaSpan").textContent = result.Placa;
+                document.getElementById("SerieSpan").textContent = result.Serie;
+                document.getElementById("TarjetaSpan").textContent = result.Tarjeta;
+                document.getElementById("MarcaSpan").textContent = result.Marca;
+                document.getElementById("SubmarcaSpan").textContent = result.Submarca;
+                document.getElementById("ModeloSpan").textContent = result.Modelo;
+                document.getElementById("PropietarioSpan").textContent = result.Propietario;
+                document.getElementById("CurpSpan").textContent = result.CURP;
+                document.getElementById("RfcSpan").textContent = result.RFC;
+
+                document.getElementById("FolioInfraccion").textContent = result.folioInfraccion;
+                hideLoading();
+            },
+            error: function (error) {
+                // Ocurrió un error al procesar la solicitud
+                console.error("Error en la actualización", error);
+                hideLoading();
+            }
+        });
+    }
+
+
+</script>
+
+<div class="col-12 mb-4 px-4 rounded gridCustom">
+    @(
+        Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.AsignacionGruaModel>()
+        .Name("gridVehiculosDeposito")
+        .Events(events => events.Change("onRowSelect").DataBinding("replaceLegend").DataBinding("replaceLegend"))
+
+        .Columns(columns =>
+        {
+            columns.Select().Width(50).ClientHeaderTemplate(" ");
+            columns.Bound(c => c.IdPersona).Hidden();
+            columns.Bound(c => c.IdVehiculo).Hidden();
+            columns.Bound(c => c.Color).Hidden();
+            columns.Bound(c => c.Marca).Title("Marca").Width(100);
+            columns.Bound(c => c.Submarca).Title("Submarca").Width(100);
+            columns.Bound(c => c.Placa).Title("Placa").Width(100);
+            columns.Bound(c => c.Modelo).Title("Modelo").Width(100);
+            columns.Bound(c => c.Serie).Title("Serie").Width(100);
+            columns.Bound(c => c.Tarjeta).Title("Tarjeta").Width(100);
+            columns.Bound(c => c.Motor).Title("Motor").Width(100);
+            columns.Bound(c => c.NumeroEconomico).Title("Numero Económico").Width(120);
+            columns.Bound(c => c.Propietario).Title("Propietario").Width(130);
+
+
+        })
+        .HtmlAttributes(new { style = "height:400px" })
+        .Sortable()
+        ////.Groupable()
+        .Scrollable()
+        .Pageable()
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .Read(read => read.Action("BuscarVehiculo", "AsignarGruas"))
+        .PageSize(5).Model(model => model.Id(p => p.IdMarcaVehiculo))
+        )
+        .ToolBar(t => t.Search().Text("Buscar..."))
+        .Search(s =>
+        {
+            s.Field(c => c.Marca);
+            s.Field(c => c.Submarca);
+            s.Field(c => c.Placa);
+            s.Field(c => c.Modelo);
+            s.Field(c => c.Serie);
+            s.Field(c => c.Tarjeta);
+            s.Field(c => c.Motor);
+            s.Field(c => c.NumeroEconomico);
+            s.Field(c => c.Propietario);
+        })
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Multiple).Type(GridSelectionType.Row))
+
+        .Events(x => x.DataBound("replaceLegend").DataBinding("replaceLegend"))
+        )
+</div>
+
+

@@ -1,0 +1,373 @@
+﻿@model List<PensionModel>
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        var auth = @autorizaciones;
+
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡El usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(function () {
+                    window.location.href = "/Principal";
+                }, 200);
+            } else {
+                //// BUSQUEA
+                //if (!auth.toString().includes("271")) {
+                //    $("#btnBucarPension").prop('disabled', true).css({ "opacity": "0.3" });
+                //}
+                ////AGREGAR
+                //if (!auth.toString().includes("273")) {
+                //    $("#btnNuevaGrua").prop('disabled', true).css({ "opacity": "0.3" });
+                //}
+           
+
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡El usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(function () {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+
+</script>
+
+<div class="mainContainer bg-light">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-pension h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Pensiones</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnNuevaGrua" onclick="modalCrearPension()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addPension h5 mb-0 me-2"></i><b>Agregar nueva pensión</b></h6>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-auto mt-4 mb-2">
+            <h5 class="px-4"><b>Búsqueda de pensiones</b></h5>
+            <h6 class="px-4 text-muted">Realiza una búsqueda personalizada de pensiones.</h6>
+        </div>
+        <div class="row align-items-end px-4">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBox()
+                    .Name("pension")
+                    .Label(l => l.Content("Pensión:"))
+                    .Placeholder("Ingresa un nombre de pensión")
+                    .HtmlAttributes(new { style = "width: 100%", id = "txtPension" }))
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Delegación:</label>
+                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .Name("ddlIdDelegacion")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("Delegaciones_DropExt", "Estadisticas");
+                        });
+                    })
+                    .OptionLabel("-- Seleccione --")
+                    .HtmlAttributes(new { style = "width:100%;", id = "ddlIdDelegacion" })
+                    .Filter(FilterType.Contains))
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <div class="controlButton">
+                        <button id="btnBucarPension" class="btnPrimary" type="button" onclick="btnBuscarPension()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+                    </div>
+                </div>
+            </div>
+            @*//Aqui*@
+
+
+            <div id="listadoPensiones">
+                <partial name="_ListadoPensiones" model="Model" />
+            </div>
+        </div>
+    </section>
+</div>
+
+
+<div class="modal fade modalCustom" id="modalCrearPension" aria-labelledby="modalCrearPension" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-addPension h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Agregar pensión</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @*<h4 class="modal-title">Agregar grúa</h4>*@
+                <div class="col-auto">
+                    <div class="row">
+                        <div class="col-auto my-4">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-body" id="modalBodyCrearPension">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade modalCustom" id="modalEditarPension" aria-labelledby="modalEditarPension" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-editPension h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Editar pensión</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @*<h4 class="modal-title">Agregar grúa</h4>*@
+                <div class="col-auto">
+                    <div class="row">
+                        <div class="col-auto my-4">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-body" id="modalBodyEditarPension">
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="modal fade modalCustom" id="eliminarPension" aria-labelledby="eliminarPensionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodEliminarPension">
+                <section class=" bg-white rounded">
+                    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                        <div class="col-auto pe-0">
+                            <div class="row align-items-center justify-content-center justify-content-md-start">
+                                <div class="col-auto pe-0">
+                                    <i class="icon-editCarretera h1 colorPrimary"></i>
+                                </div>
+                                <div class="col-auto my-3">
+                                    <h2 class="m-0 h3"><b>Editar carretera</b></h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="row">
+                                <div class="col-auto my-3">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="bg-light py-1"></div>
+                        </div>
+
+                    </div>
+                    <form id="EliminarPensionForm" class="row px-4 mb-4 align-items-end">
+                        <div class="row">
+                            <div class="col-12 col-lg-6 my-4">
+                                <h5 class="px-4"><b>Datos de Pensiones</b></h5>
+                                <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                            </div>
+                            <input name="idestatus" id="idestatus" class="d-none" /> 
+                            <div class="col-12 col-lg-6 my-4 btnToggleActive">
+                                @(Html.Kendo().Switch()
+                                    .Name("PensionSwitch")
+                                    .Checked(true)
+                                    .Messages(c => c.Checked("Activo").Unchecked("Inactivo"))
+                                    .HtmlAttributes(new { data_valor =1  })
+                                    )
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="controlForm my-3">
+                            </div>
+                        </div>
+
+                    </form>
+                    <div class="row my-4">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton" onclick="EliminarPension()">
+                                        @(Html.Kendo().Button()
+                                            .Name("EditCarretera")
+                                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                            .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        var auth = @autorizaciones;
+        var grid = $("#GridP").data("kendoGrid");
+
+
+
+    });
+
+
+    function EliminarPension(){
+        var Mydata = $("#EliminarPensionForm").serialize();
+        $.ajax({
+            url: '@Url.Action("EditarPensionEstatus")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                
+                $("#eliminarPension").modal('hide');
+                $("#btnBucarPension").click();
+                
+                
+                sitteg_success("Información guardada correctamente.");
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Sucedió un error, intente mas tarde...');
+                hideLoading();
+            }
+        });
+    }
+
+
+    $(document).ready(function () {
+        $("#modalCrearPension").on("show.bs.modal shown.bs.modal", function (e) {
+            $("body").removeClass("modal-open").find(".modal-backdrop").remove();
+        });
+        $("#modalCrearPension").on('hide.bs.modal', function () {
+            $('#modalBodyCrearPension').html('');
+        });
+
+        $("#modalEditarPension").on("show.bs.modal shown.bs.modal", function (e) {
+            // Remove overlay and enable scrolling of body
+            $("body").removeClass("modal-open").find(".modal-backdrop").remove();
+        });
+        $("#modalEditarPension").on('hide.bs.modal', function () {
+            $('#modalBodyEditarPension').html('');
+        });
+    });
+    function btnBuscarPension() {
+        var pension = $("#txtPension").val();
+        var idDelegacion = $("#ddlIdDelegacion").val();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_BuscarPensiones")',
+            type: 'GET',
+            data: {
+                "pension": pension,
+                "idDelegacion": idDelegacion,
+            },
+            dataType: "html",
+            success: function (value) {
+                $('#listadoPensiones').html(value);
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+
+    function modalCrearPension() {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_ModalCrearPension")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                if (data.includes("no tiene permisos")) {
+                    sitteg_warning("El usuario no tiene permisos suficientes para esta acción.");
+                    hideLoading();
+                } else {
+                $('#modalBodyCrearPension').html(data);
+                $('#modalCrearPension').modal({ backdrop: 'static', keyboard: false });
+                $('#modalCrearPension').modal('show');
+                }
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+</script>

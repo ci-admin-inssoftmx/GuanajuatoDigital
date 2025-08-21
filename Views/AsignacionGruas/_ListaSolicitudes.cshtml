@@ -1,0 +1,121 @@
+﻿<div class="row mb-1">
+    <div class="col-12 col-md-auto mt-4 mb-2">
+        <h5 class="px-4"><b>Resultados</b></h5>
+        @*<h6 class="px-4 text-muted">Edita los datos de vehículo.</h6>*@
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        <div class="row justify-content-between mb-1 titleCustom">
+            <div class="col-12 col-md-auto mt-4 mb-2">
+                <h5 class="px-4"><b>Listado de grúas</b></h5>
+                <h6 class="px-4 text-muted">Edita o ajusta el listado de grúas.</h6>
+            </div>
+        </div>
+        <div class="row">
+            @if (ViewBag.NoResultsMessage != null)
+            {
+                <div class="alert alert-info">
+                    @ViewBag.NoResultsMessage
+                </div>
+            }
+             @if (ViewBag.NoAuth != null)
+            {
+                <div class="alert alert-info">
+                    @ViewBag.NoAuth
+                </div>
+            }
+        </div>
+        <div>
+            <br />
+            <br />
+            <br />
+
+        </div>
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.AsignacionGruaModel>()
+            .Name("gridBusquedaSolicitudes")
+            .ToolBar(tools =>
+            {
+                tools.Search().Text("Buscar...");
+            })
+            .Columns(columns =>
+            {
+                columns.Select().Width(50).ClientHeaderTemplate(" ");
+                columns.Bound(c => c.idSolicitud).Hidden();
+                columns.Bound(c => c.idPropietarioGrua).Hidden();
+                columns.Bound(c => c.FolioSolicitud).Title("Folio").Width(100);
+               // columns.Bound(c => c.fechaSolicitud).Title("Fecha").Width(100);
+                columns.Bound(c => c.fechaSolicitudFormateada)
+                .Title("Fecha")
+                .Width(100)
+                .ClientTemplate("#= mostrarFecha(fechaSolicitudFormateada) #");
+                columns.Bound(c => c.Ubicacion)
+                    .Title("Ubicación")
+                    .Width(380)
+                    .ClientTemplate("#= espacios(Ubicacion) #");
+                                columns.Bound(c => c.concesionario).Title("Grúa").Width(200);
+                columns.Bound(c => c.Oficial)
+                    .Title("Oficial")
+                    .Width(300)
+                    .ClientTemplate("#= espacios(Oficial) #");
+                columns.Bound(c => c.tipoUsuario).Title("Solicitante").Width(100);
+            })
+           
+            .HtmlAttributes(new { style = "height:400px" })
+            .Sortable()
+            ////.Groupable()
+           
+            .Scrollable()
+            .Pageable()           
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            .Read(read => read.Action("ajax_BuscarSolicitudes", "AsignacionGruas"))
+            .PageSize(5).Model(model => model.Id(p => p.FolioSolicitud))
+            )
+            .Search(s =>
+            {
+                s.Field(c => c.FolioSolicitud);
+                s.Field(c => c.Grua);
+                s.Field(c => c.Ubicacion);
+                s.Field(c => c.Oficial);
+                s.Field(c => c.tipoUsuario);
+            })
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            //.DataBinding("replaceLegend").DataBinding("replaceLegend"))
+            .NoRecords(noRecords => noRecords.Template("No se encontrarón registros. Realice la búsqueda nuevamente."))
+            .Events(events => events.Change("onRowSelect"))
+            .Events(events => events.DataBound("replaceLegend"))
+            )
+    </div>
+</div>
+
+<script>
+    function onRowSelect(e) {
+        console.log("SIs")
+        var selectedRow = e.sender.select(); 
+        var dataItem = e.sender.dataItem(selectedRow); 
+        var FolioSolicitud = dataItem.FolioSolicitud;
+        var idPropietarioGrua = dataItem.idPropietarioGrua;
+        window.location.href = '@Url.Action("DatosGruas", "AsignacionGruas")?folio=' + FolioSolicitud + '&iPg=' + idPropietarioGrua;
+    }
+
+    function espacios(oficial) {
+        return oficial.replace(/\s/g, "&nbsp;&nbsp;&nbsp;");
+    }
+    function espacios(ubicacion) {
+        return ubicacion.replace(/\s/g, "&nbsp;");
+    }
+    function mostrarFecha(fecha) {
+        if (fecha && fecha !== "01/01/0001") {
+            return fecha;
+        } else {
+            return " ";
+        }
+    }
+</script>

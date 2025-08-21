@@ -1,0 +1,135 @@
+﻿<script>
+
+    function GetData(){
+    var fecha = $("#fechaFiltro").val();
+    var idMunicipioFiltro = $("#idMunicipioFiltroDias").val();
+     var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+    return {
+    "fecha": fecha,
+    "idMunicipio": idMunicipioFiltro,
+            idDependencia: idDependencia
+    }
+    }
+
+</script>
+ @if (ViewBag.Admin == true)
+        {
+<div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+    <div class="row">
+        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+            <button href="#" id="btnNuevoDiaInhabil" onclick="mostrarModalAgregarDia()">
+                <h6 class="m-0 d-flex align-items-center"><i class="icon-addDate h5 mb-0 me-2"></i><b>Agregar nuevo día inhábil</b></h6>
+            </button>
+        </div>
+    </div>
+</div>
+        }
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.DiasInhabilesModel>()
+            .Name("gridCatDiasInhabiles")
+            .Columns(columns =>
+            {              
+                columns.Bound(c => c.idDiaInhabil).Title("Id").Width(20);
+                columns.Bound(c => c.fecha).Width(70).Title("Fecha").Format("{0: dd/MM/yyyy}");
+                columns.Bound(c => c.todosMunicipiosDesc).Title("Aplica a todos los Municipios").Width(100);
+                columns.Bound(c => c.Municipio).Width(100);
+                columns.Bound(c => c.EstatusDesc).Title("Estatus en sistema").Width(100);
+                columns.Command(c => c.Custom("Editar").Click("getIdDia")).Width(100);
+               // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetDiasIn", "DiasInhabiles").Data("GetData"))
+            .PageSize(5).Model(model => model.Id(p => p.idDiaInhabil))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            { 
+                s.Field(c => c.Municipio);
+                s.Field(c => c.todosMunicipiosDesc);
+
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+
+    </div>
+</div>
+<div class="modal fade modalCustom" id="addDateInhabil" aria-labelledby="addDateInhabilLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyCreateDiaInhabil">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function getIdDia(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var idDiaInhabil = dataItem.idDiaInhabil;
+        console.log(idDiaInhabil);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcial", "DiasInhabiles")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { idDiaInhabil: idDiaInhabil }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCreateDiaInhabil').html(result);
+                $('#addDateInhabil').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var idDiaInhabil = dataItem.idDiaInhabil;
+        console.log(idDiaInhabil);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarDiaInhabilParcial", "DiasInhabiles")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { idDiaInhabil: idDiaInhabil }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCreateDiaInhabil').html(result);
+                $('#addDateInhabil').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

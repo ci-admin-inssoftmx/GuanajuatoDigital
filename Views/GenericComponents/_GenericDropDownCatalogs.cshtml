@@ -1,0 +1,42 @@
+@{
+    bool multiple = (bool)ViewBag.multiple;
+    bool isRequired = (bool)ViewBag.isRequired;
+    string htmlName = (string)ViewBag.htmlName;
+    string functionName = (string)ViewBag.functionName;
+    var modelList = (IEnumerable<SystemCatalogListModel>)ViewBag.ModelList;
+}
+
+@if (string.IsNullOrEmpty(functionName))
+{
+    @(
+                Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                .DataValueField("Id")
+                                .DataTextField("Text")
+                                .Filter(FilterType.Contains)
+
+                                .Name(htmlName)
+                                .BindTo(modelList)
+                                .OptionLabel("-- Seleccione --")
+                                .HtmlAttributes(new { style = "width:100%;", id = htmlName })
+            )
+}
+else
+{
+    @(
+            Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                            .DataValueField("Id")
+                            .DataTextField("Text")
+                            .Name(htmlName)
+                            .BindTo(modelList)
+                            .OptionLabel("-- Seleccione --")
+                            .Filter(FilterType.Contains)
+
+                            .Events(e =>
+                            {
+                                e.Change(functionName);
+                            })
+                            .HtmlAttributes(new { style = "width:100%;", id = htmlName })
+        )
+}
+
+

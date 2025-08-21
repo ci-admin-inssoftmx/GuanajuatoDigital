@@ -1,0 +1,155 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CatCarreterasModel
+<script>
+        function delegacion(){
+     var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+</script>
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-addCarretera h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Agregar nueva carretera</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-12 my-4">
+            <h5 class="px-4"><b>Datos de carretera</b></h5>
+            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+        </div>
+    </div>
+    <form id="agregarCarreteraForm" class="row px-4 mb-4 align-items-end">
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                <label>Delegación <b>(obligatorio)</b>:</label>
+                <span>
+                   @Html.HiddenFor(model => model.Corp, new { id = "idDependenciaFiltro" })
+                    @(Html.Kendo().DropDownListFor(t => t.idOficinaTransporte).NoDataTemplate("No se encontraron datos")
+                        .Filter(FilterType.Contains)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("Selecciona una Delegacion")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetDelegaciones", "Catalogos").Data("delegacion");
+                            });
+                        })
+                        )
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t=>t.Carretera)
+                    .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                    .Placeholder("Ingresa el nombre de la carretera")
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+
+            </div>
+        </div>
+
+    </form>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="agregarCarretera()">
+                        @(Html.Kendo().Button()
+                            .Name("AddCarretera")
+                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                            .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+
+<script>
+    function agregarCarretera() {
+        var CORP = $("#idDependenciaFiltro").val();
+        CORP = CORP ? CORP : null;
+
+        // Establece el valor del campo oculto en el formulario
+        $("#agregarCarreteraForm").find('input[name="Corp"]').val(CORP);
+        var Mydata = $("#agregarCarreteraForm").serialize();
+      
+
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'Carretera' });
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+        // DROP DOWN LIST
+        controlsValidate = [];
+        controlsValidate.push({ 'controlName': 'idOficinaTransporte' });
+        if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+       // var Mydata = $("#agregarCarreteraForm").serialize();
+   
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("CrearCarreteraMod")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                var grid = $("#gridCatCarreteras").data("kendoGrid");
+                grid.dataSource.read();
+                $('#agregarCarretera').modal('hide');
+                $('#ModalBodyCarretera').html("");
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+
+                sitteg_success("Información guardada correctamente.");
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+</script>

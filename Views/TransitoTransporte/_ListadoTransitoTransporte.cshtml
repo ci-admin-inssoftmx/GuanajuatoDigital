@@ -1,0 +1,684 @@
+﻿@model List<TransitoTransporteModel>
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+    var dependencia = @HttpContextAccessor.HttpContext.Session.GetInt32("IdDependencia").ToString();
+
+    var Eliminar = autorizaciones.Contains("205") ? 1 : 0;
+
+}
+<script>
+    function returnData() {
+        var _placas = $("#txtPlacas").val();
+        var _serie = $("#txtSerie").val();
+        var _folioSolicitud = $("#txtFolioSolicitud").val();
+        var _folioInfraccion = $("#txtFolioInfraccion").val();
+        var _propietario = $("#txtPropietario").val();
+        var _numeroEconomico = $("#txtNumeroEconomico").val();
+        var _delegacion = $("#txtDelegacion").val();
+        var _pension = $("#txtPension").val();
+        var _estatus = $("#txtEstatus").val();
+        var _dependenciaTransito = $("#txtDependenciaTransito").val();
+        var _dependenciaNoTransito = $("#txtDependenciaNoTransito").val();
+        var _fechaIngreso = $("#start").val();
+        var _fechaIngresoFin = $("#end").val();
+        var _evento = $('#txtEvento').val()
+
+        return { placas: _placas, 
+            serie: _serie,
+            folioSolicitud: _folioSolicitud, 
+            folioInfraccion: _folioInfraccion,
+            propietario: _propietario, 
+            numeroEconomico: _numeroEconomico,
+            delegacion: _delegacion,
+            pension: _pension,
+            estatus: _estatus,
+            dependenciaTransito: _dependenciaTransito,
+            dependenciaNoTransito: _dependenciaNoTransito,
+            fechaIngreso: _fechaIngreso,
+            fechaIngresoFin: _fechaIngresoFin,
+            evento: _evento
+        }
+    }
+
+    function onError() {
+        $("#message").css("display", "block");
+        //Swal.fire({
+        //    icon: "info",
+        //    text: "¡No se encontraron registros que cumplan con los criterios de búsqueda.!",
+        //});
+        $("#Grid").data("kendoGrid").dataSource.data([]);
+    }
+
+
+</script>
+
+<script>
+
+    window.Eliminar = "@Eliminar"
+
+
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        var auth = @autorizaciones;
+        console.log(auth);
+
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡El usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(function () {
+                    window.location.href = "/Principal";
+                }, 200);
+            } else {
+                //if (!auth.toString().includes("203")) {
+                //    $("#btnExcelTransito").prop('disabled', true).css({ "opacity": "0.3" });
+                //}
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡El usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(function () {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+
+    function showLoader(e) {
+        console.log("SI LOADER INICIO")
+        kendo.ui.progress($("#Grid"), true);
+    }
+
+    function hideLoader(e) {
+        hideLoading() 
+        sitteg_success("Archivo descargado correctamente")
+    }
+
+    function ShowGruaPopUp(id,b,c) {
+        $.ajax({
+            url: '@Url.Action("ajax_DetailGruas")',
+            type: 'GET',
+            data: { id: id },
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (value) {
+                $('#ModalBodyDetail').html(value);
+                $('#modalGruasConcDetail').modal('show');
+            }
+        });
+    }
+
+    function ShowDeletePopUp(Ids) {
+        $('#hdnIds').val(Ids);
+        $('#myDeleteModal').modal('show');
+    }
+
+    function ConfirmDelete() {
+        $('#myDeleteModal').modal('hide');
+        $('body').removeClass('model-open');
+        $('.modal-backdrop').remove();
+        var ids = $('#hdnIds').val();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_DeleteTransito")',
+            type: 'POST',
+            dataType: "html",
+            data: { ids: ids },
+            success: function (result) {
+                sitteg_success('Elemento guardado correctamente');
+                $('#listadoTransitoTransporte').html(result);
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+    function ShowUpdatePopUp(Id, IdDeposito, IdGrua, IdConcesionario, SolicitudEstatus) {
+        console.log("CONC", IdConcesionario);
+        //Si la solicitud tiene un estatus menor que 3 se oculta el boton del modal
+        if (SolicitudEstatus === undefined || SolicitudEstatus <= 2) {
+            $('#divGruaModal').hide();
+        } else {
+            $('#divGruaModal').show();
+        }
+
+        $('#hdnIdDeposito').val(Id);
+        $('#hdnIdDepositoInv').val(IdDeposito);
+        $('#hdnIdConcesionario').val(IdConcesionario);
+
+        $('#myUpdateModal').modal('show');
+    }
+
+
+    function downLoadPdf(Id) {
+
+        window.location = '/TransitoTransporte/CreatePdfUnRegistro?IdDeposito=' + Id;
+    }
+
+
+    function EstatusTemplate(data){
+        console.log("data",data)
+        return `<p>Estatus: ${data.nombreEstatus}</p>
+            <p>Delegación: ${data.delegacion}</p>
+            <p>Dependencia: ${data.BanderaTransito > 2 ? "MUN" : (data.BanderaTransito === 1 ? "TTO" : (data.BanderaTransito === 0 ? "TTE" : ""))}</p>`;
+
+    }
+
+    function TurnoTemplate(data, columnName) {
+        if (data.transito === 1 && columnName === "TTO") {
+            return "<span style='color: green;'>&#10003;</span>"; // Marca para TTO si transito es 1
+        } else if (data.transito === 0 && columnName === "TTE") {
+            return "<span style='color: red;'>&#10003;</span>"; // Marca para TTE si transito es 0
+        }
+        return ""; // No mostrar marca si no corresponde a ninguna columna o si transito no es ni 0 ni 1
+    }
+
+
+
+
+
+    function eliminarTemplate(data){
+
+
+        console.log(data)
+
+        if ((data.SolicitudEstatus == 1 || data.SolicitudEstatus == 2 || data.SolicitudEstatus == 3))
+            return `<button onclick="ShowDeletePopUp('${data.IdDeposito},${data.IdSolicitud}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-delete me-2'></i></h6></button>`
+        else if (window.Eliminar == '1')
+            return `<button onclick="ShowDeletePopUp('${data.IdDeposito},${data.IdSolicitud}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-delete me-2'></i></h6></button>`
+            else
+            return ''
+    }
+
+
+
+
+    function EditarTemplate(data){      
+        if ((data.SolicitudEstatus == 1 || data.SolicitudEstatus == 2 || data.SolicitudEstatus == 3 || data.SolicitudEstatus == 4))
+        return `<button onclick="ShowUpdatePopUp('${data.IdSolicitud}','${data.IdDeposito}','${data.IdGrua}','${data.IdConcesionario}','${data.SolicitudEstatus}')" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i></h6></button>`;        
+        else 
+        return ""
+    }
+
+
+
+   function TurnoToca(data) {
+        console.log("data turno", data);
+
+        var ttoText = data.BanderaTransito > 2 ? "MUN" : "TTO/TTE";
+
+        if (data.SolicitudEstatus == 1 || data.SolicitudEstatus == 2 || data.SolicitudEstatus == 4) {
+            return `<div class='turno-captura'>
+                        <div class='tto-marked'>${ttoText}:<span style='margin-right:10px;'><b>✓</b></span></div>
+                        <div class='dep-marked'>Dep:</div>
+                    </div>`;
+        } else if (data.SolicitudEstatus == 3 || data.SolicitudEstatus == 5) {
+            return `<div class='turno-captura'>
+                        <div class='tto-marked'>${ttoText}:</div>
+                        <div class='dep-marked'>Dep:<span style='margin-right:10px;'><b>✓</b></span></div>
+                    </div>`;
+        } else {
+            return `<div class='turno-captura'>
+                        <div class='tto-marked'>${ttoText}:</div>
+                        <div class='dep-marked'>Dep:</div>
+                    </div>`;
+        }
+}
+
+</script>
+<div class="row">
+    <div class="col-md-12" id="message" style="display: none">
+@*        @if (ViewBag.NoResultsMessage != null)
+        {*@
+            <div class="alert alert-danger">
+                @*@ViewBag.NoResultsMessage*@
+            No se encontraron registros que cumplan con los criterios de búsqueda.
+            </div>
+        @*}*@
+    </div>
+</div>
+
+<div class="row mb-1">
+    <div class="col-12 col-md-auto mt-4">
+        <h5 class="px-4"><b>Listado de Tránsito/Transporte</b></h5>
+        <h6 class="px-4 text-muted">Edita los datos de tránsito.</h6>
+    </div>
+</div>
+
+<div class="row">
+     
+    <!-- Aquí continúa el contenido del listado de tránsito y transporte -->
+    @*<column template="<button data-bs-toggle=modal data-bs-target=\#editVehiculo class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>" width="100" />*@
+
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @{
+            try
+            {
+                
+                @(Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.TransitoTransporteModel>()
+                .Name("Grid")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.IdSolicitud).Hidden();
+                    columns.Bound(c => c.cons).Title("Número").Width(90);
+                    columns.Bound(p => p.IdDeposito).Hidden();//.Title("Número").Width(90);
+                    columns.Bound(p => p.fullSolicitudfolioInfraccion)/*.ClientTemplate("#=TemplateEvPolInf(data)#")*/.Title("Fecha_Evento/Folio_Solicitud/Folio_Infracción").Width(350);
+
+                    columns.Bound(p => p.fullVehiculo).Title("Vehículo").Width(150);
+                    columns.Bound(c => c.FechaIngresoDesc).ClientTemplate("#= convertDate(FechaIngreso) #").Title("Fecha de ingreso").Width(180);
+                    columns.Bound(c => c.FechaLiberacionDesc).ClientTemplate("#= convertDate(FechaLiberacion) #").Title("Fecha de Salida").Width(180);
+                    columns.Bound(c => c.pension).Title("Pensión").Width(100);
+                    columns.Bound(c => c.Concesionario).Title("Grúa").Width(90);
+                    columns.Bound(p => p.IdConcesionario).ClientTemplate(
+                    "<button onclick=\"ShowGruaPopUp('#= IdDeposito #','#= IdDeposito #','#= IdGrua #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-research me-2'></i></h6></button>"
+                    ).Title("Detalle Grúa(s)").Sortable(false).Width(190);//.Exportable(x => x.Excel(false)); evita ue esta columna se esporte en el excel 
+                    columns.Bound(p => p.IdDependencia).ClientTemplate(
+                    "<button onclick=\"downLoadPdf('#= IdDeposito #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-pdf me-2'></i></h6></button>"
+                    ).Title("Descargar detalle").Sortable(false).Width(190);//.Exportable(x => x.Excel(false));
+                    columns.Bound(c => c.fullDependencia).ClientTemplate("#= EstatusTemplate(data) #")  .Title("Estatus").Width(190);
+                    columns.Bound(p => p.IdGrua).ClientTemplate("#= EditarTemplate(data) #").Title("Editar").Sortable(false).Width(100);//.Exportable(x => x.Excel(false));
+                    columns.Bound(p => p.IdDeposito).ClientTemplate("#= eliminarTemplate(data) #").Title("Eliminar").Sortable(false).Width(100);//.Exportable(x => x.Excel(false));
+                    columns.Bound(p => p.transito).ClientTemplate("#= TurnoToca(data) #").Title("Turno Captura").Width(150);//cambiar por esExterno
+                    columns.Bound(p => p.IdDeposito).ClientTemplate(
+                    "<button onclick=\"downLoadPdf('#= IdDeposito #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-pdf me-2'></i></h6></button>"
+                    ).Title("Descargar Formato Manual").Sortable(false).Width(190);
+                }).HtmlAttributes(new { style = "height:350" })
+                .Pageable()
+                .Sortable()
+                .Scrollable(scr => scr.Height(350))
+                .DataSource(dataSource => dataSource
+                .Ajax()
+                .Read(read => read.Action("GetListado", "TransitoTransporte").Data("returnData"))
+               .Events(e => e.Error("onError"))
+                )
+              .ToolBar(tools =>
+                            {
+                                tools.Excel(); 
+                                tools.Search().Text("Buscar..."); 
+                            })
+
+                .Excel(excel => excel
+                .FileName("Búsqueda_Transito.xlsx")
+                .Filterable(true)
+                 .AllPages(true)
+                .ProxyURL(Url.Action("Excel_Export_Save", "Grid"))
+
+                )
+                .Events(e =>
+                {
+           
+                   // e.ExcelExport("showLoader");
+                    e.ExcelExport("hideLoader");
+                })
+                .Search(s =>
+                {
+                    s.Field(c => c.fullSolicitudfolioInfraccion);
+                    s.Field(c => c.fullVehiculo);
+                    s.Field(c => c.FechaIngreso);
+                    s.Field(c => c.FechaLiberacion);
+                    s.Field(c => c.pension);
+                    s.Field(c => c.Concesionario);
+                })
+                .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+                    )
+            }
+            catch (Exception ex)
+            {
+                < div >< h1 > @ex.Message </ h1 > </ div >
+            }
+        }
+
+        @(Html.Kendo().Tooltip()
+            .For("#Grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+
+
+        <script>
+
+            $(document).ready(function () {
+                var auth = @autorizaciones;
+                var grid = $("#Grid").data("kendoGrid");
+
+            });
+
+        </script>
+    </div>
+
+
+
+</div>
+
+@*Modal*@
+<div class="modal fade modalCustom" id="modalGruasConcDetail" aria-labelledby="editVehiculo" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+        <div class="modal-content">
+
+            <section class=" bg-white rounded">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-edit-car h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Detalle Grúas</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="row">
+                            <div class="col-auto my-3">
+                                <button type="button"  class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bg-light py-1"></div>
+                    </div>
+
+                </div>
+
+                <div class="modal-body" id="ModalBodyDetail">
+                </div>
+
+            </section>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade modalCustom" id="myDeleteModal" aria-labelledby="editVehiculo" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+        <div class="modal-content">
+            <section class=" bg-white rounded">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-delete h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Confirmación</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="row">
+                            <div class="col-auto my-3">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bg-light py-1"></div>
+                    </div>
+
+                </div>
+
+                <div class="modal-body" id="ModalBodyDelete">
+                    <input type="hidden" id="hdnIds" />
+                    <p class="success-message">¿Esta seguro que desea eliminar este registro?</p>
+                </div>
+
+                <div class="row my-4">
+                    <div class="col-12 col-md-6 mx-md-auto">
+                        <div class="row justify-content-around">
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                    <h6 class="m-0 v"><b>Cancelar</b></h6>
+                                </button>
+                            </div>
+                            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                <div class="controlButton">
+
+                                    <button type="button" class="btnPrimary px-3" onclick="ConfirmDelete()">
+                                        <h6 class="m-0 px-3"><b>Aceptar</b></h6>
+                                    </button>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </section>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade modalCustom" id="myUpdateModal" aria-labelledby="editVehiculo" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+        <div class="modal-content">
+            <section class=" bg-white rounded">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-edit me-2 h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Modificar</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="row">
+                            <div class="col-auto my-3">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bg-light py-1"></div>
+                    </div>
+
+                </div>
+
+                <div class="modal-body" id="ModalBodyUpdate">
+                    <input type="hidden" id="hdnIdDeposito" />
+                    <input type="hidden" id="hdnIdDepositoInv" />
+                    <input type="hidden" id="hdnIdConcesionario" />
+
+
+
+                    <div class="row px-4 justify-content-around">
+
+
+
+                        <div class="col-12 col-md-5 col-lg-4 col-xl-4 btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                            <div class="controlButton">
+                                <button type="button" class="btn btn-primary btn-sm" data-id="solicitud" onclick="datosSolicitud()">
+                                    <h6 class="m-0"><b>Datos de Registro de Solicitud</b></h6>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="divGruaModal" class="col-12 col-md-5 col-lg-4 col-xl-4 btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                            <div class="controlButton">
+                                <button type="button" class="btn btn-primary btn-sm" data-id="gruas" onclick="datosGruas()">
+                                    <h6 class="m-0"><b>Datos de las Grúas Asignadas</b></h6>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row my-4">
+                    <div class="col-12 col-md-6 mx-md-auto">
+                        <div class="row justify-content-around">
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                <button type="button" data-bs-dismiss="modal" aria-label="Close" style="width: 100%; height: auto;">
+                                    <h6 class="m-0"><b>Cancelar</b></h6>
+                                </button>
+                            </div>
+                            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                <div class="controlButton">
+                                    <button type="button" class="btnPrimary px-3" onclick="ConfirmDelete()" style="width: 100%; height: auto;">
+                                        <h6 class="m-0 px-3"><b>Aceptar</b></h6>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var exporting = false;
+
+    function exportToExcel() {
+    exporting = true;
+    var grid = $("#Grid").data("kendoGrid");
+    grid.dataSource.pageSize(grid.dataSource.total()); // Desactiva la paginación
+    grid.saveAsExcel();
+    grid.dataSource.pageSize(grid.pager.pageSize()); // Restaura la paginación
+    exporting = false;
+}
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+    function generateExcel() {
+        var grid = $("#Grid").data("kendoGrid");
+        var pageSize = grid.dataSource._data.length;
+        var dataSourceTotal = grid.dataSource.total();
+        grid.dataSource.pageSize(dataSourceTotal);
+
+        // Configura el nombre del archivo
+        var fileName = "nombre_personalizado.xlsx"; // Cambia "nombre_personalizado.xlsx" al nombre que desees
+        console.log("NOMBRE",fileName)
+        grid.saveAsExcel({
+            excel: {
+                fileName: fileName
+            }
+        });
+
+        setTimeout(function () {
+            grid.dataSource.pageSize(pageSize);
+        }, 300);
+    }
+
+
+    function datosSolicitud() {
+        var idSolicitud = document.getElementById('hdnIdDeposito').value;
+
+        window.location.href = `/Depositos/Depositos?Isol=${idSolicitud}`  ;
+    }
+    function datosGruas() {
+        var idSolicitud = document.getElementById('hdnIdDeposito').value;
+        var idDeposito = document.getElementById('hdnIdDepositoInv').value;
+        var iPg = document.getElementById('hdnIdConcesionario').value;
+        console.log("infunc",iPg)
+        window.location.href = '@Url.Action("DatosGruas", "AsignacionGruas")?iSo=' + idSolicitud + '&iPg=' + iPg + '&idDeposito=' + idDeposito+"&Edit=True" ;
+    }
+
+    function TemplateEvPolInf(data){
+
+
+        return `
+            <p><b>Fecha: </b>${data.FechaIngresoDesc}</p>
+        <p><b>test: </b>${data.colonia}</p>
+        <p><b>test: </b>${data.colonia}</p>
+                    
+        `
+    }
+
+    $(document).ready(function () {
+        // Seleccionamos el botón de exportación de Excel por su clase
+        var excelButton = $("a.k-grid-excel");
+
+        // Asignamos un evento onclick al botón de exportación
+        excelButton.on("click", function () {
+            console.log("SI CLICK")
+            showLoading(); // Mostrar loader antes de la exportación
+        });
+    });
+
+    function replaceExcelButtonLegend() {
+    setTimeout(() => {
+        // Seleccionar el botón de Excel
+        var excelButton = $("a.k-grid-excel");
+
+        // Cambiar el texto del botón de Excel
+        excelButton.text("Exportar a Excel");
+    }, 100); // Esto puede requerir ajustes dependiendo de cuándo se renderiza el botón en tu página
+}
+$(document).ready(function() {
+    replaceExcelButtonLegend();
+});
+
+    function downLoadPdf(idDeposito) {
+        console.log("Iniciando descarga de PDF para el depósito: " + idDeposito);
+        var url = '/TransitoTransporte/DownloadLiberacionPdf';
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: { idDeposito: idDeposito },
+            dataType: 'json',
+            beforeSend: function () {
+                console.log("Enviando solicitud al servidor...");
+                showLoading();
+            },
+            success: function (response) {
+                if (response.success) {
+                    var pdfBase64 = response.pdfBase64;
+                    var fileName = response.fileName;
+
+                    var link = document.createElement('a');
+                    link.href = 'data:application/pdf;base64,' + pdfBase64;
+                    link.download = fileName;
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    sitteg_success('El archivo PDF se ha descargado correctamente.');
+                } else {
+                    sitteg_warning(response.message || 'Error al intentar descargar el archivo PDF.');
+                }
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.log("Error: " + error);
+                sitteg_warning('Ocurrió un error al intentar descargar el archivo PDF.');
+                hideLoading();
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+
+
+</script>
+
+
+

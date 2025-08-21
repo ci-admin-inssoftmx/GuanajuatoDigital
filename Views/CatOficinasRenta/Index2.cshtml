@@ -1,0 +1,42 @@
+﻿@model List<CatOficinasRentaModel>
+@{
+
+}
+<div class="mainContainer bg-light">
+    <h1>PRUEBA NKKENCEKN</h1>
+                </div>
+
+
+                <script>
+                    function mostrarModal() {
+                        $.ajax({
+                            url: '@Url.Action("AgregarOficinaRentaModal")',
+                            type: 'POST',
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "html",
+                            success: function (data) {
+                                $('#ModalBodyaAgregarOficinasRenta').html(data);
+                                $('#agregarOficinasRenta').modal('show');
+                            }
+                        });
+                    }
+
+                    function valor(id) {
+                        var idDelegacion = id
+                        console.log("SI", idDelegacion);
+                        $.ajax({
+                            url: '@Url.Action("BusquedaPorDelegacion", "CatOficinasRenta")',
+                            type: 'POST',
+                            data: { idDelegacion: idDelegacion },
+                            success: function (result) {
+                                console.log("OK")
+                            },
+                        })
+                    }
+
+
+
+                </script>
+
+
+                

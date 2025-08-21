@@ -1,0 +1,236 @@
+﻿<style>
+    #map-canvas {
+        height: 400px;
+    }
+
+    .map-control {
+        position: absolute;
+        top: 30px; /* Separa el botón 20 píxeles desde el borde superior */
+        left: 10px; /* Mantiene el botón 10 píxeles desde el borde izquierdo */
+        z-index: 5;
+        background-color: white;
+        border: 2px solid #ccc;
+        padding: 10px 15px; /* Aumenta el relleno interno para hacer el botón más grande */
+        border-radius: 8px; /* Aumenta el radio del borde para un botón más redondeado */
+        cursor: pointer;
+        font-size: 18px; /* Aumenta el tamaño de la fuente del texto del botón */
+        text-align: center; /* Centra el texto dentro del botón */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Añade una sombra sutil al botón */
+    }
+</style>
+
+<script>
+    function dataToMunc(){
+        var val = document.getElementById("ddlDelegaciones").value;
+        return { del: val };
+    }
+
+    function GetMunc(){
+        var dll = $("#idMunicipio").data("kendoDropDownList").dataSource;
+        dll.read();
+    }
+</script>
+
+<div class="panel">
+    <div class="panel-body container-fluid">
+        <div class="row row-lg">
+            <div class="col-md-12">
+                <section class="bg-white rounded">
+                    <form id="frmCargaGeolocalizacion">
+                        <div class="row my-4">
+                            <div class="form-group col-md-4">
+                                <div class="controlForm" hidden>
+                                    <label>Dirección: <span id="address"></span><br /></label>
+                                    <label>Municipio: <span id="municipioGL"></span><br /></label>
+                                    <label>Longitude: <span id="longitude"></span></label>
+                                    <label>Latitude: <span id="latitude"></span><br /></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="map-canvas"></div>
+                    </form>
+                    <div class="row my-12">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                    <button type="button" class="btn btnOutline btn-sm btnClose" onclick="closeModalCargaGeolocalizacionVer()" aria-label="Close">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function btnCapturarDatos() {
+        $("#Latitud").data("kendoTextBox").value(document.getElementById('latitude').innerHTML);
+        $("#Longitud").data("kendoTextBox").value(document.getElementById('longitude').innerHTML);
+        closeModalCargaGeolocalizacion();
+    }
+
+    var map = null;
+    var geocoder = null;
+    var currentMarker = null;  // Variable global para el marcador
+
+    // Función para inicializar el mapa
+    function initMap() {
+        var mapOptions = {
+            center: { lat: 0, lng: 0 },
+            zoom: 1,
+            mapId: "DEMO_MAP_ID",
+            gestureHandling: 'none' // Desactiva el manejo de gestos (arrastrar el mapa)
+        };
+
+        map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+        geocoder = new google.maps.Geocoder();
+
+        var direccionCompleta = '';
+        if (document.getElementById('latitude').innerHTML.trim() === '' && document.getElementById('longitude').innerHTML.trim() === '')
+            direccionCompleta = 'Guanajuato';
+        if (document.getElementById('address').innerHTML.trim() !== '' || document.getElementById('municipioGL').innerHTML.trim() !== '') {
+            if (document.getElementById('municipioGL').innerHTML.trim() === 'Guanajuato')
+                direccionCompleta = document.getElementById('address').innerHTML + ' Guanajuato';
+            else
+                direccionCompleta = document.getElementById('address').innerHTML + ' ' + document.getElementById('municipioGL').innerHTML + ' Guanajuato';
+        }
+
+        // Inicializa con la dirección y coordenadas proporcionadas
+        searchLocation(
+            document.getElementById('latitude').innerHTML,
+            document.getElementById('longitude').innerHTML,
+            direccionCompleta
+        );
+    }
+
+    // Función para mostrar la ubicación actual
+    function showLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(callback, errorCallback);
+        } else {
+            sitteg_warning("Geolocalización no es soportada por este navegador.");
+        }
+    }
+
+    // Callback para manejar la posición actual y mostrar el marcador en el mapa
+    function callback(position) {
+        var lat = position.coords.latitude;
+        var lon = position.coords.longitude;
+
+        document.getElementById('latitude').innerHTML = lat;
+        document.getElementById('longitude').innerHTML = lon;
+
+        var latLng = new google.maps.LatLng(lat, lon);
+
+        // Actualiza el marcador actual o crea uno nuevo si no existe
+        if (currentMarker) {
+            currentMarker.position = latLng;
+        } else {
+            currentMarker = new google.maps.marker.AdvancedMarkerElement({
+                position: latLng,
+                map: map,
+                title: 'Mi ubicación'
+            });
+        }
+
+        map.setZoom(12);
+        map.setCenter(latLng);
+    }
+
+    function searchLocation(lat, lon, address) {
+        var latNum = parseFloat(lat);
+        var lonNum = parseFloat(lon);
+        var latLng;
+
+        if (!isNaN(latNum) && !isNaN(lonNum)) {
+            latLng = new google.maps.LatLng(latNum, lonNum);
+            // Si ya hay un marcador, actualízalo; de lo contrario, crea uno nuevo
+            if (currentMarker) {
+                currentMarker.position = latLng;
+            } else {
+                currentMarker = new google.maps.marker.AdvancedMarkerElement({
+                    position: latLng,
+                    map: map,
+                    title: 'Ubicación especificada'
+                });
+            }
+            map.setZoom(12);
+            map.setCenter(latLng);
+            return;
+        }
+
+        if (address) {
+            geocoder.geocode({ 'address': address }, function (results, status) {
+                if (status === 'OK') {
+                    var result = results[0];
+                    map.setZoom(12);
+                    map.setCenter(result.geometry.location);
+
+                    // Actualiza el marcador existente o crea uno nuevo
+                    if (currentMarker) {
+                        currentMarker.position = result.geometry.location;
+                    } else {
+                        currentMarker = new google.maps.marker.AdvancedMarkerElement({
+                            position: result.geometry.location,
+                            map: map,
+                            title: address
+                        });
+                    }
+                } else {
+                    sitteg_warning('No se pudo encontrar la dirección: ' + status);
+                }
+            });
+        }
+    }
+
+    function placeMarker(location) {
+        if (currentMarker) {
+            currentMarker.position = location;
+        } else {
+            currentMarker = new google.maps.marker.AdvancedMarkerElement({
+                position: location,
+                map: map,
+                title: 'Marcador personalizado'
+            });
+        }
+
+        // Actualiza los elementos con la nueva latitud y longitud
+        var lat = location.lat();
+        var lng = location.lng();
+        document.getElementById('latitude').innerHTML = lat;
+        document.getElementById('longitude').innerHTML = lng;
+
+        // Opcional: usar el geocodificador para obtener la dirección
+        geocoder.geocode({ 'location': location }, function (results, status) {
+            if (status === 'OK' && results[0]) {
+                document.getElementById('address').innerHTML = results[0].formatted_address;
+            } else {
+                document.getElementById('address').innerHTML = 'Dirección no encontrada';
+            }
+        });
+    }
+
+    function errorCallback(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                sitteg_warning("El usuario negó la solicitud de geolocalización.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                sitteg_warning("La información de ubicación no está disponible.");
+                break;
+            case error.TIMEOUT:
+                sitteg_warning("La solicitud de geolocalización ha expirado.");
+                break;
+            case error.UNKNOWN_ERROR:
+                sitteg_warning("Un error desconocido ocurrió.");
+                break;
+        }
+    }
+
+    window.onload = initMap;
+
+</script>

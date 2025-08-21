@@ -1,0 +1,59 @@
+# Dockerfile para GuanajuatoDigital - Windows Server
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-windowsservercore-ltsc2022 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:7.0-windowsservercore-ltsc2022 AS build
+WORKDIR /src
+
+# Copy csproj and restore dependencies
+COPY ["GuanajuatoAdminUsuarios.csproj", "."]
+RUN dotnet restore "GuanajuatoAdminUsuarios.csproj"
+
+# Copy everything and build
+COPY . .
+RUN dotnet build "GuanajuatoAdminUsuarios.csproj" -c Release -o /app/build
+
+# Publish stage
+FROM build AS publish
+RUN dotnet publish "GuanajuatoAdminUsuarios.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Final stage
+FROM base AS final
+WORKDIR /app
+
+# Install IIS and ASP.NET Core Module
+RUN powershell -Command \
+    Add-WindowsFeature Web-Server; \
+    Add-WindowsFeature Web-Common-Http; \
+    Add-WindowsFeature Web-Http-Errors; \
+    Add-WindowsFeature Web-Http-Redirect; \
+    Add-WindowsFeature Web-App-Dev; \
+    Add-WindowsFeature Web-Net-Ext45; \
+    Add-WindowsFeature Web-Asp-Net45; \
+    Add-WindowsFeature Web-ISAPI-Ext; \
+    Add-WindowsFeature Web-ISAPI-Filter; \
+    Add-WindowsFeature Web-Mgmt-Tools; \
+    Add-WindowsFeature Web-Mgmt-Console
+
+# Copy published app
+COPY --from=publish /app/publish .
+
+# Create logs directory
+RUN mkdir C:\app\logs
+
+# Set environment variables
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_URLS=http://+:80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD powershell -command "try { \
+        $response = Invoke-WebRequest http://localhost:80/health -UseBasicParsing; \
+        if ($response.StatusCode -eq 200) { exit 0 } else { exit 1 } \
+    } catch { exit 1 }"
+
+# Entry point
+ENTRYPOINT ["dotnet", "GuanajuatoAdminUsuarios.dll"]

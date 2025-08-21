@@ -1,0 +1,241 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CatOficialesModel
+@*RazorCoder*@
+<script>
+    function delegacion() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+</script>
+<div class="mainContainer bg-light">
+
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-oficial h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Catálogo de oficiales</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnNuevaDep" onclick="mostrarModal()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addOficial h5 mb-0 me-2"></i><b>Agregar nuevo oficial</b></h6>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @*<div class="row justify-content-between mb-1 titleCustom">
+            <div class="col-12 col-md-auto mt-4 mb-2">
+            <h5 class="px-4"><b>Edita o elimina los registros de oficiales.</b></h5>
+            </div>
+            </div>*@
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <form id="formBuscar" class="row px-4 mb-4 align-items-end" method="post">
+
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBox()
+                        .Name("NombreB")
+                        .Label(l => l.Content("Nombre:"))
+                        .Placeholder("Ingresa el nombre del oficial")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBox()
+                        .Name("ApellidoPaternoB")
+                        .Label(l => l.Content("Apellido paterno:"))
+                        .Placeholder("Ingresa el apellido paterno del oficial")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBox()
+                        .Name("ApellidoMaternoB")
+                        .Label(l => l.Content("Apellido materno:"))
+                        .Placeholder("Ingresa el apellido materno del oficial")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm mb-3">
+                    <label>Delegación</b>:</label>
+                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                        .Name("idDelegacion")
+                        .Filter(FilterType.Contains)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("Selecciona una delegación")
+                        .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "idDelegacionFiltro" })
+                        .DataSource(source =>
+
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetDelegacionesDiv", "Catalogos").Data("delegacion");
+                            });
+                        }))
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlButton">
+                    <button class="btnPrimary" type="button" onclick="submitSearchOficial()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+                </div>
+            </div>
+
+        </form>
+        <div class="row justify-content-between mb-1 titleCustom">
+            <div class="col-12 col-md-auto mt-4 mb-2">
+                <h5 class="px-4"><b>Listado de oficiales</b></h5>
+                <h6 class="px-4 text-muted">Edita o elimina los registros de oficiales.</h6>
+            </div>
+        </div>
+        <div class="row">
+            <div id="tablaOficiales">
+                <partial name="_ListaOficiales"  />
+                <!--/////////////////////////////////////////////////////////////////////********AGREGAR*********////////////////////////////////////////////////////////////////////-->
+
+                <div class="modal fade modalCustom" id="agregarOficial" aria-labelledby="agregarOficialLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-body" id="ModalBodyCrearOficial">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--/////////////////////////////////////////////////////////////////////********EDITAR*********////////////////////////////////////////////////////////////////////-->
+
+                <div class="modal fade modalCustom" id="editarOficial" aria-labelledby="editarOficialLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-body" id="ModalBodyEditarOficial">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--/////////////////////////////////////////////////////////////////////********ELIMINAR*********////////////////////////////////////////////////////////////////////-->
+
+                <div class="modal fade modalCustom" id="eliminarOficial" aria-labelledby="eliminarOficialLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-body" id="ModalBodyEliminarOficial">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</div>
+<script>
+    function mostrarModal() {
+        $.ajax({
+            url: '@Url.Action("AgregarOficialParcial")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyCrearOficial').html(data);
+                $('#agregarOficial').modal('show');
+            }
+        });
+    }
+
+    function submitSearchOficial() {
+
+        //var fd = new FormData();
+        //fd.append("idDelegacionFiltro", $("#idDelegacionFiltro").val());
+        //fd.append("nombre", $("#NombreB").val());
+        //fd.append("apellidoPaterno", $("#ApellidoPaternoB").val());
+        //fd.append("apellidoMaterno", $("#ApellidoMaternoB").val());
+
+
+        var grd = $("#gridCatOficiales").data("kendoGrid").dataSource
+        grd.read()
+
+        //var idDelegacionFiltro = $("#idDelegacionFiltro").val();
+
+        //showLoading();
+
+
+        //$.ajax({
+        //    url: "/Oficiales/ajax_BuscarDelegacion",
+        //    type: "POST",
+        //    contentType: false, // Not to set any content header
+        //    processData: false, // Not to process data
+        //    data: fd,
+        //    success: function (data) {
+        //        console.log("REGRESO: " + data);
+        //        var grid = $("#gridCatOficiales").data("kendoGrid");
+
+        //        grid.dataSource.data([]);
+
+        //        for (var i = 0; i < data.length; i++) {
+        //            grid.dataSource.add(data[i]);
+        //        }
+        //        grid.dataSource.page(1);
+
+
+        //        hideLoading();
+
+        //    },
+        //    error: function (xhr, status) {
+        //        hideLoading();
+        //    }
+        //});
+
+        /*
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ajax_BuscarDelegacion")',
+            data: {
+                "idDelegacionFiltro": idDelegacionFiltro
+            },
+            success: function (data) {
+                console.log(data);
+                var grid = $("#gridCatOficiales").data("kendoGrid");
+
+                grid.dataSource.data([]);
+
+                for (var i = 0; i < data.length; i++) {
+                    grid.dataSource.add(data[i]);
+                }
+                grid.dataSource.page(1);
+
+
+                hideLoading();
+            },
+            error: function (xhr, status) {
+                hideLoading();
+            }
+        });
+        */
+    }
+</script>

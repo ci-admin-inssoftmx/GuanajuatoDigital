@@ -1,0 +1,97 @@
+﻿
+<script>
+    function filtroCarretera() {
+        var idDelegacion = $("#idDelegacionFiltroCar").val();
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDelegacion: idDelegacion,
+            idDependencia: idDependencia
+        };
+    }
+
+</script>
+<div class="row">
+    <div class="col-6 mb-4 px-4 rounded gridCustom">
+  
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.ReportesModel>()
+            .Name("gridReprorteTipoLic")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.tipoLicencia).Title("Tipo Licencia");
+                columns.Bound(c => c.cantidad).ClientFooterTemplate("Total : #=sum#");
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetInfraccionesPorTipoLicencia", "Reportes").Data("filtroCarretera"))
+            .PageSize(10).Model(model => model.Id(p => p.tipoLicencia))
+            .Aggregates(aggregates =>
+            {
+                aggregates.Add(c => c.cantidad).Sum();
+            })
+            )
+
+            .ToolBar(tools =>
+                                {
+                                    tools.Excel();
+                                    tools.Search().Text("Buscar...");
+                                })
+
+                    .Excel(excel => excel
+                    .FileName("Reporte_Infracciones_Tipo_Licencia.xlsx")
+                    .Filterable(true)
+                     .AllPages(true)
+                    .ProxyURL(Url.Action("Excel_Export_Save", "Grid"))
+
+                    )
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+    </div>
+</div>
+<div class="modal fade modalCustom" id="agregarCarretera" aria-labelledby="agregarCarreteraLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyCarretera">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function editarCarreteraMod(e) {
+        console.log("Frlis");
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdCarretera = dataItem.IdCarretera;
+        console.log(IdCarretera);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarCarreteraModal", "CatCarreteras")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdCarretera: IdCarretera }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCarretera').html(result);
+                $('#agregarCarretera').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

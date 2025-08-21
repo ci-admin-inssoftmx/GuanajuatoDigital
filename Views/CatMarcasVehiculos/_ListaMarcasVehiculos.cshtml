@@ -1,0 +1,130 @@
+﻿<script>
+    function filtroMarca() {
+        var idDependencia = $("#idDependenciaFiltro").val();;
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+
+</script>
+  @if (ViewBag.Admin == true)
+{
+    <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+        <div class="row">
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <button href ="#" id="btnNuevaMarca" onclick="mostrarModalMv()">
+                    <h6 class="m-0 d-flex align-items-center"><i class="icon-addMarca h5 mb-0 me-2"></i><b> Agregar nueva marca de vehículo</b></h6>
+                </button>
+            </div>
+        </div>
+    </div>
+}
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+@(
+    Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatMarcasVehiculosModel>()
+        .Name("gridCatMarcas")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.IdMarcaVehiculo).Title("Id").Width(40);
+            columns.Bound(c => c.MarcaVehiculo).Width(190);
+            columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(90);
+            columns.Command(c => c.Custom("Editar").Click("getIdMV")).Width(80);
+            //columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+
+        }).HtmlAttributes(new { style = "height:650px" })
+        .Sortable()
+        //.Groupable()
+        .Scrollable()
+        .Pageable()
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetMarca2", "CatMarcasVehiculos").Data("filtroMarca"))
+            .PageSize(5).Model(model => model.Id(p => p.IdMarcaVehiculo))
+        )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+        .Search(s =>
+        {
+            s.Field(c => c.MarcaVehiculo);
+        })
+
+        .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+        .Type(GridSelectionType.Row)
+        )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+    @*.Events(ev=>ev.Change("onChange"))*@
+    )
+
+        @(Html.Kendo().Tooltip()
+            .For("#gridCatMarcas")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+    </div>
+    </div>
+<div class="modal fade modalCustom" id="addMarca" aria-labelledby="addMarcaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyCreate">
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    function getIdMV(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdMarcaVehiculo = dataItem.IdMarcaVehiculo;
+        console.log(IdMarcaVehiculo);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcial", "CatMarcasVehiculos")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdMarcaVehiculo: IdMarcaVehiculo }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCreate').html(result);
+                $('#addMarca').modal('show');
+                hideLoading();
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdMarcaVehiculo = dataItem.IdMarcaVehiculo;
+        console.log(IdMarcaVehiculo);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarMarcaParcial", "MarcasVehiculos")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdMarcaVehiculo: IdMarcaVehiculo }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#ModalBodyCreate').html(result);
+                $('#addMarca').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>
+   
+        

@@ -1,0 +1,134 @@
+﻿<script>
+    function filtroAgencia() {
+         var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDelegacion: $("#idDelegacionFiltroAgencia").val(),
+            idDependencia: idDependencia
+        }
+    }
+</script>
+  @if (ViewBag.Admin == true)
+{
+     <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnNueaOf" onclick="mostrarModalAgencias()">
+                            <h6 class="m-0 d-flex align-items-center"><i class="icon-addMinisterio h5 mb-0 me-2"></i><b>Agregar nueva agencia de ministerio</b></h6>
+                        </button>
+                    </div>
+                </div>
+            </div>    
+}
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatAgenciasMinisterioModel>()
+            .Name("gridAgenciasMinisterio")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdAgenciaMinisterio).Title("Id").Width(30);
+                columns.Bound(c => c.NombreAgencia).Title("Nombre").Width(100);
+                columns.Bound(c => c.DelegacionDesc).Title("Delegación").Width(90);
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(90);
+                columns.Command(c => c.Custom("Editar").Click("getIdAgencia")).Width(50);
+               // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(50);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetAgenciasM", "CatAgenciasMinisterio").Data("filtroAgencia"))
+            .PageSize(5).Model(model => model.Id(p => p.IdAgenciaMinisterio))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.NombreAgencia);
+                s.Field(c => c.DelegacionDesc);
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+            )
+
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+
+    </div>
+</div>
+<div class="modal fade modalCustom" id="editarAgenciaministerio" aria-labelledby="editarAgenciaministerio" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodEditarAgenciaministerio">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    function getIdAgencia(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdAgenciaMinisterio = dataItem.IdAgenciaMinisterio;
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarAgenciaMinisterioModal", "CatAgenciasMinisterio")',
+            type: 'POST',
+            data: { IdAgenciaMinisterio: IdAgenciaMinisterio },
+            success: function (result) {
+                if (result.error) {
+                    sitteg_warning("El usuario no tienen los permisos para esta acción");
+                } else {
+                $('#ModalBodEditarAgenciaministerio').html(result);
+                $('#editarAgenciaministerio').modal('show');
+                }
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdAgenciaMinisterio = dataItem.IdAgenciaMinisterio;
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarAgenciaMinisterioModal", "CatAgenciasMinisterio")',
+            type: 'POST',
+            data: { IdAgenciaMinisterio: IdAgenciaMinisterio },
+            success: function (result) {
+                $('#ModalBodEditarAgenciaministerio').html(result);
+                $('#editarAgenciaministerio').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

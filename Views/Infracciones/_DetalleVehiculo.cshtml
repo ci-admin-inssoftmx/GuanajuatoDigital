@@ -1,0 +1,437 @@
+﻿@model VehiculoModel
+@using Microsoft.AspNetCore.Http;
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var x = ViewBag.ModoSoloLectura;
+    int modomostrar = (int)HttpContextAccessor.HttpContext.Session.GetInt32("modoMostrar");
+    var Lectura = Convert.ToBoolean(modomostrar);
+    
+}
+
+<script>
+    function btnEditarVehiculo2(event) {
+
+        event.preventDefault();
+        var id = $("#idVehiculo").val();
+        var idInfraccion = window.idInfraccion;
+        var edita =window.eseditar;
+        var DoEditar = window.DoEditar;
+        var needOrigin = window.needOrigin;
+        console.log("needOrigin", needOrigin);
+        var url="";
+        var objA={};
+        if (needOrigin) {
+            url = "@Url.Action("ajax_ModalEditarVehiculo","Infracciones")";
+            objA = { id: id, idInfraccion: idInfraccion, edit:1 };
+        }
+        else{
+            url = "@Url.Action("ajax_ModalEditarVehiculoHistorico","Infracciones")";
+            objA = { id: id, idInfraccion: idInfraccion,DoEditar:DoEditar, edit:1 };
+        }
+
+        console.log("idInfraccion",idInfraccion);
+        showLoading();
+
+        console.log("url", url);
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: objA,
+            contentType: "application/json; charset=utf-8",
+            success: function (value) {
+
+                console.log(" success", value);
+                window.DoUpdate = function (id) {
+                    console.log(id)
+                    buscarVehiculo(id.id);
+                    $('#modalBodyCrearVehiculo').html("");                    
+                    $('#modalCrearVehiculo').modal('hide');
+                }
+
+                $('#modalBodyCrearVehiculo').html(value);
+                $('#modalCrearVehiculo').modal({ backdrop: 'static', keyboard: false });
+                $('#modalCrearVehiculo').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+        event.stopPropagation();
+
+    }
+
+
+
+
+    function btnEditarPersona3() {
+        var id = $("#Persona_idPersona").val()
+        var Vehiculoid = $("#idVehiculo").val()
+        var idinfraccion = window.idInfraccion
+        var url = ""
+        var objAjax = {}
+
+        if (window.needOrigin) {
+            url = "@Url.Action("ajax_ModalEditarPersona","Infracciones")";
+            objAjax = { id: id, UpdatePermanencia: 1, Ope: window.idInfraccion }
+        }
+        else {
+            url = "@Url.Action("ajax_ModalEditarPersonaHistorico","Infracciones")";
+            objAjax = { id: id, idinfraccion: idinfraccion, UpdatePermanencia: 1, Ope: window.idInfraccion }
+        }
+
+    
+
+        window.DoUpdate = function (_,d) {
+
+
+            if (d.data=="1"){
+                buscarVehiculo(Vehiculoid);
+            } else if (d.data > 1){
+                $("#Persona_idPersona").val(d.data)
+                window.propietario = d.data;
+                console.log("pro",d.data);
+
+                $.ajax({
+                    url: '@Url.Action("UpdatePropietario")',
+                    type: 'GET',
+                    data: { idPersona: d.data, idVehiculo: Vehiculoid },
+                    contentType: "application/json; charset=utf-8",
+                    success: function (value) {
+                        buscarVehiculo(Vehiculoid);
+                        hideLoading();
+                    }, error: function () {
+                        sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                        hideLoading();
+                    }
+                });
+            }
+            else{
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            }
+            $('#modalBodyCrearPersona3').html("");
+            $('#modalCrearPersona3').modal('hide');
+        }
+
+        showLoading();
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: objAjax,
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (value) {
+
+
+                if ($('#modalCrearPersona2')) {
+                    $('#modalBodyCrearPersona2').html("");
+                    $('#modalCrearPersona2').modal('hide');
+                }
+
+                $('#modalBodyCrearPersona3').html(value);
+                $('#modalCrearPersona3').modal({ backdrop: 'static', keyboard: false });
+                $('#modalCrearPersona3').modal('show');
+                
+                
+                
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+       
+
+    }
+
+
+
+
+    function btnSeleccionarPropietario(){
+
+
+        window.DoUpdate=function(a,b){
+            $("#Persona_idPersona").val(a)
+            $("#idPersona").val(a)
+
+            var Vehiculoid = $("#idVehiculo").val()
+
+
+            $.ajax({
+                url: '@Url.Action("UpdatePropietario")',
+                type: 'GET',
+                data: { idPersona: a, idVehiculo: Vehiculoid },
+                contentType: "application/json; charset=utf-8",
+                success: function (value) {
+                    buscarVehiculo(Vehiculoid);
+                    $("#listadoVehiculosPropietario").toggleClass("d-none")
+                    $("#listadoVehiculos").toggleClass("d-none")
+                    $("#listadoVehiculosPropietario").empty()
+
+                    hideLoading();
+                }, error: function () {
+                    sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                    hideLoading();
+                }
+            });
+        }
+
+
+
+        $.ajax({
+            url: '@Url.Action("ajax_OpenPropietarioList")',
+            type: 'GET',
+            data: {  },
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (value) {
+
+                $("#listadoVehiculosPropietario").toggleClass("d-none")
+                $("#listadoVehiculos").toggleClass("d-none")
+                $("#listadoVehiculosPropietario").empty().append(value)
+
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+
+    function btnagregarpropietario(){
+        console.log("AGRPROP")
+
+
+        window.DoUpdate = function (a, b) {
+            $("#Persona_idPersona").val(a)
+            var Vehiculoid = $("#idVehiculo").val()
+            $.ajax({
+                url: '@Url.Action("UpdatePropietario")',
+                type: 'GET',
+                data: { idPersona: a, idVehiculo: Vehiculoid },
+                contentType: "application/json; charset=utf-8",
+                success: function (value) {
+                    buscarVehiculo(Vehiculoid);
+                    $('#modalBodyCrearPersona').html("");
+                    $('#modalCrearPersona').modal('hide');
+                    $('#modalBodyEditarPersona').html("");
+                    $('#modalEditarPersona').modal('hide');
+                    $('#agregarConductorModal2').modal('hide');
+                    $('#ModalBodyAgregarConductor2').html("");
+                    $('#agregarConductorModal').modal('hide');
+                    window.DoUpdate=undefined
+                    hideLoading();
+                }, error: function () {
+                    sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                    hideLoading();
+                }
+            });
+        }
+
+
+
+        $.ajax({
+            url: '@Url.Action("ModalAgregarConductor")',
+            data: { x: 0 },
+            type: 'GET',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyAgregarConductor2').html(data);
+                $('#agregarConductorModal2').modal({ backdrop: 'static', keyboard: false });
+                $('#agregarConductorModal2').modal('show');
+
+
+               /* $('#modalBodyCrearPersona').html(data);
+                $('#modalCrearPersona').modal('show');
+                 $('#modalBodyEditarPersona').html(value);
+                 $('#modalEditarPersona').modal({ backdrop: 'static', keyboard: false });
+                 $('#modalEditarPersona').modal('show');
+                   $('#agregarConductorModal').modal('hide');
+                */
+
+            }
+        });
+    }
+
+
+
+
+</script>
+
+
+<div class="row px-4">
+    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+        <button type="button" href="#" id="btnNuevoConductor" @(Lectura ? "disabled" : "") onclick="btnEditarVehiculo2(event)">
+            <h6 class="m-0 d-flex align-items-center"><i class="icon-edit h5 mb-0 me-2"></i><b>Editar</b></h6>
+        </button>
+    </div>
+    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+        <button type="button" href="#" id="btnNuevoConductor" @(Lectura ? "disabled" : "") onclick="btnEditarPersona3()">
+            <h6 class="m-0 d-flex align-items-center"><i class="icon-edit h5 mb-0 me-2"></i><b>Editar Propietario</b></h6>
+        </button>
+    </div>
+    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+        <button type="button" href="#" id="btnNuevoConductor" @(Lectura ? "disabled" : "") onclick="btnagregarpropietario()">
+            <h6 class="m-0 d-flex align-items-center"><i class="icon-edit h5 mb-0 me-2"></i><b>Agregar Propietario</b></h6>
+        </button>
+    </div>
+</div>
+<hr />
+@Html.HiddenFor(s=>s.Persona.idPersona)
+<div class="row px-4 mb-4 align-items-end">
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <input class="d-none" id="placaInfraccion" name="placaInfraccion" value="@Model.placas" />
+            <label>Placas:</label>&nbsp;@(Model.placas?.ToUpper())
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Serie:</label>&nbsp;@(Model.serie?.ToUpper())
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Numero tarjeta:</label>&nbsp;@(Model.tarjeta?.ToUpper())
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Vigencia tarjeta:</label>&nbsp;@(!Model.vigenciaTarjeta.HasValue ? "-" : Model.vigenciaTarjeta.Value.Year < 1980 ? "-" : Model.vigenciaTarjeta.Value.ToString("dd/MM/yyyy"))
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Entidad de registro:</label>&nbsp;@(Model.entidadRegistro?.ToUpper())
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Marca:</label>&nbsp;@(Model.marca?.ToUpper())
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Submarca:</label>&nbsp;@(Model.submarca?.ToUpper())
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Tipo vehículo:</label>&nbsp;@(Model.tipoVehiculo != null ? Model.tipoVehiculo.ToUpper() :"")
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Modelo:</label>&nbsp;@(Model.modelo != null ? Model.modelo.ToUpper() :"")
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Color:</label>&nbsp;@(Model.color != null ? Model.color.ToString() : "-")
+            
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Color Real:</label>&nbsp;@(Model.colorReal != null ? Model.colorReal.ToString().ToUpper() : "-")
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Capacidad:</label>&nbsp;@(Model.capacidad != null ? Model.capacidad.ToString().ToUpper() : "-")
+ 
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Póliza:</label>&nbsp;@(Model.poliza != null ? Model.poliza.ToString().ToUpper() : "-")
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Carga:</label>&nbsp;@(Model.carga.HasValue ? (Model.carga.Value ? "SI" : "NO") : "-")
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Otros:</label>&nbsp;@(Model.otros != null ? Model.otros.ToString().ToUpper() : "-")
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Número económico:</label> &nbsp; @(Model.numeroEconomico?.ToUpper())
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Motor:</label> &nbsp; @(Model.motor?.ToUpper())
+
+        </div>
+    </div>
+    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Motor Actual:</label> &nbsp; @(Model.motorActual?.ToUpper())
+
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Propietario: </label>@(Model.Persona?.nombreCompleto?.ToUpper())
+
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 auto btnOutline btnOutlinePrimary" id="btnCambiaPropietario">
+        <button type="button" href="#" @(Lectura ? "disabled" : "") onclick="btnSeleccionarPropietario()">
+            <h6 class="m-0 d-flex align-items-center"><b>...</b></h6>
+        </button>
+    </div>
+</div>
+
+
+<div class="modal fade modalCustom" id="agregarConductorModal2" aria-labelledby="agregarVehiculoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyAgregarConductor2">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade modalCustom" id="modalCrearPersona3" aria-labelledby="modalCrearPersona3" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered ">
+        <div class="modal-content">
+
+            <div class="modal-body" id="modalBodyCrearPersona3">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modalCustom" id="modalCrearVehiculo" aria-labelledby="modalCrearVehiculo" aria-hidden="true">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered ">
+        <div class="modal-content">
+
+            <div class="modal-body" id="modalBodyCrearVehiculo">
+            </div>
+        </div>
+    </div>
+</div>
+
+

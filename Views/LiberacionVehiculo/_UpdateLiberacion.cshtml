@@ -1,0 +1,404 @@
+﻿@model LiberacionVehiculoModel
+
+@*<div class="row">
+    <div class="col-12">
+        <div class="bg-light py-1"></div>
+    </div>
+
+</div>*@
+<div class="col-12 px-4">
+        <div class="controlForm mb-5">
+            <span>
+            @Html.DisplayFor(m => m.fullPropietario,new {@class="control-label"})
+                @*@(Html.Kendo().TextBoxFor(m=>m.IdPension)
+                .Label(l => l.Content("ID:"))
+                .HtmlAttributes(new { style = "width: 100%", @readonly = "readonly", type = "text" })
+                )*@
+            </span>
+        </div>
+    </div>
+
+<div class="row px-4 mb-4 align-items-end">
+    <!--div class="col-12 col-md-6 col-lg-4">
+        <div class="controlForm mb-3">
+            <label><b>ID:</b></label>
+            <span>
+                @*Html.DisplayFor(m => m.IdDeposito,new {@class=""})*@
+                @*@(Html.Kendo().TextBoxFor(m=>m.IdPension)
+                .Label(l => l.Content("ID:"))
+                .HtmlAttributes(new { style = "width: 100%", @readonly = "readonly", type = "text" })
+                )*@
+            </span>
+        </div>
+    </div-->
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm mb-3">
+            <label><b>Fecha ingreso:</b></label>
+            <span>
+                 @Html.DisplayFor(t => t.FechaIngreso,new {@class=""})
+                        
+                         
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Pensión:</b></label>
+            <span>
+                @Html.DisplayFor(m => m.pension,new {@class=""})
+            </span>
+        </div>
+    </div>
+
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Marca:</b></label>
+            <span>
+                @Html.DisplayFor(m => m.marcaVehiculo,new {@class=""})
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Folio:</b></label>
+            <span>
+                @Html.DisplayFor(m => m.Folio,new {@class=""})
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Carretera:</b></label>
+            <span>
+                @Html.DisplayFor(m => m.carretera,new {@class=""})
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Serie:</b></label>
+            <span>
+                @Html.DisplayFor(m => m.Serie,new {@class=""})
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Sub Marca:</b></label>
+            <span>
+                @Html.DisplayFor(m => m.nombreSubmarca,new {@class=""})
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Tramo:</b></label>
+            <span>
+                @Html.DisplayFor(m => m.tramo,new {@class=""})
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Placas:</b></label>
+            <span>
+                @Html.DisplayFor(m => m.Placa,new {@class=""})
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Color:</b></label>
+            <span>
+                @Html.DisplayFor(m => m.Color,new {@class=""})
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Kilómetro:</b></label>
+            <span>
+                @Html.DisplayFor(m => m.Km,new {@class=""})
+            </span>
+        </div>
+    </div>
+
+    
+
+</div>
+@* enctype="multipart/form-data"
+      asp-controller="LiberacionVehiculo" asp-action="UpdateLiberacion"
+      method="post"*@
+<form class="row px-4 mb-4 align-items-end"
+      method="post"
+      id="UpdateForm">
+    <div class="row align-items-end">
+        <div class="col-12 col-lg-6 my-4">
+            <h5 class="px-4"><b>Datos:</b></h5>
+        </div>
+    </div>
+    @Html.HiddenFor(m => m.IdDeposito, new { id = "hdnIdDeposito" })
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Acreditación de Propiedad <b>(obligatorio)</b>:</label>
+            <span>
+                @(Html.Kendo().TextBoxFor(m => m.ObservacionesPropiedad)
+
+                    .HtmlAttributes(new { style = "width: 100%", type = "text", id = "txtObservaciones1" })
+                    )
+            </span>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-auto">
+        <div class="controlForm my-3">
+            <input class="form-control" type="file" name="ImageAcreditacionPropiedad" id="ImageAcreditacionPropiedad" required>
+            @*@Html.TextBoxFor(m => m.AcreditacionPropiedad, new { type = "file" ,@class = "btnPrimary px-3",id="ImageOne"})*@
+
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-5 col-xl-4 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Acreditación de Personalidad <b>(obligatorio)</b>:</label>
+            <span>
+                @(Html.Kendo().TextBoxFor(m => m.ObservacionesPersonalidad)
+
+                    .HtmlAttributes(new { style = "width: 100%", type = "text", id = "txtObservaciones2" })
+                    )
+            </span>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-auto">
+        <div class="controlForm my-3">
+            <input class="form-control" type="file" name="ImageAcreditacionPersonalidad" id="ImageAcreditacionPersonalidad" required>
+            @*@Html.TextBoxFor(m => m.AcreditacionPersonalidad, new { type = "file" ,@class = "btnPrimary px-3"})*@
+
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-5 col-xl-4 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Recibo de Infracción <b>(obligatorio)</b>:</label>
+            <span>
+                @(Html.Kendo().TextBoxFor(m => m.ObservacionesInfraccion)
+
+                    .HtmlAttributes(new { style = "width: 100%", type = "text", id = "txtObservaciones3" })
+                    )
+            </span>
+            <span>
+                
+            </span>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-auto">
+        <div class="controlForm my-3">
+            <input class="form-control" type="file" name="ImageReciboPago" id="ImageReciboPago" required>
+            @*@Html.TextBoxFor(m => m.ReciboPago, new { type = "file" ,@class = "btnPrimary px-3"})*@
+
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-5 col-xl-4 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Observaciones:</label>
+            <span>
+                @(Html.Kendo().TextBoxFor(m => m.Observaciones)
+                    .HtmlAttributes(new { style = "width: 100%", type = "text", id = "txtObservaciones4" })
+                )
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Nombre de quien Autoriza <b>(obligatorio)</b>:</label>
+            <span>
+                @(Html.Kendo().TextBoxFor(m => m.Autoriza)
+                    .HtmlAttributes(new { style = "width: 100%", type = "text", id = "txtAutoriza", required = "required" })
+                )
+            </span>
+        </div>
+    </div>
+
+
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton">
+                        @*<button type="submit" class="btn btn-success"><h5 class="m-0"><b>Guardar</b></h5></button>*@
+                        @*  @(Html.Kendo().Button()
+                               .Name("EditVehiculo")
+                                 .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                            .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))*@
+                        <button type="button" class="btnPrimary px-3" onclick="submitVehiculo(event)"><h5 class="m-0"><b>Guardar</b></h5></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+</form>
+
+
+<script>
+
+     
+    $(document).ready(function () {
+        @if (ViewBag.ReporteRobo == true)
+        {
+		<text>
+		sitteg_error('El vehículo cuenta con reporte de robo')
+		</text>
+        }
+    });
+
+async function submitVehiculo(event) {
+    event.preventDefault();
+
+    var controlsValidate = [];
+    var isValid = true;
+
+    controlsValidate.push({ 'controlName': 'txtAutoriza' });
+    controlsValidate.push({ 'controlName': 'ImageAcreditacionPropiedad' });
+    controlsValidate.push({ 'controlName': 'ImageAcreditacionPersonalidad' });
+    controlsValidate.push({ 'controlName': 'ImageReciboPago' });
+
+    if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+    if (!isValid) {
+        sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+        return;
+    }
+
+    var fileOne = document.getElementById('ImageAcreditacionPropiedad').files[0];
+    var fileTwo = document.getElementById('ImageAcreditacionPersonalidad').files[0];
+    var fileThree = document.getElementById('ImageReciboPago').files[0];
+
+    var totalSize = 0;
+    if (fileOne) totalSize += fileOne.size;
+    if (fileTwo) totalSize += fileTwo.size;
+    if (fileThree) totalSize += fileThree.size;
+
+ 
+
+    if ($("#UpdateForm")[0].checkValidity()) {
+        var data = {
+            IdDeposito: $('#hdnIdDeposito').val(),
+            Observaciones: $('#txtObservaciones4').val(),
+            ObservacionesPropiedad: $('#txtObservaciones1').val(),
+            ObservacionesPersonalidad: $('#txtObservaciones2').val(),
+            ObservacionesInfraccion: $('#txtObservaciones3').val(),
+            Autoriza: $('#txtAutoriza').val()
+        };
+
+        var formData = new FormData();
+        formData.append("data", JSON.stringify(data));
+
+        showLoading();
+
+        try {
+            // Enviar archivos en chunks
+            if (fileOne) await uploadFileInChunks('ImageAcreditacionPropiedad', fileOne);
+            if (fileTwo) await uploadFileInChunks('ImageAcreditacionPersonalidad', fileTwo);
+            if (fileThree) await uploadFileInChunks('ImageReciboPago', fileThree);
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("UpdateLiberacion")',
+                data: formData,
+                contentType: false,
+                processData: false,
+                dataType: "json",
+                async: false,
+                success: function (result) {
+                        var pdfBase64 = result.pdfBase64;
+                        var fileName = result.fileName;
+
+                        var link = document.createElement('a');
+                        link.href = 'data:application/pdf;base64,' + pdfBase64;
+                        link.download = fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                sitteg_success('Se ha actualizado la información');
+                $('#modalUpdateLiberacion').modal('hide');
+                $('body').removeClass('model-open');
+                $('.modal-backdrop').remove();
+                 hideLoading();                
+                 location.reload(); 
+
+                },
+                error: function (error) {
+                    console.error('Error en la solicitud AJAX', error);
+                    sitteg_warning('Sucedió un error, intente mas tarde...');
+                    hideLoading
+                },
+                complete: function() {
+                    hideLoading();
+                }
+            });
+        } catch (error) {
+            console.error('Error en el proceso de subida de archivos', error);
+            sitteg_warning('Sucedió un error al enviar los archivos, intente más tarde...');
+            hideLoading();
+        }
+    } else {
+        $("#UpdateForm")[0].reportValidity();
+        hideLoading
+    }
+}
+
+async function uploadFileInChunks(fieldName, file) {
+    const chunkSize = 5 * 1024 * 1024; // 5MB
+    const totalChunks = Math.ceil(file.size / chunkSize);
+
+    for (let i = 0; i < totalChunks; i++) {
+        const start = i * chunkSize;
+        const end = Math.min(file.size, start + chunkSize);
+        const chunk = file.slice(start, end);
+
+        var formData = new FormData();
+        formData.append("fileChunk", chunk, file.name);
+        formData.append("fieldName", fieldName);
+
+        try {
+            const response = await fetch('@Url.Action("UploadChunk")', {
+                method: 'POST',
+                body: formData,
+            });
+            if (!response.ok) {
+                throw new Error('Error al cargar el chunk: ' + response.statusText);
+            }
+           // console.log(`Chunk ${i + 1}/${totalChunks} enviado correctamente.`);
+        } catch (error) {
+            console.error('Error al enviar chunk', error);
+            throw error;  
+        }
+    }
+}
+
+
+
+
+
+</script>

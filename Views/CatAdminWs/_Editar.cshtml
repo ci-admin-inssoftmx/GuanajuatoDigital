@@ -1,0 +1,133 @@
+﻿@model GuanajuatoAdminUsuarios.Models.AppSettingsModel
+
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="h1 icon-editAws colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Editar WebService</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <form id="editarWsForm" class="row px-4 mb-4 align-items-end justify-content-center">
+        <div class="row align-items-end">
+            <div class="col-12 col-lg-6 my-4">
+                <h5 class="px-4"><b>Datos de WebService</b></h5>
+                <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+            </div>
+            <div class="col-12 col-lg-6 my-4 btnToggleActive">
+                @(Html.Kendo().SwitchFor(t => t.IsActive)
+                    .Name("WsSwitch")
+                    .Checked(Model.IsActive)  
+                    .Messages(c => c.Checked("Activo").Unchecked("Inactivo"))
+                    .HtmlAttributes(new { data_valor = Model.IsActive.ToString() }) 
+                    )
+
+
+
+            </div>
+        </div>
+         <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                @Html.HiddenFor(m=>m.id)
+                @(Html.Kendo().TextBoxFor(t => t.SettingName)
+                    .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                    .Placeholder("Ingresa el nombre")
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                @Html.HiddenFor(m=>m.id)
+                @(Html.Kendo().TextBoxFor(t => t.SettingValue)
+                    .Label(l => l.Content("EndPoint <b>(obligatorio)</b>:"))
+                    .Placeholder("Ingresa el endPoint")
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+
+            </div>
+        </div>
+
+
+    </form>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton">
+                        <button class="btnPrimary px-3" onclick="editarService()">
+                            <h5 class="m-0"><b>Guardar</b></h5>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+
+<script>
+    function editarService() {
+
+        var Mydata = $("#editarWsForm").serialize();
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'SettingName' });
+        controlsValidate.push({ 'controlName': 'SettingValue' });
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+        console.log(Mydata);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("Ajax_EditarService")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                var grid = $("#gridCatWS").data("kendoGrid");
+                grid.dataSource.read();
+                $('#modalWS').modal('hide');
+
+                sitteg_success("Información guardada correctamente.");
+
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Sucedió un error, intente mas tarde...');
+                hideLoading();
+            }
+        });
+    }
+
+</script>

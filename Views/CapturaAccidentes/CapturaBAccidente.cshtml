@@ -1,0 +1,789 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.6.172/pdf.min.js"></script>
+
+<script>
+
+
+    console.log("@(Model?.EstatusReporte??"")")
+    console.log("@(Model?.idEstatusReporte??0)")
+    console.log("@(Model?.estatus??0)")
+    function mostrarModalAgregarFactor() {
+        $.ajax({
+            url: '@Url.Action("ModalFactorAccidente")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyFactorAccidente').html(data);
+                $('#factorAccidenteModal').modal('show');
+            }
+        });
+    }
+    function factoresDropDownChange() {
+        var factorDDValue = $("#IdFactorAccidente").data("kendoDropDownList").value();
+        showLoading();
+        $.ajax({
+            url: "/CapturaAccidentes/FactoresOpciones_Drop",
+            type: "POST",
+            data: { factorDDValue: factorDDValue },
+            success: function (data) {
+                var FactorOpcionDropDown = $("#IdFactorOpcionAccidente").data("kendoDropDownList");
+                FactorOpcionDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+
+    function mostrarModalAgregarCausa() {
+        $.ajax({
+            url: '@Url.Action("ModalCausaAccidente")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyCausaAccidente').html(data);
+                $('#causaAccidenteModal').modal('show');
+            }
+        });
+    }
+
+    function mostrarModalAgregarInvolucrados() {
+        $.ajax({
+            url: '@Url.Action("ModalAgregarInvolucrado")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyAgregarInvolucrado').html(data);
+                $('#agregarInvolucradoModal').modal('show');
+            }
+        });
+    }
+    function buscarInvolucrado() {
+        
+        var licenciaBusqueda = $("#numeroLicenciaBusqueda").val().trim();
+        var rfcBusqueda = $("#RFCBusqueda").val().trim();
+        var curpBusqueda = $("#CURPBusqueda").val().trim();
+        var nombreBusqueda = $("#nombreBusqueda").val().trim();
+        var apellidoPaternoBusqueda = $("#apellidoPaternoBusqueda").val().trim();
+       
+        if (licenciaBusqueda !== "") {
+            if (licenciaBusqueda.length < 10) {
+                sitteg_warning("El número de licencia debe tener al menos 10 caracteres.");
+                return;
+            }
+        }
+        if (rfcBusqueda !== "") {
+            if (rfcBusqueda.length < 10) {
+                sitteg_warning("El RFC debe tener al menos 10 caracteres.");
+                return;
+            }
+        }
+
+        if (curpBusqueda !== "") {
+            if (curpBusqueda.length < 10) {
+                sitteg_warning("El CURP debe tener al menos 10 caracteres.");
+                return;
+            }
+        }
+
+        if ((nombreBusqueda !== "" || apellidoPaternoBusqueda !== "") &&
+            (nombreBusqueda.length < 3 || apellidoPaternoBusqueda.length < 3)) {
+            sitteg_warning("El nombre y el apellido paterno deben tener al menos 3 caracteres.");
+            return;
+        }
+        var Mydata = $("#buscarInvolucradoForm").serialize();
+        console.log("capturaBAccidente2:" + Mydata);
+        var formData = $("#buscarInvolucradoForm").serializeArray();
+        console.log("capturaBAccidente3:" + formData);
+        // Aplica Trim a cada valor en formData
+        $.each(formData, function (index, field) {
+            field.value = $.trim(field.value);
+        });
+
+        // Convierte de nuevo a objeto
+        var trimmedData = {};
+        var findData = false;
+        $.each(formData, function (index, field) {
+            trimmedData[field.name] = field.value;
+            if (!findData) {
+                if (field.value != '' && field.value != undefined) {
+                    findData = true;
+                }
+            }
+        });
+
+
+        showLoading();
+         
+        $.ajax({
+            //url: '/CapturaAccidentes/BuscarPorParametro',
+            url: '/CapturaAccidentes/BuscarPorParametroPaginado',
+            type: 'POST',
+            data: trimmedData,
+            success: function (response) {
+                console.log("RESP:",response)                
+                if (response.tipo == "success") {
+                    // Crear instancia del modelo con los datos recibidos
+                    
+                    console.log("resultado de busqueda: " + response.Data)
+                                    
+                    hideLoading();
+                     
+                     $('#modalLicenciasList').modal('show');
+                    var grid = $("#gridPersonasLicencia").data("kendoGrid");
+                       grid.dataSource.data(response.Data);
+                       grid.dataSource._total = response.length;
+
+                } else {
+                    // Mostrar los resultados de personas encontradas en la búsqueda
+                    if (response.encontrada == false) {
+                        sitteg_warning("La búsqueda no arrojó resultados.");
+                    } else {
+                        if (response.tipo == "riag") {
+                            var dataArray = response.Data;
+                            var grid = $("#gridConductores").data("kendoGrid");
+                            grid.dataSource.data(dataArray);
+                           // grid.dataSource._total = dataArray.length;
+                        } else {
+                            sitteg_warning("La búsqueda no arrojó resultados.");
+                        }
+                    }
+                }
+                hideLoading();
+            },
+            error: function (error) {
+                sitteg_warning('Ocurrió un error en la búsqueda.');
+                hideLoading();
+            }
+        });
+    }
+
+    function mostrarModal(jsonData) {
+        console.log("jsonData: " + jsonData)
+        const modal = document.getElementById('modalLicencias');
+        
+        const modalContent = `
+                            <div class="modal-header">
+                                <h5 class="modal-title">Datos encontrados en el sistema de licencias</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>Nombre:</strong> ${jsonData.nombre}</p>
+                                <p><strong>Apellido Paterno:</strong> ${jsonData.apellidoPaterno}</p>
+                                <p><strong>Apellido Materno:</strong> ${jsonData.apellidoMaterno}</p>
+                                <p><strong>Tipo de Licencia:</strong> ${jsonData.tipolicencia}</p>
+                                <p><strong>Número de Licencia:</strong> ${jsonData.numeroLicencia}</p>
+                                <p><strong>Fecha de Expedición:</strong> ${jsonData.fecha_inicio_vigencia}</p>
+                                <p><strong>Fecha de Vigencia:</strong> ${jsonData.fecha_termino_vigencia}</p>
+                            </div>
+                          <div class="modal-footer">
+                            <button type="button" id="cerrarModalBtn" class="btn btn-secondary controlButton" data-dismiss="modal">Cerrar</button>
+                            <button type="button" id="guardarEnBaseDeDatosBtn" class="btn btn-primary controlButton">Guardar en Base de Datos</button>
+                          </div>
+                        `;
+
+        modal.querySelector('#modal_involucrado').innerHTML = modalContent;
+        const cerrarModalBtn = document.getElementById('cerrarModalBtn');
+        cerrarModalBtn.addEventListener('click', () => {
+            $('#modalLicencias').modal('hide');
+        });
+
+        const guardarEnBaseDeDatosBtn = document.getElementById('guardarEnBaseDeDatosBtn');
+        guardarEnBaseDeDatosBtn.addEventListener('click', () => {
+            const tipoLicenciaMapping = {
+                "TIPO A  CHOFER AUTOMOVILISTA": 1,
+                "TIPO B CHOFER SERVICIO PÚBLICO": 2,
+                "TIPO C  Chofer Servicio de Carga": 3,
+                "TIPO D -MOTOCICLISTA": 4,
+                "PERMISO A -AUTOMOVIL-": 6,
+                "PERMISO D -MOTOCICLETA-": 7,
+                "NO APLICA": 8,
+                "TIPO A": 1,
+                "TIPO B": 2,
+                "TIPO C": 3,
+                "TIPO D": 4,
+                "PERMISO A": 6,
+                "PERMISO D": 7,
+                "A-AUTOMOVILISTA": 1,
+                "B-CHOFER DE SERVICIO PÚBLICO": 2,
+                "C-CHOFER DE SERVICIO DE CARGA": 3,
+                "D-MOTOCICLISTA": 4,
+                "PA-PERMISO AUTOMOVILISTA": 6,
+                "PD-PERMISO MOTOCICLISTA": 7,
+
+                // Puedes agregar más mapeos aquí si es necesario
+            };
+            const tipoLicenciaNumero = tipoLicenciaMapping[jsonData.tipolicencia] || 0;
+            jsonData.id_tipo_licencia = tipoLicenciaNumero;
+            var idVehiculo = $("#IdVehiculoH").val();
+            showLoading();
+            $.ajax({
+                type: 'POST',
+                url: '/CapturaAccidentes/guardaDesdeServicio',
+                data: jsonData,
+                success: function (response) {
+                    $('#modalLicencias').modal('hide');
+                    var personasList = [response];
+                    var grid = $("#gridConductores").data("kendoGrid");
+                    grid.dataSource.data(personasList);
+                    hideLoading();
+                },
+                error: function (error) {
+                    sitteg_warning('Error al guardar en la base de datos:');
+                    hideLoading();
+                }
+            });
+        });
+
+        $('#modalLicencias').modal('show');
+    }
+
+    function seleccionarPersona() {
+        var selectedRow = this.select();
+        if (selectedRow.length > 0) {
+            var dataItem = this.dataItem(selectedRow);
+            var idPersonaInvolucrado = dataItem.idPersonaInvolucrado
+
+            showLoading();
+            $.ajax({
+                url: '@Url.Action("GuardarInvolucrado", "CapturaAccidentes")',
+                type: 'POST',
+                data: { idPersonaInvolucrado: idPersonaInvolucrado },
+                success: function (result) {
+                    sitteg_success("Se agregó una persona involucrada");
+                    $('#ListaVehiculosInvolucrados').show();
+                    hideLoading();
+                },
+                error: function (error) {
+                    hideLoading();
+                    alert("ERROR");
+                }
+            });
+        }
+    }
+    function dirigirParteC() {
+        console.log('dirigirParteC llamado');
+        var descripcionCausa = document.getElementById("descripcionCausaTextArea").value;
+        var esSoloLectura = @(ViewBag.EsSoloLectura ? "true" : "false");
+        console.log("ESSOLO", esSoloLectura)
+        showLoading();
+        $.ajax({
+            url: '/CapturaAccidentes/CapturaAccidenteC',
+            method: 'POST',
+            data: {
+                descripcionCausa: descripcionCausa,
+                esSoloLectura: esSoloLectura,
+                pet:1
+            },
+            success: function (response) {
+                sitteg_success('Datos enviados correctamente');
+                window.location.href = '/CapturaAccidentes/CapturaAccidenteC?rOy=' + esSoloLectura;
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                sitteg_warning('Error al enviar los datos:', error);
+                hideLoading();
+            }
+        });
+    }
+
+function goBack() {
+    var esSoloLectura = @(ViewBag.EsSoloLectura ? "true" : "false");
+    var url = '/CapturaAccidentes/CapturaAaccidente/?showE=' + esSoloLectura;
+    window.location.href = url;
+}
+
+
+</script>
+<div class="mainContainer bg-light">
+
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <div class="border border-2 border-dark rounded-circle">
+                            <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                <b>1</b>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="icon-factorAccidente h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Factores que intervienen en el accidente</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-auto text-center">
+                <div class="btnOutline btnOutlinePrimary px-4 my-3">
+                    <button data-bs-toggle="modal" onclick="mostrarModalAgregarFactor()" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                        <h6 class="m-0"><i class="me-2 icon-addFactorAccidente"></i><b>Agregar factor de accidente</b></h6>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-4 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="row justify-content-between align-items-end mb-1 titleCustom">
+            <div class="col-12 col-md-auto mt-4 mb-2">
+                <h5 class="px-4"><b>Listado de factores del accidente</b></h5>
+                <h6 class="px-4 text-muted">Da de alta los factores del accidente.</h6>
+            </div>
+        </div>
+        <partial name="_ListaFactores" model="Model" esSoloLectura="@ViewBag.EsSoloLectura" />
+        <!--SECCION CAUSAS-->
+    </section>
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <div class="border border-2 border-dark rounded-circle">
+                            <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                <b>2</b>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="icon-opciones h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Causas determinantes</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-auto text-center">
+                <div class="btnOutline btnOutlinePrimary px-4 my-3">
+                    <button data-bs-toggle="modal" onclick="mostrarModalAgregarCausa()" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                        <h6 class="m-0"><i class="me-2 icon-addOpciones"></i><b>Agregar causas</b></h6>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-4 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="row justify-content-between align-items-end mb-1 titleCustom">
+            <div class="col-12 col-md-auto mt-4 mb-2">
+                <h5 class="px-4"><b>Listado de causas del accidente</b></h5>
+                <h6 class="px-4 text-muted">Da de alta las causas del accidente.</h6>
+            </div>
+        </div>
+        <partial name="_ListaCausas" model="Model" esSoloLectura="@ViewBag.EsSoloLectura" />
+        <form class="row justify-content-between align-items-end mb-2" id="descripcionForm">
+            <div class="col-12 px-4">
+                <div class="controlForm my-3">
+                    <label>Descripción de causas determinantes</label>
+                    <span>
+                        @(Html.Kendo().TextAreaFor(t => t.DescripcionCausa)
+                            .Value(!string.IsNullOrWhiteSpace(ViewData["DescripcionCausa"] as string) ? ViewData["DescripcionCausa"] as string : "")
+                            .Rows(3)
+                            .Enable(!ViewBag.EsSoloLectura)
+                            .HtmlAttributes(new { id = "descripcionCausaTextArea", style = "width:100%;" })
+                            )
+                    </span>
+                </div>
+            </div>
+        </form>
+    </section>
+    <div id="personasInvolucrados">
+
+        <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded pb-1">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-12 col-md-auto">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto">
+                            <div class="border border-2 border-dark rounded-circle">
+                                <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                    <b>3</b>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-auto p-0">
+                            <i class="icon-involucrado h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                            <h2 class="m-0 h3"><b>Involucrados</b></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-auto text-center">
+                    <div class="btnOutline btnOutlinePrimary px-4 my-3">
+                        <button onclick="mostrarModalAgregarInvolucrados()" @(ViewBag.EsSoloLectura ? "disabled" : "")>
+                            <h6 class="m-0"><i class="me-2 icon-addInvolucrado"></i><b>Agregar un nuevo involucrado</b></h6>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-11 pe-0">
+                    <div class="bgSuccess py-1"></div>
+                </div>
+                <div class="col-1 ps-0">
+                    <div class="bg-light py-1"></div>
+                </div>
+            </div>
+            <div class="row justify-content-between mb-1 titleCustom">
+                <div class="col-12 col-md-auto mt-4 mb-2">
+                    <h5 class="px-4"><b>Listado de involucrados</b></h5>
+                    <h6 class="px-4 text-muted">Involucrados en el accidente.</h6>
+                </div>
+
+            </div>
+            <div id="tablaInvolucrados">
+                <partial name="_ListadoInvolucrados" model="Model" esSoloLectura="@ViewBag.EsSoloLectura" />
+            </div>
+            <div class="row my-3 mb-4">
+                <div class="col-12 col-md-6 mx-md-auto">
+                    <div class="row justify-content-around">
+                        <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0" onclick="goBack()">
+                            @(Html.Kendo().Button()
+                                .Name("back")
+                                .HtmlAttributes(new { @class = "px-5" })
+                                .Content("<h6 class=\"m-0\"><i class=\"icon-back me-2\"></i><b>Regresar</b></h6>"))
+                        </div>
+                        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                            <div class="controlButton" onclick="dirigirParteC()">
+                                @(Html.Kendo().Button()
+                                    .Name("finalInvolucrado")
+                                    .HtmlAttributes(new { @class = "btnPrimary px-5" })
+                                    .Content("<h5 class=\"m-0\"><b>Finalizar captura</b></h5>"))
+                            </div>
+                        </div>
+                           
+                    </div>
+
+                    
+                </div>
+            </div>
+        </section>
+    </div>
+    <!--Modal agregar involucrado-->
+    <div class="modal fade modalCustom" id="agregarInvolucradoModal" aria-labelledby="agregarVehiculoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content" id="modal_involucrado">
+                <div class="modal-body p-0" id="ModalBodyAgregarInvolucrado">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="modalLicencias" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Contenido del modal se llenará con la función mostrarModal -->
+            </div>
+        </div>
+    </div>
+    <div id="modalLicenciasList" class="modal">
+    <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+        <div class="modal-content">
+            
+                <partial name="_ListaPersonasEnLicencias" model="Model" />
+            
+            <!-- Contenido del modal se llenará con la función mostrarModal -->
+        </div>
+    </div>
+</div>
+
+
+
+    <!--Modal agregar factor accidente-->
+    <div class="modal fade modalCustom" id="factorAccidenteModal" aria-labelledby="agregarFactorLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="ModalBodyFactorAccidente">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Modal agregar causa accidente-->
+
+    <div class="modal fade modalCustom" id="causaAccidenteModal" aria-labelledby="agregarVehiculoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="ModalBodyCausaAccidente">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--SECCION VEHICULOS INVOLUCRADOS-->
+    <div id="seccionVehiculos" style="display:none;">
+        <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded pb-1">
+            <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                <div class="col-12 col-md-auto">
+                    <div class="row align-items-center justify-content-center justify-content-md-start">
+                        <div class="col-auto">
+                            <div class="border border-2 border-dark rounded-circle">
+                                <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                    <b>3</b>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-auto p-0">
+                            <i class="icon-involucrado h1 colorPrimary"></i>
+                        </div>
+                        <div class="col-auto my-3">
+                            <h2 class="m-0 h3"><b>Involucrados</b></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                    <div class="row">
+                        <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                            @(Html.Kendo().Button()
+                                .Name("editSearchInvolucrado")
+                                .HtmlAttributes(new { @class = "px-5" })
+                                .Content("<h6 class=\"m-0\"><i class=\"icon-edit me-2\"></i><b>Editar busqueda</b></h6>"))
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-11 pe-0">
+                    <div class="bgSuccess py-1"></div>
+                </div>
+                <div class="col-1 ps-0">
+                    <div class="bg-light py-1"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 my-4">
+                    <h5 class="px-4"><b>Datos de los involucrados</b></h5>
+                    <h6 class="px-4 text-muted">
+                        Selecciona entre vehículos / se ignora
+                    </h6>
+                </div>
+            </div>
+
+            <div class="row px-4 align-items-end">
+                <div class="col-12 mt-4 controlForm">
+                    <label>Involucrado del accidente:</label>
+                </div>
+                <div class="col-12 mb-4">
+                    @{
+                        var nombre = Model != null ? Model.nombre : "Involucrado";
+                    }
+
+
+                    <h5 class="m-0 colorPrimary">
+                        <i class="icon-fisica h4"></i>
+                        <b>@nombre</b>
+                    </h5>
+
+                </div>
+            </div>
+            <div class="row px-4 align-items-end">
+                <div class="col-12 mt-4 controlForm">
+                    <label>Vehículo donde iba el involucrado durante el accidente:</label>
+                </div>
+            </div>
+            <div>
+                <nav class="tabCustom">
+                    <div class="nav nav-tabs row mx-0" id="nav-tab" role="tablist">
+                        <button class="nav-link col active" id="vehiculo-involucrado-tab" data-bs-toggle="tab" data-bs-target="#vehiculo-involucrado" type="button" role="tab" aria-controls="vehiculo-involucrado" aria-selected="true">
+                            <div class="row justify-content-center align-items-center px-3 py-2">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <div class="col-auto p-0">
+                                    <h5 class="m-0"><i class="icon-car h4"></i> <b>Vehículos</b></h5>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="nav-link col" id="noneVehiculo-involucrado-tab" data-bs-toggle="tab" data-bs-target="#noneVehiculo-involucrado" type="button" role="tab" aria-controls="noneVehiculo-involucrado" aria-selected="false">
+                            <div class="row justify-content-center align-items-center px-3 py-2">
+                                <div class="col-auto radioCustom p-0">
+                                    <div class="rounded-circle m-2"></div>
+                                </div>
+                                <div class="col-auto p-0">
+                                    <h5 class="m-0"><i class="icon-sinPropietario h4"></i> <b>Se ignora</b></h5>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane tabCustomConteiner fade show active" id="vehiculo-involucrado" role="tabpanel" aria-labelledby="vehiculo-involucrado-tab">
+                        <div class="px-4 mt-4 pb-4 align-items-end">
+                            <div class="justify-content-between mb-1">
+                                <div class="col-12 col-lg-6 mt-4 mb-4">
+                                    <h5 class="px-4"><b>Listado de vehículo involucrados</b></h5>
+                                    <h6 class="px-4 text-muted">Selecciona un vehículo involucrado para continuar.</h6>
+                                </div>
+                            </div>
+                            <partial name="_ListaVehiculosInvolucrados" model="Model" esSoloLectura="@ViewBag.EsSoloLectura" />
+                            <div class="row align-items-end mt-4">
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        <label>Tipo <b>(obligatorio)</b>:</label>
+                                        <span>
+                                            @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                                .Name("Tipo")
+                                                .DataTextField("")
+                                                .DataValueField("")
+                                                .HtmlAttributes(new { style = "width:100%;" })
+                                                .Filter(FilterType.Contains)
+                                                .DataSource(source => source
+                                                .Read(read => read.Action("", ""))
+                                                )
+                                                )
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        <label>Estado de la víctima <b>(obligatorio)</b>:</label>
+                                        <span>
+                                            @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                                .Name("Estado")
+                                                .DataTextField("")
+                                                .DataValueField("")
+                                                .HtmlAttributes(new { style = "width:100%;" })
+                                                .Filter(FilterType.Contains)
+                                                .DataSource(source => source
+                                                .Read(read => read.Action("", ""))
+                                                )
+                                                )
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        <label>Llevado a:</label>
+                                        <span>
+                                            @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                                .Name("Llevado")
+                                                .DataTextField("")
+                                                .DataValueField("")
+                                                .HtmlAttributes(new { style = "width:100%;" })
+                                                .Filter(FilterType.Contains)
+                                                .DataSource(source => source
+                                                .Read(read => read.Action("", ""))
+                                                )
+                                                )
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        <label>Traslado por:</label>
+                                        <span>
+                                            @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                                .Name("Traslado")
+                                                .DataTextField("")
+                                                .DataValueField("")
+                                                .HtmlAttributes(new { style = "width:100%;" })
+                                                .Filter(FilterType.Contains)
+                                                .DataSource(source => source
+                                                .Read(read => read.Action("", ""))
+                                                )
+                                                )
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        @(Html.Kendo().TextBox()
+                                            .Name("Asiento:")
+                                            .Label(l => l.Content("Asiento que ocupaba:"))
+                                            .Placeholder("Ingresa el número asiento que ocupaba")
+                                            .HtmlAttributes(new { style = "width: 100%", type = "number" })
+                                            )
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        <label>Traía cinturón <b>(obligatorio)</b>:</label>
+                                        <span>
+                                            @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                                .Name("cinturon")
+                                                .DataTextField("")
+                                                .DataValueField("")
+                                                .HtmlAttributes(new { style = "width:100%;" })
+                                                .Filter(FilterType.Contains)
+                                                .DataSource(source => source
+                                                .Read(read => read.Action("", ""))
+                                                )
+                                                )
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row my-3 mb-4">
+                            <div class="col-12 col-md-6 mx-md-auto">
+                                <div class="row justify-content-around">
+                                    <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                        @(Html.Kendo().Button()
+                                            .Name("editVehiculo")
+                                            .HtmlAttributes(new { @class = "px-5" })
+                                            .Content("<h5 class=\"m-0\"><b>Editar búsqueda</b></h5>"))
+
+                                    </div>
+                                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                        <div class="controlButton">
+                                            @(Html.Kendo().Button()
+                                                .Name("saveVehiculo")
+                                                .HtmlAttributes(new { @class = "btnPrimary px-5" })
+                                                .Content("<h5 class=\"m-0\"><b>Siguiente</b></h5>"))
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="tabCustomEnd"></div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane tabCustomConteiner fade" id="noneVehiculo-involucrado" role="tabpanel" aria-labelledby="noneVehiculo-involucrado-tab">
+                        <div class="row px-4 my-4 py-5 align-items-end">
+                            <div class="col-12 col-md-10 mx-md-auto text-center">
+                                <h3><b>Se utiliza cuando se tiene una infracción o accidente</b></h3>
+                                <h4 class="fw-normal">y se desconoce el vehículo donde iba el involucrado</h4>
+                                <div class="row ">
+                                    <div class="col-12 col-md-8 mx-md-auto col-lg-5 ">
+                                        <div class="controlButton my-3">
+                                            @(Html.Kendo().Button()
+                                                .Name("involucrafoNoneCar")
+                                                .HtmlAttributes(new { @class = "btnPrimary" })
+                                                .Content("<h5 class=\"m-0\"><b>Siguiente</b></h5>"))
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="tabCustomEnd"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>

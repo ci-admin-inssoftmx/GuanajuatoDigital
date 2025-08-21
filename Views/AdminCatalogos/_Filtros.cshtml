@@ -1,0 +1,948 @@
+﻿@{
+    var selectedCatalogo = ViewBag.SelectedCatalogo;
+}
+<script>
+    function delegacion(){
+     var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+    </script>
+
+@if (selectedCatalogo == 1)
+{
+   <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+                <div class="row align-items-end px-4">
+                    <div class="controlForm my-3 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <label>Delegación:</label>
+                        @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                            .Name("idDelegacionCar")
+                            .Filter(FilterType.Contains)
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una delegación")
+                            .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "idDelegacionFiltroCar" })
+                            .DataSource(source =>
+
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetDelegaciones", "Catalogos").Data("delegacion");
+                                });
+                            }))
+                    </div>
+                    </div>
+                    <div class="my-3 col-12 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlButton">
+                            <button class="btnPrimary" type="button" onclick="submitSearchCar()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+                        </div>
+                    </div>
+                </div>
+
+}
+@if (selectedCatalogo == 2)
+{
+    <div class="row mb-4 px-4 rounded align-items-end">
+        <div class="controlForm my-3 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <label><b>Delegación</b>:</label>
+            @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                .Name("idDelegacionTra")
+                .Filter(FilterType.Contains)
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel("Selecciona una delegación")
+                .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "idDelegacion" })
+                .Events(e => e.Change("delegacionDropDownChange"))
+                .DataSource(source =>
+
+                {
+                    source.Read(read =>
+                    {
+                                    read.Action("GetDelegaciones", "Catalogos").Data("delegacion");
+                    });
+                }))
+        </div>
+
+        <div class="controlForm my-3 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <label><b>Carretera</b>:</label>
+            @(Html.Kendo().DropDownList()
+                .NoDataTemplate("No se encontraron datos")
+                .Name("idCarretera")
+                .Filter(FilterType.Contains)
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel("Selecciona una carretera")
+                .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "idCarretera" })
+                .DataSource(source =>
+
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("CarreterasPorDelegacion_DropTodos", "CatCarreteras");
+                    });
+                }))
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlButton my-3">
+                <button class="btnPrimary" type="button" onclick="submitSearchTramo()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+            </div>
+        </div>
+    </div>
+
+}
+@if (selectedCatalogo == 4)
+{
+         <div class="row px-4 mb-4 align-items-end">
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    @(Html.Kendo().TextBox()
+                        .Name("Municipio2")
+                        .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                        .Placeholder("Ingresa el nombre del municipio")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Entidad <b>(obligatorio)</b>:</label>
+                    <span>
+                        @(Html.Kendo().DropDownList().Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .Name("IdEntidad2")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una Entidad")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Entidades_Drop", "CatMunicipios").Data("delegacion");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            )
+                    </span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Delegación <b>(obligatorio)</b>:</label>
+                    <span>
+                        @(Html.Kendo().DropDownList().Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                        .Name("IdOficinaTransporte2")
+                        .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una Delegacion")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetDelegaciones", "Catalogos").Data("delegacion");
+                                });
+                            })
+                           
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            )
+                    </span>
+                </div>
+            </div>
+         </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <div class="controlButton">
+                        <button class="btnPrimary" id="btnBuscar" type="button" onclick="submitSearchMunicipios()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+                    </div>
+                </div>
+            </div>
+
+}
+
+@if (selectedCatalogo == 6)
+{
+    <div class="row px-4 mb-4 align-items-end">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(
+            Html.Kendo().TextBox()
+                        .Name("NombreB")
+                        .Label(l => l.Content("Nombre:"))
+                        .Placeholder("Ingresa el nombre del oficial")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(
+            Html.Kendo().TextBox()
+                        .Name("ApellidoPaternoB")
+                        .Label(l => l.Content("Apellido paterno:"))
+                        .Placeholder("Ingresa el apellido paterno del oficial")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(
+                        Html.Kendo().TextBox()
+                        .Name("ApellidoMaternoB")
+                        .Label(l => l.Content("Apellido materno:"))
+                        .Placeholder("Ingresa el apellido materno del oficial")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm mb-3">
+                <label>Delegación:</label>
+                    @(
+            Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+            .Name("idDelegacion")
+            .Filter(FilterType.Contains)
+            .DataTextField("Text")
+            .DataValueField("Value")
+            .OptionLabel("Selecciona una delegación")
+            .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "idDelegacionFiltro" })
+            .DataSource(source =>
+
+            {
+                source.Read(read =>
+                {
+                            read.Action("GetDelegacionesDiv", "Catalogos").Data("delegacion");
+                        });
+            })
+                )
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlButton">
+            <button class="btnPrimary" type="button" onclick="submitSearchOficial()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+        </div>
+    </div>
+
+}
+
+@if (selectedCatalogo == 8)
+{
+      <div class="row align-items-end px-4">
+                    <div class="controlForm my-3 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <label><b>Marca</b>:</label>
+                        @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                            .Name("idMarca")
+                            .Filter(FilterType.Contains)
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una Marca")
+                            .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "idMarcaFiltro" })
+                            .DataSource(source =>
+
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Marcas_Drop", "CatSubmarcasVehiculos");
+                                });
+                            }))
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlButton my-3">
+                            <button class="btnPrimary" type="button" onclick="submitSearchSubmarca()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+                        </div>
+                    </div>
+                </div>
+
+}
+@if (selectedCatalogo == 12)
+{
+                <div id="formBuscarMotivo" class="row px-4 mb-4 align-items-end">
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <span>
+                @(Html.Kendo().TextBox()
+                    .Name("Nombre")
+                    .Label(l => l.Content("Nombre:"))
+                    .Placeholder("Ingresa el nombre")
+                    .HtmlAttributes(new { style = "width: 100%", Id = "txtPlacas" })
+                    )
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            @(Html.Kendo().TextBox()
+                .Name("Fundamento")
+                .Label(l => l.Content("Fundamento:"))
+                .Placeholder("Ingresa fundamento")
+                .HtmlAttributes(new { style = "width: 100%", Id = "txtFundamento" })
+                )
+
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Vigencia:</label>
+            @(Html.Kendo().DropDownList().Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                 .Name("IdVigencia")    
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .HtmlAttributes(new { style = "width:100%;", Id = "ddlVigencia" })
+                .OptionLabel("Todos")
+                .BindTo(new List<SelectListItem>
+        {
+        new SelectListItem { Text = "Vigentes", Value = "1" },
+        new SelectListItem { Text = "No vigentes", Value = "2" }
+        })
+                .Events(e => e.Change("onDropDownChange"))
+                )
+
+        </div>
+    </div>
+    <div class="row px-2.2 mb-4 align-items-end" id="elementosFecha">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Inicio de vigencia desde:</label>
+                @(Html.Kendo().DatePicker()
+                    .Name("InicioVigenciaDesde")
+                    .Format("dd/MM/yyyy")
+                    .Culture("es-ES")
+                    .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "inicioVigenciaDesde" })
+                    )
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Inicio de vigencia hasta:</label>
+                @(Html.Kendo().DatePicker()
+                    .Name("InicioVigenciaHasta")
+                    .Format("dd/MM/yyyy")
+                    .Culture("es-ES")
+                    .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "inicioVigenciaHasta" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Fin de vigencia desde:</label>
+                @(Html.Kendo().DatePicker()
+                .Name("FinVigenciaDesde")
+                    .Format("dd/MM/yyyy")
+                    .Culture("es-ES")
+                    .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "FinVigenciaDesde" })
+                    )
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Fin de vigencia hasta:</label>
+                @(Html.Kendo().DatePicker()
+                    .Name("FinVigenciaHasta")
+                    .Format("dd/MM/yyyy")
+                    .Culture("es-ES")
+                    .HtmlAttributes(new { style = "width: 100%", title = "datepicker", id = "FinVigenciaHasta" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlButton my-3">
+                <button id="btnBuscarMotivos" class="btnPrimary" type="button" onclick="submitSearchMotivos()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+            </div>
+        </div>
+    </div>
+   </div>
+}
+
+@if (selectedCatalogo == 13)
+{
+    <div class="row">
+            <div class="col-12 mb-4 px-4 rounded gridCustom">
+                <div class="row align-items-end px-4">
+                        <div class="controlForm my-3 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <label>Fecha:</label>
+                            <span>
+                                @(Html.Kendo().DatePicker()
+                                    .Name("fechaFiltro")
+                                    .Culture("es-ES")
+                                    .Format("dd/MM/yyyy")
+                                  )
+                            </span>
+                        </div>
+                     <div class="controlForm my-3 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <label>Municipio:</label>
+                        @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                            .Name("idMunicipioDias")
+                            .Filter(FilterType.Contains)
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona un Municipio")
+                            .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "idMunicipioFiltroDias" })
+                            .DataSource(source =>
+
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Municipios_Read", "DiasInhabiles").Data("delegacion");
+                                });
+                            }))
+                    </div>                   
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlButton my-3">
+                            <button class="btnPrimary" type="button" onclick="submitSearchDias()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+                        </div>
+                    </div>
+             </div>
+      </div>
+   </div>
+}
+@if (selectedCatalogo == 14)
+{
+     <div class="row">
+            <div class="col-12 mb-4 px-4 rounded gridCustom">
+                <div id="tablaAgenciasMinisterio">
+                    <div class="row align-items-end px-4">
+                        <div class="controlForm my-3 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <label>Delegación:</label>
+                            @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                            .Name("idDelegacionAg")
+                            .Filter(FilterType.Contains)
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una delegación")
+                            .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "idDelegacionFiltroAgencia" })
+                            .DataSource(source =>
+
+                            {
+                                source.Read(read =>
+                                {
+                                        read.Action("GetDelegaciones", "Catalogos").Data("delegacion");
+                                });
+                            }))
+                        </div>
+                        <div class="my-3 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="controlButton">
+                                <button class="btnPrimary" type="button" onclick="submitSearchAgencia()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+                            </div>
+                        </div>
+                    </div>
+              </div>
+       </div>
+    </div>
+           
+}
+
+@if (selectedCatalogo == 21)
+{
+    <div class="row align-items-end px-4">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Entidad:</label>
+
+                @(
+                Html.Kendo().DropDownList().Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .Name("IdEntidadH")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una Entidad")
+                            .Events(e => e.Change("Municipios_DropChangeH"))
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Entidades_Drop", "CatMunicipios").Data("delegacion");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:100%;", Id = "IdEntidadH" })
+                            )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Municipio <b>(obligatorio)</b>:</label>
+                <span>
+                    @(
+                Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                .Name("idMunicipioH")
+                .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Selecciona un Municipio").Filter(FilterType.Contains)
+                    .HtmlAttributes(new { style = "width:100%;", Id = "IdMunicipioH" })
+                    @*                           .DataSource(source =>
+                            {
+                            source.Read(read =>
+                            {
+                            read.Action("Municipios_Drop", "CatHospitales");
+                            });
+                            })*@
+
+                    )
+
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <div class="controlButton">
+                    <button class="btnPrimary" id="btnBuscar" type="button" onclick="submitSearchHospital()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@if (selectedCatalogo == 23)
+    {
+        <div class="row">
+      
+            <div class="row align-items-end mb-4 px-4 rounded">
+                <div class="controlForm my-3 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <label>Factor:</label>
+                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                        .Name("idFactor")
+                        .Filter(FilterType.Contains)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("Selecciona un Factor")
+                        .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;" })
+                        .DataSource(source =>
+
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("Factores_Drop", "CatFactoresOpcionesAccidentes").Data("delegacion");
+                            });
+                        }))
+                </div>
+
+
+
+                <div class="col-12 col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlButton my-3">
+                        <button class="btnPrimary" type="button" onclick="submitSearchOpciones()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    @if (selectedCatalogo == 24)
+    {         
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Delegación <b>(obligatorio)</b>:</label>
+                    <span>
+                        @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                            .Name("IdDelegacion")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona un Municipio").Filter(FilterType.Contains)
+                            .HtmlAttributes(new { style = "width:100%;", Id = "IdDelegacion2" })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("Delegaciones_Drop", "CatOficinasRenta").Data("delegacion");
+                                });
+                            })
+                            )
+
+                    </span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <div class="controlButton">
+                        <button class="btnPrimary" id="btnBuscar" type="button" onclick="submitSearchOfiRenta()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+                    </div>
+                </div>
+            </div> 
+    }
+       @if (selectedCatalogo == 27)
+{
+                      <div class="row align-items-end px-4">
+                        <div class="controlForm my-3 col-12 col-md-6 col-lg-3">
+                            <label>Tipo de servicio:</label>
+                            @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                .Name("idTipoServicio")
+                                .Filter(FilterType.Contains)
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona un tipo de servicio")
+                                .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "idTipoServicio" })
+                                .DataSource(source =>
+
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("TipoServicios_Read", "Vehiculos");
+                                    });
+                                }))
+                        </div>
+                        <div class="col-12 my-3 col-md-6 col-lg-3">
+                            <div class="controlButton">
+                                <button class="btnPrimary" type="button" onclick="submitSearchSubtipoServicio()">  <h5 class="m-0"><b>Buscar</b></h5></button>
+
+                            </div>
+                        </div>
+                    </div>     
+                      
+}
+       @if (selectedCatalogo == 28)
+{
+                <form id="filterForm">
+    <div class="row">
+        <div class="controlForm my-3 col-12 col-md-6 col-lg-3">
+            <span>
+                @(
+                    Html.Kendo().TextBox()
+                                .Name("Nombre")
+                                .Label(l => l.Content("Nombre del turno:"))
+                                .Placeholder("Seleccione el turno")
+                                .HtmlAttributes(new { style = "width: 100%", Id = "filterNombre" })
+                                )
+            </span>
+        </div>
+
+        <div class="controlForm my-3 col-12 col-md-6 col-lg-3">
+            <span>
+                <label>Hora de inicio:</label>
+                @(
+                    Html.Kendo().TimePicker()
+                    .Name("HoraInicio")
+                                .Format("HH:mm")
+                                .Interval(30)
+                                .HtmlAttributes(new { style = "width: 100%", Id = "filterHoraInicio", placeholder = "Ingrese hora de inicio" })
+                                )
+            </span>
+        </div>
+
+        <div class="controlForm my-3 col-12 col-md-6 col-lg-3">
+            <span>
+                <label>Hora de finalización:</label>
+                @(
+                    Html.Kendo().TimePicker()
+                    .Name("HoraFin")
+                                .Format("HH:mm")
+                                .Interval(30)
+                                .HtmlAttributes(new { style = "width: 100%", Id = "filterHoraFin", placeholder = "Ingrese hora de finalización" })
+                                )
+            </span>
+        </div>
+
+        <div class="controlForm my-3 col-12 col-md-6 col-lg-3">
+            <label>Corporación:</label>
+            @(
+                Html.Kendo().DropDownList()
+                .Name("IdDelegacion")
+                                .NoDataTemplate("No se encontraron datos")
+                                .Filter(FilterType.Contains)
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona la corporación")
+                                .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "filter-idDelegacion" })
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetDelegacionesOficinasDropDownList", "CatTurnos");
+                                    });
+                                })
+                )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 my-3 col-md-6 col-lg-3">
+            <div class="controlButton">
+                <button class="btnPrimary" type="button" onclick="submitSearchTurno()">
+                    <h5 class="m-0"><b>Buscar</b></h5>
+                </button>
+            </div>
+        </div>
+    </div>
+    </form>
+}
+       @if (selectedCatalogo == 29)
+{
+    <form id="filterForm">
+        <div class="row">
+            <div class="controlForm my-3 col-12 col-md-6 col-lg-3">
+                <span>
+                    @(
+                Html.Kendo().TextBox()
+                .Name("NombreAseguradora")
+                .Label(l => l.Content("Nombre aseguradora:"))
+                .Placeholder("Ingrese nombre de aseguradora")
+                .HtmlAttributes(new { style = "width: 100%", Id = "filterNombre" })
+                )
+                </span>
+            </div>
+            <div class="controlForm my-3 col-12 col-md-6 col-lg-3">
+                <label>Estatus:</label>
+                @(
+            Html.Kendo().DropDownList()
+                    .Name("Estatus")
+            .DataTextField("Text") // Campo para el texto que se mostrará
+            .DataValueField("Value") // Campo para el valor que se enviará
+            .BindTo(new List<SelectListItem> {
+                                new SelectListItem { Text = "Selecciona un estatus", Value = "-1" },
+                                new SelectListItem { Text = "Activo", Value = "1" },
+                                new SelectListItem { Text = "Inactivo", Value = "0" }
+                    }) // Lista de elementos
+            .Value("-1") // Valor predeterminado seleccionado
+            .HtmlAttributes(new { style = "width: 100%" }) // Atributos HTML adicionales
+            )
+            </div>
+                </div>       
+                
+
+                <div class="row">                        
+                    <div class="col-12 my-3 col-md-6 col-lg-3">
+                        <div class="controlButton">
+                            <button class="btnPrimary" type="button" onclick="submitSearchAseguradora()">  
+                                <h5 class="m-0"><b>Buscar</b></h5>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                    
+                    
+            </form> 
+            }
+<script>
+    function delegacionDropDownChange() {
+        var idDelegacion = $("#idDelegacion").data("kendoDropDownList").value();
+
+        showLoading();
+        $.ajax({
+            url: "/Catalogos/GetCarreterasFiltroDelegacion",
+            type: "POST",
+            data: { idDelegacion: idDelegacion },
+            success: function (data) {
+                var CarreterasDropDown = $("#idCarretera").data("kendoDropDownList");
+                CarreterasDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+
+    function hideShowElements() {
+        var selectedValue = $("#ddlVigencia").val();
+        console.log("VAL", selectedValue)
+        if (selectedValue === "1" || selectedValue === "2") {
+            $("#elementosFechas").hide();
+        } else {
+            $("#elementosFechas").show();
+        }
+    }
+    function onDropDownChange() {
+        var selectedValue = $("#ddlVigencia").data("kendoDropDownList").value();
+        console.log("Valor seleccionado: " + selectedValue);
+
+        // Ocultar el div con el id "elementosFechas" si el valor seleccionado no es el valor por defecto
+        if (selectedValue !== "") {
+            $("#elementosFecha").hide();
+        } else {
+            $("#elementosFecha").show();
+        }
+    }
+    function Municipios_DropChange2() {
+        var idEntidad = $("#idEntidad2").data("kendoDropDownList").value();
+        showLoading();
+        $.ajax({
+            url: "/CatHospitales/Municipios_DropChange",
+            type: "POST",
+            data: { idEntidad: idEntidad },
+            success: function (data) {
+                var IdMunicipio2 = $("#IdMunicipio2").data("kendoDropDownList");
+                //console.log(data);
+                IdMunicipio2.dataSource.data(data);
+                hideLoading();
+                //$("#IdMunicipio2").trigger("onFinishLoading");
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+
+    function Municipios_DropChange() {
+        var idEntidad = $("#idEntidad").data("kendoDropDownList").value();
+                var CORP = $("#idDependenciaFiltro").val();
+
+        showLoading();
+        $.ajax({
+            url: "/CatHospitales/Municipios_DropChange",
+            type: "POST",
+            data: { idEntidad: idEntidad,CORP:CORP},
+            success: function (data) {
+                var IdMunicipio = $("#IdMunicipio").data("kendoDropDownList");
+                console.log(data);
+                IdMunicipio.dataSource.data(data);
+                hideLoading();
+                $("#IdMunicipio").trigger("onFinishLoading");
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+    function Municipios_DropChangeH() {
+        var idEntidad = $("#IdEntidadH").data("kendoDropDownList").value();
+        var CORP = $("#idDependenciaFiltro").val();
+
+        showLoading();
+        $.ajax({
+            url: "/CatHospitales/Municipios_DropChange",
+            type: "POST",
+            data: { idEntidad: idEntidad, CORP:CORP},
+            success: function (data) {
+                var IdMunicipio2 = $("#IdMunicipioH").data("kendoDropDownList");
+                //console.log(data);
+                IdMunicipio2.dataSource.data(data);
+                hideLoading();
+              // $("#IdMunicipio2").trigger("onFinishLoading");
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+     function submitSearchCar() {
+
+        var grid = $("#gridCatCarreteras").data("kendoGrid");
+        grid.dataSource.read()
+        grid.dataSource.page(1);
+    }
+    function submitSearchTramo() {
+        var idCarreteraFiltro = $("#idCarretera").val();
+        var idDelegacionFiltro = $("#idDelegacion").val();
+
+        console.log("V", idDelegacionFiltro)
+        showLoading();
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ajax_BuscarTramos", "CatTramos")', 
+            data: {
+                "idCarreteraFiltro": idCarreteraFiltro,
+                "idDelegacionFiltro": idDelegacionFiltro
+            },
+            success: function (data) {
+                console.log(data);
+                var grid = $("#gridTramos").data("kendoGrid");
+
+                grid.dataSource.data([]);
+
+                for (var i = 0; i < data.length; i++) {
+                    grid.dataSource.add(data[i]);
+                }
+
+                grid.dataSource.page(1);
+                hideLoading();
+            },
+            error: function (xhr, status) {
+                hideLoading();
+            }
+        });
+    }
+     function submitSearchOficial() {
+     var grd = $("#gridCatOficiales").data("kendoGrid").dataSource
+        grd.read()
+     }
+      function submitSearchDias() {
+        var fecha = $("#fechaFiltro").val();
+        var idMunicipioFiltro = $("#idMunicipioFiltroDias").val();
+
+
+        var grid = $("#gridCatDiasInhabiles").data("kendoGrid");
+        grid.dataSource.page(0);
+      }
+    function submitSearchAgencia() {
+        var grid = $("#gridAgenciasMinisterio").data("kendoGrid");
+        grid.dataSource.read()
+    }
+    function submitSearchMunicipios() {
+        var grid = $("#gridMunicipios").data("kendoGrid");
+        grid.dataSource.page(0);
+    }
+    function submitSearchSubmarca() {
+
+        var grid = $("#gridCatSubmarcasVehiculos").data("kendoGrid");
+        grid.dataSource.page(0);
+    }
+    function submitSearchMotivos() {
+        var grid = $("#gridCatMotivos").data("kendoGrid");
+        grid.dataSource.read()
+        grid.dataSource.page(1);
+    }
+     function submitSearchHospital() {
+        var grid = $("#gridCatHospitales").data("kendoGrid").dataSource;
+        grid.read();
+     }
+      function submitSearchOpciones() {
+        var grd = $("#gridCatFactoresopcion").data("kendoGrid")
+
+        grd.dataSource.page(0)
+    }
+    function submitSearchOfiRenta() {
+        var grid = $("#gridCatOficinasRenta").data("kendoGrid").dataSource;
+        grid.read();
+    }
+
+    function submitSearchSubtipoServicio() {
+        var grid = $("#gridCatSubtipoServicio").data("kendoGrid");
+        grid.dataSource.read()
+        grid.dataSource.page(1);
+    }
+    function submitSearchTurno() {
+        let form = document.getElementById('filterForm');
+        let formData = new FormData(form);
+
+        currentFilter = {
+            Nombre: formData.get('Nombre'),
+            HoraInicio: formData.get('HoraInicio'),
+            HoraFin: formData.get('HoraFin'),
+            IdDelegacion: formData.get('IdDelegacion')
+        };
+
+        console.log(currentFilter);
+
+        let grid = $("#turnosGrid").data("kendoGrid");
+        grid.dataSource.read();
+    }
+    function submitSearchAseguradora() {
+        let form = document.getElementById('filterForm');
+        let formData = new FormData(form);
+
+        currentFilter = {
+            NombreAseguradora: formData.get('NombreAseguradora'),
+            Estatus: formData.get('Estatus')
+        };
+
+        console.log(currentFilter);
+
+        let grid = $("#AseguradorasGrid").data("kendoGrid");
+        grid.dataSource.read();
+    }
+  
+
+
+
+</script>

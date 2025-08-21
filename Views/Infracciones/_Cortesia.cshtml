@@ -1,0 +1,122 @@
+﻿@model InfraccionesModel
+
+<div class="row px-4 mb-4 align-items-end">
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Folio Infracción:</b></label>
+            <span class="ms-2">
+                @Html.DisplayFor(m => m.folioInfraccion,new {@class=""})
+            </span>
+        </div>
+    </div>
+
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Fecha Infracción:</b></label>
+            <span class="ms-2">
+                @Html.DisplayFor(m => m.fechaInfraccion,new {@class=""})
+
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Nombre Conductor:</b></label>
+            <span class="ms-2">
+                @Html.DisplayFor(m => m.NombreConductor,new {@class=""})
+            </span>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label><b>Placas:</b></label>
+            <span class="ms-2">
+                @Html.DisplayFor(m => m.Vehiculo.placas,new {@class=""})
+            </span>
+        </div>
+    </div>
+
+</div>
+
+<form id="frmCortesia" class="row px-4 mb-4 align-items-end justify-content-center">
+    <div class="row align-items-end">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <h5 class="px-4"><b>Datos:</b></h5>
+        </div>
+    </div>
+    @Html.HiddenFor(m=>m.idInfraccion,new { id="hdnIdInfraccion"})
+
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+        <div class="controlForm my-3">
+            <label>Observaciones <b>(obligatorio)</b>:</label>
+            <span>
+                @(Html.Kendo().TextBoxFor(m => m.observacionesCortesia)
+                    .HtmlAttributes(new { style = "width: 100%", type = "text", id = "txtObservaciones", required = "required" })
+                    )
+            </span>
+        </div>
+    </div>
+
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton">
+                        <button class="btnPrimary px-3" onclick="submitCortesia()"><h5 class="m-0"><b>Guardar</b></h5></button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+
+<script>
+
+    function submitCortesia() {      
+        var validator = $("#frmCortesia").kendoValidator().data('kendoValidator');
+        validator.validate();
+        if (validator.validate()) {
+            var formData = $("#frmCortesia").serialize();
+            console.log(formData);
+            $('#modalCortesia').modal('hide');
+            $('body').removeClass('model-open');
+            $('.modal-backdrop').remove();
+            showLoading();
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("ajax_UpdateCortesiaInfraccion")',
+                data: formData,
+                dataType: "html",
+                async: false,
+                success: function (result) {
+                    sitteg_success('Elemento guardado correctamente');
+                        $('#listadoInfracciones').html(result);    
+                        hideLoading();
+                },
+                error: function (xhr, status) {
+                    var errmsg = xhr.responseText;
+                    console.log(errmsg)
+                    sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                    hideLoading();
+                }
+            });
+        }
+        else {
+            sitteg_info('Debe llenar los campos requeridos');
+            return;
+        }
+
+    }
+
+</script>

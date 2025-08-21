@@ -1,0 +1,212 @@
+﻿@model GuanajuatoAdminUsuarios.Models.Catalogos.Turnos.TurnoCreateModel
+@{
+}
+
+<section class="bg-white rounded">
+	<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-turnos h1 colorPrimary"></i>
+                </div>                                                                                                                                                                                  
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Catálogo de turnos</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>            
+        </div>
+	</div>
+	<div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+    </div>
+	<div class="row">
+        <div class="col-12 my-4">
+            <h5 class="px-4"><b> Datos del turno.</b></h5>
+            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+        </div>
+    </div>
+	<form id="crearTurnoForm">
+        <div class="row justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12">
+                <div id="errorMessages" class="alert alert-danger d-none"></div>
+            </div>
+            <div class="controlForm my-3 col-12 col-md-6 col-lg-6">
+                <span>
+                    @(Html.Kendo().TextBoxFor(t => t.Nombre)
+                        .Label(l => l.Content("Nombre del turno (Obligatorio):"))
+                        .Placeholder("Seleccione el turno")
+                        .HtmlAttributes(new { style = "width: 100%", Id = "nombre", required = "required" })
+                    )
+                    @Html.ValidationMessageFor(t => t.Nombre, "", new { @class = "k-form-error k-invalid-msg field-validation-error" })
+                </span>
+            </div>
+
+            <div class="controlForm my-3 col-12 col-md-6 col-lg-6">
+                <span>
+                    <label>Hora de inicio (Obligatorio):</label>
+                    @(Html.Kendo().TimePickerFor(t => t.HoraInicio)
+                        .Format("HH:mm")
+                        .Interval(30)
+                        .HtmlAttributes(new { style = "width: 100%", Id = "horaInicio", placeholder = "Ingrese hora de inicio", required = "required" })
+                        )
+                </span>
+                @Html.ValidationMessageFor(t => t.HoraInicio, "", new { @class = "k-form-error k-invalid-msg field-validation-error" })
+            </div>
+        </div>
+        <div class="row justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="controlForm my-3 col-12 col-md-6 col-lg-6">
+                <span>
+                    <label>Hora de finalización (Obligatorio):</label>
+                    @(Html.Kendo().TimePickerFor(t => t.HoraFin)
+                        .Format("HH:mm")
+                        .Interval(30)
+                        .HtmlAttributes(new { style = "width: 100%", Id = "horaFin", placeholder = "Ingrese hora de finalización", required = "required" })
+                        )
+                </span>
+                @Html.ValidationMessageFor(t => t.HoraFin, "", new { @class = "k-form-error k-invalid-msg field-validation-error" })
+            </div>
+
+            <div class="controlForm my-3 col-12 col-md-6 col-lg-6">
+                <label>Corporación (Obligatorio):</label>
+                @(Html.Kendo().DropDownList()
+                    .NoDataTemplate("No se encontraron datos")
+                    .Name("IdDelegacion")
+                    .Filter(FilterType.Contains)
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("Selecciona la corporación")
+                    .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;", id = "idDelegacion" })
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetDelegacionesOficinasDropDownList", "CatTurnos");
+                        });
+                    }))
+                @Html.ValidationMessageFor(t => t.IdDelegacion, "", new { @class = "k-form-error k-invalid-msg field-validation-error" })
+            </div>
+        </div>
+    </form>
+	<div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="crearTurno()">
+                        @(Html.Kendo().Button()
+                            .Name("crearTurnoCommand")
+                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                            .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                    </div>
+                </div>
+            </div>        
+        </div>
+    </div>
+</section>
+
+
+<script>
+    $(document).ready(function () {
+        let form = $("#crearTurnoForm");
+        form.kendoValidator({
+            messages: {
+                required: "El campo es obligatorio",
+                horaFinGreaterThanHoraInicio: "La hora de finalización debe ser mayor que la hora de inicio."
+            },
+            rules: {
+                required: function (input) {
+                    if (input.is("[required]")) {
+                        return input.val().trim() !== "";
+                    }
+                    return true;
+                },
+                horaFinGreaterThanHoraInicio: function (input) {
+                    if (input.is("[name=HoraFin]")) {                        
+                        var horaInicio = $("[name=HoraInicio]").val();
+                        var horaFin = input.val();
+                        return horaFin > horaInicio;
+                    }
+                    return true;
+                }
+            },
+            highlight: function (element) {
+                $(element).addClass("k-invalid"); 
+            },
+            unhighlight: function (element) {
+                $(element).removeClass("k-invalid"); 
+            }
+        }).data("kendoValidator"); 
+
+        let timePickers = [document.getElementById('horaInicio'), document.getElementById('horaFin')];
+        timePickers.forEach(function (timePicker) {
+            if (timePicker) {
+                timePicker.addEventListener('input', valid5char);
+                timePicker.addEventListener('paste', handlePaste);
+                timePicker.addEventListener('blur', handleBlur);
+            }
+        });
+        
+    });
+    
+    function crearTurno() {
+        let form = $("#crearTurnoForm");
+        
+        var validator = form.data("kendoValidator");
+        var isValid = validator.validate();
+        if (!isValid) {
+            form.find("label[for='nombre']").removeClass("k-text-error");
+            return;
+        }
+
+        let errorMessages = $("#errorMessages");
+        errorMessages.empty();
+        errorMessages.addClass("d-none");
+        showLoading();
+
+        $.ajax({
+            url: '@Url.Action("Create", "CatTurnos")',
+            type: 'POST',
+            data: form.serialize(),            
+            success: function (result) {
+                var grid = $("#turnosGrid").data("kendoGrid");
+                grid.dataSource.read();
+                $('#crearTurnoModal').modal('hide');
+                sitteg_success('Se ha actualizado la información');
+            }, error: function (xhr) {
+                if (xhr.status !== 400) {
+                    sitteg_warning("Ocurrió un error al procesar su solicitud.");
+                    return;
+                }
+                
+                try {
+                    var result = JSON.parse(xhr.responseText);
+                    if (result.errors) {
+                        result.errors.forEach(function (error) {
+                            errorMessages.append("<p>" + error + "</p>");
+                        });
+                        errorMessages.removeClass("d-none");
+                        return;
+                    }
+                    $("#crearTurnoModalBody").html(xhr.responseText);
+                } catch {
+                    $("#crearTurnoModalBody").html(xhr.responseText);
+                }                                                
+            },
+            complete: function() {
+                hideLoading();
+            }
+        });
+    }    
+</script>

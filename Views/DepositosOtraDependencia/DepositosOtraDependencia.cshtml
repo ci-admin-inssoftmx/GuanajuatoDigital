@@ -1,0 +1,716 @@
+@model GuanajuatoAdminUsuarios.Models.SolicitudDepositoOtraDependenciaModel
+@{
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    string listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos")==null?"undefined":@HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos");
+}
+
+<script>
+    var depositControlsValidate=[];
+        $(document).ready(function () {
+            var access = @listaIdsPermitidosJson;
+            if (access != undefined && access != '') {
+                if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "¡EL usuario no tiene acceso a esta opción!"
+                    });
+                    setTimeout(() => {
+                        window.location.href = "/Principal";
+                    }, 200);
+                }
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡EL usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            }
+        });
+
+         function filtroCarretera() {
+             
+        var idMunicipio = $("#ddlMunicipiUbicacion").val();
+        console.log("idMunicipio", idMunicipio)
+
+        return {
+            idMunicipio: idMunicipio,
+        };
+    }
+    function onChangeCarretera() {
+        var ddlidCarretera = $("#IdCarretera").data("kendoDropDownList");
+        ddlidCarretera.dataSource.read();
+
+    }
+
+    function valid5char(e) {
+
+        var value = e.target.value
+        var reg = /[0-2][0-9][\:][0-5][0-9]/g
+        var can = reg.test(value)
+        if (!can) {
+            e.target.value = ""
+        }
+    }
+
+
+
+function validacionHora(event) {
+		var horaIngresada = event.target.value;
+		var key = event.key
+		var keycode = event.keyCode
+		var horalength = horaIngresada.length
+		if ([8, 46, 37, 38, 39, 40, 9].indexOf(keycode) != -1) {
+			return
+		}
+		event.preventDefault();
+
+
+
+		console.log(key,keycode)
+
+
+		if(horalength == 0 ){
+			if("012".indexOf(key)!=-1){
+				event.target.value=key
+			}
+		}
+		if(horalength == 1 ){
+			var lastval =horaIngresada[0]
+			if(":"==key && lastval!="0"){
+				event.target.value=  "0"+ event.target.value+key
+			}
+			else if( lastval=="2"){
+				if("0123".indexOf(key) != -1){
+				event.target.value=  event.target.value+key
+				}
+			}else if("0123456789".indexOf(key)!=-1){
+				event.target.value = event.target.value + key
+			}
+		}
+		if(horalength == 2){
+			if(key==":"){
+				event.target.value = event.target.value + key
+			}
+			else if ("012345".indexOf(key)!= -1){
+				event.target.value = event.target.value + ":" + key
+			} 
+		}
+		if(horalength == 3){
+			if ("012345".indexOf(key) != -1) {
+				event.target.value = event.target.value + key
+			}
+		}
+		if(horalength == 4){
+			var lastval = horaIngresada[3]
+			var hours = parseInt(horaIngresada[0]+horaIngresada[1])
+
+			if(lastval =="0" && hours==0 ){
+				if ("0123456789".indexOf(key) != -1) {
+					event.target.value = event.target.value + key
+					setTimeout(validarFecha,2)
+				}
+			} else{
+				if ("0123456789".indexOf(key) != -1) {
+					event.target.value = event.target.value + key
+					setTimeout(validarFecha, 2)
+				}
+			}
+
+		}
+        }
+
+    function validarFecha() {
+        // Obtener la fecha actual
+        var fechaActual = new Date();
+        var fechaParseo = new Date(parseInt(fechaActual.getFullYear()), parseInt(fechaActual.getMonth()), parseInt(fechaActual.getDate()));
+
+
+        var fechaSeleccionadaString = $("#FechaSolicitud").val();
+        var splitFechaSeleccion = fechaSeleccionadaString.split('/')
+        var objetoFecha = !fechaSeleccionadaString ? fechaParseo : new Date(parseInt(splitFechaSeleccion[2]), parseInt(splitFechaSeleccion[1]) - 1, parseInt(splitFechaSeleccion[0]));
+        console.log("objetoFecha:", objetoFecha)
+        console.log("fechaParseo:", fechaParseo)
+        // Comparar la fecha seleccionada con la fecha actual
+        if (fechaParseo.getTime() === objetoFecha.getTime()) {
+            // Si la fecha seleccionada es la fecha actual, verificar la hora ingresada
+            var horaIngresada = $("#dateTime").val();
+            var horaActual = fechaActual.getHours() * 60 + fechaActual.getMinutes();
+            var horaIngresadaSplit = horaIngresada.split(':');
+            var horaIngresadaEnMinutos = parseInt(horaIngresadaSplit[0]) * 60 + parseInt(horaIngresadaSplit[1]);
+            console.log("horaIngresada", horaIngresada)
+            console.log("horaActual", horaActual)
+            console.log("horaSplit", horaIngresadaSplit)
+
+            console.log("horaIngresadaEnMinutos", horaIngresadaEnMinutos)
+
+            if (horaIngresadaEnMinutos > horaActual) {
+
+                $("#dateTime").val('');
+                event.preventDefault();
+            }
+        }
+    }
+    $(document).ready(function () {
+        $("#KilometroUbicacion").on("input", function () {
+            var value = this.value;
+            if (value !== "") {
+                this.value = value.replace(/[^\d.]/g, "");
+            }
+        });
+
+        $("#KilometroUbicacion").on("paste", function (e) {
+            e.preventDefault();
+            var clipboardData = e.originalEvent.clipboardData.getData('text/plain');
+            if (/^\d+$/.test(clipboardData)) {
+                document.execCommand('insertText', false, clipboardData);
+            }
+        });
+    });
+
+
+    function DataMun(){
+        return {entidadDDlValue:11}
+    }
+
+</script>
+<div class="mainContainer bg-light">
+    <section id="seccionPrincipal" class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto pe-0">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <div class="border border-2 border-dark rounded-circle">
+                            <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                <b>1</b>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-auto p-0">
+                        <i class="icon-deposito h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Registro de solicitud de depósito para Otra Dependencia</b></h2>
+                    </div>
+                </div>
+            </div>    
+        </div>
+            <div class="row">
+            <div class="col-7 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-5 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 my-4">
+                <h5 class="px-4"><b>Solicitud de depósito</b></h5>
+                <h6 class="px-4 text-muted">Se capturan los datos referentes al evento como fecha, motivo de ingreso.</h6>
+            </div>
+        </div>
+         <form id="frmDepositoOtraDependencia">
+        @Html.HiddenFor(m=> m.Vehiculo.idVehiculo, new { @id = "IdVehiculoAsignado" })
+        <div class="row px-4 mt-3 mb-2 align-items-end">
+            
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Fecha (obligatorio):</label>
+                        @(Html.Kendo().DatePickerFor(t => t.FechaSolicitud)
+                        .Value("")
+                        .Max(DateTime.Now).Format("dd/MM/yyyy")
+                            .Culture("es-ES")
+                            .Events(e =>
+                           {
+                                e.Change("validarFecha");
+											})
+                        .HtmlAttributes(new { style = "width: 100%", 
+                            title = "datepicker", 
+                            required = "required" })
+                    )
+                </div>
+            </div>
+
+              <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                  <div class="controlForm my-3">
+					<label class="tex">Hora (formato 24 horas):</label>
+					<input type="text" autocomplete="off" name="horaSolicitud" id="dateTime" onblur="valid5char(event)" onkeydown="validacionHora(event)" style="height: 3.6em;"  />
+			      </div>
+
+             </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Envía vehículo (obligatorio):</label>
+                    <span>
+                            @(Html.Kendo().DropDownListFor(t => t.IdDependenciaEnvia).NoDataTemplate("No se encontraron datos")
+                                .Filter(FilterType.Contains)
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona una opción")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("DependenciaEnvia_Drop", "DepositosOtraDependencia");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                .Events(e =>
+                                {
+                                    e.Change("showHideMunicipioEnviaDropdown");
+                                })
+                                )
+                    </span>
+
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                <div class="controlForm my-3">
+                    <label>Motivo de ingreso (obligatorio):</label>
+                    <span>
+                            @(Html.Kendo().DropDownListFor(t => t.IdTipoMotivoIngreso).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("Selecciona una opción")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("TipoMotivoIngreso_Drop", "DepositosOtraDependencia");
+                                });
+                            })
+                                .HtmlAttributes(new { style = "width:100%;" })
+                            )
+                    </span>
+
+                </div>
+            </div>
+                <div id="municipioEnviaDropdownContainer" class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2" style="display:none;">
+                    <div class="controlForm my-3">
+                        <label>Municipio que envía (obligatorio):</label>
+                        <span>
+                            @(Html.Kendo().DropDownListFor(t => t.IdMunicipoEnvia).NoDataTemplate("No se encontraron datos")
+                                .Filter(FilterType.Contains)
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona una opción")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("Municipios_Drop2", "DepositosOtraDependencia");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                )
+                        </span>
+                    </div>
+                </div>
+        </div>
+          <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2 my-4">
+            <div class="col-12 col-md-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <div class="border border-2 border-dark rounded-circle">
+                            <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                <b>2</b>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-auto p-0">
+                        <i class="icon-ubicacion h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Ubicación donde se recoge el vehículo</b></h2>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+         <div class="row">
+            <div class="col-8 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-4 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+            <div class="row">
+            <div class="col-12 my-4">
+                <h5 class="px-4"><b>Datos de recolección</b></h5>
+                <h6 class="px-4 text-muted">Completa los datos solicitados de la recolección del vehículo.</h6>
+            </div>
+        </div>
+          <div class="row align-items-end px-4">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Municipio <b>(obligatorio)</b>:</label>
+                        <span>
+                            @(Html.Kendo().DropDownListFor(t => t.IdMunicipioUbicacion).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona un Municipio")
+                                .Events(e => e.Change("onChangeCarretera"))
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("Drop_MunicipiosActivosPorEntidad", "Catalogos").Data("DataMun");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:100%;", id = "ddlMunicipiUbicacion" })
+                                )
+                        </span>
+
+                    </div>
+                </div>
+                 <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Carretera (obligatorio):</label>
+                        <span>
+                            @(Html.Kendo().DropDownListFor(t => t.IdCarretera).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona una Carretera")
+                                .Events(e => e.Change("carreteraDropDownChange"))
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("Carreteras_Drop", "DepositosOtraDependencia").Data("filtroCarretera"); 
+                                    });
+                                })
+                                )
+                        </span>
+
+                    </div>
+                </div>
+                  <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        <label>Tramo (obligatorio):</label>
+                        <span>
+                            @(Html.Kendo().DropDownListFor(t => t.IdTramo).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("Selecciona un Tramo")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("Drop_TramosActivos", "Catalogos");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                .Filter(FilterType.Contains)
+                                )
+                        </span>
+                    </div>
+                </div>
+                 <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @*(Html.Kendo().TextBoxFor(t => t.KilometroUbicacion)
+                            .Label(l => l.Content("Kilómetro:"))
+                            .Placeholder("Km.")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            )*@
+
+                            
+                    <label>Kilómetro <b>(obligatorio)</b>:</label>
+                    <div class="input-group">
+                            <input autocomplete="off" type="text" id="KilometroUbicacion" name="KilometroUbicacion" class="form-control" onkeydown="ValidarKm(event)" style="height: 3.5em;" />
+                    </div>
+
+                    </div>
+                </div>
+
+ <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.ColoniaUbicacion)
+                            .Label(l => l.Content("Colonia:"))
+                            .Placeholder("Ingresa la colonia")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            )
+
+                    </div>
+                </div>
+                  <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.CalleUbicacion)
+                            .Label(l => l.Content("Calle:"))
+                            .Placeholder("Ingresa la calle")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            )
+
+                    </div>
+                </div>
+                   <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.NumeroUbicacion)
+                            .Label(l => l.Content("Número:"))
+                            .Placeholder("Ingresa el número")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            )
+
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                    <div class="controlForm my-3">
+                        @(Html.Kendo().TextBoxFor(t => t.InterseccionUbicacion)
+                            .Label(l => l.Content("Intersección:"))
+                            .Placeholder("Ingrese la intersección")
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            )
+
+                    </div>
+                </div>
+  
+              </div>
+                      <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2 my-4">
+            <div class="col-12 col-md-auto pe-0">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <div class="border border-2 border-dark rounded-circle">
+                            <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                <b>3</b>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-auto p-0">
+                        <i class="icon-car h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Asignación de vehículo</b></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+          <div class="row">
+            <div class="col-6 pe-0">
+                <div class="bgSuccess py-1"></div>
+            </div>
+            <div class="col-6 ps-0">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+                    <div class="row align-items-center">
+            <div class="col-8 my-4">
+                <h5 class="px-4"><b>Asignación de vehículo</b></h5>
+                <h6 class="px-4 text-muted">Realiza una búsqueda del vehículo para conocer si ya está capturado en Registro de Infracciones y Accidentes de Guanajuato o de lo contrario podrá capturarlo.</h6>
+            </div>
+             <div class="col-12 col-md-6 col-lg-3 col-xl-auto">
+				   <div class="col-auto btnOutline btnOutlinePrimary my-3">
+                     @(Html.Kendo().Button()
+                    .Name("btnBuscarVehiculo")
+                    .HtmlAttributes(new { type = "button" })
+                    .Content(" <h6 class='m-0 d-flex align-items-center'><i class='icon-addCar h5 mb-0 me-2'></i><b>Buscar vehículo</b></h6>")
+                    .Events(e => e.Click("mostrarBusquedaVehiculo")))
+                   </div>				
+				</div>
+        </div>
+              <div class="row" id="vehiculoPropietarioDatosContainer" style="display:none">
+            <div class="col-12 my-4 mx-4">
+                <div id="vehiculoPropietarioDatos"> </div>
+            </div>
+              </div>
+         </form>
+            <div class="row">
+            <div class="col-12 col-md-8 mx-md-auto col-lg-5 ">
+                <div class="controlButton my-3" onclick="guardarDeposito()">
+                    @(Html.Kendo().Button()
+                        .Name("addVehiculoBtn")
+                        .HtmlAttributes(new { @class = "btnPrimary" })
+                        .Content("<h5 class=\"m-0\"><b>Finalizar registro</b></h5>"))
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="modal fade modalCustom" id="agregarVehiculoModal"  aria-labelledby="VehiculoServiceLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body bg-light p-0" id="agregarVehiculoBodyModal">
+                        </div>
+                    </div>
+                </div>
+            </div>
+</div>
+
+<script>
+          var depositoOtraDependenciaControlsValidate = [];
+     $(document).ready(function() {
+        //Se configuran la validacion de los campos
+            depositoOtraDependenciaControlsValidate.push({ 'controlName': 'FechaSolicitud', 'isInput': true });
+            depositoOtraDependenciaControlsValidate.push({ 'controlName': 'IdDependenciaEnvia', 'isDropDown': true });
+            depositoOtraDependenciaControlsValidate.push({ 'controlName': 'IdTipoMotivoIngreso', 'isDropDown': true });
+        depositoOtraDependenciaControlsValidate.push({ 'controlName': 'ddlMunicipiUbicacion', 'isDropDown': true });
+            depositoOtraDependenciaControlsValidate.push({ 'controlName': 'IdCarretera', 'isDropDown': true });
+            depositoOtraDependenciaControlsValidate.push({ 'controlName': 'IdTramo', 'isDropDown': true });
+             depositoOtraDependenciaControlsValidate.push({ 'controlName': 'KilometroUbicacion', 'isInput': true });
+
+             //Se agrega a los controles requeridos el evento de perdida de foco para remover el estilo de requerido
+            addOnLostFocusRequiredControls(depositoOtraDependenciaControlsValidate);
+
+            //Si hay un cambio en el id de vehiculo se muestra los datos
+            $("#IdVehiculoAsignado").bind("change", function() {
+                if($(this).val()==='' || $(this).val()==0 || $(this).val()===undefined){
+                 $('#vehiculoPropietarioDatosContainer').hide();
+                    $('#ModalBodyVehiculos').hide();
+                    console.log("cierra modales 0");
+                 
+                } else {
+                        $.ajax({
+                                url: '@Url.Action("MostrarDatosVehiculo","DepositosOtraDependencia")',
+                                type: "GET",
+                                data: { 'idVehiculo': $(this).val() },
+                                success: function (result) {
+                                            $('#vehiculoPropietarioDatosContainer').show();
+                                            $("#vehiculoPropietarioDatos").html(result);
+                                            hideLoading();
+                                           
+                                },
+                                error: function (xhr, status, error) {
+                                            hideLoading();
+                                            console.log(error);
+                                }
+                        });
+                    
+                     }
+            });
+
+        });
+    function carreteraDropDownChange() {
+        var carreteraDDValue = $("#IdCarretera").data("kendoDropDownList").value();
+        showLoading();
+        $.ajax({
+            url: "/Catalogos/Drop_TramosActivos",
+            type: "POST",
+            data: { carreteraDDValue: carreteraDDValue },
+            success: function (data) {
+                var TramosDropDown = $("#IdTramo").data("kendoDropDownList");
+                TramosDropDown.dataSource.data(data);
+                hideLoading();
+                $("#IdTramo").trigger("onFinishLoading");
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+
+    function mostrarBusquedaVehiculo(){
+         showLoading();
+         $.ajax({
+            url: '@Url.Action("MostrarBusquedaVehiculo")',
+            type: "POST",
+            data: {},
+            success: function (result) {
+                 $('#agregarVehiculoBodyModal').html(result);
+				 $('#agregarVehiculoModal').modal('show');
+                  hideLoading();
+            },
+            error: function (xhr, status, error) {
+                sitteg_error("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+    function guardarDeposito(){
+        //Se validan los campos del formulario
+        if (!isControlsValidWithFocus(depositoOtraDependenciaControlsValidate).isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+        //Se valida que se haya asignado un vehículo
+        var idVehiculo = $('#IdVehiculoAsignado').val();
+
+        if(idVehiculo==='' || idVehiculo===0 || idVehiculo===undefined){
+             sitteg_info('Debes asignar un vehículo');
+             return;
+        }
+
+      
+         showLoading();
+         console.log("AJAX")
+         $.ajax({
+            url: '@Url.Action("GuardarDeposito")',
+            type: "POST",
+            data: $("#frmDepositoOtraDependencia").serialize(),
+            success: function (result) {
+                if(result.success){
+                    sitteg_success("Se guardó el registro exitosamente");
+                    setTimeout(() => { window.location.href = result.redirectTo; },1000)
+                      
+                }
+                else{
+                     sitteg_error("Ocurrio un error al guardar el registro.");
+                }
+              
+                  hideLoading();
+            },
+            error: function (xhr, status, error) {
+                sitteg_error("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+    function showHideMunicipioEnviaDropdown() {
+        var selectedValue = $("#IdDependenciaEnvia").val();
+        var municipioEnviaDropdownContainer = $("#municipioEnviaDropdownContainer");
+
+        if (selectedValue == 12) { 
+            municipioEnviaDropdownContainer.show();
+        } else {
+            municipioEnviaDropdownContainer.hide();
+        }
+    }
+
+    function cambiaFecha() {
+        var timepickerControl = $("#dateTime").data("kendoTimePicker");
+        var varFechaInfraccion = kendo.toString(this.value(), 'd');
+        var dia = varFechaInfraccion.slice(0, varFechaInfraccion.indexOf("/"));
+        varFechaInfraccion = varFechaInfraccion.slice(varFechaInfraccion.indexOf("/") + 1, varFechaInfraccion.length);
+        var mes = varFechaInfraccion.slice(0, varFechaInfraccion.indexOf("/"));
+        varFechaInfraccion = varFechaInfraccion.slice(varFechaInfraccion.indexOf("/") + 1, varFechaInfraccion.length);
+        let date = new Date();
+
+        if (varFechaInfraccion == date.getFullYear() && mes == (date.getMonth() + 1) && dia == date.getDate()) {
+            timepickerControl.max(date.getHours() + ":" + date.getMinutes());
+
+            timepickerControl.bind("change", function (e) {
+                var hora = timepickerControl.value();
+                if (hora != null && hora.getHours() > date.getHours()) {
+                    if (hora.getMinutes() > date.getMinutes()) {
+                        timepickerControl.value("");
+                    }
+                }
+            });
+        } else {
+            timepickerControl.max("23:59");
+        }
+    }
+
+
+
+    function subMarcaDropDownChange() {
+        var _idMarca = $("#ddlMarcas").data("kendoDropDownList").value();
+        showLoading();
+        $.ajax({
+            url: "/Vehiculos/SubMarcas_ReadPorMarca",
+            type: "POST",
+            data: { idMarca: _idMarca },
+            success: function (data) {
+                var TramosDropDown = $("#idSubmarca").data("kendoDropDownList");
+                TramosDropDown.dataSource.data(data);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.log("EE", error)
+                hideLoading();
+            }
+        });
+    }
+
+</script>

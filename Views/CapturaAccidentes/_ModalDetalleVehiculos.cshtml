@@ -1,0 +1,243 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-car h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Detalle del vehículo</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-12 my-4">
+            <h5 class="px-4"><b>Datos del vehículo</b></h5>
+            <h6 class="px-4 text-muted">Datos cargados en el sistema de Registro de Infracciones y Accidentes de Guanajuato.</h6>
+        </div>
+    </div>
+    <form class="row px-4 align-items-end">
+        <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Placas:</label>
+                <label>@Model.Placa</label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Entidad:</label>
+                <label>@Model.Entidad</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Serie:</label>
+                <label>@Model.Serie</label>
+            </div>
+        </div>
+
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Marca:</label>
+                <label>@Model.Marca</label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Sub-marca:</label>
+                <label>@Model.Submarca</label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Tipo de vehículo:</label>
+                <label>@Model.TipoVehiculo</label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Modelo:</label>
+                <label>@Model.Modelo</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Tarjeta:</label>
+                <label>@Model.Tarjeta</label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Vigencia de tarjeta:</label>
+                <label>
+                    @((Model.VigenciaTarjeta != new DateTime(1900, 1, 1) && Model.VigenciaTarjeta != DateTime.MinValue)
+                        ? Model.VigenciaTarjeta.ToString("dd/MM/yyyy")
+                        : "-")
+                </label>
+            </div>
+        </div>
+       <!-- <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Número de vehículo:</label>
+                <label>@Model.IdVehiculoInvolucrado</label>
+            </div>
+         </div>-->
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Color:</label>
+                <label>@Model.Color</label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Motor:</label>
+                <label>@Model.Motor</label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Capacidad:</label>
+                <label>@Model.Capacidad</label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Carga:</label>
+                <label>@(Model.TipoCargaBool ? "1" : "0")</label>
+            </div>
+        </div>
+
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Póliza:</label>
+                <label>@Model.Poliza</label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Otros:</label>
+                <label>@Model.Otros</label>
+            </div>
+        </div>
+
+
+    </form>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light pt-1 px-4"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-12 my-4">
+            <h5 class="px-4"><b>Datos del propietario</b></h5>
+            <h6 class="px-4 text-muted">Datos cargados en el sistema de Registro de Infracciones y Accidentes de Guanajuato.</h6>
+        </div>
+    </div>
+    <form class="row px-4 align-items-end">
+        <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Tipo de propietario:</label>
+                <label>@Model.TipoPersona</label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Nombre:</label>
+                <label>@Model.PropietarioInvolucrado</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">RFC:</label>
+                <label>@Model.RFC</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">CURP:</label>
+                <label>@Model.CURP</label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Fecha de nacimiento:</label>
+                <label>
+                    @(Model.FechaNacimientoFormateada != "01/01/0001" ? Model.FechaNacimientoFormateada : "-")
+                </label>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Entidad:</label>
+                <label>@Model.EntidadPropietario</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Municipio:</label>
+                <label>@Model.MunicipioPropietario</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Colonia:</label>
+                <label>@Model.ColoniaPropietario</label>
+            </div>
+        </div>
+         <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Calle:</label>
+                <label>@Model.CallePropietario</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Número:</label>
+                <label>@Model.NumeroPropietario</label>
+            </div>
+        </div>
+            <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Teléfono:</label>
+                <label>@Model.TelefonoPropietario</label>
+            </div>
+        </div>    <div class="col">
+            <div class="controlForm mb-3 mt-1">
+                <label class="text-muted">Correo Electrónico:</label>
+                <label>@Model.CorreoPropietario</label>
+            </div>
+        </div>
+
+    </form>
+
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+

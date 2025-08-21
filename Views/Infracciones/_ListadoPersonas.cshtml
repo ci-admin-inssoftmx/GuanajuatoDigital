@@ -1,0 +1,129 @@
+﻿@model List<PersonaModel>
+@*@using GuanajuatoAdminUsuarios.Models;*@
+@{
+    var propietario = ViewBag.espropietario;
+
+}
+@if (!ViewBag.EditarVehiculo != null && !ViewBag.EditarVehiculo)
+{
+    <div class="row justify-content-between my-2 mb-1 titleCustom">
+    <div class="offset-1 col-12 mt-4 mb-2">
+        <h5 class="px-4"><b>Listado de personas</b></h5>
+        <h6 class="px-4 text-muted">Marque el conductor de la infracción.</h6>
+    </div>
+</div>
+}
+
+<div class="col-12 mb-4 px-4 rounded gridCustom">
+    @(Html.Kendo().Grid(Model)
+        .Name("gridInfraccionesPersonas")
+        .EnableCustomBinding(true)
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .Read("ajax_BuscarPersonasFiscasPagination", "Infracciones")
+        .PageSize(10)
+        )
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.idPersona).Hidden();
+            columns.Select().ClientHeaderTemplate(" ");
+            columns.Bound(c => c.nombreCompleto).Title("Nombre");
+            columns.Bound(p => p.CURP).Title("CURP");
+            columns.Bound(p => p.RFC).Title("RFC");
+            columns.Bound(p => p.numeroLicencia).Title("No. Licencia");
+            columns.Bound(p => p.folioDetencion).Title("Folio detenido");
+            columns.Bound(c => c.tipoPersona).Title("Tipo persona");
+        }).HtmlAttributes(new { style = "height:auto" })
+        @*.Pageable(p => p.Enabled(true).PageSizes(new[] { 10, 20, 30 }))*@
+        .Pageable(p => p.Enabled(true))
+        .Sortable(scr => scr.Enabled(true))
+        .Scrollable(scr => scr.Height(350))
+        .ToolBar(t => t.Custom().Text("Buscar...").Name("search"))
+        .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+        )
+
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        var grid = $("#gridInfraccionesPersonas").data("kendoGrid");
+        grid.tbody.on("click", ".k-checkbox", onClickPersonas);
+        
+        function onClickPersonas(e) {
+            var grid = $("#gridInfraccionesPersonas").data("kendoGrid");
+            var row = $(e.target).closest("tr");
+            var dataItem = grid.dataItem(row);
+            var idPersona = dataItem.idPersona;
+            console.log("IDPER",idPersona)
+            var nombre = dataItem.nombre + ' ' + dataItem.apellidoPaterno + ' ' + dataItem.apellidoMaterno;
+            $("#idPersona").val(idPersona);
+
+            $("#Vehiculo_Persona_idPersona").val(idPersona);
+            $("#idPersonaConductor").val(idPersona);
+           
+            $("#Vehiculo_Persona_nombreCompleto").val(nombre);
+            if (row.hasClass("k-selected")) {
+                setTimeout(function (e) {
+                    var grid = $("#gridInfraccionesPersonas").data("kendoGrid");
+                    grid.clearSelection();
+                })
+            } else {
+                grid.clearSelection();
+            };
+            try{
+                $('#agregarConductor2Modal').modal('hide');
+                $('#ModalBodyAgregar2Conductor').html("");
+                $('#ModalBodyAgregarEditarConductor').modal('hide');
+                $('#ModalBodyAgregarEditarConductor').html("");
+            }
+            catch(error){
+                console.log(error)
+            }
+            //$("#textoConductor").empty()
+            var t = "@propietario"
+            if(!t){
+              buscarPersona(idPersona);
+            }else{
+                buscarPersona2(idPersona);
+
+            }
+           
+        };
+
+        window.onClickPersonas = onClickPersonas;
+
+        var grid = $("#gridInfraccionesPersonas").data("kendoGrid");
+        grid.tbody.on("click", ".k-checkbox", onClickPersonas);
+
+        var grid = $("#gridInfraccionesPersonas").data("kendoGrid");
+
+        grid.tbody.on("click", ".k-checkbox", function (e) {
+            var row = $(e.target).closest("tr");
+
+            grid.clearSelection();
+            grid.select(row);
+
+            grid.tbody.find(".k-checkbox").each(function () {
+                if ($(this).closest("tr").is(row)) {
+                    $(this).attr("aria-checked", "true");
+                } else {
+                    $(this).attr("aria-checked", "false");
+                }
+            });
+
+            e.stopPropagation();
+        });
+    });
+
+    $(document).on("PersonaCreada", function (e, selectedRow) {
+        var grid = $("#gridInfraccionesPersonas").data("kendoGrid");
+        var checkboxInRow = selectedRow.find(".k-checkbox");
+
+        if (checkboxInRow.length > 0) {
+            onClickPersonas({ target: checkboxInRow[0] });
+        }
+    });
+
+</script>

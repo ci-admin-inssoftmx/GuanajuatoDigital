@@ -1,0 +1,61 @@
+﻿@model List<GuanajuatoAdminUsuarios.Models.DependenciasModel>
+@*RazorCoder*@
+
+<div class="row">
+    <div class="col-md-10">
+        <h2>Lista de Productos</h2>
+    </div>
+    <br />
+    <div class="col-md-2">
+        <a href="#" id="btnNuevaDep"  onclick="mostrarModal()" class="text-info">Crear</a>
+    </div>
+</div>
+<hr />
+<br />
+<div class="row">
+    <div id="tablaDependencias">
+        <partial name="_ListaDependencias" model="Model" />
+        @*@Html.Partial("_ProductModelList", Model)*@
+    </div>
+
+</div>
+
+<div class="modal fade modalCustom" id="addDependencia"  aria-labelledby="addDependenciaLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Crear Dependencia</h4>
+                @* <button type="button" class="close" id="hidden-cancel" data-dismiss="modal" aria-label="close">
+                <span aria-hidden="true">&times;</span>
+                </button>*@
+
+            </div>
+            <div class="modal-body" id="ModalBodyCreate">
+            </div>
+            @*  <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>*@
+        </div>
+
+    </div>
+</div>
+
+@*<script src="~/jquery-ajax-unobtrusive/dist/jquery.unobtrusive-ajax.min.js"></script>*@
+<script>
+    function mostrarModal() {
+        $.ajax({
+            url: '@Url.Action("AgregarPacial")',
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                $('#ModalBodyCreate').html(data);
+                $('#addDependencia').modal('show');
+            }
+        });
+    }
+
+
+</script>

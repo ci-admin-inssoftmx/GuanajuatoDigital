@@ -1,0 +1,387 @@
+﻿@model PensionModel
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+<script>
+    function isGoogleMapsScriptLoaded() {
+        const scripts = document.getElementsByTagName('script');
+        for (let i = 0; i < scripts.length; i++) {
+            if (scripts[i].src.includes('https://maps.googleapis.com/maps/api/js')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    if (!isGoogleMapsScriptLoaded()) {
+        const script = document.createElement('script');
+        script.defer = true;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=@Configuration["AppSettings:GoogleMapsApiKey"]&loading=async&libraries=marker`;
+        document.head.appendChild(script);
+    }
+</script>
+
+
+<script>
+
+    function dataToMunc(){
+        var val = document.getElementById("ddlDelegaciones").value//  $("#idDelegacion").val()
+
+        return { del: val }
+
+    }
+
+    function GetMunc(){
+        var dll = $("#idMunicipio").data("kendoDropDownList").dataSource
+        dll.read()
+    }
+
+    </script>
+
+<div class="panel">
+    <div class="panel-body container-fluid">
+        <div class="row row-lg">
+            <div class="col-md-12">
+                <section id="sectionCrearPension" class=" bg-white rounded">
+                    <div class="row">
+                        <div class="col-12 my-4">
+                            <h5 class="px-4"><b>Datos de la pensión</b></h5>
+                            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                        </div>
+                    </div>
+                    <form id="frmCrearPension">
+                        <div class="row align-items-end">
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Pension)
+                                        .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                                        .Placeholder("Ingresa pensión")
+                                        .HtmlAttributes(new { style = "width: 100%", required = "required" })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Permiso)
+                                        .Label(l => l.Content("Permiso:"))
+                                        .Placeholder("Ingresa Permiso")
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <label>Delegación  <b>(obligatorio)</b>:</label>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("idDelegacion")
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        // .BindTo((SelectList)ViewBag.CatDelegaciones)
+                                        .Events(ev => ev.Change("GetMunc"))
+                                        .OptionLabel("-- Seleccione --")
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("Delegaciones_DropExt2", "Estadisticas");
+                                            });
+                                        })
+                                        .HtmlAttributes(new { style = "width:100%;", id = "ddlDelegaciones" })
+                                        .Popup(p =>
+                                        {
+                                            p.AppendTo("#sectionCrearPension");
+                                        })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <label>Municipio  <b>(obligatorio)</b>:</label>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("idMunicipio")
+                                        
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .OptionLabel("Seleccione Municipio...")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("Municipios_Guanajuatofilter", "PadronDepositosGruas").Data("dataToMunc");
+                                            });
+                                        })
+                                        .Popup(p =>
+                                        {
+                                            p.AppendTo("#sectionCrearPension");
+                                        }))
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <label>Responsable  <b>(obligatorio)</b>:</label>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("idResponsable")
+                                        .BindTo((SelectList)ViewBag.CatResponsablesPensiones)
+                                        .OptionLabel("-- Seleccione --")
+                                        .Filter(FilterType.Contains)
+                                        .HtmlAttributes(new { style = "width:100%;", id = "idResponsable" })
+                                        .Popup(p =>
+                                        {
+                                            p.AppendTo("#sectionCrearPension");
+                                        })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Direccion)
+                                        .Label(l => l.Content("Dirección <b>(obligatorio)</b>:"))
+                                        .Placeholder("Ingresa Dirección")
+                                        .HtmlAttributes(new { style = "width: 100%", required = "required" })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Telefono)
+                                        .Label(l => l.Content("Teléfono:"))
+                                        .Placeholder("Ingresa Teléfono")
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Correo
+                                    )
+                                        .Label(l => l.Content("Correo electrónico:"))
+                                        .Placeholder("Ingresa correo electrónico")
+                                        .HtmlAttributes(new { style = "width: 100%", })
+
+                                        )
+                                    @*@Html.ValidationMessageFor(model => model.Correo, "", new { @class = "text-danger" })*@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row  my-4">
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Latitud)
+                                        .Label(l => l.Content("Latitud:"))
+                                        .Placeholder("Ingresa Latitud")
+                                        .HtmlAttributes(new
+                                        {
+                                            style = "width: 100%",
+                                            type = "text",
+                                            pattern = @"^-?\d+(\.\d+)?$",
+                                            title = "Ingrese un número decimal, puede ser negativo.",
+                                            inputmode = "decimal", // Ayuda a los navegadores y dispositivos móviles a mostrar el teclado adecuado
+                                            oninput = "this.value=this.value.replace(/[^0-9.-]/g,'')" // Reemplaza caracteres no permitidos en tiempo real
+                                        })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.Longitud)
+                                        .Label(l => l.Content("Longitud:"))
+                                        .Placeholder("Ingresa Longitud")
+                                        .HtmlAttributes(new
+                                        {
+                                            style = "width: 100%",
+                                            type = "text",
+                                            pattern = @"^-?\d+(\.\d+)?$",
+                                            title = "Ingrese un número decimal, puede ser negativo.",
+                                            inputmode = "decimal", // Ayuda a los navegadores y dispositivos móviles a mostrar el teclado adecuado
+                                            oninput = "this.value=this.value.replace(/[^0-9.-]/g,'')" // Reemplaza caracteres no permitidos en tiempo real
+                                        })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-md-4">
+                                
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row my-12">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton">
+                                        <button class="btnPrimary px-3" href="#" id="btnGeolocalizacion" onclick="modalCargaGeolocalizacion()">
+                                            <h5 class="m-0"><b>Geolocalización</b></h5>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton">
+                                        <button class="btnPrimary px-3" onclick="btnCrearPension()">
+                                            <h5 class="m-0"><b>Guardar</b></h5>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function btnCrearPension() {
+        
+       // var validator = $("#frmCrearPension").kendoValidator().data('kendoValidator');
+        var controlsValidate = [];
+        var isValid = true;
+
+         controlsValidate.push({ 'controlName': 'Pension' });
+        controlsValidate.push({ 'controlName': 'Direccion' });
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+        controlsValidate = [];
+        controlsValidate.push({ 'controlName': 'idMunicipio' });
+        controlsValidate.push({ 'controlName': 'ddlDelegaciones' });
+        controlsValidate.push({ 'controlName': 'idResponsable' });
+
+        if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+        var correo = $("#Correo").val();
+
+        //// Expresión regular para validar el formato de correo electrónico
+        //var regex = /^[a-zA-Z0-9._-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+
+        //// Realiza la validación del formato de correo electrónico
+        //if (!regex.test(correo)) {
+        //    sitteg_info('El formato del correo electrónico no es válido.');
+        //    return;
+        //}
+
+      
+     
+
+        // INPUTS
+
+
+        if (correo != "" && correo != undefined) {
+            if (!isValidEmail(correo)) {
+                $('#Correo').addClass("errorData");
+                isValid = false;
+            }
+        }
+
+            var formData = $("#frmCrearPension").serialize();
+        //var formData = new FormData();
+        //formData.delete('idDelegacion');
+        //alert(json);
+        showLoading();
+        $.ajax({
+            url: '/Pensiones/ajax_CrearPension',
+                type: 'POST',
+            data: formData,
+            dataType: "html",
+
+            success: function (data) {
+                console.log("JOJ", data)
+                $('#modalBodyCrearPension').html('');
+                $('#modalCrearPension').modal('hide');
+                $("body").removeClass("modal-open").find(".modal-backdrop").remove();
+                sitteg_success('Elemento guardado correctamente');
+                //$('#listadoPensiones').html(data);
+                $('#btnBucarPension').click();
+                
+                hideLoading();
+
+            },
+            error: function (xhr, status) {
+                var errmsg = xhr.responseText;
+                console.log(errmsg)
+                sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                hideLoading();
+            }
+        });
+        }
+        //$('#addDependencia').modal('hide');
+        //$('body').removeClass('model-open');
+        //$('.modal-backdrop').remove();
+
+    function modalCargaGeolocalizacion() {
+        showLoading();
+        var formData = $("#frmCrearPension").serialize();
+        $.ajax({
+            url: '@Url.Action("ajax_CargaGeolocalizacion")',
+            type: 'POST',
+            data: formData,
+            dataType: "html",
+            success: function (data) {
+                    $('#modalBodyCargaGeolocalizacion').html(data);
+                    $('#modalCargaGeolocalizacion').modal({ backdrop: 'static', keyboard: false });
+                    $('#modalCargaGeolocalizacion').modal('show');
+                    $('#modalCargaGeolocalizacion').show();
+                document.getElementById('latitude').innerHTML = $("#Latitud").data("kendoTextBox").value();
+                document.getElementById('longitude').innerHTML = $("#Longitud").data("kendoTextBox").value();
+                if ($("#idMunicipio").data("kendoDropDownList").value() !== '') {
+                    document.getElementById('municipioGL').innerHTML = $("#idMunicipio").data("kendoDropDownList").text();
+                } else {
+                    document.getElementById('municipioGL').innerHTML = '';
+                }
+                document.getElementById('address').innerHTML = $("#Direccion").data("kendoTextBox").value();
+                initMap();
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+    function closeModalCargaGeolocalizacion() {
+        $('#modalCargaGeolocalizacion').hide();
+    }
+
+</script>
+
+<div class="modal fade modalCustom" id="modalCargaGeolocalizacion" aria-labelledby="modalCargaGeolocalizacion" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-geolocalizacion h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Geolocalización</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="row">
+                        <div class="col-auto my-4">
+                            <button type="button" class="btn-close" onclick="closeModalCargaGeolocalizacion()" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-body" id="modalBodyCargaGeolocalizacion">
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,30 @@
+
+<ul class="navbar-nav">
+    @{
+        string searchvalue1 = ViewContext.HttpContext.Request.Path.ToString();
+    }
+    @if (User.Identity.IsAuthenticated)
+    {
+                string nombre = User.FindFirst("nombre").Value;
+                string perfil = User.FindFirst("perfil").Value;
+        <li class="nav-item">
+            <p class="mb-0 mr-1">@nombre</p>
+            <p class="mt-0 mr-1">@perfil</p>
+            <a href="/Home/Inicio" class="nav-link btn btn-link text-dark">Actualizar Contraseña</a>
+        </li>
+        <li class="nav-item">
+            <form class="form-inline" asp-action="Index">
+                @if (searchvalue1 == "/Home/Index/0")
+                {
+
+                    <button type="submit" class="nav-link btn btn-link text-dark">Cierre de sesión por inactividad</button>
+                }
+                else
+                {
+                     <a href="/cerrar-sesion" class="nav-link btn btn-link text-dark">Cerrar sesión</a>
+                }
+
+            </form>
+        </li>
+    }
+</ul>

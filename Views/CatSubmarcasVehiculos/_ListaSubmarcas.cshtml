@@ -1,0 +1,129 @@
+﻿<script>
+    function filtoMarca() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+        return{
+            idMarca: $("#idMarcaFiltro").val(),
+            idDependencia: idDependencia
+        }
+    }
+    </script>
+      @if (ViewBag.Admin == true)
+        {
+<div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+    <div class="row">
+        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+            <button href="#" id="btnNueop" onclick="mostrarModalSub()">
+                <h6 class="m-0 d-flex align-items-center"><i class="icon-addSubMarcar h5 mb-0 me-2"></i><b>Agregar nueva submarca de vehículo</b></h6>
+            </button>
+        </div>
+    </div>
+</div>
+        }
+<div class="row">
+        <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatSubmarcasVehiculosModel>()
+            .Name("gridCatSubmarcasVehiculos")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdSubmarca).Title("Id").Width(20);
+                columns.Bound(c => c.NombreSubmarca).Title("Nombre submarca").Width(100);
+                columns.Bound(c => c.MarcaVehiculo).Title("Marca vehículo").Width(90);
+                columns.Bound(c => c.estatusDesc).Title("Estatus").Width(90);
+                columns.Command(c => c.Custom("Editar").Click("getIdSubM")).Width(100);
+               // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(80);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetSubs", "CatSubmarcasVehiculos").Data("filtoMarca"))
+            .PageSize(5).Model(model => model.Id(p => p.IdSubmarca))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.NombreSubmarca);
+                s.Field(c => c.MarcaVehiculo);
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+
+            )
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+
+    </div>
+</div>
+<div class="modal fade modalCustom" id="agregarSubmarca" aria-labelledby="addSubMarcaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body" id="agregarSubmarcaBody">
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    function getIdSubM(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdSubmarca = dataItem.IdSubmarca;
+        console.log(IdSubmarca);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarSubmarcaParcial", "CatSubmarcasVehiculos")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdSubmarca: IdSubmarca }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#agregarSubmarcaBody').html(result);
+                $('#agregarSubmarca').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function eliminar(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var IdSubmarca = dataItem.IdSubmarca;
+        console.log(IdSubmarca);
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarSubmarcaParcial", "CatSubmarcasVehiculos")', // URL de la acción del controlador
+            type: 'POST', // Tipo de solicitud HTTP (POST o GET)
+            data: { IdSubmarca: IdSubmarca }, // Datos que se enviarán al controlador
+            success: function (result) {
+                $('#agregarSubmarcaBody').html(result);
+                $('#agregarSubmarca').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

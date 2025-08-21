@@ -1,0 +1,684 @@
+@font-face {
+  font-family: 'RIAG';
+  src:  url('fonts/RIAG.eot?n5u4a3');
+  src:  url('fonts/RIAG.eot?n5u4a3#iefix') format('embedded-opentype'),
+    url('fonts/RIAG.ttf?n5u4a3') format('truetype'),
+    url('fonts/RIAG.woff?n5u4a3') format('woff'),
+    url('fonts/RIAG.svg?n5u4a3#RIAG') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'RIAG' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-addRelacionData:before {
+  content: "\e9da";
+}
+.icon-puestos:before {
+  content: "\e9d7";
+}
+.icon-aseguradoras:before {
+  content: "\e9d6";
+}
+.icon-geolocalizacion:before {
+  content: "\e9d3";
+}
+.icon-catalogoConfi:before {
+  content: "\e9d4";
+}
+.icon-turnos:before {
+  content: "\e9d5";
+}
+.icon-deleteCargo:before {
+  content: "\e9cf";
+}
+.icon-editCargo:before {
+  content: "\e9d0";
+}
+.icon-addCargo:before {
+  content: "\e9d1";
+}
+.icon-cargo:before {
+  content: "\e9d2";
+}
+.icon-deleteFirma:before {
+  content: "\e9c7";
+}
+.icon-editFirma:before {
+  content: "\e9c8";
+}
+.icon-addFirma:before {
+  content: "\e9c9";
+}
+.icon-firma:before {
+  content: "\e9ca";
+}
+.icon-deleteBloc:before {
+  content: "\e9cb";
+}
+.icon-addBloc:before {
+  content: "\e9cc";
+}
+.icon-editBloc:before {
+  content: "\e9cd";
+}
+.icon-bloc:before {
+  content: "\e9ce";
+}
+.icon-deleteSubtipoServicio:before {
+  content: "\e9bf";
+}
+.icon-editSubtipoServicio:before {
+  content: "\e9c0";
+}
+.icon-addSubtipoServicio:before {
+  content: "\e9c1";
+}
+.icon-subtipoServicio:before {
+  content: "\e9c2";
+}
+.icon-editTipoServicio:before {
+  content: "\e9c3";
+}
+.icon-deleteTipoServicio:before {
+  content: "\e9c4";
+}
+.icon-addTipoServicio:before {
+  content: "\e9c5";
+}
+.icon-tipoServicio:before {
+  content: "\e9c6";
+}
+.icon-salir:before {
+  content: "\e9be";
+}
+.icon-addConcesonaria:before {
+  content: "\e9a9";
+}
+.icon-addDeposito:before {
+  content: "\e9aa";
+}
+.icon-addGrua:before {
+  content: "\e9ab";
+}
+.icon-addInventario:before {
+  content: "\e9ac";
+}
+.icon-addPension:before {
+  content: "\e9ad";
+}
+.icon-addTransito:before {
+  content: "\e9ae";
+}
+.icon-concesonaria:before {
+  content: "\e9af";
+}
+.icon-deleteConcesonaria:before {
+  content: "\e9b0";
+}
+.icon-deleteDeposito:before {
+  content: "\e9b1";
+}
+.icon-deleteGrua:before {
+  content: "\e9b2";
+}
+.icon-deleteInventario:before {
+  content: "\e9b3";
+}
+.icon-deletePension:before {
+  content: "\e9b4";
+}
+.icon-deleteTransito:before {
+  content: "\e9b5";
+}
+.icon-editConcesonaria:before {
+  content: "\e9b6";
+}
+.icon-editDeposito:before {
+  content: "\e9b7";
+}
+.icon-editGrua:before {
+  content: "\e9b8";
+}
+.icon-editInventario:before {
+  content: "\e9b9";
+}
+.icon-editPension:before {
+  content: "\e9ba";
+}
+.icon-editTransito:before {
+  content: "\e9bb";
+}
+.icon-pension:before {
+  content: "\e9bc";
+}
+.icon-transito:before {
+  content: "\e9bd";
+}
+.icon-accidente:before {
+  content: "\e9a7";
+}
+.icon-catalogos:before {
+  content: "\e9a8";
+}
+.icon-addDanoAccidente:before {
+  content: "\e99f";
+}
+.icon-addDanoVehiculo:before {
+  content: "\e9a0";
+}
+.icon-danoAccidente:before {
+  content: "\e9a1";
+}
+.icon-danoVehiculo:before {
+  content: "\e9a2";
+}
+.icon-deleteDanoAccidente:before {
+  content: "\e9a3";
+}
+.icon-deleteDanoVehiculo:before {
+  content: "\e9a4";
+}
+.icon-editDanoAccidente:before {
+  content: "\e9a5";
+}
+.icon-editDanoVehiculo:before {
+  content: "\e9a6";
+}
+.icon-addFactorAccidente:before {
+  content: "\e996";
+}
+.icon-addInvolucrado:before {
+  content: "\e997";
+}
+.icon-deleteFactorAccidente:before {
+  content: "\e998";
+}
+.icon-down:before {
+  content: "\e999";
+}
+.icon-editFactorAccidente:before {
+  content: "\e99a";
+}
+.icon-editInvolucrado:before {
+  content: "\e99b";
+}
+.icon-factorAccidente:before {
+  content: "\e99c";
+}
+.icon-involucrado:before {
+  content: "\e99d";
+}
+.icon-up:before {
+  content: "\e99e";
+}
+.icon-infoAdicional:before {
+  content: "\e995";
+}
+.icon-deleteClasificacionAccidente:before {
+  content: "\e993";
+}
+.icon-addClasificacionAccidente:before {
+  content: "\e994";
+}
+.icon-clasificacionAccidente:before {
+  content: "\e98f";
+}
+.icon-editClasificacionAccidente:before {
+  content: "\e990";
+}
+.icon-estadisticas:before {
+  content: "\e991";
+}
+.icon-excel:before {
+  content: "\e992";
+}
+.icon-addCortesia:before {
+  content: "\e98b";
+}
+.icon-addEnviar:before {
+  content: "\e98c";
+}
+.icon-cortesia:before {
+  content: "\e98d";
+}
+.icon-enviar:before {
+  content: "\e98e";
+}
+.icon-editRecibo:before {
+  content: "\e986";
+}
+.icon-deleteRecibo:before {
+  content: "\e987";
+}
+.icon-cancelInfracion:before {
+  content: "\e988";
+}
+.icon-addRecibo:before {
+  content: "\e989";
+}
+.icon-recibo:before {
+  content: "\e98a";
+}
+.icon-pdf:before {
+  content: "\e985";
+}
+.icon-propietario:before {
+  content: "\e984";
+}
+.icon-addConductor:before {
+  content: "\e980";
+}
+.icon-conductor:before {
+  content: "\e981";
+}
+.icon-deleteConductor:before {
+  content: "\e982";
+}
+.icon-editConductor:before {
+  content: "\e983";
+}
+.icon-opciones:before {
+  content: "\e968";
+}
+.icon-addOpciones:before {
+  content: "\e969";
+}
+.icon-deleteOpciones:before {
+  content: "\e96a";
+}
+.icon-editOpciones:before {
+  content: "\e96b";
+}
+.icon-editHospital:before {
+  content: "\e96c";
+}
+.icon-deleteHospital:before {
+  content: "\e96e";
+}
+.icon-hospital:before {
+  content: "\e96f";
+}
+.icon-oficinas:before {
+  content: "\e970";
+}
+.icon-deleteOficinas:before {
+  content: "\e971";
+}
+.icon-addOficinas:before {
+  content: "\e972";
+}
+.icon-editOficinas:before {
+  content: "\e973";
+}
+.icon-causas:before {
+  content: "\e974";
+}
+.icon-deleteCausas:before {
+  content: "\e975";
+}
+.icon-addCausas:before {
+  content: "\e976";
+}
+.icon-editCausas:before {
+  content: "\e977";
+}
+.icon-factores:before {
+  content: "\e978";
+}
+.icon-deleteFactores:before {
+  content: "\e979";
+}
+.icon-addFactores:before {
+  content: "\e97a";
+}
+.icon-editFactores:before {
+  content: "\e97b";
+}
+.icon-editAdccidentes:before {
+  content: "\e97c";
+}
+.icon-addAccidentes:before {
+  content: "\e97d";
+}
+.icon-deleteAccidentes:before {
+  content: "\e97e";
+}
+.icon-accidentes:before {
+  content: "\e97f";
+}
+.icon-deleteTraslado:before {
+  content: "\e960";
+}
+.icon-addTraslado:before {
+  content: "\e961";
+}
+.icon-editTraslado:before {
+  content: "\e962";
+}
+.icon-traslado:before {
+  content: "\e963";
+}
+.icon-editEntrega:before {
+  content: "\e964";
+}
+.icon-addEntrega:before {
+  content: "\e965";
+}
+.icon-deleteEntrega:before {
+  content: "\e966";
+}
+.icon-entrega:before {
+  content: "\e967";
+}
+.icon-addMinisterio:before {
+  content: "\e951";
+}
+.icon-addAutoridad:before {
+  content: "\e952";
+}
+.icon-deleteAutoridad:before {
+  content: "\e953";
+}
+.icon-autoridad:before {
+  content: "\e954";
+}
+.icon-editAutoridad:before {
+  content: "\e955";
+}
+.icon-addCarga:before {
+  content: "\e956";
+}
+.icon-deleteCarga:before {
+  content: "\e957";
+}
+.icon-editCarga:before {
+  content: "\e958";
+}
+.icon-carga:before {
+  content: "\e959";
+}
+.icon-editInfracion:before {
+  content: "\e95a";
+}
+.icon-deleteInfracion:before {
+  content: "\e95b";
+}
+.icon-addInfracion:before {
+  content: "\e95c";
+}
+.icon-ministerio:before {
+  content: "\e95d";
+}
+.icon-editMinisterio:before {
+  content: "\e95e";
+}
+.icon-deleteMinisterio:before {
+  content: "\e95f";
+}
+.icon-oficina:before {
+  content: "\e94d";
+}
+.icon-deleteOficina:before {
+  content: "\e94e";
+}
+.icon-addOficina:before {
+  content: "\e94f";
+}
+.icon-editOficina:before {
+  content: "\e950";
+}
+.icon-udi:before {
+  content: "\e945";
+}
+.icon-date:before {
+  content: "\e946";
+}
+.icon-editDate:before {
+  content: "\e947";
+}
+.icon-addDate:before {
+  content: "\e948";
+}
+.icon-deleteDate:before {
+  content: "\e949";
+}
+.icon-editUdi:before {
+  content: "\e94a";
+}
+.icon-addUdi:before {
+  content: "\e94b";
+}
+.icon-deleteUdi:before {
+  content: "\e94c";
+}
+.icon-tipoVehiculo:before {
+  content: "\e93d";
+}
+.icon-deleteTipoVehiculo:before {
+  content: "\e93e";
+}
+.icon-editTipoVehiculo:before {
+  content: "\e93f";
+}
+.icon-addTipoVehiculo:before {
+  content: "\e940";
+}
+.icon-subMarcar:before {
+  content: "\e941";
+}
+.icon-editSubMarcar:before {
+  content: "\e942";
+}
+.icon-addSubMarcar:before {
+  content: "\e943";
+}
+.icon-deleteSubMarcar:before {
+  content: "\e944";
+}
+.icon-editEntidad:before {
+  content: "\e939";
+}
+.icon-deleteEntidad:before {
+  content: "\e93a";
+}
+.icon-addEntidad:before {
+  content: "\e93b";
+}
+.icon-entidad:before {
+  content: "\e93c";
+}
+.icon-editOficial:before {
+  content: "\e932";
+}
+.icon-deleteOficial:before {
+  content: "\e933";
+}
+.icon-addOficial:before {
+  content: "\e934";
+}
+.icon-deleteMunicipio:before {
+  content: "\e935";
+}
+.icon-addMunicipio:before {
+  content: "\e936";
+}
+.icon-editMunicipio:before {
+  content: "\e937";
+}
+.icon-municipio:before {
+  content: "\e938";
+}
+.icon-deposito:before {
+  content: "\e929";
+}
+.icon-ubicacion:before {
+  content: "\e92a";
+}
+.icon-back:before {
+  content: "\e924";
+}
+.icon-grua:before {
+  content: "\e92b";
+}
+.icon-inventario:before {
+  content: "\e92c";
+}
+.icon-editTramo:before {
+  content: "\e928";
+}
+.icon-tramo:before {
+  content: "\e925";
+}
+.icon-addTramo:before {
+  content: "\e926";
+}
+.icon-deleteTramo:before {
+  content: "\e927";
+}
+.icon-addHospital:before {
+  content: "\e96d";
+}
+.icon-garantia:before {
+  content: "\e91b";
+}
+.icon-licencia:before {
+  content: "\e91c";
+}
+.icon-tarjeta:before {
+  content: "\e91d";
+}
+.icon-placa:before {
+  content: "\e91e";
+}
+.icon-infracion:before {
+  content: "\e91f";
+}
+.icon-less:before {
+  content: "\e919";
+}
+.icon-plus:before {
+  content: "\e91a";
+}
+.icon-addMarca:before {
+  content: "\e915";
+}
+.icon-editMarca:before {
+  content: "\e916";
+}
+.icon-deleteMarca:before {
+  content: "\e917";
+}
+.icon-marca:before {
+  content: "\e918";
+}
+.icon-filter:before {
+  content: "\e912";
+}
+.icon-delegacion:before {
+  content: "\e913";
+}
+.icon-carretera:before {
+  content: "\e90e";
+}
+.icon-delete:before {
+  content: "\e90f";
+}
+.icon-deleteCarretera:before {
+  content: "\e910";
+}
+.icon-addCarretera:before {
+  content: "\e911";
+}
+.icon-relacionData:before {
+  content: "\e9d8";
+}
+.icon-adminData:before {
+  content: "\e9d9";
+}
+.icon-editColor:before {
+  content: "\e92e";
+}
+.icon-deleteColor:before {
+  content: "\e92f";
+}
+.icon-addColor:before {
+  content: "\e930";
+}
+.icon-color:before {
+  content: "\e931";
+}
+.icon-oficial:before {
+  content: "\e92d";
+}
+.icon-dependencia:before {
+  content: "\e920";
+}
+.icon-editDependencia:before {
+  content: "\e921";
+}
+.icon-addDependencia:before {
+  content: "\e922";
+}
+.icon-deleteDependencia:before {
+  content: "\e923";
+}
+.icon-editCarretera:before {
+  content: "\e914";
+}
+.icon-edit-car:before {
+  content: "\e90a";
+}
+.icon-editMoral:before {
+  content: "\e90b";
+}
+.icon-editFisica:before {
+  content: "\e90c";
+}
+.icon-addCar:before {
+  content: "\e909";
+}
+.icon-correct:before {
+  content: "\e90d";
+}
+.icon-addFisica:before {
+  content: "\e902";
+}
+.icon-research:before {
+  content: "\e903";
+}
+.icon-edit:before {
+  content: "\e904";
+}
+.icon-addMoral:before {
+  content: "\e905";
+}
+.icon-sinPropietario:before {
+  content: "\e906";
+}
+.icon-fisica:before {
+  content: "\e907";
+}
+.icon-moral:before {
+  content: "\e908";
+}
+.icon-car:before {
+  content: "\e900";
+}
+.icon-data:before {
+  content: "\e901";
+}

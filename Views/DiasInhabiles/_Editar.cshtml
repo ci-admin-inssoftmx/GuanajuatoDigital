@@ -1,0 +1,158 @@
+﻿@model GuanajuatoAdminUsuarios.Models.DiasInhabilesModel
+@{
+    var municipios = (SelectList)ViewBag.Municipios;
+
+}
+
+@{
+    Layout = null;
+}
+<script>
+    function delegacion() {
+        var idDependencia = $("#idDependenciaFiltro").val();
+
+        idDependencia = idDependencia ? idDependencia : null;
+
+        return {
+            idDependencia: idDependencia
+        };
+    }
+    </script>
+
+<section class=" bg-white rounded">
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-editDate h1 colorPrimary"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Editar día inhábil</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <form id="EditarDiaInhabilForm" class="row px-4 mb-4 align-items-end justify-content-center">
+    <div class="row align-items-end">
+        <div class="col-12 col-lg-6 my-4">
+            <h5 class="px-4"><b>Datos de día inhábil</b></h5>
+            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+        </div>
+            <div class="col-12 col-lg-6 my-4 btnToggleActive">
+                @(Html.Kendo().SwitchFor(t => t.ValorEstatusDiasInhabiles)
+                    .Name("diasInhabilesSwitch")
+                    .Checked(Model.Estatus == 1)
+                    .Messages(c => c.Checked("Activo").Unchecked("Inactivo"))
+                    .HtmlAttributes(new { data_valor = Model.Estatus })
+                    )
+        </div>
+    </div>
+        <div class="col-12 col-md-6 ">
+            <div class="controlForm my-3">
+                <label>Día inhábil <b>(obligatorio)</b>:</label>
+                <span>
+                    @Html.HiddenFor(m=>m.idDiaInhabil)
+                    @(Html.Kendo().DatePickerFor(t => t.fecha).Format("dd/MM/yyyy")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                <label>Municipio <b>(obligatorio)</b>:</label>
+                <span>
+                    @(Html.Kendo().DropDownListFor(t => t.idMunicipio).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("Selecciona un Municipio")
+                        .HtmlAttributes(new { @class = "CentradoList", style = "width:100%;" })
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("Municipios_Read", "DiasInhabiles").Data("delegacion");
+                            });
+                        }))
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="controlForm my-3">
+                <label>Aplica a todos los municipios <b>(obligatorio)</b>:</label>
+                <div class="radioCustomTelerik">
+                    @(Html.Kendo().RadioGroupFor(t=>t.todosMunicipiosDesc)
+                        .Items(i =>
+                        {
+                            i.Add().Label("Si").Value("Si");
+                            i.Add().Label("No").Value("No");
+
+                        })
+                        )
+                </div>
+            </div>
+        </div>
+
+    </form>
+    <div class="row my-4">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton">
+                        <button class="btnPrimary px-3" onclick="editarDiaInhabil()">
+                            <h5 class="m-0"><b>Guardar</b></h5>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+<script>
+    function editarDiaInhabil() {
+
+        var Mydata = $("#EditarDiaInhabilForm").serialize();
+        console.log(Mydata);
+        $('#addDateInhabil').modal('hide');
+        $('body').removeClass('model-open');
+        $('.modal-backdrop').remove();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcialModal")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                var grid = $("#gridCatDiasInhabiles").data("kendoGrid");
+        grid.dataSource.read();
+                $('#addDateInhabil').modal('hide');
+        sitteg_success("Información actualizada correctamente.");
+
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+</script>

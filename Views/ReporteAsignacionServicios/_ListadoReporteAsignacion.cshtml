@@ -1,0 +1,118 @@
+﻿@model List<ReporteAsignacionModel>
+
+<div class="row mb-2 mt-4 titleCustom">
+    <div class="col-12">
+        <h5 class="px-4"><b>Listado de Reporte de Servicios</b></h5>
+        <h6 class="px-4 text-muted">Visualiza el reporte de servicios.</h6>
+    </div>
+</div>
+<div>
+    <br />
+    <br />
+    <br />
+
+</div>
+<div class="row">
+    @if (ViewBag.NoResultsMessage != null)
+    {
+        <div class="alert alert-info">
+            @ViewBag.NoResultsMessage
+        </div>
+    }
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(
+            Html.Kendo().Grid(Model)
+                .Name("Grid")
+            .ToolBar(t => t.Search().Text("Buscar..."))
+
+                .Columns(columns =>
+                {
+                    columns.Bound(p => p.carretera).Title("Carretera").Width(110);
+                    columns.Bound(p => p.tramo).Title("Tramo").Width(90);
+                    columns.Bound(p => p.vehiculoKm).Title("KM").Width(90);
+                    columns.Bound(c => c.fechaSolicitud2)
+                    .Title("Fecha")
+                    .Width(90);
+
+@* .ClientTemplate("#= formatFechaSolicitud(fechaSolicitud) #")
+                .Format("{0:dd/MM/yyyy}");*@
+                columns.Bound(c => c.fechaLiberacion2).Title("Salida")
+                .Width(90);
+               @* .ClientTemplate("#= formatFechaLiberacion(fechaLiberacion) #")
+                .Format("{0:dd/MM/yyyy}");*@
+                columns.Bound(c => c.evento).Title("Evento").Width(90);
+                columns.Bound(c => c.motivoAsignacion).Title("Motivo").Width(90);
+
+                columns.Bound(c => c.fullName).Title("Nombre Solicitante").Width(200);
+                columns.Bound(c => c.fullcolonia).Title("Dirección").Width(200);
+                columns.Bound(c => c.tipoVehiculo).Title("Tipo Vehículo").Width(160);
+                columns.Bound(c => c.propietarioGrua).Title("Grúa").Width(90);
+                columns.Bound(c => c.Alias).Title("Alias de la grúa").Width(180);
+                columns.Bound(c => c.oficial).Title("Oficial").Width(150);
+                columns.Bound(c => c.folio).Title("Folio").Width(100);
+                columns.Bound(c => c.vehiculoPension).Title("Pensión").Width(120);
+                columns.Bound(c => c.Delegacion).Title("Delegación").Width(120);
+                columns.Bound(c => c.numeroIventario).Title("Inventario").Width(120);
+            }).HtmlAttributes(new { style = "height:350" })
+            @*.Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Bottom).PageSizes(true))*@
+            .Pageable(p => p.Enabled(true))
+            .Sortable()
+            .Scrollable(scr => scr.Height(350))
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            )
+            .Search(s =>
+            {
+                s.Field(c => c.vehiculoCarretera);
+                s.Field(c => c.vehiculoTramo);
+                s.Field(c => c.vehiculoKm);
+                s.Field(c => c.fechaSolicitud);
+                s.Field(c => c.fechaLiberacion);
+                s.Field(c => c.evento);
+                s.Field(c => c.motivoAsignacion);
+                s.Field(c => c.fullName);
+                s.Field(c => c.fullcolonia);
+                s.Field(c => c.tipoVehiculo);
+                s.Field(c => c.noEconomico);
+                s.Field(c => c.Alias);
+                s.Field(c => c.oficial);
+                s.Field(c => c.vehiculoPension);
+                s.Field(c => c.Delegacion);
+                s.Field(c => c.numeroIventario);
+            })
+           // .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend")) se reemplaza pra evitar interferencias con el campo de busqueda
+            .Events(events => events.DataBound("replaceLegend"))
+
+
+            )
+    </div>
+
+</div>
+
+<style>
+    .k-grid-content {
+        overflow-x: scroll;
+    }
+</style>
+
+<script>
+    function formatFechaSolicitud(fechaSolicitud) {
+        if (fechaSolicitud === null || fechaSolicitud === '0001-01-01') {
+            return '-';
+        } else {
+
+            return new Date(fechaSolicitud).toLocaleString();
+        }
+    }
+
+    function formatFechaLiberacion(fechaLiberacion) {
+        if (fechaLiberacion === null || fechaLiberacion === '0001-01-01') {
+            return '-';
+        } else {
+            // Aquí también puedes usar moment.js o el formato que prefieras
+            return new Date(fechaLiberacion).toLocaleString();
+        }
+    }
+
+</script>

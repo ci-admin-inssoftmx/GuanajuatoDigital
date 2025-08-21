@@ -1,0 +1,256 @@
+@model GuanajuatoAdminUsuarios.Models.LoginModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]RIAG Registro Infracciones y Accidentes de Guanajuato</title>
+
+
+    <environment names="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.css" />
+    </environment>
+    <environment names="Staging,Production">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+    </environment>
+    <link href="https://cdn.kendostatic.com/2021.3.914/styles/kendo.classic-opal.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="~/css/main.css" />
+    <link href="~/css/plugins/toastr.min.css" rel="stylesheet" />
+    <script src="https://cdn.kendostatic.com/2021.3.914/js/jquery.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2021.3.914/js/jszip.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2021.3.914/js/kendo.all.min.js"></script>
+    <script src="https://cdn.kendostatic.com/2021.3.914/js/kendo.aspnetmvc.min.js"></script>
+    <script src="https://cdn.kendostatic.com/VERSION/js/messages/kendo.messages.es-ES.min.js"></script>
+    <script src="~/js/toastr.min.js"></script>
+    <globalization culture="es-MX" uiCulture="es" />
+    <script>kendo.culture("es-MX");</script>
+    <script>
+        function hideLoading() {
+            $('#loading').css('display', 'none');
+        }
+
+
+
+        function showLoading() {
+            $('#loading').css('display', 'block');
+        }
+
+        function inicioSesion() {
+            var isValid = true;
+            var usuario = document.getElementById('usuario').value;
+            var contrasena = document.getElementById('contrasena').value;
+            $('#usuario').removeClass("errorData");
+            $('#contrasena').removeClass("errorData");
+            if (usuario === '' || usuario === undefined) {
+                $('#usuario').addClass("errorData");
+                isValid = false;
+            }
+
+            if (contrasena === '' || contrasena === undefined) {
+                $('#contrasena').addClass("errorData");
+                isValid = false;
+            }
+            var horaActual = new Date(Date.now());
+            var horaUsuario = parseInt(horaActual.getHours() * 100) + parseInt(horaActual.getMinutes())
+
+            var data = {
+                usuario: usuario,
+                contrasena: contrasena,
+                horaUsuario: horaUsuario
+            };
+            showLoading();
+            $.ajax({
+                url: '/Login/IniciarSesion',
+                type: 'POST',
+                data: data,
+                success: function (data) {
+                    console.log(data); // Asegúrate de estar recibiendo los datos correctamente
+                    var mensajeUsuario = document.getElementById('mensajeUsuario');
+                    if (data.success === true) {
+                        mensajeUsuario.textContent = "Inicio de sesión autorizado";
+                        mensajeUsuario.style.color = "green";
+                        window.location.href = "/Principal";
+                    } else {
+                        if (data.success === false) {
+                            mensajeUsuario.textContent = "Sucedio un error con el horario de su equipo. Verifique su configuración.";
+                            mensajeUsuario.style.color = "red";
+                        } else {
+                            mensajeUsuario.textContent = "Usuario no capturado";
+                            mensajeUsuario.style.color = "red";
+                        }
+                    }
+
+                    mensajeUsuario.style.display = "block";
+                    hideLoading();
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    var mensajeUsuario = document.getElementById('mensajeUsuario');
+                    mensajeUsuario.textContent = "Usuario  no capturado.";
+                    mensajeUsuario.style.color = "red";
+                    mensajeUsuario.style.display = "block";
+                    hideLoading();
+                }
+
+            });
+        }
+    </script>
+
+
+</head>
+<body class="bg-light">
+    <main class="container-fluid">
+
+        <section id="sec0" class="row align-items-center justify-content-center pe-0 ">
+            <div style="max-width:1140px" class="col-11 col-md-11 col-lg-10 bg-white boxShadow mt-5 rounded">
+                <div class="row align-items-stretch justify-content-center">
+                    <div class="col-12 col-12 col-md-5 col-lg-4 col-xl-4 px-5 pb-3">
+                        <div class="row align-items-center justify-content-center py-5">
+                            <img style="max-width:380px" width="90%" src="~/img/logo-gto.svg" />
+                        </div>
+                        <div class="row align-items-center justify-content-center mb-4">
+                            <h2 class="m-0 h3"><b>Iniciar sesión</b></h2>
+                        </div>
+                        <div class="row align-items-center justify-content-center mb-4">
+                            <div class="controlForm">
+                                @(Html.Kendo().TextBoxFor(m => m.Usuario)
+                                        .Label(l => l.Content("Usuario:"))
+                                        .Placeholder("Usuario")
+                                        .HtmlAttributes(new { style = "width: 100%", id = "usuario" })
+                                        )
+                            </div>
+                        </div>
+                        <div class="row align-items-center justify-content-center">
+                            <div class="controlForm">
+                                @(Html.Kendo().TextBoxFor(m => m.Contraseña)
+                                        .Label(l => l.Content("Contraseña:"))
+                                        .Placeholder("*****")
+                                        .HtmlAttributes(new { type = "password", style = "width: 100%", id = "contrasena" })
+                                        )
+
+                            </div>
+                        </div>
+                        <div class="row align-items-end">
+                            <div class="alert-dismissible alert-info alert fw-bold" id="mensajeUsuario" style="display: none;">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                @*<h6 class="px-4 text-muted">Introduce tus credenciales de acceso.</h6>*@
+                                @*<br />*@
+                                <h6 id="errorAlerta" class="px-4" style="display:none; color: red">Credenciales inválidas.</h6>
+                            </div>
+                        </div>
+                        <div class="row align-items-center justify-content-center mt-5">
+                            <div class="col-12 controlButton">
+                                <button type="button" id="botonLogin" class="btnPrimary" onclick="inicioSesion()">
+                                    <h5 class="m-0"><b>Iniciar sesión</b></h5>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row align-items-center justify-content-center mt-3 mb-4">
+                            <h5 style="text-align:end" class="m-0">V1.0.170</h5>
+                        </div>
+                    </div>
+                    <div class="col-12 col-12 col-md-7 col-lg-8 col-xl-8 d-flex flex-column justify-content-evenly text-light back px-5">
+                        <div class="row align-items-center justify-content-center my-5 text-center">
+                            <h1 class="my-4"><b>RIAG</b></h1>
+                            <h1 class="px-5" style="text-transform: uppercase;"><b>Registro de infracciones y accidentes de guanajuato</b></h1>
+                        </div>
+                        <div class="row align-items-center justify-content-center my-5">
+                            <div class="col-12 col-12 col-md-9">
+                                <div class="row my-1">
+                                    <h4>
+                                        <b>SIRELIA</b>
+                                    </h4>
+                                </div>
+                                <div class="row mt-1">
+                                    <h4>
+                                        <b>Sistema Integral del Registro Estatal de Licencias, Infracciones y Accidentes.</b>
+                                    </h4>
+                                </div>
+                            </div>
+                            <div class="col-12 col-12 col-md-3">
+                                <div class="row align-items-center justify-content-center">
+                                    <img style="max-width:130px" width="90%" src="~/img/logotipo.png" />
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+                </div>
+
+        </section>
+
+    </main>
+
+    <footer class="text-center bg-white mt-5 py-3 loginFooter">
+        <h5 class="m-0">©️ 2023 - Secretaría de Seguridad Pública</h5>
+    </footer>
+
+    <style>
+        .loadingGif {
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 10, 10, 0.10);
+            z-index: 9999;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .errorData {
+            border: 1px solid red !important;
+            border-radius: 5px !important;
+        }
+        .back {
+            background-image: url(/img/back.svg);
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+            background-color: #283480;
+        }
+        
+    </style>
+
+    <div id="loading" style="display: none">
+        <div class="container-fluid">
+            <main role="main" class="pb-3">
+                <div class="loadingGif" id="loadingx">
+                    <div class="row text-center">
+                        <div class="col-md-12 loading-spinner">
+                            <div class="spinner-grow text-primary" style="color:#366777!important" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="spinner-grow text-secondary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="spinner-grow text-success" style="color:#6AB438!important" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+</body>
+</html>
+

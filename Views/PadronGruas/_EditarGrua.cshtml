@@ -1,0 +1,190 @@
+﻿@model Gruas2Model
+<div class="col-auto pe-0">
+    <div class="row align-items-center justify-content-center justify-content-md-start">
+        <div class="col-auto pe-0">
+            <i class="icon-editGrua h1 colorPrimary"></i>
+        </div>
+        <div class="col-auto my-3">
+            <h2 class="m-0 h3"><b>Editar grúa</b></h2>
+        </div>
+    </div>
+</div>
+<div class="panel">
+    <div class="panel-body container-fluid">
+        <div class="row row-lg">
+            <div class="col-md-12">
+                <section class=" bg-white rounded">
+                    <div class="row">
+                        <div class="col-12 my-4">
+                            <h5 class="px-4"><b>Datos de grúa</b></h5>
+                            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                        </div>
+                    </div>
+                    <form id="frmEditarGrua">
+                        @Html.HiddenFor(f=> f.idGrua)
+                        <div class="row align-items-end">
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <label>Delegación:</label>
+                                    @(Html.Kendo().DropDownListFor(f => f.idDelegacion).NoDataTemplate("No se encontraron datos")
+                                        .BindTo((SelectList)ViewBag.CatDelegaciones)
+                                        .OptionLabel("-- Seleccione --")
+                                        .HtmlAttributes(new { style = "width:100%;", id = "ddlDelegacionesed" })
+                                        .Filter(FilterType.Contains)
+                                        //.Popup(p => p.AppendTo("frmEditarGrua"))
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <label>Concesionario <b>(obligatorio):</b></label>
+                                    <div id="divConcesionario">
+                                        @(Html.Kendo().DropDownListFor(f => f.idConcesionario).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                            .BindTo(ViewData["CatConcesionarios"] as SelectList)
+                                            .OptionLabel("-- Seleccione --")
+                                            .HtmlAttributes(new { style = "width:100%;", id = "idConcesionario" })
+                                            .Filter(FilterType.Contains))
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.capacidad)
+                                        .Label(l => l.Content("Capacidad <b>(obligatorio)</b>:"))
+                                        .Placeholder("Ingresa Capacidad")
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.noEconomico)
+                                        .Label(l => l.Content("No. Económico <b>(obligatorio)</b>:"))
+                                        .Placeholder("Ingresa No. Economico")
+                                        .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.modelo)
+                                        .Label(l => l.Content("Modelo <b>(obligatorio)</b>:"))
+                                        .Placeholder("Ingresa Modelo")
+                                        .HtmlAttributes(new { style = "width: 100%", autocomplete="off" })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    @(Html.Kendo().TextBoxFor(t => t.placas)
+                                        .Label(l => l.Content("Placas <b>(obligatorio)</b>:"))
+                                        .Placeholder("Ingresa Placas")
+                                        .HtmlAttributes(new { style = "width: 100%", autocomplete="off" })
+                                        )
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <label>Clasificación:</label>
+                                    @(Html.Kendo().DropDownListFor(f => f.idClasificacion).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                        .BindTo(ViewData["CatClasificacionGruas"] as SelectList)
+                                        .OptionLabel("-- Seleccione --")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains))
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <label>Tipo <b>(obligatorio):</b></label>
+                                    @(Html.Kendo().DropDownListFor(f => f.idTipoGrua).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                        .BindTo(ViewData["CatTipoGruas"] as SelectList)
+                                        .OptionLabel("-- Seleccione --")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains))
+                                </div>
+                            </div>
+                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <div class="controlForm my-3">
+                                    <label>Situación <b>(obligatorio):</b></label>
+                                    @(Html.Kendo().DropDownListFor(f => f.idSituacion).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                                        .BindTo(ViewData["CatSituacionGruas"] as SelectList)
+                                        .OptionLabel("-- Seleccione --")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains))
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row my-12">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton">
+                                        <button class="btnPrimary px-3" onclick="editarGrua()">
+                                            <h5 class="m-0"><b>Guardar</b></h5>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function editarGrua() {
+        var formData = $("#frmEditarGrua").serialize();
+        var isValid = true;
+        var controlsValidate = [];
+        controlsValidate.push({ 'controlName': 'capacidad' });
+        controlsValidate.push({ 'controlName': 'noEconomico' });
+        controlsValidate.push({ 'controlName': 'modelo' });
+        controlsValidate.push({ 'controlName': 'placas' });
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+       
+        controlsValidate = [];
+        controlsValidate.push({ 'controlName': 'idTipoGrua' });
+        controlsValidate.push({ 'controlName': 'idSituacion' });
+        controlsValidate.push({ 'controlName': 'idConcesionario' });
+        if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar!');
+            return;
+        }
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_editGrua")',
+            type: 'POST',
+            data: formData,
+            success: function (result) {
+                $("#listadoGruas").html(result);
+                $('#addGrua').modal('hide');
+                sitteg_success('Elemento guardado correctamente')
+                hideLoading();
+            },
+            error: function (xhr, status) {
+                var errmsg = xhr.responseText;
+                console.log(errmsg)
+                sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                hideLoading();
+            }
+        });
+
+        //$('#addDependencia').modal('hide');
+        //$('body').removeClass('model-open');
+        //$('.modal-backdrop').remove();
+    }
+
+  
+    
+</script>

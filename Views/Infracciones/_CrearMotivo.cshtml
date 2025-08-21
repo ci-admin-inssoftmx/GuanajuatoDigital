@@ -1,0 +1,276 @@
+﻿@model MotivoInfraccionModel
+
+<script>
+    function filtroMotivos() {
+
+        var idConcepto = $("#ddlConcepto").val(); // Obtener el valor seleccionado del dropdown de Concepto
+        var idSubconcepto = $("#IdSubConcepto").val(); // Obtener el valor seleccionado del dropdown de Subconcepto
+
+        return {
+            idConcepto: idConcepto,
+            idSubconcepto: idSubconcepto
+        };
+    }
+    function onChangeConcepto() {
+        
+        var idConceptoValue = $("#ddlConcepto").data("kendoDropDownList").value();
+        console.log("CON", idConceptoValue)
+        showLoading();
+        $.ajax({
+            url: "/MotivosInfraccion/ObtenerSubconceptos",
+            type: "POST",
+            data: { idConceptoValue: idConceptoValue },
+            success: function (data) {
+                var SubconceptosDD = $("#IdSubConcepto").data("kendoDropDownList");
+                SubconceptosDD.dataSource.data(data);
+                var ddlidCatMotivoInfraccion = $("#idCatMotivoInfraccion").data("kendoDropDownList");
+                ddlidCatMotivoInfraccion.dataSource.read();
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+            }
+        });
+    }
+
+    function onChangeSubconcepto(){
+        var ddlidCatMotivoInfraccion = $("#idCatMotivoInfraccion").data("kendoDropDownList");
+        ddlidCatMotivoInfraccion.dataSource.read();
+
+    }
+
+
+
+    </script>
+<form id="frmCrearMotivos" class="row px-4 mb-4 align-items-end justify-content-center">
+    @Html.HiddenFor(m=> m.idInfraccion, new { id = "hndIdInfraccion"}) 
+    <div class="row my-4 row px-4 mb-4 align-items-end">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Concepto:</label>
+                @(Html.Kendo().DropDownListFor(m => m.idConcepto)
+                    .Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .BindTo((SelectList)ViewData["CatConcepto"])
+                    .OptionLabel("-- Seleccione --")
+                    .Events(e => e.Change("onChangeConcepto"))
+                    .HtmlAttributes(new { style = "width:100%;", id = "ddlConcepto" }))
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Subconcepto:</label>
+                <div id="divSubConcepto">
+                    @(Html.Kendo().DropDownListFor(m => m.IdSubConcepto).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("Selecciona un Subconcepto")
+                      
+                        .Events(e => e.Change("onChangeSubconcepto"))
+
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("ObtenerSubconceptos", "MotivosInfraccion");
+                            });
+                        })
+                        .HtmlAttributes(new { style = "width:100%;" })
+                        
+                        )
+                </div>
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Motivo:</label>
+                <div id="divCatMotivo">
+                    @(Html.Kendo().DropDownListFor(m => m.idCatMotivoInfraccion)
+                        .Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("Selecciona un Motivo")                                                
+                       
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("AllMotivos_Drop", "MotivosInfraccion").Data("filtroMotivos");
+                                });
+                            })
+                        .HtmlAttributes(new { style = "width:100%;"})
+                            
+                            )
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.calificacionMinima)
+                    .Label(l => l.Content("Calificación mínima <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;", id = "calificacionMinima", disabled="disabled" })
+                    )
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.calificacionMaxima)
+                    .Label(l => l.Content("Calificación máxima <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;", id = "calificacionMaxima", disabled = "disabled" })
+                    )
+            </div>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+
+                <label>Calificación <b>(obligatorio)</b>:</label>
+                <div class="input-group">
+                    <input autocomplete="off" type="text" name="calificacion" id="calificacion" onchange="onChangeCa()" onkeydown="ValidarEnteros(event)" style="width: 100%; height:58px;" />
+            
+                </div>
+             </div>
+        </div>
+    </div>
+</form>
+
+<div class="row my-4">
+    <div class="col-12 col-md-6 mx-md-auto">
+        <div class="row justify-content-around">
+            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                    <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                </button>
+            </div>
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <div class="controlButton">
+                    <button class="btnPrimary px-3" onclick="btnCrearMotivos()">
+                        <h5 class="m-0"><b>Guardar</b></h5>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+
+    function btnCrearMotivos() {
+
+
+
+        
+        var controlsValidate = [];
+        var isValid = true;
+
+
+        controlsValidate.push({ 'controlName': 'calificacion' });
+
+        // INPUTS
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+
+        // DROP DOWN LIST
+        var ddlMotivo = $("#idCatMotivoInfraccion").val()
+        if (!ddlMotivo) { isValid = false; }
+
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+
+        //if (validator.validate()) {
+            var idInfraccion = $("#idInfraccion").val();
+            $("#hndIdInfraccion").val(idInfraccion);
+            var formData = $("#frmCrearMotivos").serialize();
+            formData = formData + '&calificacionMinima=' + $("#calificacionMinima").val() + '&calificacionMaxima=' + $("#calificacionMaxima").val();
+            console.log(formData);
+            showLoading();
+            $.ajax({
+                url: '@Url.Action("ajax_CrearMotivos")',
+                type: 'POST',
+                data: formData,
+                success: function (result) {
+                $("#listadoMotivos").html(result);
+                    $('#modalCrearMotivo').modal('hide');
+                    sitteg_success('Elemento guardado correctamente')
+                    hideLoading();
+                },
+                error: function (xhr, status) {
+                    var errmsg = xhr.responseText;
+                    console.log(errmsg)
+                    sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                    hideLoading();
+                }
+            });
+        //}
+        //else {
+        //    sitteg_info('Debe llenar los campos requeridos');
+        //    return;
+        //}
+    }
+
+
+
+
+    function onChangeCa() {
+    var min = parseInt($("#calificacionMinima").val() || "0");
+    var currentval = parseInt($("#calificacion").val() || "0");
+
+    if (currentval >= min) {
+    } else {
+        $("#calificacion").val(min);
+        sitteg_info("La calificación es menor");
+    }
+}
+
+
+    function _on_change_Motivo() {
+        var min = 0;
+        var max = 0;
+        var txtCalificacion = $("#calificacion");
+
+        var value = $("#idCatMotivoInfraccion").val();
+        var txtMin = $("#calificacionMinima").data("kendoTextBox");
+        var txtMax = $("#calificacionMaxima").data("kendoTextBox");
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("BuscarMotivoByID","MotivosInfraccion")',
+            type: 'GET',
+            data: { idCatMotivoInfraccion: value },
+            success: function (result) {
+                console.log("RE", result)
+                if (result != null) {
+                    min = result.CalificacionMinima;
+                    max = result.CalificacionMaxima;
+                    txtMin.value(min);
+                    txtMax.value(max);
+                    if (txtCalificacion) {
+                        txtCalificacion.val(min);
+                    } else {
+                        console.error("El componente de calificación no se ha inicializado correctamente.");
+                    }
+                } else {
+                    console.error("El resultado de la llamada AJAX es nulo.");
+                }
+                hideLoading();
+            },
+            error: function (xhr, status) {
+                var errmsg = xhr.responseText;
+                console.log(errmsg)
+                sitteg_warning('Lo sentimos, ha ocurrido un error.' + errmsg);
+                hideLoading();
+            }
+        });
+    }
+
+
+       $("#idCatMotivoInfraccion").change(_on_change_Motivo);
+
+    $("#calificacion").change(onChangeCa);
+  
+
+
+</script>

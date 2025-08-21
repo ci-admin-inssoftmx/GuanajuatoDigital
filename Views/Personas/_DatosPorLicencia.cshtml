@@ -1,0 +1,257 @@
+﻿@model PersonaModel
+
+<form id="frmCrearPersona" class="row px-4 mb-4 align-items-end justify-content-center">
+    @Html.HiddenFor(m=> m.idPersona)
+    <div class="row align-items-end my-2">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.nombre)
+                    .Label(l => l.Content("Nombre: <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;", required = "required" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.apellidoPaterno)
+                    .Label(l => l.Content("Apellido paterno: <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;", required = "required" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.apellidoMaterno)
+                    .Label(l => l.Content("Apellido materno: <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;", required = "required" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Fecha de nacimiento <b>(obligatorio)</b>:</label>
+                @(Html.Kendo().DatePickerFor(t => t.fechaNacimiento)
+                    .Culture("es-ES")
+                    .HtmlAttributes(new { style = "width: 100%;", required = "required" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.CURP)
+                    .Label(l => l.Content("CURP: <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;", required = "required" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.RFC)
+                    .Label(l => l.Content("RFC: :"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Género <b>(obligatorio)</b>:</label>
+                @(Html.Kendo().DropDownListFor(m => m.idGenero).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .BindTo((SelectList)ViewBag.CatGeneros)
+                    .OptionLabel("-- Seleccione --")
+                    .HtmlAttributes(new { style = "width:100%;", required = "required" }))
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Tipo persona <b>(obligatorio)</b>:</label>
+                @(Html.Kendo().DropDownListFor(m => m.idCatTipoPersona).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .BindTo((SelectList)ViewBag.CatTipoPersona)
+                    .OptionLabel("-- Seleccione --")
+                    .HtmlAttributes(new { style = "width:100%;", required = "required" }))
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.numeroLicencia)
+                    .Label(l => l.Content("Número licencia <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;", required = "required" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Tipo licencia:</label>
+                @(Html.Kendo().DropDownListFor(m => m.idTipoLicencia).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .BindTo((SelectList)ViewBag.CatTipoLicencia)
+                    .OptionLabel("-- Seleccione --")
+                    .HtmlAttributes(new { style = "width:100%;" }))
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Vigencia licencia:</label>
+                @(Html.Kendo().DatePickerFor(t => t.vigenciaLicencia)
+                    .Culture("es-ES")
+                    .HtmlAttributes(new { style = "width: 100%;" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Entidad <b>(obligatorio)</b>:</label>
+                @(Html.Kendo().DropDownListFor(m => m.PersonaDireccion.idEntidad).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .BindTo((SelectList)ViewBag.CatEntidades)
+                    .OptionLabel("-- Seleccione --")
+                    .HtmlAttributes(new { style = "width:100%;", required = "required" }))
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                <label>Municipio <b>(obligatorio)</b>:</label>
+                @(Html.Kendo().DropDownListFor(m => m.PersonaDireccion.idMunicipio).Filter(FilterType.Contains).NoDataTemplate("No se encontraron datos")
+                    .BindTo((SelectList)ViewBag.CatMunicipios)
+                    .OptionLabel("-- Seleccione --")
+                    .HtmlAttributes(new { style = "width:100%;", id = "ddlConcepto", required = "required" }))
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.codigoPostal)
+                    .Label(l => l.Content("Código postal: <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;", required = "required" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.colonia)
+                    .Label(l => l.Content("Colonia: <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;", required = "required" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.calle)
+                    .Label(l => l.Content("Calle: <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;", required = "required" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.numero)
+                    .Label(l => l.Content("Número: <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;", required = "required" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.telefono)
+                    .Label(l => l.Content("Teléfono: <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;", required = "required" })
+                    )
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+            <div class="controlForm my-3">
+                @(Html.Kendo().TextBoxFor(t => t.PersonaDireccion.correo)
+                    .Label(l => l.Content("Correo: <b>(obligatorio)</b>:"))
+                    .HtmlAttributes(new { style = "width: 100%; height:58px;", required = "required" })
+                    )
+            </div>
+        </div>
+    </div>
+</form>
+<div class="row my-4">
+    <div class="col-12 col-md-6 mx-md-auto">
+        <div class="row justify-content-around">
+
+            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                    <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                </button>
+            </div>
+            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <div class="controlButton">
+                    <button class="btnPrimary px-3" onclick="btnCrearPersona()">
+                        <h5 class="m-0"><b>Guardar</b></h5>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        $('#vigenciaLicencia').removeAttr("required");
+    });
+
+    function btnCrearPersona() {
+        var validator = $("#frmCrearPersona").kendoValidator().data('kendoValidator');
+        validator.validate();
+        if (validator.validate()) {
+            var formData = $("#frmCrearPersona").serialize();
+            showLoading();
+            $.ajax({
+                url: '@Url.Action("ajax_CrearPersona","Personas")',
+                type: 'POST',
+                data: formData,
+                success: function (result) {
+                    $("#listadoPersonas").html(result);
+                    $('#modalCrearPersona').modal('hide');
+                    sitteg_success('Elemento guardado correctamente')
+                    hideLoading();
+                },
+                error: function (xhr, status) {
+                    var errmsg = xhr.responseText;
+                    console.log(errmsg)
+                    sitteg_warning('Lo sentimos, ha ocurrido un error.');
+                    hideLoading();
+                }
+            });
+        }
+        else {
+            sitteg_info('Debe llenar los campos requeridos');
+            return;
+        }
+    }
+    function completarConLicencia() {
+        var formData = $("#frmCrearPersona").serialize();
+
+        // Parsear el formData utilizando URLSearchParams
+        var searchParams = new URLSearchParams(formData);
+
+        // Obtener el valor de "numeroLicencia" del formData
+        var numeroLicencia = searchParams.get('numeroLicencia');
+
+        // Validar si el TextBox contiene información
+        if (numeroLicencia.trim() !== "") {
+            // Enviar el valor al controlador mediante AJAX
+            showLoading();
+            $.ajax({
+                type: "POST",
+                url: "/Personas/BusquedaPorLicencia",
+                data: { numeroLicencia: numeroLicencia },
+                success: function (result) {
+                    // Manejar la respuesta del controlador si es necesario
+                    console.log(result);
+                    hideLoading();
+                },
+                error: function (error) {
+                    // Manejar errores en la solicitud AJAX
+                    console.error(error);
+                    hideLoading();
+                }
+            });
+        } else {
+            // Mostrar un mensaje de error o realizar acciones cuando el TextBox está vacío
+            alert("El número de licencia es obligatorio.");
+        }
+    }
+
+
+</script>

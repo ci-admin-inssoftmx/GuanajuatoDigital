@@ -1,0 +1,2474 @@
+﻿
+
+    <head>
+        <title></title>
+        <script>
+
+            function closeForm() {
+                console.log("hola ", document.getElementById("placas").value);
+
+                if (document.getElementById("placas").value == "GTD7308" || document.getElementById("serie").value == "1N4AB41D95C74309") {
+                    document.getElementById("sec0").style.display = "none";
+                    document.getElementById("sec1Sitteg").style.display = "block";
+                    document.getElementById("sec2").style.display = "block";
+                } else if (document.getElementById("placas").value == "GTD7309") {
+                    document.getElementById("sec0").style.display = "none";
+                    document.getElementById("sec1Estatal").style.display = "block";
+                    document.getElementById("sec2").style.display = "block";
+                } else {
+                    document.getElementById("sec0").style.display = "none";
+                    document.getElementById("sec1").style.display = "block";
+                    document.getElementById("sec2").style.display = "block";
+                }
+
+
+            }
+
+            function buscarPFisica() {
+                console.log("buscarFisica");
+                document.getElementById("secFisica").style.display = "block";
+                document.getElementById("sec2").style.display = "none";
+
+            }
+
+            function finalizar() {
+                console.log("finalizar");
+                document.getElementById("sec0").style.display = "block";
+                document.getElementById("secFisica").style.display = "none";
+                document.getElementById("sec1").style.display = "none";
+                document.getElementById("sec2").style.display = "none";
+                document.getElementById("sec1Sitteg").style.display = "none";
+                document.getElementById("sec1Estatal").style.display = "none";
+
+            }
+
+
+        function finalizarCap() {
+            console.log("finalizar");
+            document.getElementById("sec0").style.display = "block";
+            document.getElementById("secFisica").style.display = "none";
+            document.getElementById("sec1").style.display = "none";
+            document.getElementById("sec2").style.display = "none";
+            document.getElementById("sec1Sitteg").style.display = "none";
+            document.getElementById("sec1Estatal").style.display = "none";
+            window.location.href = "https://localhost:44367/";
+
+        }
+        </script>
+    </head>
+
+
+        <!-- ***************************** -->
+        <div class="mainContainer bg-light">
+
+            <!-- ** Busqueda ** -->
+            <section id="sec0" class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow mt-3 mb-5 rounded" style="display:block">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-12 col-md-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto">
+                                <div class="border border-2 border-dark rounded-circle">
+                                    <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                        <b>1</b>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-auto p-0">
+                                <i class="icon-car h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Captura de vehículos</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 pe-0">
+                        <div class="bgSuccess py-1"></div>
+                    </div>
+                    <div class="col-6 ps-0">
+                        <div class="bg-light py-1"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 my-4">
+                        <h5 class="px-4 colorSuccess d-flex align-items-center"><b class="d-flex align-items-center justify-content-center bgSuccess mb-1 me-2 rounded-circle px-1"><i style="font-size: 10px; padding: 7px 2px;" class="icon-correct text-white"></i></b><b>Busqueda del vehículo</b></h5>
+                        <h6 class="px-4 text-muted">Realiza una búsqueda del vehículo para conocer si ya esta capturado en 
+                            Registro de Infracciones y Accidentes o de lo contrario importar los datos del registro estatal.</h6>
+                    </div>
+                </div>
+                <div class="row px-4 mb-4 align-items-end">
+                    <!--todo select -->
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("entidad1x")
+                                .Label(l => l.Content("Entidad de Registro:"))
+                                .Value("Guanajuato")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("placas")
+                                .Label(l => l.Content("Placas"))
+                                .Placeholder("Ingresa el número de placa del vehículo")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("serie")
+                                .Label(l => l.Content("Serie:"))
+                                .Placeholder("Ingresa el número de serie válido")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlButton my-3" onclick="closeForm()">
+                            @(Html.Kendo().Button()
+                                .Name("buscar")
+                                .HtmlAttributes(new { @class = "btnPrimary" })
+                                .Content("<h5 class=\"m-0\"><b>Buscar</b></h5>")
+                                )
+                        </div>
+                    </div>
+
+
+
+
+
+                </div>
+            </section>
+
+
+            <!-- ** Captura de vehiculos en sitteg ** -->
+            <section id="sec1Sitteg" class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded" style="display:none">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-12 col-md-6 col-lg-5 col-xl-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto">
+                                <div class="border border-2 border-dark rounded-circle">
+                                    <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                        <b>1</b>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-auto p-0">
+                                <i class="icon-car h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Captura de vehículos</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                        <div class="row">
+                            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                <button data-bs-toggle="modal" data-bs-target="#editCar">
+                                    <h6 class="m-0"><i class="icon-edit me-2"></i><b>Editar captura de vehículo</b></h6>
+                                </button>
+                            </div>
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0" onclick="finalizar()">
+                                @(Html.Kendo().Button()
+                                    .Name("editBusqueda")
+                                    .HtmlAttributes(new { @class = "btnPrimary" })
+                                    .Content("<h6 class=\"m-0\"><i class=\"icon-research me-2\"></i><b>Editar búsqueda</b></h6>"))
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bgSuccess py-1"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 my-4">
+                <h5 class="px-4 colorSuccess d-flex align-items-center"><b class="d-flex align-items-center justify-content-center bgSuccess mb-1 me-2 rounded-circle px-1"><i style="font-size: 10px; padding: 7px 2px;" class="icon-correct text-white"></i></b><b>Vehículo capturado en Registro de Infracciones y Accidentes Guanjuato</b></h5>
+                        <h6 class="px-4 text-muted">El vehículo ya está capturado en la plataforma. Puede actualizar o corregir la información del vehículo.</h6>
+                    </div>
+                </div>
+                <div class="row px-4 mb-4 align-items-end">
+                    <div class="col">
+                        <div class="controlForm mb-3 mt-1">
+                            <label class="text-muted">Entidad:</label>
+                            <label>Guanajuato</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="controlForm mb-3 mt-1">
+                            <label class="text-muted">Placas:</label>
+                            <label>GTD7308</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="controlForm mb-3 mt-1">
+                            <label class="text-muted">Serie:</label>
+                            <label>1N4AB41D95C74309</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="controlForm mb-3 mt-1">
+                            <label class="text-muted">Tarjeta:</label>
+                            <label>-</label>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="controlForm mb-3 mt-1">
+                            <label class="text-muted">Vigencia de tarjeta:</label>
+                            <label>-</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="controlForm mb-3 mt-1">
+                            <label class="text-muted">Marca:</label>
+                            <label>Nissan</label>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="controlForm mb-3 mt-1">
+                            <label class="text-muted">Sub-Marca:</label>
+                            <label>Sentra</label>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="controlForm mb-3 mt-1">
+                            <label class="text-muted">Tipo de vehículo:</label>
+                            <label>Sedan</label>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="controlForm mb-3 mt-1">
+                            <label class="text-muted">Modelo:</label>
+                            <label>1995</label>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="controlForm mb-3 mt-1">
+                            <label class="text-muted">Color:</label>
+                            <label>Blanco</label>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="controlForm mb-3 mt-1">
+                            <label class="text-muted">No. económico:</label>
+                            <label>-</label>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="controlForm mb-3 mt-1">
+                            <label class="text-muted">Manufactura:</label>
+                            <label>-</label>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ** Captura de vehiculos en registro estatal ** -->
+            <section id="sec1Estatal" class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow mt-3 mb-5 rounded" style="display:none">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-12 col-md-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto">
+                                <div class="border border-2 border-dark rounded-circle">
+                                    <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                        <b>1</b>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-auto p-0">
+                                <i class="icon-car h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Captura de vehículos</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                        <div class="row">
+
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0" onclick="finalizar()">
+                                @(Html.Kendo().Button()
+                                    .Name("editBusqueda")
+                                    .HtmlAttributes(new { @class = "btnPrimary" })
+                                    .Content("<h6 class=\"m-0\"><i class=\"icon-research me-2\"></i><b>Editar búsqueda</b></h6>"))
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 pe-0">
+                        <div class="bgWarning py-1"></div>
+                    </div>
+                    <div class="col-6 ps-0">
+                        <div class="bg-light py-1"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 my-4">
+                <h5 class="px-4 colorWarning d-flex align-items-center"><b class="text-white bgWarning mb-1 me-2 rounded-circle px-2 h6">i</b><b>Vehículo sin captura en el Registro de Infracciones y Accidentes de Guanajuato</b></h5>
+                        <h6 class="px-4 text-muted">Se importaron los datos desde el registro estatal. Favor de revisar y corregir si hace falta.</h6>
+                    </div>
+                </div>
+                <div class="row px-4 mb-4 align-items-end">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm mb-3">
+                            <label>Entidad de registro <b>(obligatorio)</b></label>
+                            <span>
+                                @(Html.Kendo().DropDownList()
+                                .NoDataTemplate("No se encontraron datos")
+                                    .Name("entidad")
+                                    .DataTextField("")
+                                    .DataValueField("")
+                                    .HtmlAttributes(new { style = "width:100%;" })
+                                    .Filter(FilterType.Contains)
+                                    .DataSource(source => source
+                                    .Read(read => read.Action("GetProducts", "Home"))
+                                    )
+                                    )
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("placas")
+                                .Label(l => l.Content("Placas"))
+                                .Placeholder("Ingresa el número de placa del vehículo")
+                                .HtmlAttributes(new { style = "width: 100%", autocomplete="off" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("serie")
+                                .Label(l => l.Content("Serie:"))
+                                .Placeholder("Ingresa el número de serie válido")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("tarjeta")
+                                .Label(l => l.Content("Tarjeta:"))
+                                .Placeholder("Ingresa el número de la tarjeta")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("vigencia")
+                                .Label(l => l.Content("Vigencia de tarjeta:"))
+                                .Placeholder("Ingresa la vigencia")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("marca")
+                                .Label(l => l.Content("Marca <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa una marca")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("sub-marca")
+                                .Label(l => l.Content("Sub-Marca <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa la sub-marca")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("tipo")
+                                .Label(l => l.Content("Tipo de vehículo <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa el tipo de vehículo")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("modelo")
+                                .Label(l => l.Content("Modelo:"))
+                                .Placeholder(" Año")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Color:</label>
+                            <span>
+                                @(Html.Kendo().DropDownList()
+                                .NoDataTemplate("No se encontraron datos")
+                                    .Name("color")
+                                    .DataTextField("")
+                                    .DataValueField("")
+                                    .HtmlAttributes(new { style = "width:100%;" })
+                                    .Filter(FilterType.Contains)
+                                    .DataSource(source => source
+                                    .Read(read => read.Action("GetProducts", "Home"))
+                                    )
+                                    )
+                            </span>
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("economico")
+                                .Label(l => l.Content("No. económico:"))
+                                .Placeholder("Ingresa el no. económico")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("manufactura")
+                                .Label(l => l.Content("Manufactura:"))
+                                .Placeholder("Ingresa el pais de manufactura")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ** Captura de vehiculos en registro estatal ** -->
+            <section id="sec1" class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow mt-3 mb-5 rounded" style="display:none">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-12 col-md-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto">
+                                <div class="border border-2 border-dark rounded-circle">
+                                    <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                        <b>1</b>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-auto p-0">
+                                <i class="icon-car h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Captura de vehículos</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                        <div class="row">
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0" onclick="finalizar()">
+                                @(Html.Kendo().Button()
+                                    .Name("editBusqueda")
+                                    .HtmlAttributes(new { @class = "btnPrimary" })
+                                    .Content("<h6 class=\"m-0\"><i class=\"icon-research me-2\"></i><b>Editar búsqueda</b></h6>"))
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-8 pe-0">
+                        <div class="bgDanger py-1"></div>
+                    </div>
+                    <div class="col-4 ps-0">
+                        <div class="bg-light py-1"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 my-4">
+                <h5 class="px-4 colorDanger d-flex align-items-center"><b class="text-white bgDanger mb-1 me-2 rounded-circle px-2 h6">i</b><b>Vehículo sin captura en el Registro de Infracciones y Accidentes de Guanajuato</b></h5>
+                <h6 class="px-4 text-muted">No se encontró captura en <b class="colorPrimary">Registro de Infracciones y Accidentes de Guanajuato</b> y en el registro estatal. Completa la captura de vehículo.</h6>
+                    </div>
+                </div>
+                <form class="row px-4 mb-4 align-items-end">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Entidad de registro <b>(obligatorio)</b></label>
+                            <span>
+                                @(Html.Kendo().DropDownList()
+                                .NoDataTemplate("No se encontraron datos")
+                                    .Name("entidadOut")
+                                    .DataTextField("")
+                                    .DataValueField("")
+                                    .HtmlAttributes(new { style = "width:100%;" })
+                                    .Filter(FilterType.Contains)
+                                    .DataSource(source => source
+                                    .Read(read => read.Action("GetProducts", "Home"))
+                                    )
+                                    )
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("placasOut")
+                                .Label(l => l.Content("Placas"))
+                                .Placeholder("Ingresa el número de placa del vehículo")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("serieOut")
+                                .Label(l => l.Content("Serie:"))
+                                .Placeholder("Ingresa el número de serie válido")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("tarjetaOut")
+                                .Label(l => l.Content("Tarjeta:"))
+                                .Placeholder("Ingresa el número de la tarjeta")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("vigenciaOut")
+                                .Label(l => l.Content("Vigencia de tarjeta:"))
+                                .Placeholder("Ingresa la vigencia")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("marcaOut")
+                                .Label(l => l.Content("Marca <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa una marca")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("sub-marcaOut")
+                                .Label(l => l.Content("Sub-Marca <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa la sub-marca")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("tipoOut")
+                                .Label(l => l.Content("Tipo de vehículo <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa el tipo de vehículo")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("modeloOut")
+                                .Label(l => l.Content("Modelo:"))
+                                .Placeholder(" Año")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            <label>Color:</label>
+                            <span>
+                        @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                    .Name("colorOut")
+                                    .DataTextField("")
+                                    .DataValueField("")
+                                    .HtmlAttributes(new { style = "width:100%;" })
+                                    .Filter(FilterType.Contains)
+                                    .DataSource(source => source
+                                    .Read(read => read.Action("GetProducts", "Home"))
+                                    )
+                                    )
+                            </span>
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("economicoOut")
+                                .Label(l => l.Content("No. económico:"))
+                                .Placeholder("Ingresa el no. económico")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("manufacturaOut")
+                                .Label(l => l.Content("Manufactura:"))
+                                .Placeholder("Ingresa el pais de manufactura")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+
+                </form>
+            </section>
+
+            <!-- ** Tabs de busqueda ** -->
+            <section id="sec2" class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded" style="display:none">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-12 col-md-auto">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto">
+                                <div class="border border-2 border-dark rounded-circle">
+                                    <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                        <b>2</b>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-auto p-0">
+                                <i class="icon-data h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Datos del vehículo</b></h2>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-5 pe-0">
+                        <div class="bgSuccess py-1"></div>
+                    </div>
+                    <div class="col-7 ps-0">
+                        <div class="bg-light py-1"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 mt-4">
+                        <h5 class="px-4"><b>Datos complementarios</b></h5>
+                        <h6 class="px-4 text-muted">Completa los datos solicitados como tipo de servicio y el propietario.</h6>
+                    </div>
+                </div>
+                <div class="row px-4 align-items-end">
+
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("servicio")
+                                .Label(l => l.Content("Tipo de DServicio:"))
+                                .Value("Ingresa el nombre del propietario o empresa")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+
+                    <!--div class="col-12 col-md-6 col-lg-4">
+                        <div class="controlForm mb-3">
+                            <label>Tipo de servicio:</label>
+                            <span>
+            @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                              .Name("servicio")
+                              .DataTextField("")
+                              .DataValueField("")
+                              .HtmlAttributes(new { style = "width:100%;" })
+                              .Filter(FilterType.Contains)
+                              .DataSource(source => source
+                                  .Read(read => read.Action("GetProducts", "Home"))
+                              )
+                        )
+                            </span>
+                        </div>
+                    </div-->
+                    <div class="col-12 col-md-8"></div>
+                    <div class="col-12 mt-4 controlForm">
+                        <label>Tipo de propietario:</label>
+                    </div>
+                </div>
+                <div>
+                    <nav class="tabCustom">
+                        <div class="nav nav-tabs row mx-0" id="nav-tab" role="tablist">
+                            <button class="nav-link active col" id="person-moral-tab" data-bs-toggle="tab" data-bs-target="#person-moral" type="button" role="tab" aria-controls="person-moral" aria-selected="true">
+                                <div class="row justify-content-center align-items-center px-3 py-2">
+                                    <div class="col-auto radioCustom p-0">
+                                        <div class="rounded-circle m-2"></div>
+                                    </div>
+                                    <div class="col-auto p-0">
+                                        <h5 class="m-0"><i class="icon-moral h4"></i> <b>Persona moral</b></h5>
+                                    </div>
+                                </div>
+                            </button>
+                            <button class="nav-link col" id="person-fisica-tab" data-bs-toggle="tab" data-bs-target="#person-fisica" type="button" role="tab" aria-controls="person-fisica" aria-selected="false">
+                                <div class="row justify-content-center align-items-center px-3 py-2">
+                                    <div class="col-auto radioCustom p-0">
+                                        <div class="rounded-circle m-2"></div>
+                                    </div>
+                                    <div class="col-auto p-0">
+                                        <h5 class="m-0"><i class="icon-fisica h4"></i> <b>Persona física</b></h5>
+                                    </div>
+                                </div>
+                            </button>
+                            <button class="nav-link col" id="none-person-tab" data-bs-toggle="tab" data-bs-target="#none-person" type="button" role="tab" aria-controls="none-person" aria-selected="false">
+                                <div class="row justify-content-center align-items-center px-3 py-2">
+                                    <div class="col-auto radioCustom p-0">
+                                        <div class="rounded-circle m-2"></div>
+                                    </div>
+                                    <div class="col-auto p-0">
+                                        <h5 class="m-0"><i class="icon-sinPropietario h4"></i> <b>Se ignora propietario</b></h5>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    </nav>
+                    <div class="tab-content" id="nav-tabContent">
+                        <div class="tab-pane tabCustomConteiner fade show active" id="person-moral" role="tabpanel" aria-labelledby="person-moral-tab">
+                            <div class="row px-4 mt-4 pb-4 align-items-end">
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        @(Html.Kendo().TextBox()
+                                            .Name("RFC")
+                                            .Label(l => l.Content("RFC:"))
+                                            .Placeholder("Ingresa el RFC del propietario o empresa")
+                                            .HtmlAttributes(new { style = "width: 100%" })
+                                            )
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        @(Html.Kendo().TextBox()
+                                            .Name("nombre")
+                                            .Label(l => l.Content("Nombre:"))
+                                            .Placeholder("Ingresa el nombre del propietario o empresa")
+                                            .HtmlAttributes(new { style = "width: 100%" })
+                                            )
+
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2 ">
+                                    <div class="controlButton my-3">
+                                        @(Html.Kendo().Button()
+                                            .Name("buscar")
+                                            .HtmlAttributes(new { @class = "btnPrimary" })
+                                            .Content("<h5 class=\"m-0\"><b>Buscar</b></h5>"))
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <div class="row px-4 py-5 align-items-end bg-light">
+                                <div class="col-12 col-md-10 mx-md-auto text-center">
+                                    <h3><b>Aún no has realizado ninguna búsqueda</b></h3>
+                                    <h4>Realiza la búsqueda con el RFC o nombre de la persona moral</h4>
+                                    <div class="row ">
+                                        <div class="col-12 col-md-8 mx-md-auto col-lg-5 ">
+                                            <div class="btnOutline btnOutlinePrimary my-3">
+                                                <button data-bs-toggle="modal" data-bs-target="#addMoral">
+                                                    <h5 class="m-0"><i class="me-2 icon-addMoral"></i><b>Agregar nueva persona moral</b></h5>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="tabCustomEnd"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane tabCustomConteiner fade" id="person-fisica" role="tabpanel" aria-labelledby="person-fisica-tab">
+                            <div class="row px-4 mt-4 pb-4 align-items-end">
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        @(Html.Kendo().TextBox()
+                                            .Name("licencia:")
+                                            .Label(l => l.Content("No. de licencia:"))
+                                            .Placeholder("Ingresa el número de licencia válido")
+                                            .HtmlAttributes(new { style = "width: 100%" })
+                                            )
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        @(Html.Kendo().TextBox()
+                                            .Name("CURP:")
+                                            .Label(l => l.Content("CURP:"))
+                                            .Placeholder("Ingresa el CURP del propietario")
+                                            .HtmlAttributes(new { style = "width: 100%" })
+                                            )
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        @(Html.Kendo().TextBox()
+                                            .Name("RFCFisico:")
+                                            .Label(l => l.Content("RFC:"))
+                                            .Placeholder("Ingresa el RFC del propietario")
+                                            .HtmlAttributes(new { style = "width: 100%" })
+                                            )
+
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        @(Html.Kendo().TextBox()
+                                            .Name("NombreFisico")
+                                            .Label(l => l.Content("Nombre(s):"))
+                                            .Placeholder("Ingresa el nombre(s) del propietario")
+                                            .HtmlAttributes(new { style = "width: 100%" })
+                                            )
+
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        @(Html.Kendo().TextBox()
+                                            .Name("paterno")
+                                            .Label(l => l.Content("Apellido paterno:"))
+                                            .Placeholder("Ingresa el apellido paterno")
+                                            .HtmlAttributes(new { style = "width: 100%" })
+                                            )
+
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                    <div class="controlForm my-3">
+                                        @(Html.Kendo().TextBox()
+                                            .Name("materno")
+                                            .Label(l => l.Content("Apellido materno:"))
+                                            .Placeholder("Ingresa el apellido materno")
+                                            .HtmlAttributes(new { style = "width: 100%" })
+                                            )
+
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 mx-md-auto col-lg-3 mx-lg-0 ">
+                                    <!-- ******* aqui -->
+                                    <div class="controlButton my-3">
+                                        <div class="controlButton my-3" onclick="buscarPFisica()">
+                                            @(Html.Kendo().Button()
+                                                .Name("buscarFisica")
+                                                .HtmlAttributes(new { @class = "btnPrimary" })
+                                                .Content("<h5 class=\"m-0\"><b>Buscar</b></h5>")
+                                                )
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            
+                            <div class="row px-4 py-5 align-items-end bg-light">
+                                <div class="col-12 col-md-10 mx-md-auto text-center">
+                                    <h3><b>Aún no has realizado ninguna búsqueda</b></h3>
+                                    <h4>Realiza la búsqueda de las persona física</h4>
+                                    <div class="row ">
+                                        <div class="col-12 col-md-8 mx-md-auto col-lg-5 ">
+                                            <div class="btnOutline btnOutlinePrimary my-3">
+                                                <button data-bs-toggle="modal" data-bs-target="#addFisico">
+                                                    <h5 class="m-0"><i class="me-2 icon-addFisica"></i><b>Agregar nueva persona física</b></h5>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="tabCustomEnd"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane tabCustomConteiner fade" id="none-person" role="tabpanel" aria-labelledby="none-person-tab">
+                            <div class="row px-4 my-4 py-5 align-items-end">
+                                <div class="col-12 col-md-10 mx-md-auto text-center">
+                                    <h3><b>Se utiliza cuando se tiene una infracción o accidente</b></h3>
+                                    <h4>y se desconoce el propietario o conductor</h4>
+                                    <div class="row ">
+                                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                            <div class="controlButton my-3" onclick="finalizarCap()">
+                                                @(Html.Kendo().Button()
+                                                    .Name("buscarFisica")
+                                                    .HtmlAttributes(new { @class = "btnPrimary" })
+                                                    .Content("<h5 class=\"m-0\"><b>Finalizar captura</b></h5>"))
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="tabCustomEnd"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ** Tipo de servicio persona fisica ** -->
+            <section id="secFisica" class=" mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded pb-1" style="display:none">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-12 col-md-auto">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto">
+                                <div class="border border-2 border-dark rounded-circle">
+                                    <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                        <b>2</b>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-auto p-0">
+                                <i class="icon-data h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Datos del vehículo</b></h2>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-8 pe-0">
+                        <div class="bgSuccess py-1"></div>
+                    </div>
+                    <div class="col-4 ps-0">
+                        <div class="bg-light py-1"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 my-4">
+                        <h5 class="px-4"><b>Datos complementarios</b></h5>
+                        <h6 class="px-4 text-muted">Completa los datos solicitados como tipo de servicio y el propietario.</h6>
+                    </div>
+                </div>
+                <div class="row px-4 align-items-end">
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @(Html.Kendo().TextBox()
+                                .Name("servicio")
+                                .Label(l => l.Content("Tipo de Servicio:"))
+                                .Value("Privado")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+                    <!--div class="col-12 col-md-6 col-lg-4">
+
+                        <div class="controlForm mb-3">
+                            <label>Tipo de servicio:</label>
+                            <span>
+            @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                              .Name("servicioB")
+                              .DataTextField("")
+                              .DataValueField("")
+                              .HtmlAttributes(new { style = "width:100%;" })
+                              .Filter(FilterType.Contains)
+                              .DataSource(source => source
+                                  .Read(read => read.Action("GetProducts", "Home"))
+                              )
+                        )
+                            </span>
+                        </div>
+                    </div-->
+                    <div class="col-12 col-md-8"></div>
+                    <div class="col-12 mt-4 controlForm">
+                        <label>Tipo de propietario:</label>
+                    </div>
+                    <div class="col-12 mb-4">
+                        <h5 class="m-0 colorPrimary"><i class="icon-fisica h4"></i> <b>Persona física</b></h5>
+                    </div>
+                </div>
+                <div class="row justify-content-between mb-1">
+                    <div class="col-12 col-lg-6 mt-4 mb-2">
+                        <h5 class="px-4"><b>Datos complementarios</b></h5>
+                        <h6 class="px-4 text-muted">Completa los datos solicitados como tipo de servicio y el propietario.</h6>
+                    </div>
+                    <div class="col-12 col-lg-auto text-center">
+                        <div class="btnOutline btnOutlinePrimary px-4 my-3">
+                            <button data-bs-toggle="modal" data-bs-target="#addFisico">
+                                <h5 class="m-0"><i class="me-2 icon-addFisica"></i><b>Agregar nueva persona física</b></h5>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 px-4 rounded">
+                        <kendo-grid name="grid" height="250">
+                            <datasource type="DataSourceTagHelperType.Custom" custom-type="odata" page-size="1">
+                                <transport>
+                                    <read url="https://demos.telerik.com/kendo-ui/service/Northwind.svc/Orders" />
+                                </transport>
+
+                            </datasource>
+                            <sortable enabled="true" />
+
+                            <pageable button-count="5" refresh="true" page-sizes="new int[] { 5, 10, 20 }">
+                            </pageable>
+                            <columns>
+                                <column width="75" selectable="true"
+                                        header-html-attributes='new Dictionary<string,object> { ["class"] = "checkbox-align" }'
+                                        html-attributes='new Dictionary<string,object> { ["class"] = "checkbox-align" }' />
+                                <column field="OrderDate" title="Nombre" format="{0:dd/MM/yyyy}" width="250" />
+                                <column field="OrderID" title="RFC" width="150" />
+                                <column field="OrderID" title="CURP" width="180" />
+                                <column field="ShipName" title="No. Licencia" width="180" />
+                                <column field="ShipCity" title="Nacimiento" width="150" />
+                                <column template="#=productNameTemplate(data)#" width="100" />
+                            </columns>
+
+                        </kendo-grid>
+
+                        <script type="text/javascript">
+                            function productNameTemplate(data) {
+                                return `<button data-bs-toggle=modal data-bs-target=\#editFisico class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>`
+                            }</script>
+
+
+
+                    </div>
+                </div>
+                <div class="row my-5">
+                    <div class="col-12 col-md-6 mx-md-auto">
+                        <div class="row justify-content-around">
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                @(Html.Kendo().Button()
+                                    .Name("editSearchFisico")
+                                    .HtmlAttributes(new { @class = "px-5" })
+                                    .Content("<h5 class=\"m-0\"><b>Editar búsqueda</b></h5>"))
+
+                            </div>
+                            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                <div class="controlButton" onclick="finalizarCap()">
+                                    @(Html.Kendo().Button()
+                                        .Name("saveFisico")
+                                        .HtmlAttributes(new { @class = "btnPrimary px-5" })
+                                        .Content("<h5 class=\"m-0\"><b>Finalizar captura</b></h5>"))
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </section>
+
+
+
+            <!-- ** Tipo de servicio persona moral ** -->
+            <!--section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded pb-1">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-12 col-md-auto">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto">
+                                <div class="border border-2 border-dark rounded-circle">
+                                    <h5 class="m-0 numberCard d-flex align-items-center justify-content-center">
+                                        <b>2</b>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-auto p-0">
+                                <i class="icon-data h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Datos del vehículo</b></h2>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-8 pe-0">
+                        <div class="bgSuccess py-1"></div>
+                    </div>
+                    <div class="col-4 ps-0">
+                        <div class="bg-light py-1"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 my-4">
+                        <h5 class="px-4"><b>Datos complementarios</b></h5>
+                        <h6 class="px-4 text-muted">Completa los datos solicitados como tipo de servicio y el propietario.</h6>
+                    </div>
+                </div>
+                <div class="row px-4 align-items-end">
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="controlForm mb-3">
+                            <label>Tipo de servicio:</label>
+                            <span>
+    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                      .Name("servicioA")
+                      .DataTextField("")
+                      .DataValueField("")
+                      .HtmlAttributes(new { style = "width:100%;" })
+                      .Filter(FilterType.Contains)
+                      .DataSource(source => source
+                          .Read(read => read.Action("GetProducts", "Home"))
+                      )
+                )
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-8"></div>
+                    <div class="col-12 mt-4 controlForm">
+                        <label>Tipo de propietario:</label>
+                    </div>
+                    <div class="col-12 mb-4">
+                        <h5 class="m-0 colorPrimary"><i class="icon-moral h4"></i> <b>Persona moral</b></h5>
+                    </div>
+                </div>
+                <div class="row justify-content-between mb-1">
+                    <div class="col-12 col-lg-6 mt-4 mb-2">
+                        <h5 class="px-4"><b>Datos complementarios</b></h5>
+                        <h6 class="px-4 text-muted">Completa los datos solicitados como tipo de servicio y el propietario.</h6>
+                    </div>
+                    <div class="col-12 col-lg-auto text-center">
+                        <div class="btnOutline btnOutlinePrimary px-4 my-3">
+                            <button data-bs-toggle="modal" data-bs-target="#addMoral">
+                                <h5 class="m-0"><i class="me-2 icon-addMoral"></i><b>Agregar nueva persona moral</b></h5>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 px-4 rounded">
+
+                        <kendo-grid name="grid" height="450">
+                            <datasource type="DataSourceTagHelperType.Custom" custom-type="odata" page-size="20">
+                                <transport>
+                                    <read url="https://demos.telerik.com/kendo-ui/service/Northwind.svc/Orders" />
+                                </transport>
+
+                            </datasource>
+                            <sortable enabled="true" />
+
+                            <pageable button-count="5" refresh="true" page-sizes="new int[] { 5, 10, 20 }">
+                            </pageable>
+                            <columns>
+                                <column width="75" selectable="true"
+                                        header-html-attributes='new Dictionary<string,object> { ["class"] = "checkbox-align" }'
+                                        html-attributes='new Dictionary<string,object> { ["class"] = "checkbox-align" }' />
+                                <column field="OrderID" title="RFC" width="150" />
+                                <column field="OrderDate" title="Nombre" format="{0:dd/MM/yyyy}" width="250" />
+                                <column field="ShipName" title="Dirección" width="220" />
+                                <column field="ShipCity" title="Municipio" width="150" />
+                                <column template="#=productNameTemplate(data)#" width="100" />
+                            </columns>
+                        </kendo-grid>
+
+                        <script type="text/javascript">function productNameTemplate(data) {
+                                return `<button data-bs-toggle=modal data-bs-target=\#editMoral class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>`
+                            }</script>
+                    </div>
+
+                </div>
+                <div class="row my-5">
+                    <div class="col-12 col-md-6 mx-md-auto">
+                        <div class="row justify-content-around">
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+            @(Html.Kendo().Button()
+                                .Name("editSearchMoral")
+                                .HtmlAttributes(new { @class = "px-5" })
+                                .Content("<h5 class=\"m-0\"><b>Editar búsqueda</b></h5>"))
+
+                            </div>
+                            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                <div class="controlButton">
+            @(Html.Kendo().Button()
+                            .Name("saveMoral")
+                            .HtmlAttributes(new { @class = "btnPrimary px-5" })
+                            .Content("<h5 class=\"m-0\"><b>Finalizar captura</b></h5>"))
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </section-->
+
+
+
+
+    </div>
+
+
+
+
+
+
+    <!-- Modal -->
+    <!-- ********************************************************************************************************** -->
+    <div class="modal fade modalCustom" id="editCar"  aria-labelledby="editCarLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered boxShadow">
+            <div class="modal-content">
+
+                <section class=" bg-white rounded">
+                    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                        <div class="col-auto pe-0">
+                            <div class="row align-items-center justify-content-center justify-content-md-start">
+                                <div class="col-auto pe-0">
+                                    <i class="icon-editCar h1 colorPrimary"></i>
+                                </div>
+                                <div class="col-auto my-3">
+                                    <h2 class="m-0 h3"><b>Editar captura de vehículos</b></h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="row">
+                                <div class="col-auto my-3">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="bg-light py-1"></div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-12 my-4">
+                            <h5 class="px-4"><b>Datos de vehículo</b></h5>
+                            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                        </div>
+                    </div>
+                    <form class="row px-4 mb-4 align-items-end">
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm mb-3">
+                                <label>Entidad de registro <b>(obligatorio)</b></label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("entidadEdit")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("placasEdit")
+                                    .Label(l => l.Content("Placas"))
+                                    .Placeholder("Ingresa el número de placa del vehículo")
+                                    .Value("GTD7308")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("serieEdit")
+                                    .Label(l => l.Content("Serie:"))
+                                    .Placeholder("Ingresa el número de serie válido")
+                                    .Value("1N4AB41D95C74309")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("tarjetaEdit")
+                                    .Label(l => l.Content("Tarjeta:"))
+                                    .Placeholder("Ingresa el número de la tarjeta")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-3 col-xl-2">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("vigenciaEdit")
+                                    .Label(l => l.Content("Vigencia de tarjeta:"))
+                                    .Placeholder("Ingresa la vigencia")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-3 col-xl-2">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("marcaEdit")
+                                    .Label(l => l.Content("Marca <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa una marca")
+                                    .Value("Nissan")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-3 col-xl-2">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("sub-marcaEdit")
+                                    .Label(l => l.Content("Sub-Marca <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa la sub-marca")
+                                    .Value("Sentra")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-5 col-lg-4 col-xl-3">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("tipoEdit")
+                                    .Label(l => l.Content("Tipo de vehículo <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa el tipo de vehículo")
+                                    .Value("Sedan")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-2 col-lg-3">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("modeloEdit")
+                                    .Label(l => l.Content("Modelo:"))
+                                    .Placeholder(" Año")
+                                    .Value("1995")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-3 col-xl-2">
+                            <div class="controlForm my-3">
+                                <label>Color:</label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("colorEdit")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("economicoEdit")
+                                    .Label(l => l.Content("No. económico:"))
+                                    .Placeholder("Ingresa el no. económico")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("manufacturaEdit")
+                                    .Label(l => l.Content("Manufactura:"))
+                                    .Placeholder("Ingresa el pais de manufactura")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+
+                    </form>
+                    <div class="row my-4">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                    <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton" onClick="finalizar()" data-bs-dismiss="modal" aria-label="Close">
+                                        @(Html.Kendo().Button()
+                                            .Name("editVehiculo")
+                                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                            .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="modal fade modalCustom" id="editMoral"  aria-labelledby="editMoralLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+            <div class="modal-content">
+
+                <section class=" bg-white rounded">
+                    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                        <div class="col-auto pe-0">
+                            <div class="row align-items-center justify-content-center justify-content-md-start">
+                                <div class="col-auto pe-0">
+                                    <i class="icon-editMoral h1 colorPrimary"></i>
+                                </div>
+                                <div class="col-auto my-3">
+                                    <h2 class="m-0 h3"><b>Editar persona moral</b></h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="row">
+                                <div class="col-auto my-3">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="bg-light py-1"></div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-12 my-4">
+                            <h5 class="px-4"><b>Datos de persona moral</b></h5>
+                            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                        </div>
+                    </div>
+                    <form class="row px-4 mb-4 align-items-end">
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm mb-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("RFCEditMoral")
+                                    .Label(l => l.Content("RFC"))
+                                    .Placeholder("Ingresa el RFC del propietario o empresa")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("nombreEditMoral")
+                                    .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa el nombre del propietario o empresa")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                <label>Entidad:</label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("entidadEditMoral")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("coloniaEditMoral")
+                                    .Label(l => l.Content("Colonia <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa una colonia")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-6">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("calleEditMoral")
+                                    .Label(l => l.Content("Calle <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa una calle")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-2">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("numeroEditMoral")
+                                    .Label(l => l.Content("Número <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa un número interior")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                <label>Municipio:</label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("municipioEditMoral")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("telefonoEditMoral")
+                                    .Label(l => l.Content("Teléfono:"))
+                                    .Placeholder("Ingresa un teléfono")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("correoEditMoral")
+                                    .Label(l => l.Content("Correo electrónico::"))
+                                    .Placeholder("Ingresa un correo electrónico")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row my-4">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                    <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton" onClick="finalizar()" data-bs-dismiss="modal" aria-label="Close">
+                                        @(Html.Kendo().Button()
+                                            .Name("EditMoral")
+                                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                            .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal fade modalCustom" id="addMoral"  aria-labelledby="addMoralLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+            <div class="modal-content">
+
+                <section class=" bg-white rounded">
+                    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                        <div class="col-auto pe-0">
+                            <div class="row align-items-center justify-content-center justify-content-md-start">
+                                <div class="col-auto pe-0">
+                                    <i class="icon-addMoral h1 colorPrimary"></i>
+                                </div>
+                                <div class="col-auto my-3">
+                                    <h2 class="m-0 h3"><b>Agregar persona moral</b></h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="row">
+                                <div class="col-auto my-3">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="bg-light py-1"></div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-12 my-4">
+                            <h5 class="px-4"><b>Datos de persona moral</b></h5>
+                            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                        </div>
+                    </div>
+                    <form class="row px-4 mb-4 align-items-end">
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm mb-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("RFCAddMoral")
+                                    .Label(l => l.Content("RFC"))
+                                    .Placeholder("Ingresa el RFC del propietario o empresa")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("nombreAddMoral")
+                                    .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa el nombre del propietario o empresa")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                <label>Entidad:</label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("entidadAddMoral")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("coloniaAddMoral")
+                                    .Label(l => l.Content("Colonia <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa una colonia")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-6">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("calleAddMoral")
+                                    .Label(l => l.Content("Calle <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa una calle")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-2">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("numeroAddMoral")
+                                    .Label(l => l.Content("Número <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa un número interior")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                <label>Municipio:</label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("municipioAddMoral")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("telefonoAddMoral")
+                                    .Label(l => l.Content("Teléfono:"))
+                                    .Placeholder("Ingresa un teléfono")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("correoAddMoral")
+                                    .Label(l => l.Content("Correo electrónico::"))
+                                    .Placeholder("Ingresa un correo electrónico")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row my-4">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                    <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton" onClick="finalizar()" data-bs-dismiss="modal" aria-label="Close">
+                                        @(Html.Kendo().Button()
+                                            .Name("AddMoral")
+                                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                            .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modalCustom" id="editFisico"  aria-labelledby="editFisicoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+            <div class="modal-content">
+
+                <section class=" bg-white rounded">
+                    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                        <div class="col-auto pe-0">
+                            <div class="row align-items-center justify-content-center justify-content-md-start">
+                                <div class="col-auto pe-0">
+                                    <i class="icon-editFisica h1 colorPrimary"></i>
+                                </div>
+                                <div class="col-auto my-3">
+                                    <h2 class="m-0 h3"><b>Editar persona física</b></h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="row">
+                                <div class="col-auto my-3">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="bg-light py-1"></div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-12 my-4">
+                            <h5 class="px-4"><b>Datos de persona física</b></h5>
+                            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                        </div>
+                    </div>
+                    <form class="row px-4 mb-4 align-items-end">
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm mb-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("nombreEditFisico")
+                                    .Label(l => l.Content("Nombre(s) <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa el nombre(s)")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("paternoEditFisico")
+                                    .Label(l => l.Content("Apellido paterno:"))
+                                    .Placeholder("Ingresa el apellido paterno")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("maternoEditFisico")
+                                    .Label(l => l.Content("Apellido materno:"))
+                                    .Placeholder("Ingresa el apellido materno")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm mb-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("RFCEditFisico")
+                                    .Label(l => l.Content("RFC:"))
+                                    .Placeholder("Ingresa un RFC válido")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm mb-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("CURPEditFisico")
+                                    .Label(l => l.Content("CURP:"))
+                                    .Placeholder("Ingresa un CURP válido")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm mb-3">
+                                <label>Fecha de nacimiento <b>(obligatorio)</b></label>
+                                <span>
+                                    @(Html.Kendo().DatePicker()
+                                        .Name("nacimientoEditFisico")
+                                        .DateInput()
+                                    .Culture("es-ES")
+                                        )
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm">
+                                <label>Sexo <b>(obligatorio)</b></label>
+                            </div>
+                            <div class="btnToggle mb-3">
+
+
+                                <div style="z-index:0" class="position-relative d-flex align-items-center">
+                                    <input class="toggle toggle-left" id="hombre" name="toggle-sexo" value="false"
+                                           type="radio" checked="" />
+                                    <label class="btn" for="hombre">Hombre</label>
+                                    <input class="toggle toggle-right" id="mujer" name="toggle-sexo" value="true"
+                                           type="radio" />
+                                    <label class="btn" for="mujer">&nbsp;&nbsp;Mujer&nbsp;&nbsp;</label>
+
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-12 my-5">
+                            <div class="bg-light pt-1 mx-1"></div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm mb-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("telefonoEditFisico")
+                                    .Label(l => l.Content("Teléfono:"))
+                                    .Placeholder("Ingresa un Teléfono")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm mb-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("correoEditFisico")
+                                    .Label(l => l.Content("Correo electrónico:"))
+                                    .Placeholder("Ingresa un correo electrónico:")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                <label>Entidad:</label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("entidadEditFisico")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("coloniaEditFisico")
+                                    .Label(l => l.Content("Colonia <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa una colonia")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-6">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("calleEditFisico")
+                                    .Label(l => l.Content("Calle <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa una calle")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-2">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("numeroEditFisico")
+                                    .Label(l => l.Content("Número <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa un número interior")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                <label>Municipio:</label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("municipioEditFisico")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+                            </div>
+                        </div>
+
+
+                        <div class="col-12 my-5">
+                            <div class="bg-light pt-1 mx-1"></div>
+                        </div>
+
+
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("licenciaEditFisico")
+                                    .Label(l => l.Content("No. Licencia:"))
+                                    .Placeholder("Ingresa un número de licencia:")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                <label>Vigencia:</label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("vigenciaEditFisico")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                <label>Tipo de licencia:</label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("tipoEditFisico")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                <label>Fecha de vencimiento:</label>
+                                <span>
+                                    @(Html.Kendo().DatePicker()
+                                        .Name("vencimientoEditFisico")
+                                        .DateInput()
+                                        .Culture("es-ES")
+                                        )
+
+                                </span>
+                            </div>
+                        </div>
+
+                    </form>
+                    <div class="row my-4">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                    <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton" onClick="finalizar()" data-bs-dismiss="modal" aria-label="Close">
+                                        @(Html.Kendo().Button()
+                                            .Name("EditFisico")
+                                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                            .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade modalCustom" id="addFisico"  aria-labelledby="addFisicoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl boxShadow modal-dialog-centered">
+            <div class="modal-content">
+
+                <section class=" bg-white rounded">
+                    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                        <div class="col-auto pe-0">
+                            <div class="row align-items-center justify-content-center justify-content-md-start">
+                                <div class="col-auto pe-0">
+                                    <i class="icon-addFisica h1 colorPrimary"></i>
+                                </div>
+                                <div class="col-auto my-3">
+                                    <h2 class="m-0 h3"><b>Agregar persona física</b></h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="row">
+                                <div class="col-auto my-3">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="bg-light py-1"></div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-12 my-4">
+                            <h5 class="px-4"><b>Datos de persona física</b></h5>
+                            <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                        </div>
+                    </div>
+                    <form class="row px-4 mb-4 align-items-end">
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm mb-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("nombreAddFisico")
+                                    .Label(l => l.Content("Nombre(s) <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa el nombre(s)")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("paternoAddFisico")
+                                    .Label(l => l.Content("Apellido paterno:"))
+                                    .Placeholder("Ingresa el apellido paterno")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("maternoAddFisico")
+                                    .Label(l => l.Content("Apellido materno:"))
+                                    .Placeholder("Ingresa el apellido materno")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm mb-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("RFCAddFisico")
+                                    .Label(l => l.Content("RFC:"))
+                                    .Placeholder("Ingresa un RFC válido")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm mb-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("CURPAddFisico")
+                                    .Label(l => l.Content("CURP:"))
+                                    .Placeholder("Ingresa un CURP válido")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm mb-3">
+                                <label>Fecha de nacimiento <b>(obligatorio)</b></label>
+                                <span>
+                                    @(Html.Kendo().DatePicker()
+                                        .Name("nacimientoAddFisico")
+                                        .DateInput()
+                                    .Culture("es-ES")
+                                        )
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm">
+                                <label>Sexo <b>(obligatorio)</b></label>
+                            </div>
+                            <div class="btnToggle mb-3">
+
+
+                                <div style="z-index:0" class="position-relative d-flex align-items-center">
+                                    <input class="toggle toggle-left" id="hombre" name="toggle-sexo" value="false"
+                                           type="radio" checked="" />
+                                    <label class="btn" for="hombre">Hombre</label>
+                                    <input class="toggle toggle-right" id="mujer" name="toggle-sexo" value="true"
+                                           type="radio" />
+                                    <label class="btn" for="mujer">&nbsp;&nbsp;Mujer&nbsp;&nbsp;</label>
+
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-12 my-5">
+                            <div class="bg-light pt-1 mx-1"></div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm mb-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("telefonoAddFisico")
+                                    .Label(l => l.Content("Teléfono:"))
+                                    .Placeholder("Ingresa un Teléfono")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm mb-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("correoAddFisico")
+                                    .Label(l => l.Content("Correo electrónico:"))
+                                    .Placeholder("Ingresa un correo electrónico:")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                <label>Entidad:</label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("entidadAddFisico")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("coloniaAddFisico")
+                                    .Label(l => l.Content("Colonia <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa una colonia")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-6">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("calleAddFisico")
+                                    .Label(l => l.Content("Calle <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa una calle")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-2">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("numeroAddFisico")
+                                    .Label(l => l.Content("Número <b>(obligatorio)</b>:"))
+                                    .Placeholder("Ingresa un número interior")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="controlForm my-3">
+                                <label>Municipio:</label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("municipioAddFisico")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+                            </div>
+                        </div>
+
+
+                        <div class="col-12 my-5">
+                            <div class="bg-light pt-1 mx-1"></div>
+                        </div>
+
+
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                @(Html.Kendo().TextBox()
+                                    .Name("licenciaAddFisico")
+                                    .Label(l => l.Content("No. Licencia:"))
+                                    .Placeholder("Ingresa un número de licencia:")
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                <label>Vigencia:</label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("vigenciaAddFisico")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                <label>Tipo de licencia:</label>
+                                <span>
+                                    @(Html.Kendo().DropDownList().NoDataTemplate("No se encontraron datos")
+                                        .Name("tipoAddFisico")
+                                        .DataTextField("")
+                                        .DataValueField("")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Filter(FilterType.Contains)
+                                        .DataSource(source => source
+                                        .Read(read => read.Action("GetProducts", "Home"))
+                                        )
+                                        )
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3">
+                            <div class="controlForm my-3">
+                                <label>Fecha de vencimiento:</label>
+                                <span>
+                                    @(Html.Kendo().DatePicker()
+                                        .Name("vencimientoAddFisico")
+                                        .DateInput()
+                                    .Culture("es-ES")
+                                        )
+
+                                </span>
+                            </div>
+                        </div>
+
+                    </form>
+                    <div class="row my-4">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                    <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                    <div class="controlButton" onClick="finalizar()" data-bs-dismiss="modal" aria-label="Close">
+                                        @(Html.Kendo().Button()
+                                            .Name("AddFisico")
+                                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                                            .Content("<h5 class=\"m-0\"><b>Guardar ajustes</b></h5>"))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+

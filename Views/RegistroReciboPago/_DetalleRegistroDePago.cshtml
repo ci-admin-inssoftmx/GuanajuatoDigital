@@ -1,0 +1,376 @@
+﻿@model GuanajuatoAdminUsuarios.Models.RegistroReciboPagoModel
+@{
+    var iddep = Convert.ToInt32(User.FindFirst(CustomClaims.TipoOficina).Value);
+
+
+
+
+
+}
+<script>
+
+    function validarFecha() {
+        // Obtener la fecha actual
+        var fechaActual = new Date();
+        var fechaParseo = new Date(parseInt(fechaActual.getFullYear()), parseInt(fechaActual.getMonth()), parseInt(fechaActual.getDate()));
+        var fechaSeleccionadaString = $("#FechaPago").val();
+        var splitFechaSeleccion = fechaSeleccionadaString.split('/')
+        var objetoFecha = !fechaSeleccionadaString ? fechaParseo : new Date(parseInt(splitFechaSeleccion[2]), parseInt(splitFechaSeleccion[1]) - 1, parseInt(splitFechaSeleccion[0]));
+    }
+    
+</script>
+
+<div class="px-4 mb-4 align-items-end mt-1">
+    <h1>Registro de recibo de pago</h1>
+    <hr />
+
+    @if (Model != null)
+    {
+
+        <p><b>Folio:</b> @(Model.FolioInfraccion ?? "-")</p>
+        <p><b>Monto Calificación:</b> @(string.IsNullOrEmpty(Model.MontoSTR) ? "" : Model.MontoSTR)</p>
+
+
+    }
+</div>
+
+  <form id ="reciboPagoForm" class="row px-4 mb-4 align-items-end">
+      @Html.HiddenFor(m=>m.IdInfraccion)
+      @Html.HiddenFor(m=>m.FolioInfraccion)
+      @Html.HiddenFor(m=>m.MontoSTR)
+
+
+    @if (iddep < 3)
+    {
+        <div class="row align-items-start">
+            <div class="col-12 col-md-6 col-lg-6 col-xl-6 col-xx-6">
+                <div class="controlForm my-3">
+                    @(
+                        Html.Kendo().TextBoxFor(m => m.ReciboPago)
+                                .Label(l => l.Content("Recibo:"))
+                                .Placeholder("Ingresa el número del recibo")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                </div>
+                <div id="mensajeServicio" class="error-message" style="color:green"></div>
+                <div id="mensajeError" class="success-message" style="color:red"></div>
+            </div>
+
+
+            <div class="col-12 col-md-6 col-lg-6 col-xl-6 col-xx-6">
+                <div class="controlButton my-3">
+                    <button type="button" onclick="comprobarRecibo($('#ReciboPago').val())" class='btnPrimary'>
+                        <h5 class="m-0"><i class='icon-data m-0'></i>&nbsp;&nbsp; <b>Comprobar Recibo</b></h5>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    }
+
+
+    <div class="row">
+        <div class="col-12 col-md-6 col-lg-6 col-xl-6 col-xx-4">
+            <div class="controlForm my-3">
+
+                @if (iddep < 3)
+                {
+                    @(Html.Kendo().TextBox()
+                        .Name("MontoInput")
+                        .Label(l => l.Content("Monto:"))
+                        .Placeholder("monto Pagado")
+                        .HtmlAttributes(new
+                        {
+                            style = "width: 100%",
+                            onkeydown = "ValidarMonto(event)",
+                            @readonly = "readonly"
+                        })
+                            )
+                }
+                else
+                {
+                    @(Html.Kendo().TextBox()
+                        .Name("MontoInput")
+                        .Label(l => l.Content("Monto:"))
+                        .Placeholder("monto Pagado")
+                        .HtmlAttributes(new
+                        {
+                            style = "width: 100%",
+                            onkeydown = "ValidarMonto(event)"
+                        })
+                        )
+                }
+
+                
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xx-4">
+            <div class="controlForm my-3">
+                <label>Fecha:</label>
+                <span>
+
+                    @if (iddep < 3)
+                    {
+                    @(Html.Kendo().DatePicker()
+                        .Name("FechaPago")
+                        .Max(DateTime.Now)
+                        .Culture("es-ES")
+                        .Format("yyyy/MM/dd")
+                        .Label(l => l.Content("Fecha de pago:"))
+                        .HtmlAttributes(new
+                        {
+                            style = "width: 100%",
+                            title = "Fecha de pago:",
+                            id = "FechaPago",
+                            onkeydown = "fechaKeyDown(event)",
+                            @readonly = "readonly"
+                        })
+                        .Events(e =>
+                        {
+                            e.Change("validarFecha");
+                        })
+                                )
+                    }
+                    else
+                    {
+                        @(Html.Kendo().DatePicker()
+                            .Name("FechaPago")
+                            .Max(DateTime.Now)
+                            .Culture("es-ES")
+                            .Format("yyyy/MM/dd")
+                            .Label(l => l.Content("Fecha de pago:"))
+                            .HtmlAttributes(new
+                            {
+                                style = "width: 100%",
+                                title = "Fecha de pago:",
+                                id = "FechaPago",
+                                onkeydown = "fechaKeyDown(event)"
+                            })
+                            .Events(e =>
+                            {
+                                e.Change("validarFecha");
+                            })
+                            )
+                    }
+                </span>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-4 col-xx-4">
+            <div class="controlForm my-3">
+                 @if (iddep < 3)
+                {
+                @(Html.Kendo().TextBoxFor(m => m.LugarPago)
+                    .Label(l => l.Content("Lugar de pago:"))
+                    .Placeholder("Lugar de pago")
+                    .HtmlAttributes(new { style = "width: 100%", @readonly = "readonly" })
+                            )
+                }
+                else
+                {
+                    @(Html.Kendo().TextBoxFor(m => m.LugarPago)
+                        .Label(l => l.Content("Lugar de pago:"))
+                        .Placeholder("Lugar de pago")
+                        .HtmlAttributes(new { style = "width: 100%" })
+                        )
+                }
+            </div>
+        </div>
+    </div>
+
+</form>
+<div class="row px-4 mb-4 align-items-center">
+    <div class="col-12 col-md-6 col-lg-4 col-xl-4">
+        <div class="btnOutline my-3" id="botnCancelar" style="display: block;" onclick="cerrarModal()">
+            @(Html.Kendo().Button()
+                .Name("Cerrar")
+                .HtmlAttributes(new { @class = "btn btnOutline btn-sm btnClose" })
+                .Content("<h5 class=\"m-0\"><b>Cerrar</b></h5>"))
+        </div>
+    </div>
+
+
+                     @if (iddep < 3)
+                    {
+                       <div class="col-12 col-md-6 col-lg-6 col-xl-6">
+                            <div class="controlButton my-3" id="botnGuardar" style="display: none;" onclick="guardarReciboPago()">
+                                @(Html.Kendo().Button()
+                                    .Name("GuardarPago")
+                                .HtmlAttributes(new { @class = "btnPrimary"}) 
+                                .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                            </div>
+                       </div>
+                    }
+                    else
+                    {
+                        <div class="col-12 col-md-6 col-lg-6 col-xl-6">
+                            <div class="controlButton my-3" id="botnGuardar"  onclick="guardarReciboPago()">
+                                @(Html.Kendo().Button()
+                                    .Name("GuardarPago")
+                                    .HtmlAttributes(new { @class = "btnPrimary" })
+                                    .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                            </div>
+                        </div>
+                    }
+</div>
+<script>
+    function guardarReciboPago() {
+        showLoading();
+        $.ajax({
+            url: '/RegistroReciboPago/GuardarReciboPago',
+            type: 'POST',
+            data: {
+                IdInfraccion: $("#IdInfraccion").val(),
+                ReciboPago: $("#ReciboPago").val(),
+                Monto: $("#MontoInput").val(),
+                FechaPago: $("#FechaPago").val(),
+                LugarPago: $("#LugarPago").val(),
+                MontoCalculado: $("#MontoSTR").val()
+            },
+            success: function (result) {
+                sitteg_success("Información guardada correctamente ");
+                $('#modalComprobacion').modal('hide');
+                location.reload();
+                hideLoading();
+
+            },
+            error: function (error) {
+                sitteg_warning("!Sucedio un error, intente mas tarde...");
+                hideLoading();
+            }
+        });
+    }
+
+    function comprobarRecibo(reciboValue) {
+        showLoading();
+        var id = window.idInfrac
+
+    @if (iddep<3)
+    {
+        <text>
+                $.ajax({
+                    url: '/RegistroReciboPago/ConsultarDocumento',
+                    type: 'POST',
+                    data: { recibo: reciboValue, idInfracc: id },
+                    success: function (response) {
+                        console.log("RES", response);
+                        if (response === null) {
+                            $('#mensajeError').text("Ha ocurrido un error en el servicio intente mas tarde");
+                        }
+                        else if (response.hasError) {
+                            $('#mensajeError').text(response.message);
+                        } else {
+                            var wType = response.MT_ConsultarDocumento_res.result.WTYPE;
+                            var wMessage = response.MT_ConsultarDocumento_res.result.WMESSAGE;
+                            if (wType === "E") {
+                                hideLoading();
+                                if (wMessage != undefined || wMessage != null || wMessage != "") {
+                                    $('#mensajeError').text(wMessage);
+                                } else {
+                                    $('#mensajeError').text("No se pudo verificar el recibo de pago, revise que el número este completo y sea correcto");
+                                }
+
+                            } else if (wType === "S") {
+                                hideLoading();
+
+                                var folioInfraccion = response.MT_ConsultarDocumento_res.result.FOL_MULTA;
+
+                                folioInfraccion = folioInfraccion.replace('TTO-', '');
+                                folioInfraccion = folioInfraccion.replace('TTE-', '');
+
+
+                                var folioInfraccionInit = $("#FolioInfraccion").val();
+
+                                //console.log("folioInfraccionInit",folioInfraccionInit);
+                                //console.log("folioInfraccion",folioInfraccion);
+
+                                if (folioInfraccionInit == folioInfraccion) {
+                                    $('#mensajeError').text("");
+                                    $('#mensajeServicio').text(wMessage);
+                                    document.getElementById("botnGuardar").style.display = "block";
+                                    var fechaPago = response.MT_ConsultarDocumento_res.e_doc_pago.fecha_pago;
+                                    var fechaReal = fechaPago.split('-')
+                                    console.log("fechaPago",fechaPago);
+                                    var importe = response.MT_ConsultarDocumento_res.e_doc_pago.importe;
+                                    console.log("importe",importe);
+                                    var Oficina = response.MT_ConsultarDocumento_res.result.OFICINA;
+                                    console.log("importe", Oficina);
+                                    
+                                    
+                                    $('#MontoInput').data("kendoTextBox").value(importe);
+                                    $('#LugarPago').data("kendoTextBox").value(Oficina);
+                                    $('#FechaPago').data("kendoDatePicker").value(new Date(parseInt(fechaReal[0]), parseInt(fechaReal[1])-1, parseInt(fechaReal[2])));
+                                }
+                                else {
+                                    $('#mensajeServicio').text("");
+                                    $('#mensajeError').text("El recibo ingresado no esta asociado al folio de infracción.");
+                                }
+
+
+
+                            } else {
+                                // Mostrar mensaje específico cuando el servicio no responda
+                                $('#mensajeError').text("El servicio no está respondiendo en este momento. Por favor, intenta más tarde.");
+                            }
+                        }
+                        hideLoading();
+                    },
+                    error: function (response) {
+                        console.error('Error en la llamada AJAX:', response);
+                        hideLoading();
+                        $('#mensajeError').text("Ha ocurrido un error en la comunicación con el servidor. Por favor, verifica tu conexión y vuelve a intentar.");
+                    }
+                });
+        </text>
+    }
+    else
+    {
+        <text>
+            document.getElementById("botnGuardar").style.display = "block";
+            hideLoading();
+        </text>
+    }
+
+    }
+
+    function cerrarModal(){
+        $('#modalComprobacion').modal('hide');
+    }  
+
+    function fechaKeyDown(e) {
+        var value = e.target.value
+        var key = e.key
+        var keyCode = e.keyCode
+        var pattern = /^[0-3]([0-9](\/([0-1]([0-9](\/([1-2]([0-9]([0-9]([0-9])?)?)?)?)?)?)?)?)?$/
+        var date = value + key
+        var can = pattern.test(date)
+        if ([8, 46, 37, 38, 39, 40, 9].indexOf(keyCode) != -1) {
+            return
+        }
+        if (can) {
+            if (date.length == 10) {
+                var splDate = date.split('/')
+                var newDate = new Date(parseInt(splDate[2]), parseInt(splDate[1]) - 1, parseInt(splDate[0]))
+                var day = newDate.getDate() < 10 ? "0" + newDate.getDate() : newDate.getDate()
+                var month = newDate.getMonth() < 9 ? "0" + (parseInt(newDate.getMonth()) + parseInt(1)) : (parseInt(newDate.getMonth()) + parseInt(1))
+                var year = newDate.getFullYear()
+                var newStringDate = `${day}/${month}/${year}`
+                if (day == splDate[0] && month == splDate[1] && year == splDate[2]) {
+                    var NowStr = $("#" + e.target.id).data("kendoDatePicker").dateView._current
+                    console.log(NowStr)
+                    var selectetDay = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+                    if (selectetDay > NowStr) {
+                        $("#FechaPago").val("")
+                        e.preventDefault()
+                    }
+                }
+                else {
+                    $("#FechaPago").val("")
+                    e.preventDefault()
+                }
+            } else if (date.length > 10) e.preventDefault()
+            return
+        }
+        e.preventDefault()
+    }
+</script>

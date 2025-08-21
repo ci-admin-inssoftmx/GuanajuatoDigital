@@ -1,0 +1,98 @@
+﻿<script>
+    function filtroTipo() {
+        return {
+            idTipoServicio: $("#idTipoServicio").val()
+        }
+    }
+</script>
+ @if (ViewBag.Admin == true)
+        {
+<div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+    <div class="row">
+        <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+            <button href="#" id="btnNueaOf" onclick="mostrarModalSubServicio()">
+                <h6 class="m-0 d-flex align-items-center"><i class="icon-addSubtipoServicio h5 mb-0 me-2"></i><b>Agregar nuevo subtipo de servicio</b></h6>
+            </button>
+        </div>
+    </div>
+</div>
+        }
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CatSubtipoServicioModel>()
+            .Name("gridCatSubtipoServicio")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.idSubTipoServicio).Title("Id").Width(30);
+                columns.Bound(c => c.subTipoServicio).Title("Subtipo").Width(100);
+                columns.Bound(c => c.tipoServicio).Title("Tipo").Width(90);
+                columns.Bound(c => c.estatusDesc).Title("Estatus en sistema").Width(90);
+                columns.Command(c => c.Custom("Editar").Click("getIdSubservicio")).Width(50);
+                // columns.Command(c => c.Custom("Eliminar").Click("eliminar")).Width(50);
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetSubtipos", "CatSubtipoServicio").Data("filtroTipo"))
+            .PageSize(5).Model(model => model.Id(p => p.idSubTipoServicio))
+            )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.subTipoServicio);
+                s.Field(c => c.tipoServicio);
+
+            })
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+
+            )
+
+
+    </div>
+</div>
+<div class="modal fade modalCustom" id="agregarSubtipo" aria-labelledby="agregarSubtipoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg boxShadow modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body" id="ModalBodyaAgregarSubtipoServicio">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    function getIdSubservicio(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var idSubtipoServicio = dataItem.idSubTipoServicio;
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarSubtipoServicioModal", "CatSubtipoServicio")',
+            type: 'POST',
+            data: { idSubtipoServicio: idSubtipoServicio },
+            success: function (result) {
+
+                $('#ModalBodyaAgregarSubtipoServicio').html(result);
+                    $('#agregarSubtipo').modal('show');
+                
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        })
+    }
+
+   
+</script>

@@ -1,0 +1,141 @@
+@model List<PersonaModel>
+
+<section id="secMoral" class=" mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded pb-1">
+    <div class="row justify-content-between mb-1">
+        <div class="col-12 col-lg-6 mt-4 mb-2">
+            <h5 class="px-4"><b>Listado de personas morales</b></h5>
+            <h6 class="px-4 text-muted">Selecciona una persona para completar el registro.</h6>
+        </div>
+        <div class="col-12 col-lg-auto text-center">
+            <div class="btnOutline btnOutlinePrimary px-4 my-3">
+                <button data-bs-toggle="modal" data-bs-target="#addMoral">
+                    <h5 class="m-0"><i class="me-2 icon-addFisica"></i><b>Agregar nueva persona moral</b></h5>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 px-4 rounded">
+
+
+            <div class="row">
+                <div class="col-12 mb-4 px-4 rounded gridCustom">
+                    @(Html.Kendo().Grid(Model)
+                        .Name("gridPersonasMorales")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.idPersona).Hidden();
+                            columns.Bound(c => c.idCatTipoPersona).Hidden();
+                            columns.Select().Width(50).ClientHeaderTemplate(" ");
+                            columns.Bound(p => p.RFC).Title("RFC:").Width(150);
+                            columns.Bound(p => p.nombre).Title("Nombre:").Width(250);
+                            columns.Bound(p => p.PersonaDireccion.calle).Title("Dirección:").Width(150);
+                            columns.Bound(c => c.PersonaDireccion.municipio).Title("Municipio:").Width(100);
+                            columns.Bound(p => p.idPersona).ClientTemplate(
+                            "<button onclick=\"ShowDetailPopUp('#= idPersona #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>"
+                            ).Title("Acciones").Sortable(false).Width(100);
+
+
+                        }).HtmlAttributes(new { style = "height:250" })
+                        @*.Pageable(pager => pager.AlwaysVisible(true).PageSizes(new int[] { 5, 10, 20, 100 }))*@
+                        .Pageable(p => p.Enabled(true))
+                        .Sortable()
+                        .Scrollable(scr => scr.Height(250))
+                        .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        )
+                        .ToolBar(t => t.Search().Text("Buscar..."))
+                        .Search(s =>
+                        {
+                            s.Field(c => c.RFC);
+                            s.Field(c => c.nombre);
+                            s.Field(c => c.PersonaDireccion.calle);
+                            s.Field(c => c.PersonaDireccion.municipio);
+                        })
+                        .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+                        )
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="row my-5">
+        <div class="col-12 col-md-6 mx-md-auto">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="EditarBusquedaMoral()">
+
+                        @(Html.Kendo().Button()
+                            .Name("editSearchMoral")
+                                .HtmlAttributes(new { @class = "btn btnOutline btn-sm btnClose px-5" })
+                            .Content("<h5 class=\"m-0\"><b>Cerrar</b></h5>"))
+                    </div>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                    <div class="controlButton" onclick="submitCreateVehiculo()">
+                        @(Html.Kendo().Button()
+                            .Name("saveMoral")
+                            .HtmlAttributes(new { @class = "btnPrimary px-5" })
+                            .Content("<h5 class=\"m-0\"><b>Finalizar captura</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+
+<script>
+
+    $(document).ready(function () {
+        var grid = $("#gridPersonasMorales").data("kendoGrid");
+        grid.tbody.on("click", ".k-checkbox", onClickPersonasMorales);
+        function onClickPersonasMorales(e) {
+            var grid = $("#gridPersonasMorales").data("kendoGrid");
+            var row = $(e.target).closest("tr");
+            var dataItem = grid.dataItem(row);
+            var idPersona = dataItem.idPersona;
+            var idCatTipoPersona = dataItem.idCatTipoPersona;
+            $("#ddlIdPersona").val(idPersona);
+            $("#ddlIdCatTipoPersona").val(idCatTipoPersona);
+            console.log("Persona Moral: ", idPersona);
+            if (row.hasClass("k-selected")) {
+                setTimeout(function (e) {
+                    var grid = $("#gridPersonasMorales").data("kendoGrid");
+                    grid.clearSelection();
+                    var gridFisica = $("#gridPersonasFisicas").data("kendoGrid");
+                    gridFisica.clearSelection();
+                })
+            } else {
+                grid.clearSelection();
+            };
+        };
+    })
+
+
+    function ShowDetailPopUp(id) {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("ajax_GetPersonaMoral")',
+            type: 'GET',
+            data: { id: id },
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (value) {
+                $('#ModalBodyUpdateMoral').html(value);
+                $('#modalUpdateMoral').modal('show');
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+    function EditarBusquedaMoral() {
+        document.getElementById("sec3").style.display = "block";
+        document.getElementById("PersonaMoralLocalizada").style.display = "none";
+    }
+</script>

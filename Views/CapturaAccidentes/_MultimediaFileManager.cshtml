@@ -1,0 +1,527 @@
+﻿@{
+    var controlClass = ViewData["controlClass"] as string ?? string.Empty;
+    bool esSoloLectura = ViewData["EsSoloLectura"] != null && (bool)ViewData["EsSoloLectura"];
+
+}
+
+<style>
+    .loader {
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 16px solid #3498db;
+        width: 60px;
+        height: 60px;
+        animation: spin 2s linear infinite;
+        margin: auto;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .empty-thumbnail {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 150px;
+        background-color: #f0f0f0;
+    }
+
+    .upload-thumbnail {
+        cursor: pointer;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .dotted-border {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        border-radius: 5px;
+    }
+
+    .dotted-border i {
+        font-size: 24px;
+        color: #ccc;
+    }
+
+    .dotted-border p {
+        margin: 0;
+        color: #ccc;
+    }
+
+    .icon-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: none;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 5px;
+        padding: 5px;
+    }
+
+    .icon-container i {
+        font-size: 20px;
+        color: whitesmoke;
+        margin: 0 5px;
+        cursor: pointer;
+    }
+
+    .thumbnail:hover .icon-container {
+        display: flex;
+    }
+
+    .thumbnail {
+        position: relative;
+    }
+
+    .thumbnail .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        transition: opacity 0.3s;
+        display: flex;
+    }
+
+    .thumbnail:hover .overlay {
+        opacity: 1;
+    }
+
+    .thumbnail .overlay i {
+        color: white;
+        font-size: 24px;
+        margin: 0 5px;
+        cursor: pointer;
+    }
+
+    .custom-editor-container {
+        width: 75vw;
+    }
+
+    .custom-editor {
+        height: 100%;
+        width: 100%
+    }
+</style>
+
+<!-- compenete -->
+<div class="@controlClass">
+    <label>Imágenes y Videos del Accidente</label>
+    <div id="thumbnails" class="row p-3 border rounded m-2" style="border:2px solid;border-radius: 4px;">
+        <!-- Caja de carga de archivos con borde punteado -->
+        <div class="col-3 mb-3">
+            <div class="thumbnail upload-thumbnail" @(esSoloLectura ? "style='pointer-events: none; opacity: 0.5;'" : "")>
+                <div class="dotted-border" @(esSoloLectura ? "style='cursor: not-allowed;'" : "") onclick="$('#files').click()">
+                    <i class="k-icon k-i-upload"></i>
+                    <p>Click para cargar</p>
+                </div>
+            </div>
+        </div>
+        <!-- Aquí se agregarán las miniaturas de los archivos cargados -->
+    </div>
+    <div id="file-container" style="display:none">
+        @(Html.Kendo().Upload()
+            .Name("files")
+            .HtmlAttributes(new { style = "display:none" })
+            .Async(a => a
+                .Save("UploadTemporaryFiles", "CapturaAccidentes")
+                .AutoUpload(true)
+            )
+            .Events(e => e
+                .Error("onUploadError")
+                .Select("onFileSelect")
+                .Success("onUploadSuccess")
+            )
+        )
+    </div>
+</div>
+
+<!-- modal image editor -->
+<div class="modal fade modalCustom" id="imageEditorModal" aria-labelledby="imageEditorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document" style="max-width:fit-content">
+        <div class="modal-content">
+            <div class="modal-body" id="imageEditorModalBody">
+                <section class="bg-white rounded">
+                    <div class="row align-items-center justify-content-between px-2 py-1">
+                        <div class="col-auto pe-0">
+                            <div class="row align-items-center justify-content-center justify-content-md-start">
+                                <div class="col-auto pe-0">
+                                    <i class="icon-accidente h1 colorPrimary"></i>
+                                </div>
+                                <div class="col-auto my-0">
+                                    <h2 class="m-0 h4"><b>Editar imagen</b></h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="row">
+                                <div class="col-auto my-0">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="bg-light py-1"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 my-2">
+                            <div id="imageEditorContainer" class="custom-editor-container"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-6 mx-md-auto">
+                            <div class="row justify-content-around">
+                                <div class="col-auto btnOutline my-0 mx-auto mx-xl-2 p-0">
+                                    <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- eventos -->
+<script>
+    function onUploadSuccess(e) {        
+        if (e.operation != "upload") {
+            return;
+        }
+
+        let files = e.files;
+        for (let i = 0; i < files.length; i++) {
+            let original = files[i].rawFile;
+
+            const fileExtension = original.name.substring(original.name.lastIndexOf('.'));
+            const newFileName = uuid.v4() + fileExtension;
+
+            let file = new File([original], newFileName, { type: original.type });
+            thumbnailsUIManager.addThumbnail(file);
+        }
+    }
+    
+    function onUploadError(e) {        
+        var message = "Error al subir archivo: ";
+        if (e.XMLHttpRequest) {
+            message += e.XMLHttpRequest.responseText;
+        } else {
+            message += e.files[0].name + " is not a valid file type or exceeds the maximum size.";
+        }
+        sitteg_error(message);
+        thumbnailsUIManager.removeAllEmptyThumbnails();
+    }
+
+    function onFileSelect(e) {
+        const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".mp4", ".avi"];
+        const maxFileSizeMb = 5;
+        const maxFileSize = maxFileSizeMb * 1024 * 1024;
+
+        let error = false;
+        for (var i = 0; i < e.files.length; i++) {
+            var file = e.files[i];
+            var extension = file.extension.toLowerCase();
+
+            if (allowedExtensions.indexOf(extension) === -1) {
+                e.preventDefault();
+                sitteg_error(`El tipo de archivo no es soportado: ${file.name}`);
+                error = true;
+            }
+
+            if (file.size > maxFileSize) {
+                e.preventDefault();
+                sitteg_error(`El archivo excede el límite de tamaño (${maxFileSizeMb}MB): ${file.name}`);
+                error = true;
+            }
+
+            thumbnailsUIManager.addEmptyThumbnail();
+        }
+
+		if (error) {
+			thumbnailsUIManager.removeAllEmptyThumbnails();
+		}
+    }
+
+    
+    function editFile(fileName) {
+        // Lógica para editar el archivo
+        $("#imageEditorContainer").empty();
+        $("<div id='imageEditor' class='custom-editor'></div>").appendTo("#imageEditorContainer").kendoImageEditor({
+            toolbar: {
+                items: [
+                    "undo",
+                    "redo",
+                    "crop",
+                    "resize",
+                    "zoomIn",
+                    "zoomOut",
+                    "zoomDropdown",
+                    "zoomActualSize",
+                    "zoomFitToScreen"
+                ]
+            },
+            messages: {
+                toolbar: {
+                    undo: "Deshacer",
+                    redo: "Rehacer",
+                    crop: "Recortar",
+                    resize: "Cambiar tamaño",
+                    zoomIn: "Zoom acercar",
+                    zoomOut: "Zoom alejar",
+                    zoomDropdown: "Zoom opciones",
+                    zoomActualSize: "Tamaño original",
+                    zoomFitToScreen: "Ajustar a pantalla"
+                },
+                panes: {
+                    crop: {
+                        title: "Recortar imagen",
+                        aspectRatio: "Relación de aspecto:",
+                        aspectRatioItems: {
+                            "originalRatio": "Relación original",
+                            "1:1": "1:1 (Cuadrado)",
+                            "4:5": "4:5 (8:10)",
+                            "5:7": "5:7",
+                            "2:3": "2:3 (4:6)",
+                            "16:9": "16:9"
+                        },
+                        orientation: "Orientación:",
+                        portrait: "Vertical",
+                        landscape: "Horizontal"
+                    },
+                    resize: {
+                        title: "Redimensionar imagen",
+                        pixels: "Píxeles",
+                        percents: "Porcientos"
+                    }
+                },
+                common: {
+                    width: "Ancho:",
+                    height: "Alto:",
+                    cancel: "Cancelar",
+                    confirm: "Confirmar",
+                    lockAspectRatio: "Bloquear relación de aspecto"
+                }
+            },
+            imageUrl: fileName,
+            imageRendered: function (e) {
+                let originalBlobUrl = e.sender.options.imageUrl;
+                let imageBase64 = e.image.currentSrc;
+                if (originalBlobUrl === imageBase64) {
+                    return;
+                }
+
+                thumbnailsUIManager.updateThumbnail(imageBase64, originalBlobUrl);
+            }
+        });
+
+        // eliminar los estilos en línea de ancho y alto establecidos por Kendo
+        $("#imageEditor").removeAttr('style');
+
+        // abre el editor de imágenes en un modal
+        let imageEditorModal = $("#imageEditorModal");
+        imageEditorModal.modal("show");
+    }
+
+</script>
+
+<!-- class for handle ui thumbanils and files in memory -->
+<script>
+    // ThumbnailFileManager class
+    function ThumbnailFileManager() {
+        this.thumbnails = [];
+        this.deletedThumbnails = [];
+    }
+
+    ThumbnailFileManager.prototype.addThumbnail = function (file) {
+        let key = URL.createObjectURL(file);
+        this.thumbnails.push({ key: key, file: file });
+        return key;
+    };
+
+    ThumbnailFileManager.prototype.removeThumbnail = function (key) {
+        let removedThumbnail = this.thumbnails.find(function (t) {
+            return t.key === key;
+        });
+
+        if (!removedThumbnail) {
+            return;
+        }
+
+        this.deletedThumbnails.push(removedThumbnail.file.name);
+        this.thumbnails = this.thumbnails.filter(function (t) {
+            return t.key !== key;
+        });
+        URL.revokeObjectURL(key);
+    };
+
+    ThumbnailFileManager.prototype.updateThumbnail = function (base64String, key) {
+        let base64Data = base64String.split(",")[1];
+        let mimeType = base64String.split(",")[0].split(":")[1].split(";")[0];
+        let updatedBlob = this.base64ToBlob(base64Data, mimeType);
+
+        for (let i = 0; i < this.thumbnails.length; i++) {
+            if (this.thumbnails[i].key === key) {
+                let file = new File([updatedBlob], this.thumbnails[i].file.name, { type: mimeType });
+                file.rawFile = updatedBlob;
+                let updatedkey = URL.createObjectURL(file.rawFile);
+
+                this.thumbnails[i].file = file;
+                this.thumbnails[i].key = updatedkey;
+
+                URL.revokeObjectURL(key);
+                return this.thumbnails[i];
+            }
+        }
+        return null;
+    };
+
+    ThumbnailFileManager.prototype.base64ToBlob = function (base64, mimeType) {
+        var byteCharacters = atob(base64);
+        var byteArrays = [];
+
+        for (var offset = 0; offset < byteCharacters.length; offset += 512) {
+            var slice = byteCharacters.slice(offset, offset + 512);
+            var byteNumbers = new Array(slice.length);
+            for (var i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+            var byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+
+        return new Blob(byteArrays, { type: mimeType });
+    };
+
+    ThumbnailFileManager.prototype.getThumbnails = function () {
+        return this.thumbnails;
+    };
+
+    ThumbnailFileManager.prototype.getDeletedThumbnails = function () {
+        return this.deletedThumbnails;
+    };
+
+    // ThumbnailsUIManager class
+    function ThumbnailsUIManager(thumbnailFileManager) {
+        this.thumbnailFileManager = thumbnailFileManager;
+    }
+
+    ThumbnailsUIManager.prototype.addEmptyThumbnail = function () {
+        var emptyThumbnailHtml = this.generateEmptyThumbnailHtml();
+        document.getElementById("thumbnails").insertAdjacentHTML("beforeend", emptyThumbnailHtml);
+    };
+
+    ThumbnailsUIManager.prototype.generateEmptyThumbnailHtml = function () {
+        return `
+            <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3 empty-thumbnail" data-thumbnail-empty>
+                <div class="loader"></div>
+            </div>
+        `;
+    };
+
+    ThumbnailsUIManager.prototype.replaceEmptyThumbnail = function (file, blobUrl) {
+        var emptyThumbnailElement = document.querySelector(`div[data-thumbnail-empty]`);
+        if (emptyThumbnailElement) {
+            var thumbnailHtml = this.generateThumbnailHtml(file, blobUrl);
+            emptyThumbnailElement.outerHTML = thumbnailHtml;
+            return true;
+        }
+        return false;
+    };
+
+    ThumbnailsUIManager.prototype.removeAllEmptyThumbnails = function () {
+        const emptyThumbnails = document.querySelectorAll('.empty-thumbnail');
+        emptyThumbnails.forEach(thumbnail => thumbnail.remove());
+    };
+
+    ThumbnailsUIManager.prototype.removeEmptyThumbnail = function () {
+        let emptyThumbnail = document.querySelector('.empty-thumbnail');
+        if (emptyThumbnail) {
+            emptyThumbnail.remove();
+        }        
+    };    
+
+    ThumbnailsUIManager.prototype.addThumbnail = function (file) {
+        var blobUrl = this.thumbnailFileManager.addThumbnail(file);
+        let replaced = this.replaceEmptyThumbnail(file, blobUrl);
+       
+        if (replaced)
+            return;
+        
+        this.createThumbnail(file, blobUrl);        
+    };
+
+    ThumbnailsUIManager.prototype.createThumbnail = function (file, blobUrl) {
+        var thumbnailHtml = this.generateThumbnailHtml(file, blobUrl);
+        document.getElementById("thumbnails").insertAdjacentHTML("beforeend", thumbnailHtml);
+    };
+
+    ThumbnailsUIManager.prototype.generateThumbnailHtml = function (file, blobUrl) {
+        var fileType = file.type.split('/')[0];
+        var contentHtml = '';
+        var actionHtml = '';
+
+        if (fileType === 'image') {
+            contentHtml = `<img src="${blobUrl}" class="card-img-top img-thumbnail" />`;
+            actionHtml = `
+                    <i class="icon-edit" onclick="editFile('${blobUrl}')"></i>
+                    <i class="icon-delete" onclick="thumbnailsUIManager.removeThumbnail('${blobUrl}')"></i>
+                `;
+        } else if (fileType === 'video') {
+            contentHtml = `<video class="card-img-top img-thumbnail" controls><source src="${blobUrl}" type="${file.type}"></video>`;
+            actionHtml = `<i class="icon-delete" onclick="thumbnailsUIManager.removeThumbnail('${blobUrl}')"></i>`;
+        } else {
+            contentHtml = `<div class="card-img-top img-thumbnail text-center"><p>Tipo de archivo no soportado</p></div>`;
+            actionHtml = `<i class="icon-delete" onclick="thumbnailsUIManager.removeThumbnail('${blobUrl}')"></i>`;
+        }
+
+        return `
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3" data-blob-url="${blobUrl}">
+                    <div class="thumbnail">
+                        ${contentHtml}
+                        <div class="icon-container">
+                            ${actionHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+    };
+
+    ThumbnailsUIManager.prototype.removeThumbnail = function (blobUrl) {
+        var thumbnailElement = document.querySelector(`div[data-blob-url="${blobUrl}"]`);
+        if (thumbnailElement) {
+            thumbnailElement.parentNode.removeChild(thumbnailElement);
+        }
+        this.thumbnailFileManager.removeThumbnail(blobUrl);
+    };
+
+    ThumbnailsUIManager.prototype.updateThumbnail = function (base64String, blobUrl) {
+        let thumbnail = this.thumbnailFileManager.updateThumbnail(base64String, blobUrl);
+        if (thumbnail) {
+            var thumbnailElement = document.querySelector(`div[data-blob-url="${blobUrl}"]`);
+            thumbnailElement.outerHTML = this.generateThumbnailHtml(thumbnail.file, thumbnail.key);
+        }
+    };
+</script>
+
+
+<!-- inicialización del componente -->
+<script>
+    let thumbnailsUIManager;
+    let thumbnailFileManager;
+
+    $(document).ready(function () {
+        thumbnailFileManager = new ThumbnailFileManager();
+        thumbnailsUIManager = new ThumbnailsUIManager(thumbnailFileManager);
+    });
+</script>
+

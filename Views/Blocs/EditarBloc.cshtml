@@ -1,0 +1,250 @@
+﻿@model GuanajuatoAdminUsuarios.Models.Blocs.BlocsBlocbySerieDto
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+    var nombreUsuario = User.FindFirst(CustomClaims.Nombre);
+}
+
+<script>
+    $(document).ready(function () {
+        var access = @listaIdsPermitidosJson;
+        if (access != undefined && access != '') {
+            if (!access.toString().includes(localStorage.getItem("menuId"))) {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡EL usuario no tiene acceso a esta opción!"
+                });
+                setTimeout(() => {
+                    window.location.href = "/Principal";
+                }, 200);
+            }
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "¡EL usuario no tiene acceso a esta opción!"
+            });
+            setTimeout(() => {
+                window.location.href = "/Principal";
+            }, 200);
+        }
+    });
+</script>
+<div class="mainContainer bg-light">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-center justify-content-md-start">
+                    <div class="col-auto">
+                        <i class="icon-addBloc h1 colorPrimary"></i>
+                    </div>
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Editar el bloc</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-7 col-xl-auto">
+                <div class="row">
+                    <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                        <button href="#" id="btnNuevabol" onclick="nvaBoleta()">
+                            <h6 class="m-0 d-flex align-items-center">
+                                <i class="icon-addBloc h5 mb-0 me-2"></i><b>Nueva boleta</b>
+                            </h6>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-light py-1"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 mb-4 px-4 rounded gridCustom">
+                <div class="col-12 col-md-auto mt-4 mb-2">
+                    <h5 class="px-4"><b>Datos del bloc</b></h5>
+                    <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar el bloc.</h6>
+                </div>
+            </div>
+            <div
+         </div>
+        </div>       
+            <div class="row ustify-content-md-center">
+                <div class="col-4 col-md-2">
+                    <h6 class="px-4">No. de Serie </h6>
+                </div>
+                <div class="col-4 col-md-2">
+                    <h6 class="px-4">Delegación</h6>
+                </div>
+                <div class="col-4 col-md-2">
+                    <h6 class="px-4">Asigna</h6>
+                </div>
+                <div class="col-4 col-md-4">
+                    <h6 class="px-4">Formato de recepcion de bloc</h6>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4 col-md-2">
+                    <h6 class="px-4">
+                        @(Html.Kendo().TextBox()
+                            .Name("txSerie")
+                            .Readonly(true)                            
+                            .Value(Model.Serie)
+                            )
+                    </h6>
+                </div>
+                <div class="col-4 col-md-2">
+                    <h6 class="px-4">
+                        @(Html.Kendo().TextBox()
+                            .Name("txDeleg")
+                            .Readonly(true)
+                            .Value(Model.Delegacion)
+                            )
+                    </h6>
+                </div>
+                <div class="col-4 col-md-2">
+                    <h6 class="px-4">
+                        @(Html.Kendo().TextBox()
+                            .Name("txAsigna")
+                            .Readonly(true)
+                            .Value(Model.Asigna)
+                            .HtmlAttributes(new { style = "width: 200px;" })
+                            )
+                    </h6>
+                </div>
+            <div class="col-4 col-md-2">
+                <h6 class="px-4">
+                    @(Html.Kendo().TextBox()
+                        .Name("txFtoRep")
+                        .Readonly(true)
+                        .Value(Model.FormatoBloc)
+                        .HtmlAttributes(new { style = "width: 200px;" })
+                        )
+                </h6>
+            </div>
+            </div>
+            <div class="row">
+                <div class="col-6 col-md-4">
+                    <h6 class="px-4"><b>Tipo de bloc (obligatorio)</b></h6>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6 col-md-4">
+                    <h6 class="px-4">
+                        <span>
+                            @(Html.Kendo().DropDownList()
+                                .Name("CatBlocs")
+                                .DataTextField("Tipo")
+                                .DataValueField("TipoBlocId")
+                                .AutoWidth(true)
+                                .Enable(true)
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetCatalogoBlocs", "Blocs");
+                                    });
+                                })
+                                )
+                        </span>
+                    </h6>
+                </div>
+            <div class="col-6 col-md-4">
+                <h6 class="px-4">
+                    <div class="controlButton my-3" onclick="Cerrar()">
+                        @(Html.Kendo().Button()
+                            .Name("btnCerrar")
+                            .Enable(true)
+                            .HtmlAttributes(new { @class = "btn btnOutline btn-sm btnClose" })
+                            .Content("<h5 class=\"m-0\"><b>Cerrar</b></h5>"))
+                    </div>
+                </h6>
+            </div>
+                <div class="col-6 col-md-4">
+                    <h6 class="px-4">
+                        <div class="controlButton my-3" onclick="GuardaBloc()">
+                            @(Html.Kendo().Button()
+                                .Name("addBloc")
+                                .Enable(false)
+                                .HtmlAttributes(new { @class = "btnPrimary" })
+                                .Content("<h5 class=\"m-0\"><b>Guardar</b></h5>"))
+                        </div>                                                          
+                    </h6>
+                </div>
+            </div>
+        
+        <div class="row">
+            <div class="col-12 mb-4 px-4 rounded gridCustom">
+                <div id="tablablocs">
+                    <partial name="_BlocsListaAlta" model="Model" />
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+</div>
+
+<script>  
+    function nvaBoleta(e) {
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("Delegacion", "Blocs")',
+            type: 'GET',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (data) {
+                var content = JSON.parse(data);
+                $("#txSerie").kendoTextBox({
+                    value: "NA"
+                });
+                $("#txDeleg").kendoTextBox({
+                    value: content.nombreDelegacion
+                });
+
+                $("#txAsigna").kendoTextBox({
+                    value: content.Usuario
+                });
+                var btnadd = $("#addBloc").data("kendoButton");
+                btnadd.enable(true);
+            }
+        }); 
+        hideLoading();
+    }
+
+    function GuardaBloc(e) {     
+        showLoading();
+        var idDeleg = $("#CatBlocs").data("kendoDropDownList").value();        
+        $.ajax({
+            url: '@Url.Action("GuardaBloc", "Blocs")',
+            type: 'POST',            
+            data: { TipoBloc: idDeleg },
+            success: function (data) {                           
+                var Jsonstring = JSON.stringify(data);
+                var content = JSON.parse(Jsonstring);                
+                $("#txSerie").kendoTextBox({
+                    value: content.Serie
+                });
+                sitteg_success('Bloc Agregado correctamente')
+                var grid = $("#gridBlocs").data("kendoGrid");
+                grid.dataSource.read();
+                var btnadd = $("#addBloc").data("kendoButton");
+                btnadd.enable(false);
+            },
+            error: function () {
+                sitteg_warning("Registro Agregado con errores");
+            }
+        })
+        hideLoading();       
+    }
+
+    function Cerrar(e) {
+        location.href = "/Blocs/Index";
+    }
+
+
+</script>

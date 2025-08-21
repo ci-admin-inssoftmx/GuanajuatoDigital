@@ -1,0 +1,210 @@
+﻿@model InfraccionesModel;
+@functions {
+    string ObtenerValorSeguro(object obj, string propiedad)
+    {
+        if (obj == null) return string.Empty;
+
+        var propiedades = propiedad.Split('.');
+        object valor = obj;
+
+        foreach (var p in propiedades)
+        {
+            var infoPropiedad = valor?.GetType().GetProperty(p);
+            if (infoPropiedad == null) return string.Empty;
+
+            valor = infoPropiedad.GetValue(valor);
+            if (valor == null) return string.Empty;
+        }
+
+        // Verificar si el valor es de tipo DateTime y formatear adecuadamente
+        if (valor is DateTime fecha)
+        {
+            return fecha.ToString("dd/MM/yyyy");
+        }
+
+        return valor?.ToString() ?? string.Empty;
+    }
+
+}
+<script>
+    console.log('@ObtenerValorSeguro(Model, "PersonaInfraccion.fechaNacimiento")');
+</script>
+
+
+<div class="mainContainer bg-light h-100" style="overflow-y:scroll; max-height:100vh;">
+    <section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded">
+        <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+            <div class="col-12 col-md-6 col-lg-5 col-xl-auto">
+                <div class="row align-items-center justify-content-between justify-content-md-start">
+
+                    <div class="col-auto my-3">
+                        <h2 class="m-0 h3"><b>Detalle de infracción</b></h2>
+                    </div>
+                </div>
+            </div>
+           
+        </div>
+
+        <div class="mx-2 my-2 row">
+
+            <div class="container">
+                <div class="mx-2 my-2 row">
+
+                    <div class="col-12">
+                        <div class="row">
+                            <h2><i class="icon-infracion h1 colorPrimary"></i> Detalles Infracción</h2>
+                        </div>
+
+                        <div class="row my-2">
+                            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <label class="form-label">Aplicada A:</label>
+                                <input type="text" class="form-control" value="@(Model.aplicacion?? string.Empty)" readonly />
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                <label class="form-label">Cortesia:</label>
+                                <input type="text" class="form-control" value="@(Model.infraccionCortesia.HasValue ? (Model.infraccionCortesia.Value ? "Si se aplicó" : "No se aplicó") : "Valor nulo")" readonly />
+
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Concepto de la infracción:</label>
+                                <textarea class="form-control" readonly>@(Model.observaciones ?? string.Empty)</textarea>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div class="row">
+                        <h2><i class="icon-infracion h1 colorPrimary"></i> Motivos de infracción</h2>
+                    </div>
+                    <partial name="_Motivos2" model="Model.MotivosInfraccion" esSoloLectura="@ViewBag.EsSoloLectura" />
+                    <div class="row px-4 pb-4 mb-4 align-items-end">
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="my-3 ">
+                                <label class="form-label">Valor Uma:</label>
+                                <input type="text" class="form-control" value="@(Model.umas != null ? Model.umas.ToString("N2") : string.Empty)" readonly />
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="my-3 ">
+                                <label class="form-label">Calificación total:</label>
+                                @{
+                                    decimal sumaCalificaciones = Model.MotivosInfraccion.Sum(m => m.calificacion ?? 0);
+                                }
+                                <input type="text" class="form-control" value="@sumaCalificaciones.ToString()" readonly />
+
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="my-3 ">
+                                <label class="form-label">Monto total:</label>
+                                <input type="text" class="form-control" value="@(Model.totalInfraccion != null ? Model.totalInfraccion.ToString("N2") : string.Empty)" readonly />
+                            </div>
+                        </div>
+                        <div class="row my-4">
+                            <div class="col-12">
+                                <h2><i class="icon-infracion h1 colorPrimary"></i> Garantia</h2>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                            <div class="my-3 "></div>
+                        </div>
+                        <div class="row my-2">
+
+                            @{
+                                switch (Model.Garantia.idCatGarantia)
+                                {
+                                    case 1:
+                                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                            <div class="my-3 ">
+                                                <label class="form-label">Placa:</label>
+                                                <input type="text" class="form-control " value="@(Model.Garantia.numPlaca?? string.Empty)" readonly />
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                            <div class="my-3 ">
+                                                <label class="form-label">Tipo de placa:</label>
+                                                <input type="text" class="form-control" value="@(Model.Garantia.tipoPlaca?? string.Empty)" readonly />
+                                            </div>
+                                        </div>
+                                        break;
+                                    case 2:
+                                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                            <div class="my-3 ">
+                                                <label class="form-label">Licencia:</label>
+                                                <input type="text" class="form-control" value="@(Model.Garantia.numLicencia?? string.Empty)" readonly />
+
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                            <div class="my-3 ">
+                                                <label class="form-label">Tipo de licencia:</label>
+                                                <input type="text" class="form-control" value="@(Model.Garantia.tipoLicencia?? string.Empty)" readonly />
+                                            </div>
+                                        </div>
+                                        break;
+                                    case 3:
+                                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                            <div class="my-3 ">
+                                                <label class="form-label">Tarjeta de circulación:</label>
+                                                <input type="text" class="form-control" value="@(Model.tarjetaInfraccion?? string.Empty)" readonly />
+                                            </div>
+                                        </div>
+                                        break;
+                                    case 4:
+                                        <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                                            <div class="my-3 ">
+                                                <label class="form-label">Vehículo</label>
+                                                <input type="text" class="form-control" value="@(Model.Nombreinventarios?? "Sin Inventario")" readonly />
+
+                                            </div>
+                                        </div>
+                                        break;
+                                    default:
+                                        <div class="col-12 col-md-6 col-lg-4">
+                                            <div class="my-3 "><label class="form-label">No hay información</label></div>
+                                        </div>
+                                        
+                                        break;
+                                }
+                            }
+
+                        </div>
+
+                    </div>
+                </div>
+                <div class="row my-3 mb-4">
+                    <div class="col-12 col-md-8 mx-md-auto">
+                        <div class="row justify-content-around">
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0" onclick="goBack2(@Model.idInfraccion)">
+                                @(Html.Kendo().Button()
+                                        .Name("back")
+                                        .HtmlAttributes(new { @class = "px-5" })
+                                        .Content("<h6 class=\"m-0\"><i class=\"icon-back me-2\"></i><b>Regresar</b></h6>"))
+                            </div>
+                            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                <div class="controlButton" onclick="goBackBusqueda()">
+                                    @(Html.Kendo().Button()
+                                            .Name("finalInvolucrado")
+                                            .HtmlAttributes(new { @class = "btnPrimary px-5" })
+                                            .Content("<h5 class=\"m-0\"><b>Volver a busqueda especial</b></h5>"))
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+</div>
+<script>
+    function goBackBusqueda() {
+        window.location.href = '/Infracciones/BusquedaEspecial'
+
+    }
+    
+    function goBack2(idInfraccion) {
+    window.location.href = '/Infracciones/Mostrar?id=' + idInfraccion;
+}
+</script>

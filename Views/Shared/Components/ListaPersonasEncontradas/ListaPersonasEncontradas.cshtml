@@ -1,0 +1,103 @@
+@model List<GuanajuatoAdminUsuarios.Models.PersonaModel>
+    <script>
+        function validaFechaGrid(data) {
+            if(data.fechaNacimiento==undefined ||  data.fechaNacimiento==='null' || data.fechaNacimiento==='')
+            return '';
+    var minDate = new Date('0001-01-01T00:00:00Z');
+    minDate.setDate(minDate.getDate() + 1);
+    if (data.fechaNacimiento < minDate) {
+        return '';
+    } else {
+        return kendo.toString(data.fechaNacimiento, 'dd/MM/yyyy');
+    }
+}
+
+    </script>
+        <div class="row justify-content-between my-2 mb-3 titleCustom">
+    <div class="offset-1 col-12 mt-4 mb-2">
+        <h5 class="px-4"><b>Personas encontradas en RIAG</b></h5>
+        <h6 class="px-4 text-muted">Puedes selecciona y/o editar un registro</h6>
+    </div>
+</div>
+<div class="col-12 mb-4 px-4 rounded gridCustom">
+    @(Html.Kendo().Grid(Model)
+        .Name("gridPersonas")
+            .EnableCustomBinding(true)
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.idPersona).Hidden();
+            columns.Select().ClientHeaderTemplate(" ");
+            columns.Bound(c => c.nombreCompleto).Title("Nombre");
+            columns.Bound(p => p.CURP).Title("CURP");
+            columns.Bound(p => p.RFC).Title("RFC");
+            columns.Bound(p => p.fechaNacimiento).Title("Fecha de nacimiento").ClientTemplate("#=validaFechaGrid(data)#");
+            columns.Bound(p => p.numeroLicencia).Title("No. Licencia");
+            columns.Bound(p => p.tipoLicencia).Title("Tipo de Licencia");
+            columns.Bound(c => c.tipoPersona).Title("Tipo persona");
+            columns.Bound(p => p.idPersona).ClientTemplate(
+            "<button onclick=\"abrirModalPersonaFisica('#: idPersona #',null)\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b>Editar</b></h6></button>"
+            ).Title("Acciones").Sortable(false).Width(100);
+        })
+        @*.Pageable(pager => pager.AlwaysVisible(true).Position(GridPagerPosition.Bottom).PageSizes(true))*@
+        .Pageable(p => p.Enabled(true))
+        .Sortable()
+        .Scrollable(scr => scr.Enabled(true))
+         .DataSource(dataSource => dataSource
+         .Custom().PageSize(10))
+        .ToolBar(t => t.Custom().Text("Buscar...").Name("search"))
+        .Search(s =>
+        {
+            s.Field(c => c.nombreCompleto);
+            s.Field(c => c.CURP);
+            s.Field(c => c.RFC);
+            s.Field(c => c.fechaNacimiento);
+            s.Field(c => c.numeroLicencia);
+            s.Field(c => c.tipoPersona);
+            s.Field(c => c.tipoLicencia);
+
+        })
+        .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+        )
+</div>
+
+<script>
+    $(document).ready(function () {
+        var grid = $("#gridPersonas").data("kendoGrid");
+        grid.tbody.on("click", ".k-checkbox", onClickPersonas);
+
+        if (grid.dataSource.total() === 1) {
+            var row = grid.tbody.find("tr:first");
+            grid.select(row);
+            row.find(".k-checkbox").trigger("click");
+        }
+
+        function onClickPersonas(e) {
+            
+            var grid = $("#gridPersonas").data("kendoGrid");
+            var row = $(e.target).closest("tr");
+            var dataItem = grid.dataItem(row);
+            var idPersona = dataItem.idPersona;
+            $('#idPersonaInput').val(idPersona);
+            try {
+                console.log("asignara ddlIdPersona ",idPersona);
+                $('#ddlIdPersona').val(idPersona);
+
+            } catch (error) {
+            }
+            
+            if (row.hasClass("k-selected")) {
+                setTimeout(function (e) {
+                    var grid = $("#gridPersonas").data("kendoGrid");
+                    grid.clearSelection();
+                })
+            } else {
+                grid.clearSelection();
+            };
+            //Se invoca el método configurado para el trigger y cachar el evento de persona seleccionada
+            //$('#@ViewBag.VariableToChange').val(idPersona);
+             $('#@ViewBag.VariableToChange').trigger('@ViewBag.NombreMetodoToTrigger',JSON.parse(JSON.stringify(dataItem)));
+            //$('#agregarConductorModal').modal('hide');
+        };
+    })
+</script>

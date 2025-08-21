@@ -1,0 +1,91 @@
+﻿@model List<CapturaAccidentesModel>
+
+<script>
+	function onRowSelect(e) {
+
+		var grid = $("#gridConductores").data("kendoGrid");
+		var row = $(event.target).closest("tr");
+		var dataItem = grid.dataItem(row);
+		var IdPersona = dataItem.IdPersona
+		console.log(IdPersona);
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("ModalAgregarInvolucradoPersona", "CapturaAccidentes")',
+			type: 'POST',
+			data: {
+				IdPersona: IdPersona
+			},
+			success: (data) => {
+				$('#ModalBodyAgregarInvolucrado').html(data);
+				$('#agregarInvolucradoModal').modal('show');
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+
+	}
+
+</script>
+
+<div class="col-12 mb-4 px-4 rounded gridCustom">
+
+	@{
+		try
+		{
+			@(Html.Kendo().Grid(Model)
+			.Name("gridConductores")
+			.Events(events => events.Change("onRowSelect").DataBinding("replaceLegend").DataBinding("replaceLegend"))
+			.Columns(columns =>
+			{
+				columns.Bound(c => c.IdPersona).Hidden();
+				columns.Select().Width(50).ClientHeaderTemplate(" ");
+				columns.Bound(c => c.nombre).Title("Nombre").Width(80);
+				columns.Bound(c => c.apellidoPaterno).Title("Apellido Paterno").Width(100);
+				columns.Bound(c => c.apellidoMaterno).Title("Apellido Materno").Width(100);
+				columns.Bound(c => c.RFC).Title("RFC").Width(80);
+				columns.Bound(c => c.CURP).Title("CURP").Width(100);
+				columns.Bound(c => c.fechaNacimiento).Title("Fecha Nacimiento").Format("{0:dd/MM/yyyy}").Width(100);
+				columns.Bound(c => c.numeroLicencia).Title("No Licencia").Width(100);
+			})
+			.Sortable()
+			////.Groupable()
+			.Scrollable(scr => scr.Enabled(true))
+			.Pageable()
+			.DataSource(dataSource => dataSource
+			.Ajax()
+			.ServerOperation(false)
+			.PageSize(5).Model(model => model.Id(p => p.IdPersona))
+			)
+			.ToolBar(t => t.Search())
+			.Search(s =>
+			{
+				s.Field(c => c.nombre);
+				s.Field(c => c.apellidoPaterno); 
+				s.Field(c => c.apellidoMaterno);
+				s.Field(c => c.RFC);
+				s.Field(c => c.CURP);
+				s.Field(c => c.numeroLicencia);
+
+			}).Selectable(selectable => selectable.Mode(GridSelectionMode.Single).Type(GridSelectionType.Row)
+			)
+				)
+
+		}
+		catch (Exception ex)
+		{
+			< div >< h1 > @ex.Message </ h1 > </ div >
+		}
+	}
+	<div class="modal fade modalCustom" id="modalCrearPersona" aria-labelledby="modalCrearPersona" aria-hidden="true">
+		<div class="modal-dialog modal-xl boxShadow modal-dialog-centered ">
+			<div class="modal-content">
+
+				<div class="modal-body" id="modalBodyCrearPersona">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+

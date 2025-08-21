@@ -1,0 +1,51 @@
+﻿@model GuanajuatoAdminUsuarios.Models.OficialesModel
+@{
+}
+
+
+<div class="row">
+    <div class="col-md-10">
+        <h2>Crear Marca</h2>
+    </div>
+    <br />
+    <div class="col-md-2">
+        @Html.ActionLink("Cancelar","Index",null,new{@class="btn btn-info"})
+    </div>
+</div>
+<hr />
+<br />
+
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("Create", "Oficiales"))
+        {
+            @(Html.Kendo().TextBoxFor(t => t.Rango)
+                .HtmlAttributes(new { placeholder = "Rango", required = "required", validationmessage = "Introduce el Rango" })
+                .Label(l => l.Content("Rango <b>(obligatorio)</b>:"))
+                )
+            @(Html.Kendo().TextBoxFor(t => t.Nombre)
+                .HtmlAttributes(new { placeholder = "Nombre", required = "required", validationmessage = "Introduce el Nombre" })
+                .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                )
+                @(Html.Kendo().TextBoxFor(t => t.ApellidoPaterno)
+              .HtmlAttributes(new { placeholder = "Apellido Paterno", required = "required", validationmessage = "Introduce el Apellido Paterno" })
+                .Label(l => l.Content("Marca de Vehiculo <b>(obligatorio)</b>:"))
+                ) 
+                @(Html.Kendo().TextBoxFor(t => t.ApellidoMaterno)
+              .HtmlAttributes(new { placeholder = "Apellido Materno", validationmessage = "Introduce el Apellido Materno" })
+              .Label(l => l.Content("Apellido Materno"))
+                )
+            <br />  <br />
+
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <a href='@Url.Action("Index")' class="btn btn-default">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </div>
+
+        }
+
+    </div>
+</div>

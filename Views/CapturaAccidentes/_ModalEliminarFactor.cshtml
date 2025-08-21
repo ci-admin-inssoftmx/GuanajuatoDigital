@@ -1,0 +1,103 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel
+    <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+        <div class="col-auto pe-0">
+            <div class="row align-items-center justify-content-center justify-content-md-start">
+                <div class="col-auto pe-0">
+                    <i class="icon-deleteFactorAccidente h1 colorDanger"></i>
+                </div>
+                <div class="col-auto my-3">
+                    <h2 class="m-0 h3"><b>Eliminar factor</b></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row">
+                <div class="col-auto my-3">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light py-1"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-12 text-center my-4">
+            <h3><b>Eliminar registro en el listado</b></h3>
+        </div>
+    </div>
+     <form id="eliminarFactorForm" class="row justify-content-center px-4 mb-4 align-items-end">
+
+                @Html.HiddenFor(t => t.IdFactorOpcionAccidente)
+                @Html.HiddenFor(t => t.IdFactorAccidente)
+                @Html.HiddenFor(t => t.IdAccidenteFactorOpcion)
+     </form>
+
+    <div class="row justify-content-center mb-5">
+        <div class="col-10 col-md-5 mt-1">
+            
+            <h6 class="px-4 text-muted">Factor:</h6>
+        <h5 class="px-4"><b></b>@ViewBag.FactorAccidente</h5>
+        </div>
+        <div class="col-10 col-md-5 mt-1">
+            <h6 class="px-4 text-muted">Opción:</h6>
+        <h5 class="px-4"><b>@ViewBag.FactorOpcionAccidente</b></h5>
+        </div>
+
+    </div>
+
+    <div class="row my-4">
+        <div class="col-12">
+            <div class="row justify-content-around">
+                <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                        <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                    </button>
+                </div>
+                <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                <div class="controlButton" onclick="eliminarFactor()">
+                        @(Html.Kendo().Button()
+                            .Name("deletFactor")
+                            .HtmlAttributes(new { @class = "btnPrimary px-3" })
+                            .Content("<h5 class=\"m-0 px-3\"><b>Eliminar</b></h5>"))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+                       
+<script>
+ 
+    function eliminarFactor() {
+
+        var Mydata = $("#eliminarFactorForm").serialize();
+        console.log("MUD",Mydata)
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EliminarValorFactorYOpcion")',
+            type: 'POST',
+            data: Mydata,
+            success: function (data) {
+
+                $("#gridFactoresA").data("kendoGrid").dataSource.data(data);
+                sitteg_success("Se ha modificado la información");
+                $('#factorAccidenteModal').modal('hide');
+                $('modal-body').removeClass('model-open');
+                $('.modal-backdrop').remove();
+
+                hideLoading();
+            },
+            error: function (error) { 
+                sitteg_warning('Sucedió un error, intente mas tarde...');
+                hideLoading();
+            }
+        });
+    }
+
+</script>

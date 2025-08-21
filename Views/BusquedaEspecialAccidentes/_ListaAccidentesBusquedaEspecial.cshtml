@@ -1,0 +1,203 @@
+﻿@{
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+    var listaIdsPermitidosJson = @HttpContextAccessor.HttpContext.Session.GetString("IdsPermitidos").ToString();
+    var autorizaciones = @HttpContextAccessor.HttpContext.Session.GetString("Autorizaciones").ToString();
+}
+
+<script>
+
+    function DataBusquedaEsp() {
+                var data = {
+            FechaInicio: $('#dateInicio').val(),
+            FechaFin: $('#dateFinal').val(),
+            placasBusqueda: $('#txtPlacas').val(),
+            serieBusqueda: $('#txtSerie').val(),
+            folioBusqueda: $('#txtFolio').val(),
+            IdDelegacionBusqueda: $('#ddlDelegaciones').val(),
+            IdCarreteraBusqueda: $('#ddlCarreteras').val(),
+            idTramoBusqueda: parseInt($('#ddlTramos').val()),
+            propietarioBusqueda: $('#txtPropietarios').val(),
+            conductorBusqueda: $('#txtConductores').val(),
+            IdOficialBusqueda: $('#ddlOficiales').val(),
+            IdEstatusAccidente: $('#ddlEstatus').val(),
+            FolioEmergenciaBusqueda: parseInt($('#txtFolioEmergencia').val())
+        };
+
+        return data
+    }
+
+
+    </script>
+
+
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.BusquedaEspecialAccidentesModel>()
+            .Name("gridBusquedaEspecialAccidentes")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.IdAccidente).Hidden();
+                columns.Bound(c => c.Numero).Title("Número").Width(60);
+                columns.Bound(c => c.numeroReporte)
+                    .Title("Folio")
+                    .Width(100)
+                    .ClientTemplate(
+                        "<div style='display:flex; align-items:center;'>" +
+                        "<div>#= numeroReporte #</div>" +
+                "<button id='btnFolio' onclick=\"ModalEditarFolio('#= IdAccidente #', '#= numeroReporte #')\" class='w-100 btn'>" +
+                        "<h6 class='m-0 colorPrimary'><i class='icon-edit me-2'></i><b></b></h6>" +
+                        "</button>" +
+                        "</div>"
+                    );
+                columns.Bound(c => c.fecha)
+                .Title("Fecha")
+                .ClientTemplate("#= kendo.toString(kendo.parseDate(fecha), 'dd/MM/yyyy') #")
+                .Width(100); columns.Bound(c => c.hora).Title("Hora").Width(70);
+                columns.Bound(c => c.municipio).Title("Municipio").Width(100);
+                columns.Bound(c => c.carretera).Title("Carretera").Width(100);
+                columns.Bound(c => c.tramo).Title("Tramo").Width(100);
+                columns.Bound(c => c.estatusReporte).Title("Estatus").Width(100);
+                columns.Bound(c => c.folioEmergencia).Title("Folio Emergencia").Width(100);
+                columns.Bound(p => p.IdAccidente).ClientTemplate(
+                "<button onclick=\"editarAccidente('#= IdAccidente #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='icon-research me-2'></i><b>Mostrar</b></h6></button>"
+                ).Title("Mostrar").Sortable(false).Width(90);
+               // columns.Bound(p => p.IdAccidente).ClientTemplate(
+                //"<button onclick=\"downLoadPdf('#= IdAccidente #')\" class='w-100 btn'><h6 class='m-0 colorPrimary'><i class='h5 icon-pdf me-2'></i><b>Descargar</b></h6></button>"
+                //).Title("Exportar").Sortable(false).Width(90);
+                 columns.Bound(p => p.IdAccidente).ClientTemplate(
+                "<button onclick=\"eliminarAccidente('#= IdAccidente #', '#= numeroReporte #')\" class='w-100 btn'><h6 class='m-0 colorDanger'><i class='icon-delete me-2'></i><b>Eliminar</b></h6></button>"
+                ).Title("Eliminar").Sortable(false).Width(90);
+            }).HtmlAttributes(new { style = "height:550px" })
+            .EnableCustomBinding(true)
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(s=>s.Action("GetAccidentesBusquedaPagination", "BusquedaEspecialAccidentes").Data("DataBusquedaEsp"))
+            .PageSize(10)
+            .Events(events => events.Error("handleError"))
+            )
+
+            .Pageable(p => p.Enabled(true))
+            .Sortable(s => s.Enabled(false))
+            .Scrollable(scr => scr.Enabled(true))
+            .Events(x => x.DataBound("replaceLegend").DataBinding("replaceLegend"))
+            @*.ToolBar(t => t.Custom().Text("Buscar...").Name("search"))*@
+            )
+
+    </div>
+</div>
+    <div class="modal fade modalCustom" id="editarFolioModal"  aria-labelledby="editarCarreteraLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="ModalBodyEditarFolio">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade modalCustom" id="eliminarAccidenteModal" aria-labelledby="editarCarreteraLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="ModalBodyEliminarAccidente">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<script>
+    $(document).ready(function () {
+        //var auth = @autorizaciones;
+        //var grid = $("#gridBusquedaEspecialAccidentes").data("kendoGrid");
+
+        //if (!auth.toString().includes("611")) {
+        //    grid.hideColumn(9);
+        //}
+        //if (!auth.toString().includes("614")) {
+        //    grid.hideColumn(10);
+        //}
+        //if (!auth.toString().includes("616")) {
+        //    $("#btnFolio").prop('disabled', true).css({ "opacity": "0.3" });
+
+        //}
+
+    });
+
+    function downLoadPdf(Id) {
+        console.log("SI", Id)
+        window.location = '/BusquedaAccidentes/CreatePdfUnRegistro?IdAccidente=' + Id;
+    }
+    function editarAccidente(idAccidente) {
+        showLoading();
+        $.ajax({
+            url: '/CapturaAccidentes/SetLastInsertedIdEdit',
+            type: 'POST',
+            data: { idAccidente: idAccidente },
+            success: function (result) {
+                console.log("ESPECIAL",result)
+                if (result && result.LastInsertedId != null) {
+                window.location.href = '/CapturaAccidentes/CapturaAaccidente/?lstId=' + result.LastInsertedId + '&showE=true';
+                } else {
+                    sitteg_warning("Intentelo de nuevo mas tarde.");
+                }
+                hideLoading();
+            },
+            error: function () {
+                sitteg_warning("Ocurrió un error. Por favor, inténtelo de nuevo más tarde.");
+                hideLoading();
+            }
+        });
+    }
+
+        function eliminarAccidente(idAccidente, numeroReporte) {
+            showLoading();
+            $.ajax({
+                url: '/BusquedaEspecialAccidentes/ModalEliminarAccidente',
+                type: 'POST',
+                data: {
+                    idAccidente: idAccidente,
+                    numeroReporte: numeroReporte
+                }, success: function (result) {
+                if (result.includes("no tiene permisos")) {
+                    sitteg_warning("El usuario no tiene permisos suficientes para esta acción.");
+                    hideLoading();
+                } else {
+                    $('#ModalBodyEliminarAccidente').html(result);
+                    $('#eliminarAccidenteModal').modal('show');
+                    hideLoading();
+                }
+                },
+                error: function () {
+                    sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                    hideLoading();
+                }
+
+            });
+        }
+
+    function ModalEditarFolio(idAccidente, numeroReporte) {
+            showLoading();
+        $.ajax({
+            url: '/BusquedaEspecialAccidentes/ModalEditarFolio', 
+            type: 'POST',
+            data: {
+                idAccidente: idAccidente,
+                numeroReporte: numeroReporte
+            },
+            success: function (result) {
+                    $('#ModalBodyEditarFolio').html(result);
+                    $('#editarFolioModal').modal('show');
+                    hideLoading();
+            },
+            error: function (xhr, status, error) {
+                console.log("Error al realizar la solicitud AJAX: " + error);
+                hideLoading();
+            }
+        });
+    }
+
+    function handleError(e) {
+        console.log("Error en la solicitud al servidor:", e.errors); 
+    }
+
+</script>

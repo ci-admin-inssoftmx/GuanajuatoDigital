@@ -1,0 +1,797 @@
+﻿@model GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.6.172/pdf.min.js"></script>
+
+<section class="mx-md-3 mx-lg-4 mx-xl-5 bg-white boxShadow my-5 rounded pb-1">
+	<div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+		<div class="col-md-12 col-md-auto">
+			<div class="row align-items-center justify-content-center justify-content-md-start">
+				<div class="col-auto p-0">
+					<i class="icon-involucrado h1 colorPrimary"></i>
+				</div>
+				<div class="col-md-9 my-3">
+					<h2 class="m-0 h3"><b>Datos de persona Involucrada</b></h2>
+				</div>
+				<div class="col-auto">
+					<button type="button" onclick="cerrarModalInvEdit()">X</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<input type="hidden" id="personaInvolucrada">
+	<div class="row">
+		<!--<div class="col-md-6">
+			<div class="btnOutline btnOutlinePrimary px-4 my-3">
+				<button onclick="busquedaPersonaEditar()">
+					<h5 class="m-0"><i class="me-2 icon-addInvolucrado"></i><b>Buscar involucrado</b></h5>
+				</button>
+			</div>
+		</div>-->
+		<div class="col-md-6">
+			<div class="btnOutline btnOutlinePrimary px-4 my-3">
+				<button onclick="editarPersona()">
+					<h5 class="m-0"><i class="me-2 icon-addInvolucrado"></i><b>Editar</b></h5>
+				</button>
+			</div>
+		</div>
+	</div>
+	<div id="sinBuqueda" class="col-12 mt-4 controlForm" style="display:block">
+		@*
+		<label>Realiza la busqueda para relacionar un involucrado con un vehículo</label> *@
+	</div>
+
+	<div class="col-12 col-md-12">
+		@if (Model != null)
+		{
+			<div>
+
+				<div id="datosIniciales" class="row">
+					<div class="col-md-6">
+						<div class="col-md-6">
+							<h5 class="px-4"><b>Datos Personales</b></h5>
+						</div>
+						<div class="col-md-6">
+							<div hidden><h6 class="px-4 text-muted" id="IdPersona">@Model.IdPersona</h6></div>
+							<h6 class="px-4 text-muted"><b>Nombre: </b>@Model.nombre</h6>
+							<h6 class="px-4 text-muted"><b>Paterno: </b> @Model.apellidoPaterno</h6>
+							<h6 class="px-4 text-muted"><b>Materno: </b>@Model.apellidoMaterno</h6>
+							<h6 class="px-4 text-muted"><b>RFC: </b>@Model.RFC</h6>
+							<h6 class="px-4 text-muted"><b>CURP: </b>@Model.CURP</h6>
+							<h6 class="px-4 text-muted"><b>Sexo: </b> @Model.Genero</h6>
+							<h6 class="px-4 text-muted"><b>Fecha nacimiento: </b>@Model.FormatDateNacimiento</h6>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<h5 class="px-4"><b>Domicilio</b></h5>
+
+						<div class="col-md-6">
+							<h6 class="px-4 text-muted"><b>Entidad: </b>@Model.Entidad</h6>
+							<h6 class="px-4 text-muted"><b>Municipio: </b> @Model.Municipio</h6>
+							<h6 class="px-4 text-muted"><b>Calle: </b>@Model.Calle </h6>
+							<h6 class="px-4 text-muted"><b>Número: </b>@Model.Numero</h6>
+							<h6 class="px-4 text-muted"><b>Colonia: </b>@Model.Colonia</h6>
+							<h6 class="px-4 text-muted"><b>Teléfono: </b>@Model.Telefono</h6>
+							<h6 class="px-4 text-muted"><b>Correo: </b> @Model.Correo</h6>
+							<h6 class="px-4 text-muted"><b>No. Licencia: </b> @Model.numeroLicencia</h6>
+						</div>
+					</div>
+
+				</div>
+			</div>
+			
+		}
+	</div>
+	<div id="involucradoSeleccionado" class="row" style="display:none">
+		<div class="col-md-6">
+			<div class="col-md-12">
+				<h5 class="px-4"><b>Datos Personales</b></h5>
+			</div>
+			<div class="col-md-12">
+				<h6 class="px-4 text-muted"><b>Nombre: </b><span id="nombreModal"></span></h6>
+				
+								<h6 class="px-4 text-muted"><b>Apellido Paterno: </b><span id="apellidoPaternotxt"></span></h6>
+																<h6 class="px-4 text-muted"><b>Apellido Materno: </b><span id="apellidoMaternotxt"></span></h6>
+
+				<h6 class="px-4 text-muted"><b>RFC: </b><span id="rfcModal"></span></h6>
+				<h6 class="px-4 text-muted"><b>CURP: </b><span id="curpModal"></span></h6>
+				<h6 class="px-4 text-muted"><b>Sexo: </b><span id="sexoModal"></span></h6>
+				<h6 class="px-4 text-muted"><b>Fecha nacimiento: </b><span id="fechaNacimientoModal"></span></h6>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="col-md-12">
+				<h5 class="px-4"><b>Domicilio</b></h5>
+			</div>
+			<div class="col-md-12">
+				<h6 class="px-4 text-muted"><b>Entidad: </b><span id="entidadtxt"></span></h6>
+				<h6 class="px-4 text-muted"><b>Municipio: </b><span id="municipiotxt"></span></h6>
+				<h6 class="px-4 text-muted"><b>Calle: </b><span id="calletxt"> </span></h6>
+				<h6 class="px-4 text-muted"><b>Número: </b><span id="numerotxt"></span></h6>
+				<h6 class="px-4 text-muted"><b>Colonia: </b><span id="coloniatxt"></span></h6>
+				<h6 class="px-4 text-muted"><b>Teléfono: </b><span id="telefonotxt"></span></h6>
+				<h6 class="px-4 text-muted"><b>Correo: </b> <span id="correotxt"></span></h6>
+				<h6 class="px-4 text-muted"><b>No. Licencia: </b> <span id="licenciatxt"><</span></h6>
+			</div>
+		</div>
+	</div>
+
+
+
+
+	<div class="row px-4 align-items-end">
+		<div class="col-12 mt-4 controlForm">
+			<label>Vehículo donde iba el involucrado durante el accidente:</label>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="btnOutline btnOutlinePrimary px-4 my-3">
+			<button onclick="SelecionVehiculo()">
+				<h5 class="m-0"><i class="me-2 icon-addInvolucrado"></i><b>Editar(Selecionar otro)</b></h5>
+			</button>
+		</div>
+	</div>
+	<div class="col-md-6">
+			<h6 class="px-4 text-muted"><b>Placas: </b>@(Model.Placa ?? "-")</h6>
+			<h6 class="px-4 text-muted"><b>Tarjeta: </b> @(Model.Tarjeta ?? "-")</h6>
+			<h6 class="px-4 text-muted"><b>Serie: </b>@(Model.Serie ?? "-") </h6>
+			<h6 class="px-4 text-muted"><b>Tipo: </b>@(Model.TipoVehiculo ?? "-")</h6>
+		</div>
+
+		<div class="col-md-6">
+    <h6 class="px-4 text-muted"><b>Marca: </b>@(Model.Marca ?? "-")</h6>
+    <h6 class="px-4 text-muted"><b>Submarca: </b>@(Model.Submarca ?? "-")</h6>
+    <h6 class="px-4 text-muted"><b>Modelo: </b>@(Model.Modelo ?? "-")</h6>
+    <h6 class="px-4 text-muted"><b>Propietario: </b>@(Model.Propietario ?? "-")</h6>
+</div>
+
+<div id="seccionVehiculo" style="display:none">
+	<nav class="tabCustom">
+		<div class="nav nav-tabs row mx-0" id="nav-tab" role="tablist">
+				<button class="nav-link col active"  id="vehiculo-involucrado-tab" data-bs-toggle="tab" data-bs-target="#vehiculo-involucrado" type="button" role="tab" aria-controls="vehiculo-involucrado" aria-selected="true">
+				<div class="row justify-content-center align-items-center px-3 py-2">
+					<div class="col-auto radioCustom p-0">
+						<div class="rounded-circle m-2"></div>
+					</div>
+					<div class="col-auto p-0">
+							<h5 class="m-0" ><i class="icon-car h4"></i> <b>Vehículos</b></h5>
+					</div>
+				</div>
+			</button>
+				<button class="nav-link col" onclick="involucradoRequerido()" id="noneVehiculo-involucrado-tab" data-bs-toggle="tab" data-bs-target="#noneVehiculo-involucrado" type="button" role="tab" aria-controls="noneVehiculo-involucrado" aria-selected="false">
+				<div class="row justify-content-center align-items-center px-3 py-2">
+					<div class="col-auto radioCustom p-0">
+						<div class="rounded-circle m-2"></div>
+					</div>
+					<div class="col-auto p-0">
+							<h5 class="m-0" ><i class="icon-sinPropietario h4"></i> <b>Se ignora</b></h5>
+					</div>
+				</div>
+			</button>
+		</div>
+	</nav>
+	<div class="tab-content" id="nav-tabContent">
+			<div class="tab-pane tabCustomConteiner fade show active" id="vehiculo-involucrado" role="tabpanel" aria-labelledby="vehiculo-involucrado-tab">
+			<div class="px-4 mt-4 pb-4 align-items-end">
+				<div class="row titleCustom mb-1">
+					<div class="col-12 mt-4 mb-4">
+						<h5 class="px-4"><b>Listado de vehículos involucrados</b></h5>
+						<h6 class="px-4 text-muted">Selecciona un vehículo involucrado para continuar.</h6>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12 rounded mb-4">
+
+						<partial name="_ListaInvolucrados" model="Model" />
+
+						<!--tABLA-->
+					</div>
+				</div>
+
+			</div>
+			<div class="row">
+				<div class="col-12">
+					<div class="tabCustomEnd"></div>
+				</div>
+			</div>
+
+		</div>
+		<div class="tab-pane tabCustomConteiner fade" id="noneVehiculo-involucrado" role="tabpanel" aria-labelledby="noneVehiculo-involucrado-tab">
+			<div class="row px-4 my-4 py-5 align-items-end">
+				<div class="col-12 col-md-10 mx-md-auto text-center">
+					<h3><b>Se utiliza para capturar un accidente</b></h3>
+					<h4 class="fw-normal">en el que se desconoce el vehículo donde iba el involucrado o no iba en un vehiculo.</h4>
+					<h6 class="fw-normal">Si este es el caso debes dar click en el botón</h6>
+
+
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12">
+					<div class="tabCustomEnd"></div>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+		<form id="complementoInvolucradoForm">
+			<div class="row align-items-end mt-4">
+				<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+					<div class="controlForm my-3">
+						<label>Tipo <b>(obligatorio)</b>:</label>
+						<span>
+							@Html.HiddenFor(model => model.IdPersona, new { id = "idPersonaInput" })
+						@Html.HiddenFor(model => model.IdVehiculoNuevo, new { id = "idVehiculoHidden2" })
+					 @Html.HiddenFor(model => model.IdVehiculo)
+						<input type="hidden" id="IdInvolucradoHidden" value="@Model.IdInvolucrado" name="IdInvolucrado" />
+
+						@(Html.Kendo().DropDownListFor(t => t.IdTipoInvolucrado).NoDataTemplate("No se encontraron datos")
+								.DataTextField("Text")
+								.DataValueField("Value")
+								.OptionLabel("Selecciona un tipo")
+								.Filter(FilterType.Contains)
+								.DataSource(source =>
+								{
+									source.Read(read =>
+									{
+										read.Action("Tipos_Drop", "CapturaAccidentes");
+									});
+								})
+								.HtmlAttributes(new { style = "width:100%;" })
+								)
+						</span>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+					<div class="controlForm my-3">
+						<label>Estado de la víctima <b>(obligatorio)</b>:</label>
+						<span>
+						@(Html.Kendo().DropDownListFor(t => t.IdEstadoVictima).NoDataTemplate("No se encontraron datos")
+								.DataTextField("Text")
+								.DataValueField("Value")
+								.OptionLabel("Selecciona una opción")
+								.Filter(FilterType.Contains)
+								.DataSource(source =>
+								{
+									source.Read(read =>
+									{
+										read.Action("EstadoVictima_Drop", "CapturaAccidentes");
+									});
+								})
+								.HtmlAttributes(new { style = "width:100%;" })
+								)
+						</span>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+					<div class="controlForm my-3">
+						<label>Llevado a:</label>
+						<span>
+						@(Html.Kendo().DropDownListFor(t => t.IdHospital).NoDataTemplate("No se encontraron datos")
+								.DataTextField("Text")
+								.DataValueField("Value")
+								.OptionLabel("Selecciona una opción")
+								.Filter(FilterType.Contains)
+								.DataSource(source =>
+								{
+									source.Read(read =>
+									{
+										read.Action("Hospitales_Drop", "CapturaAccidentes");
+									});
+								})
+								.HtmlAttributes(new { style = "width:100%;" })
+								)
+
+						</span>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+					<div class="controlForm my-3">
+						<label>Traslado por:</label>
+						<span>
+						@(Html.Kendo().DropDownListFor(t => t.IdInstitucionTraslado).NoDataTemplate("No se encontraron datos")
+								.DataTextField("Text")
+								.DataValueField("Value")
+								.OptionLabel("Selecciona una opción")
+								.Filter(FilterType.Contains)
+								.DataSource(source =>
+								{
+									source.Read(read =>
+									{
+									read.Action("InstTraslado_DropTodas", "CapturaAccidentes");
+									});
+								})
+								.HtmlAttributes(new { style = "width:100%;" })
+								)
+						</span>
+					</div>
+				</div>
+				<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+					<div class="controlForm my-3">
+						<label>Asiento que ocupaba:</label>
+						<span>
+						@(Html.Kendo().TextBoxFor(t => t.IdAsiento)
+							.HtmlAttributes(new { style = "width: 100%", Id = "IdAsiento", type = "number", min = "1" })
+
+							//.Spinners(true)
+							)
+								
+						</span>
+					</div>
+				</div>
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3" id="cinturon" style="display:block">
+					<label for="IdCinturon" id="labelIdCinturon">Traía cinturón <b>(obligatorio)</b>:</label>
+					<span>
+						@(Html.Kendo().DropDownListFor(t => t.IdCinturon).NoDataTemplate("No se encontraron datos")
+							.DataTextField("Text")
+							.DataValueField("Value")
+							.Filter(FilterType.Contains)
+							.OptionLabel("Selecciona una opción")
+							.DataSource(source =>
+							{
+								source.Read(read =>
+								{
+									read.Action("Cinturon_Drop", "CapturaAccidentes");
+								});
+							})
+							.HtmlAttributes(new { style = "width:100%;" })
+							)
+					</span>
+				</div>			
+			</div>
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3">
+					<label>Aseguradora:</label>
+					<span>
+						@(Html.Kendo().DropDownListFor(t => t.IdAseguradora).NoDataTemplate("No se encontraron datos")
+							.DataTextField("Text")
+							.DataValueField("Value")
+							.OptionLabel("Selecciona una opción")
+							.Filter(FilterType.Contains)
+							.DataSource(source =>
+							{
+								source.Read(read =>
+								{
+									read.Action("Aseguradora_Drop", "CapturaAccidentes");
+								});
+							})
+							.HtmlAttributes(new { style = "width:100%;" })
+							)
+					</span>
+				</div>
+			</div>
+
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3">
+					<label>Nro. Póliza:</label>
+					<span>
+						@(Html.Kendo().TextBoxFor(t => t.Poliza)
+							.Placeholder("Ingresa Nro. Póliza")
+							.HtmlAttributes(new { style = "width: 100%" })
+							)
+					</span>
+				</div>
+			</div>
+
+			<div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+				<div class="controlForm my-3">
+					<label>Fecha Expiración Póliza:</label>
+					@(Html.Kendo().DatePickerFor(t => t.FechaExpiracionPoliza)
+						.Format("dd/MM/yyyy")
+						.HtmlAttributes(new { style = "width: 100%", id = "FechaExpiracionPoliza" })
+						.Min(DateTime.Today)
+						)
+				</div>
+			</div>
+			<div class="w-100"></div>
+			<!--ARCHIVO INVOLUCRADO -->
+
+			<div class="col-12 col-md-5  me-md-3 mb-4">
+				<div class="controlForm">
+					<div id="conInfoInv">
+						@if (!string.IsNullOrEmpty(Model.archivoInvolucradoStr))
+						{
+							<span>Archivo actual: @System.IO.Path.GetFileName(Model.archivoInvolucradoStr)</span>
+							<div>
+								<button type="button" class="btn btn-primary mt-2" onclick="mostrarCargaArchivoInv()">
+									Cambiar archivo
+								</button>
+								<button type="button" class="btn btn-secondary mt-2" onclick="mostrarArchivoInv()">
+									Mostrar archivo guardado
+								</button>
+							</div>
+						}
+					</div>
+					<div class="input-group @(string.IsNullOrEmpty(Model.archivoInvolucradoStr) ? "" : "d-none")" id="inputCargaArchivoInv">
+						<label for="arhivoInv">Agregar archivo:</label>
+						<div class="input-group">
+							<input type="file" name="archivoInvolucrado" id="archivoInvolucrado" class="form-control mb-2">
+						</div>
+						<button type="button" class="btn btn-primary mt-2" onclick="guardarArchivoInv()">
+							Guardar archivo
+						</button>
+						<button type="button" class="btn btn-secondary mt-2" onclick="mostrarArchivoInv()">
+							Mostrar archivo guardado
+						</button>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		</form>
+	<div class="row">
+		<div class="col-12">
+			<div class="tabCustomEnd">
+				<div class="row">
+					<div class="col-12 col-md-8 mx-md-auto col-lg-5 d-flex justify-content-between align-items-center">
+						<div class="col-auto btnOutline my-2 p-0">
+							<button type="button" class="btn btnOutline btn-sm btnClose" onclick="cerrarModalInvEdit()" class="btn btn-secondary">
+								<h6 class="m-0 px-3"><b>Cerrar</b></h6>
+							</button>
+						</div>
+						<div class="col-auto controlButton my-3 p-0">
+							<button type="button" onclick="agregarComplementos()" class="btn btn-primary">
+								<h5 class="m-0"><b>Finalizar captura</b></h5>
+							</button>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</section>
+<!--MODAL BUSQUEDA INVOLUCRADO-->
+<div class="modal fade modalCustom" id="buscarInvolucradoModal" aria-labelledby="buscarInvolucradLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl" role="document">
+		<div class="modal-content">
+			<div class="modal-body" id="ModalBodyBuscarInvolucrado">
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade modalCustom" id="modalCrearPersona" aria-labelledby="modalCrearPersona" aria-hidden="true">
+	<div class="modal-dialog modal-xl boxShadow modal-dialog-centered ">
+		<div class="modal-content">
+
+			<div class="modal-body" id="modalBodyCrearPersona">
+			</div>
+		</div>
+	</div>
+</div>
+@*FRAME ARCHIVO*@
+
+
+<div class="modal fade" id="archivoInvEditModal" tabindex="-1" aria-labelledby="archivoInvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="archivoModalLabel">Vista Previa del Archivo</h5>
+                <button type="button" class="btn btn-secondary" onclick="cerrarIframe()">X</button>
+            </div>
+            <div class="modal-body">
+                <div id="pdfContainerEditInv" style="display: none; overflow: auto; max-height: 500px;">
+                    <canvas id="pdfViewerEditInv" style="display: block; width: auto; height: auto;"></canvas>
+                    <div>
+                        <button id="prevPageEditInv" class="btn btn-primary">Anterior</button>
+                        <button id="nextPageEditInv" class="btn btn-primary">Siguiente</button>
+                        <button id="zoomInEditInv" class="btn btn-primary">Zoom +</button>
+                        <button id="zoomOutEditInv" class="btn btn-primary">Zoom -</button>
+                        <span id="pageNumEditInv"></span> / <span id="pageCountEditInv"></span>
+                    </div>
+                </div>
+                <div id="imageContainerEditInv" style="display: none;">
+                    <img id="imageViewerEditInv" style="width: 100%; height: auto;" />
+                </div>
+                <p id="archivoErrorEditInv" style="display: none; color: red;">No se puede cargar el archivo.</p>
+            </div>
+            <div class="modal-footer">
+				<button type="button" class="btn btn-secondary" onclick="cerrarIframe()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+	function editarPersona() {
+		var idPersona = document.getElementById('idPersonaInput').value;
+		var esFisico = 1;
+		$.ajax({
+			url: '@Url.Action("ajax_ModalEditarPersona2")',
+			type: 'GET',
+			data: { idPersona: idPersona, esFisico: esFisico },
+			contentType: "application/json; charset=utf-8",
+			success: function (value) { 
+				$('#modalBodyCrearPersona').html(value);
+				$('#modalCrearPersona').modal({ backdrop: 'static', keyboard: false });
+				$('#modalCrearPersona').modal('show');
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+		event.stopPropagation();
+	}
+	function busquedaPersonaEditar() {
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("SubmodalBuscarInvolucrado", "CapturaAccidentes")',
+			type: 'GET',
+			contentType: "application/json; charset=utf-8",
+			dataType: "html",
+			async: false,
+			success: function (data) {
+				$('#ModalBodyBuscarInvolucrado').html(data);
+				$('#buscarInvolucradoModal').modal({ backdrop: 'static', keyboard: false });
+				$('#buscarInvolucradoModal').modal('show');
+				hideLoading();
+			}, error: function () {
+				sitteg_warning("Ocurrio un error al procesar su solicitud.");
+				hideLoading();
+			}
+		});
+	}
+
+	function involucradoRequerido() {
+		//$("#personaInvolucrada").val(value);
+		//alert($("#personaInvolucrada").val());
+				 $('#idVehiculoHidden2').val(0);
+
+	}
+
+	function agregarComplementos() {
+		var idPersona = $("#idPersonaInput").val();
+		if (idPersona === "") {
+			sitteg_warning("Debe seleccionar una persona involucrada");
+			return;
+		}
+		var validator = $("#complementoInvolucradoForm").kendoValidator().data('kendoValidator');
+
+		var controlsValidate = [];
+		var isValid = true;
+		var IdTipoInvolucrado = $("#IdTipoInvolucrado").val();
+		var IdEstadoVictima = $("#IdEstadoVictima").val();
+		var IdCinturon = $("#IdCinturon").val();
+		console.log("AA", IdTipoInvolucrado)
+		controlsValidate.push({ 'controlName': 'IdTipoInvolucrado' });
+		controlsValidate.push({ 'controlName': 'IdEstadoVictima' });
+		controlsValidate.push({ 'controlName': 'IdCinturon' });
+
+
+		// INPUTS
+		if (!isControlsValidDropDown(controlsValidate)) { isValid = false; }
+
+		if (!isValid) {
+			sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+			return;
+		}
+		var Mydata = $("#complementoInvolucradoForm").serialize();
+		console.log("YAH",Mydata)
+
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("ActualizarRelacionVehiculoInvolucrado", "CapturaAccidentes")',
+			type: 'POST',
+			data: Mydata,
+			success: function (result) {
+				$('#agregarInvolucradoModal').modal('hide');
+				$('.modal-backdrop').remove();
+				sitteg_success("Se ha actualizado la información");
+				actualizarGrid();
+				hideLoading();
+			},
+			error: function (error) {
+				hideLoading();
+			}
+		});
+	}
+
+	function actualizarGrid() {
+		var grid = $("#gridInvolucradosTodo").data("kendoGrid");
+		grid.dataSource.read();
+		grid.refresh();
+	}
+	function involucardoNoVehiculo() {
+		var idPersona = $("#idPersonaInput").val();
+		var IdVehiculoInvolucrado = $("#idVehiculoHidden").val();
+		showLoading();
+		$.ajax({
+			url: '@Url.Action("GuardarRelacionPersonaVehiculo", "CapturaAccidentes")',
+			type: 'POST',
+			data: { idPersona: idPersona, IdVehiculoInvolucrado: IdVehiculoInvolucrado },
+			success: function (response) {
+				sitteg_success("Se ha actualizado la información");
+				hideLoading();
+			},
+			error: function (xhr, status, error) {
+				hideLoading();
+			}
+		});
+	}
+	function SelecionVehiculo(){
+		$('#seccionVehiculo').show();
+	}
+	$(document).ready(function () {
+		$("#IdAsiento").on("keydown", function (e) {
+			// Obtener el código de la tecla presionada
+			var keyCode = e.keyCode || e.which;
+
+			// Verificar si la tecla presionada es el cero
+			if (keyCode === 48 || keyCode === 96) {
+				// Si se presionó el cero, prevenir su inserción
+				e.preventDefault();
+			}
+		});
+	});
+
+	function cerrarModalInvEdit() {
+		$('#agregarInvolucradoModal').modal('hide');
+		$('body').removeClass('model-open');
+         $('.modal-backdrop').remove();
+	}
+
+	 function mostrarCargaArchivoInv() {
+		var inputCargaArchivoInv = document.getElementById('inputCargaArchivoInv');
+		var conInfoInv = document.getElementById('conInfoInv');
+
+        if (inputCargaArchivoInv) {
+			inputCargaArchivoInv.classList.remove('d-none');
+        }
+
+        if (conInfoInv) {
+			conInfoInv.classList.add('d-none');
+        }
+    }
+
+
+
+	function mostrarArchivoInv() {
+		var IdInvolucrado = $("#idPersonaInput").val();
+		$.ajax({
+			url: '@Url.Action("ObtenerArchivoInvolucrado", "CapturaAccidentes")',
+			type: 'POST',
+			data: {
+				IdInvolucrado: IdInvolucrado
+			},
+			success: function (data) {
+				if (data.file) {
+					var fileType = data.app;
+					var src = 'data:' + fileType + ';base64,' + data.file;
+
+					// Muestra el contenedor adecuado dependiendo del tipo de archivo
+					var pdfContainer = document.getElementById('pdfContainerEditInv');
+					var imageContainer = document.getElementById('imageContainerEditInv');
+					var imageViewer = document.getElementById('imageViewerEditInv');
+					var canvas = document.getElementById('pdfViewerEditInv');
+					var context = canvas.getContext('2d');
+
+					if (fileType === 'application/pdf') {
+						pdfContainer.style.display = 'block';
+						imageContainer.style.display = 'none';
+
+						pdfjsLib.getDocument(src).promise.then(function (pdf) {
+							var pageNum = 1;
+							var scale = 1.0;
+							var pageCount = pdf.numPages;
+
+							function renderPage(num) {
+								pdf.getPage(num).then(function (page) {
+									var viewport = page.getViewport({ scale: scale });
+									canvas.height = viewport.height;
+									canvas.width = viewport.width;
+
+									var renderContext = {
+										canvasContext: context,
+										viewport: viewport
+									};
+									page.render(renderContext);
+									document.getElementById('pageNumEditInv').textContent = num;
+									document.getElementById('pageCountEditInv').textContent = pageCount;
+								});
+							}
+
+							document.getElementById('prevPageEditInv').addEventListener('click', function () {
+								if (pageNum > 1) {
+									pageNum--;
+									renderPage(pageNum);
+								}
+							});
+
+							document.getElementById('nextPageEditInv').addEventListener('click', function () {
+								if (pageNum < pageCount) {
+									pageNum++;
+									renderPage(pageNum);
+								}
+							});
+
+							document.getElementById('zoomInEditInv').addEventListener('click', function () {
+								scale += 0.1;
+								renderPage(pageNum);
+							});
+
+							document.getElementById('zoomOutEditInv').addEventListener('click', function () {
+								if (scale > 0.1) {
+									scale -= 0.1;
+									renderPage(pageNum);
+								}
+							});
+
+							renderPage(pageNum);
+
+							// Mostrar el modal
+							var myModal = new bootstrap.Modal(document.getElementById('archivoInvEditModal'));
+							myModal.show();
+							hideLoading();
+						}).catch(function (error) {
+							document.getElementById('archivoErrorEditInv').style.display = 'block';
+							hideLoading();
+						});
+
+					} else if (fileType.startsWith('image/')) {
+						pdfContainer.style.display = 'none';
+						imageContainer.style.display = 'block';
+						imageViewer.src = src;
+
+						// Mostrar el modal
+						var myModal = new bootstrap.Modal(document.getElementById('archivoInvEditModal'));
+						myModal.show();
+						hideLoading();
+					} else {
+						document.getElementById('archivoErrorEditInv').style.display = 'block';
+						hideLoading();
+					}
+				} else {
+					hideLoading();
+					sitteg_warning('No se ha guardado un archivo.');
+				}
+			},
+			error: function (xhr, status, error) {
+				hideLoading();
+				console.error('Error al obtener el archivo:', error);
+				document.getElementById('archivoError').style.display = 'block';
+			}
+		});
+	}
+
+	 function guardarArchivoInv() {
+		var archivoInput = document.getElementById('archivoInvolucrado');
+        var archivo = archivoInput.files[0];
+		var IdInvolucrado = $("#idPersonaInput").val();
+
+        if (!archivo) {
+            sitteg_warning('Por favor, selecciona un archivo primero.');
+            return;
+        }
+          if (archivo && archivo.size > 6 * 1024 * 1024) { // 6 MB en bytes
+            sitteg_warning('El archivo del parte excede el tamaño máximo permitido.');
+            return; 
+        }
+        var formData = new FormData();
+        formData.append('archivoInvolucrado', archivo);
+		    formData.append('IdInvolucrado', IdInvolucrado);
+
+        $.ajax({
+            url: '/CapturaAccidentes/GuardarArchivoInvolucrado', 
+            type: 'POST',
+            data: formData,
+            contentType: false, 
+            processData: false,
+            success: function(response) {
+                if (response.success) {
+                    sitteg_success('Archivo guardado correctamente.');
+                } else {
+                    sitteg_warning('Error: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                sitteg_warning('Hubo un error al guardar el archivo.');
+                console.error('Error:', error);
+            }
+        });
+    }
+	function cerrarIframe(){
+		$('#archivoInvEditModal').modal('hide');
+
+	}
+</script>

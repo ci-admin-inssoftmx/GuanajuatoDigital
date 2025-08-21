@@ -1,0 +1,63 @@
+﻿<script>
+    function filtroLicencia() {
+        var txtLicencia = $("#TxtLicencia").val();
+
+        txtLicencia = txtLicencia ? txtLicencia : null;
+
+        return {
+            txtLicencia: txtLicencia
+        };
+    }
+
+</script>
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+
+        @(
+            Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.ReportesModel>()
+            .Name("gridDanosAccidentes")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.numeroReporte).Title("No. de Reporte");
+                columns.Bound(c => c.montoCarga).Title("Daños carga");
+                columns.Bound(c => c.montoCamino).Title("Daños camino");
+                columns.Bound(c => c.montoPropietarios).Title("Daños propietarios");
+                columns.Bound(c => c.montoVehiculo).Title("Daños vehiculo");
+                columns.Bound(c => c.montoOtros).Title("Otros daños");
+                columns.Bound(c => c.ContadorTotal).Title("Total daños");
+
+
+
+            }).HtmlAttributes(new { style = "height:550px" })
+            .Sortable()
+            //.Groupable()
+            .Scrollable()
+            .Pageable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Read(read => read.Action("GetDanosAccidentes", "Reportes").Data("filtroLicencia"))
+            .PageSize(10)
+
+            )
+            .ToolBar(tools =>
+            {
+                tools.Excel();
+                tools.Search().Text("Buscar...");
+            })
+
+            .Excel(excel => excel
+            .FileName("Reporte_Daños_Accidente.xlsx")
+            .Filterable(true)
+            .AllPages(true)
+            .ProxyURL(Url.Action("Excel_Export_Save", "Grid"))
+
+            )
+
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+            .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+            )
+    </div>
+</div>

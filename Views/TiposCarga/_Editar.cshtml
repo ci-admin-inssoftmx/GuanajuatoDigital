@@ -1,0 +1,124 @@
+﻿@model GuanajuatoAdminUsuarios.Models.TiposCargaModel
+
+@{
+    Layout = null;
+}
+
+            <section class=" bg-white rounded">
+                <div class="row align-items-center justify-content-between px-4 px-md-4 pt-3 pb-2">
+                    <div class="col-auto pe-0">
+                        <div class="row align-items-center justify-content-center justify-content-md-start">
+                            <div class="col-auto pe-0">
+                                <i class="icon-editCarga h1 colorPrimary"></i>
+                            </div>
+                            <div class="col-auto my-3">
+                                <h2 class="m-0 h3"><b>Editar tipo de carga</b></h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="row">
+                            <div class="col-auto my-3">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="bg-light py-1"></div>
+                    </div>
+
+                </div>
+    <form id="EditarTipoCargaForm" class="row px-4 mb-4 align-items-end justify-content-center">
+
+                <div class="row align-items-end">
+                    <div class="col-12 col-lg-6 my-4">
+                        <h5 class="px-4"><b>Datos de tipo de carga</b></h5>
+                        <h6 class="px-4 text-muted">Completa los datos obligatorios para guardar.</h6>
+                    </div>
+        <div class="col-12 col-lg-6 my-4 btnToggleActive">
+            @(Html.Kendo().SwitchFor(t => t.ValorEstatusTiposCarga)
+                .Name("tiposCargaSwitch")
+                    .Checked(Model.Estatus == 1)
+                    .Messages(c => c.Checked("Activo").Unchecked("Inactivo"))
+                .HtmlAttributes(new { data_valor = Model.Estatus})
+
+                )
+        </div>
+                </div>
+                    <div class="col-12 col-md-6 col-lg-4 col-xl-3 col-xx-2">
+                        <div class="controlForm my-3">
+                            @Html.HiddenFor(m=>m.IdTipoCarga)
+                            @(Html.Kendo().TextBoxFor(t=>t.TipoCarga)
+                                .Label(l => l.Content("Nombre <b>(obligatorio)</b>:"))
+                                .Placeholder("Ingresa el nombre del tipo de carga")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                        </div>
+                    </div>
+
+
+                </form>
+                <div class="row my-4">
+                    <div class="col-12 col-md-6 mx-md-auto">
+                        <div class="row justify-content-around">
+                            <div class="col-auto btnOutline my-2 mx-auto mx-xl-2 p-0">
+                                <button type="button" class="btn btnOutline btn-sm btnClose" data-bs-dismiss="modal" aria-label="Close">
+                                    <h6 class="m-0 px-3"><b>Cerrar</b></h6>
+                                </button>
+                            </div>
+                            <div class="col-auto btnOutline btnOutlinePrimary my-2 mx-auto mx-xl-2 p-0">
+                                <div class="controlButton">
+                        <button class="btnPrimary px-3" onclick="editarTipoCarga()">
+                            <h5 class="m-0"><b>Guardar</b></h5>
+                        </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </section>
+
+            <script>
+ function editarTipoCarga() {
+        var controlsValidate = [];
+        var isValid = true;
+
+        controlsValidate.push({ 'controlName': 'TipoCarga' });
+
+        if (!isControlsValid(controlsValidate)) { isValid = false; }
+
+
+        if (!isValid) {
+            sitteg_warning('Hacen falta datos o existen datos incorrectos, favor de verificar.');
+            return;
+        }
+        var Mydata = $("#EditarTipoCargaForm").serialize();
+        console.log(Mydata);
+        $('#addTipoCarga').modal('hide');
+        $('body').removeClass('model-open');
+        $('.modal-backdrop').remove();
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("EditarParcialModal")',
+            type: 'POST',
+            data: Mydata,
+            success: function (result) {
+                var grid = $("#gridCatTiposCarga").data("kendoGrid");
+                                grid.dataSource.read();
+                sitteg_success("Información actualizada correctamente.");
+
+                hideLoading();
+            }, error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+                hideLoading();
+            }
+        });
+    }
+
+</script>
+   

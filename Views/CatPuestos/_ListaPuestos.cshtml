@@ -1,0 +1,106 @@
+﻿@using GuanajuatoAdminUsuarios.Models.Catalogos.Puestos
+@model List<PuestoModel>
+@{
+
+}
+
+<div class="row">
+    <div class="col-12 mb-4 px-4 rounded gridCustom">
+        @(Html.Kendo().Grid<PuestoModel>(Model)
+            .Name("puestosGrid")
+            .Columns(columns =>
+            {
+                columns.Bound(t => t.Id).Title("Id");
+                columns.Bound(t => t.Puesto).Title("Puesto");
+                columns.Bound(t => t.Descripcion).Title("Descripción");
+                columns.Bound(t => t.Delegacion).Title("Delegación");
+                columns.Command(c =>
+                    {
+                        c.Custom("Editar").Click("mostrarEditarModal");
+                        c.Custom("Eliminar").Click("mostrarEliminarModal").HtmlAttributes( new { @class = "text-danger" });
+                    }).Width(200);                
+            })
+            .Pageable()
+            .Sortable()
+            .DataSource(dataSource => dataSource
+			    .Ajax()
+			    .Read(read => read.Action("Search", "CatPuestos").Data("applyFilter"))
+                .PageSize(7)
+                .Model(model => model.Id(p => p.Id))
+		    )
+            .ToolBar(t => t.Search().Text("Buscar..."))
+            .Search(s =>
+            {
+                s.Field(c => c.Puesto);
+            })
+            .Selectable(selectable => selectable.Mode(GridSelectionMode.Single)
+                .Type(GridSelectionType.Row)
+            )
+            .Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+        )  
+        
+        @(Html.Kendo().Tooltip()
+            .For("#grid")
+            .Filter("th")
+            .Position(TooltipPosition.Top)
+            .ContentHandler("tooltipContent")
+            )
+    </div>
+</div>
+
+<script>
+    function mostrarEditarModal(e) {
+        let dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        let puestoId= dataItem.Id;
+                
+        showLoading();
+        $.ajax({
+            url: `@Url.Action("LoadEditarPartial","CatPuestos")/${puestoId}`,
+            type: 'GET',
+            success: function (data) {
+                $('#editarPuestoModalBody').html(data);
+                $('#editarPuestoModal').modal('show');
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+
+    function mostrarEliminarModal(e) {
+        let dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        let puestoId = dataItem.Id;
+
+        let formData = new FormData();
+        formData.append('Id', puestoId);
+        formData.append('Puesto', dataItem.Puesto);
+        formData.append('Delegacion', dataItem.Delegacion);
+
+        showLoading();
+        $.ajax({
+            url: '@Url.Action("LoadEliminarPartial", "CatPuestos")',
+            type: 'POST',
+            data: formData,
+            processData: false, // Necesario para enviar FormData
+            contentType: false,
+            success: function (data) {
+                $('#eliminarPuestoModalBody').html(data);
+                $('#eliminarPuestoModal').modal('show');
+            },
+            error: function () {
+                sitteg_warning("Ocurrio un error al procesar su solicitud.");
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+
+    function tooltipContent(e) {
+        var titulo = e.target.context.dataset.title;
+        return titulo;
+    }
+</script>

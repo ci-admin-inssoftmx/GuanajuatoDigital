@@ -1,0 +1,133 @@
+﻿
+<div class="row">
+	<div class="col-12 mb-4 px-4 rounded gridCustom">
+		@(
+			Html.Kendo().Grid<GuanajuatoAdminUsuarios.Models.CapturaAccidentesModel>()
+			.Name("gridVehiculosInvolucrados")
+			.Columns(columns =>
+			{
+				columns.Select().Width(50).ClientHeaderTemplate(" ");
+				columns.Bound(c => c.IdPersona).Hidden();
+				columns.Bound(c => c.IdVehiculo).Hidden();
+				columns.Bound(c => c.OrdenVehiculo).Title("No. de Vehículo").Width(100);
+				columns.Bound(c => c.Placa).Title("Placas").Width(100);
+				columns.Bound(c => c.Tarjeta).Title("Tarjeta").Width(100);
+				columns.Bound(c => c.Serie).Title("Serie").Width(100);
+				columns.Bound(c => c.Marca).Title("Marca").Width(100);
+				columns.Bound(c => c.Submarca).Title("SubMarca").Width(100);
+				columns.Bound(c => c.Modelo).Title("Tipo/Modelo").Width(100);
+				columns.Bound(c => c.PropietarioInvolucrado).Title("Propietario").Width(300);
+			}).HtmlAttributes(new { style = "height:550px" })
+			.Sortable(sortable => sortable.AllowUnsort(true).InitialDirection("desc"))
+			.Scrollable()
+			.DataSource(dataSource => dataSource
+			.Ajax()
+			.Read(read => read.Action("ObtVehiculosInvol2", "CapturaAccidentes"))
+			)
+			.ToolBar(t => t.Search().Text("Buscar..."))
+			.Search(s =>
+			{
+				s.Field(c => c.IdVehiculoInvolucrado);
+				s.Field(c => c.Tarjeta);
+				s.Field(c => c.Fecha);
+				s.Field(c => c.Placa);
+				s.Field(c => c.Serie);
+				s.Field(c => c.Marca);
+				s.Field(c => c.Submarca);
+				s.Field(c => c.PropietarioInvolucrado);
+				s.Field(c => c.Modelo);
+
+			})
+			.Events(events => events.DataBound("replaceLegend").DataBinding("replaceLegend"))
+
+			)
+	</div>
+</div>
+
+<script>
+
+	$(document).ready(function () {
+		var grid = $("#gridVehiculosInvolucrados").data("kendoGrid");
+		grid.tbody.on("click", ".k-checkbox", onClickInfraccionesVehiculo);
+
+		function onClickInfraccionesVehiculo(e) {
+			var gridI = $("#gridVehiculosInvolucrados").data("kendoGrid");
+			var row = $(e.target).closest("tr");
+			var dataItem = gridI.dataItem(row);
+			var IdTipoVehiculo = dataItem.IdTipoVehiculo;
+
+			console.log("DATA", dataItem);
+			obtenerIdPersonaDesdeModal(dataItem.IdVehiculoInvolucrado);
+
+			// Obtener referencia al DropDownList
+			var dropdown = $("#IdCinturon").data("kendoDropDownList");
+			if (dropdown) {
+				var dataSource = dropdown.dataSource;
+
+				var derivadosDeMotocicleta = [5, 13, 24, 25, 42, 46, 48, 49, 84, 86, 97, 98, 100, 108];
+
+				// Limpiar filtros antes de aplicar uno nuevo
+				dataSource.filter({});
+
+				// Aplicar filtro basado en IdTipoVehiculo
+				if (derivadosDeMotocicleta.includes(IdTipoVehiculo)) {
+					dataSource.filter({
+						logic: "or",
+						filters: [
+							{ field: "Value", operator: "eq", value: "4" },
+							{ field: "Value", operator: "eq", value: "5" }
+						]
+					});
+                 $("#labelIdCinturon").html("Usaba casco <b>(obligatorio)</b>:");
+
+				} else {
+					dataSource.filter({
+						logic: "or",
+						filters: [
+							{ field: "Value", operator: "eq", value: "1" },
+							{ field: "Value", operator: "eq", value: "2" },
+							{ field: "Value", operator: "eq", value: "3" }
+						]
+					});
+					$("#labelIdCinturon").html("Traía cinturón <b>(obligatorio)</b>:");
+
+				}
+			}
+
+			if (row.hasClass("k-selected")) {
+				setTimeout(function () {
+					gridI.clearSelection();
+				});
+			} else {
+				gridI.clearSelection();
+			}
+		}
+	});
+
+
+	function obtenerIdPersonaDesdeModal(IdVehiculoInvolucrado) {
+
+		var idPersona = $('#idPersonaInput').val();
+		$('#idPersonaInput').val(idPersona);
+		$('#idVehiculoHidden').val(IdVehiculoInvolucrado);
+		var IdInvolucrado = $("#IdInvolucradoHidden").val();
+		 $('#idVehiculoHidden2').val(IdVehiculoInvolucrado);
+
+		/*$.ajax({
+			url: '/CapturaAccidentes/GuardarRelacionPersonaVehiculo',
+			type: 'POST',
+			data: { idPersona: idPersona, IdVehiculoInvolucrado: IdVehiculoInvolucrado, IdInvolucrado: IdInvolucrado },
+			success: function (response) {
+				sitteg_success("Se ha actualizado la información del vehículo");
+				hideLoading();
+				// $("#tablaHospitales").html(result);
+
+			},
+			error: function (error) {
+				hideLoading();
+			}
+		});*/
+	}
+
+
+</script>
