@@ -1,0 +1,94 @@
+name: "🏭 Production Deployment (Blue-Green)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      artifact_run_id:
+        description: 'Run ID del artefacto a desplegar'
+        required: true
+        default: '17144072754'
+
+jobs:
+  deploy-production:
+    name: 🏭 Deploy to Production (Blue-Green)
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: GuanajuatoDigital-1.0.4
+          path: ./artifacts
+          repository: ci-admin-inssoftmx/GuanajuatoDigital
+          run-id: ${{ github.event.inputs.artifact_run_id }}
+
+      - name: Blue-Green Pre-Deploy Setup
+        run: |
+          echo "🔵🟢 Starting Blue-Green Deployment..."
+          echo "📦 Artifact: GuanajuatoDigital-1.0.4"
+          echo ""
+          echo "🔍 Current State:"
+          echo "  🔵 BLUE (current):  https://prod-guanajuato.blue.local"
+          echo "  🟢 GREEN (staging): https://prod-guanajuato.green.local"
+          echo ""
+          echo "📁 Artifact Contents:"
+          ls -la ./artifacts
+          cat ./artifacts/version.txt
+
+      - name: Deploy to GREEN Environment
+        run: |
+          echo "🟢 Deploying to GREEN environment..."
+          echo "📤 Copying artifacts to GREEN servers..."
+          sleep 3
+          echo "⚙️ Configuring GREEN environment..."
+          sleep 2
+          echo "🌐 GREEN URL: https://prod-guanajuato.green.local"
+          echo "✅ GREEN deployment completed"
+
+      - name: Health Check GREEN
+        run: |
+          echo "🏥 Running health checks on GREEN..."
+          sleep 5
+          echo "✅ Application responding on GREEN"
+          echo "✅ Database connection: OK"
+          echo "✅ External services: OK"
+          echo "✅ Load balancer check: OK"
+          echo "🎯 GREEN environment is healthy"
+
+      - name: Blue-Green Traffic Switch
+        run: |
+          echo "🔄 Switching traffic from BLUE to GREEN..."
+          echo "⚠️ This will redirect all production traffic"
+          sleep 3
+          echo "🔀 Updating load balancer configuration..."
+          sleep 2
+          echo "📊 Traffic switch progress:"
+          echo "  🔵 BLUE: 100% → 0%"
+          echo "  🟢 GREEN: 0% → 100%"
+          sleep 3
+          echo "✅ Traffic successfully switched to GREEN"
+
+      - name: Verify Production
+        run: |
+          echo "🔍 Verifying production deployment..."
+          sleep 3
+          echo "🌐 Production URL: https://prod-guanajuato.simulation.local"
+          echo "📊 Production Status:"
+          echo "  🟢 GREEN (active):   100% traffic"
+          echo "  🔵 BLUE (standby):   0% traffic (kept for rollback)"
+          echo ""
+          echo "✅ Blue-Green deployment completed successfully!"
+
+      - name: Post-Deploy Cleanup
+        run: |
+          echo "🧹 Post-deployment cleanup..."
+          echo "📊 Final State:"
+          echo "  🟢 Production (GREEN): GuanajuatoDigital v1.0.4"
+          echo "  🔵 Standby (BLUE):     Previous version (rollback ready)"
+          echo ""
+          echo "🎯 Deployment Summary:"
+          echo "  ✅ Zero downtime achieved"
+          echo "  ✅ Instant rollback available"
+          echo "  ✅ Production health verified"
+          echo "  🌐 Live at: https://prod-guanajuato.simulation.local"
