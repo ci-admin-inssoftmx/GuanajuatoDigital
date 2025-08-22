@@ -43,7 +43,8 @@
 		<PackageReference Include="System.ServiceModel.Http" Version="4.10.*" />
 		<PackageReference Include="System.ServiceModel.NetTcp" Version="4.10.*" />
 		<PackageReference Include="System.ServiceModel.Security" Version="4.10.*" />
-		<PackageReference Include="Telerik.UI.for.AspNet.Core.Trial" Version="2023.1.117" />
+		<!-- Telerik.UI.for.AspNet.Core.Trial - Comentado para CI/CD público -->
+		<!-- <PackageReference Include="Telerik.UI.for.AspNet.Core.Trial" Version="2023.1.117" /> -->
 
 
 	</ItemGroup>
