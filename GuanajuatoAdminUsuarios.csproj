@@ -1,0 +1,148 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web" ToolsVersion="15.0">
+
+	<PropertyGroup>
+		<TargetFramework>netcoreapp7.0</TargetFramework>
+		<AssemblyName>GuanajuatoAdminUsuarios</AssemblyName>
+		<BaseOutputPath></BaseOutputPath>
+	</PropertyGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="ClosedXML" Version="0.104.0-preview2" />
+		<PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
+		<PackageReference Include="HtmlRenderer.PdfSharp" Version="1.5.0.6" />
+		<PackageReference Include="iTextSharp" Version="5.5.13.3" />
+		<PackageReference Include="itextsharp.xmlworker" Version="5.5.13.3" />
+		<PackageReference Include="log4net" Version="2.0.15" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="7.0.13" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.13" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="3.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.jQuery.Unobtrusive.Ajax" Version="3.2.6" />
+		<PackageReference Include="Microsoft.Web.Administration" Version="11.1.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+		<PackageReference Include="NSwag.ApiDescription.Client" Version="13.0.5">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="SpreadsheetLight" Version="3.5.0" />
+		<PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+		<PackageReference Include="System.ServiceModel.Duplex" Version="4.10.*" />
+		<PackageReference Include="System.ServiceModel.Federation" Version="4.10.*" />
+		<PackageReference Include="System.ServiceModel.Http" Version="4.10.*" />
+		<PackageReference Include="System.ServiceModel.NetTcp" Version="4.10.*" />
+		<PackageReference Include="System.ServiceModel.Security" Version="4.10.*" />
+		<PackageReference Include="Telerik.UI.for.AspNet.Core.Trial" Version="2023.1.117" />
+
+
+	</ItemGroup>
+
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Remove="Attributes\**" />
+		<Compile Remove="Extensions\**" />
+		<Compile Remove="Templates\**" />
+		<Compile Remove="WebClientServices\**" />
+		<Content Remove="Attributes\**" />
+		<Content Remove="Extensions\**" />
+		<Content Remove="Templates\**" />
+		<Content Remove="WebClientServices\**" />
+		<EmbeddedResource Remove="Attributes\**" />
+		<EmbeddedResource Remove="Extensions\**" />
+		<EmbeddedResource Remove="Templates\**" />
+		<EmbeddedResource Remove="WebClientServices\**" />
+		<None Remove="Attributes\**" />
+		<None Remove="Extensions\**" />
+		<None Remove="Templates\**" />
+		<None Remove="WebClientServices\**" />
+		<None Remove="Helpers\" />
+		<None Remove="Microsoft.EntityFrameworkCore.SqlServer" />
+		<None Remove="Microsoft.EntityFrameworkCore" />
+		<None Remove="Areas\" />
+		<None Remove="Areas\Administracion\" />
+		<None Remove="Areas\Administracion\Controllers\" />
+		<None Remove="Areas\Administracion\Views\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Views\ModificacionVehiculos\" />
+		<Folder Include="Views\PDFGenerator\AccidentesDetallado\" />
+		<Folder Include="Views\Reportes\Grids\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="Views\Inicio\About.cshtml" />
+		<None Include="Views\Inicio\Contact.cshtml" />
+		<None Include="Views\Inicio\Inicio.cshtml" />
+		<None Include="Views\Inicio\Marca.cshtml" />
+		<None Include="Views\MarcasVehiculos\Create.cshtml" />
+		<None Include="Views\MarcasVehiculos\Index.cshtml" />
+		<None Include="Views\Personas\Index.cshtml" />
+		<None Include="Views\Personas\_CrearPersona.cshtml" />
+		<None Include="Views\Personas\_EditarPersona.cshtml" />
+		<None Include="Views\Personas\_ListadoPersonas.cshtml" />
+		<None Include="Views\Shared\Components\Menu\Default.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\Boolean.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\Country.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\Currency.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\Date.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\DateTime.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\Email.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\EmailAddress.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\GridForeignKey.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\Integer.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\Number.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\Password.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\String.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\Time.cshtml" />
+		<None Include="Views\Shared\EditorTemplates\Url.cshtml" />
+		<None Include="Views\Shared\Error.cshtml" />
+		<None Include="Views\Shared\_Layout.cshtml" />
+		<None Include="Views\Shared\_UserDataPartial.cshtml" />
+		<None Include="Views\Shared\_ValidationScriptsPartial.cshtml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="SITTEG.APIClientHelper">
+			<HintPath>References\SITTEG.APIClientHelper.dll</HintPath>
+		</Reference>
+		<Reference Include="SITTEG.APIClientInfrastructure">
+			<HintPath>References\SITTEG.APIClientInfrastructure.dll</HintPath>
+		</Reference>
+		<Reference Include="SITTEG.Framework">
+			<HintPath>References\SITTEG.Framework.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Update="Views\Blocs\EditarBloc.cshtml">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+		<Content Update="Views\Blocs\_CancelarBloc.cshtml">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
+	<ProjectExtensions>
+		<VisualStudio>
+			<UserProperties UseCdnSupport="" />
+		</VisualStudio>
+	</ProjectExtensions>
+
+</Project>
