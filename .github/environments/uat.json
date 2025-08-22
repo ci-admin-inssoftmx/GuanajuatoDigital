@@ -1,0 +1,45 @@
+{
+  "environment": "UAT",
+  "description": "Ambiente de pruebas de usuario con GitHub-hosted runners (simulación)",
+  "mode": "simulation",
+  "configuration": {
+    "logging": {
+      "level": "Information",
+      "console": true,
+      "file": false
+    },
+    "database": {
+      "connection_string": "simulation://uat-database",
+      "migrations": true,
+      "seed_data": false
+    },
+    "features": {
+      "swagger": false,
+      "debug_mode": false,
+      "hot_reload": false,
+      "detailed_errors": false
+    },
+    "security": {
+      "authentication": "testing",
+      "cors": ["https://uat-frontend.simulation.local"],
+      "https_redirect": true
+    },
+    "performance": {
+      "cache": true,
+      "compression": true,
+      "monitoring": true
+    }
+  },
+  "deployment": {
+    "strategy": "artifacts",
+    "runner": "ubuntu-latest",
+    "health_check": "simulation",
+    "rollback": "manual",
+    "approval_required": true
+  },
+  "validation": {
+    "smoke_tests": true,
+    "integration_tests": true,
+    "load_tests": false
+  }
+}

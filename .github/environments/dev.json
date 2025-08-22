@@ -1,0 +1,44 @@
+{
+  "environment": "Development",
+  "description": "Ambiente de desarrollo con GitHub-hosted runners (simulación)",
+  "mode": "simulation",
+  "configuration": {
+    "logging": {
+      "level": "Debug",
+      "console": true,
+      "file": false
+    },
+    "database": {
+      "connection_string": "simulation://dev-database",
+      "migrations": true,
+      "seed_data": true
+    },
+    "features": {
+      "swagger": true,
+      "debug_mode": true,
+      "hot_reload": true,
+      "detailed_errors": true
+    },
+    "security": {
+      "authentication": "development",
+      "cors": ["*"],
+      "https_redirect": false
+    },
+    "performance": {
+      "cache": false,
+      "compression": false,
+      "monitoring": false
+    }
+  },
+  "deployment": {
+    "strategy": "artifacts",
+    "runner": "ubuntu-latest",
+    "health_check": "simulation",
+    "rollback": "manual"
+  },
+  "validation": {
+    "smoke_tests": true,
+    "integration_tests": false,
+    "load_tests": false
+  }
+}

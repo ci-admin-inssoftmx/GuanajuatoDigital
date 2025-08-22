@@ -1,0 +1,50 @@
+{
+  "environment": "Production",
+  "description": "Ambiente de producción con Blue-Green deployment (simulación)",
+  "mode": "simulation",
+  "configuration": {
+    "logging": {
+      "level": "Warning",
+      "console": false,
+      "file": false
+    },
+    "database": {
+      "connection_string": "simulation://production-database",
+      "migrations": false,
+      "seed_data": false
+    },
+    "features": {
+      "swagger": false,
+      "debug_mode": false,
+      "hot_reload": false,
+      "detailed_errors": false
+    },
+    "security": {
+      "authentication": "production",
+      "cors": ["https://guanajuato.simulation.local"],
+      "https_redirect": true
+    },
+    "performance": {
+      "cache": true,
+      "compression": true,
+      "monitoring": true
+    }
+  },
+  "deployment": {
+    "strategy": "blue-green-simulation",
+    "runner": "ubuntu-latest",
+    "health_check": "simulation",
+    "rollback": "automatic",
+    "approval_required": true,
+    "blue_green": {
+      "switch_simulation": true,
+      "rollback_timeout": 180,
+      "health_check_interval": 30
+    }
+  },
+  "validation": {
+    "smoke_tests": true,
+    "integration_tests": true,
+    "load_tests": true
+  }
+}
