@@ -49,12 +49,29 @@ jobs:
       - name: Restore Dependencies
         run: |
           echo "📦 Restoring NuGet packages..."
-          dotnet restore ${{ env.PROJECT_FILE }}
+          echo "Working directory: $(pwd)"
+          echo "Files in directory:"
+          ls -la *.csproj || echo "No .csproj files found"
+          ls -la *.sln || echo "No .sln files found"
+          
+          # Try to find and restore the project
+          if [ -f "GuanajuatoAdminUsuarios.csproj" ]; then
+            dotnet restore GuanajuatoAdminUsuarios.csproj
+          elif [ -f "GuanajuatoAdminUsuarios.sln" ]; then
+            dotnet restore GuanajuatoAdminUsuarios.sln
+          else
+            echo "❌ No project file found"
+            exit 1
+          fi
 
       - name: Build Application
         run: |
           echo "🔨 Building application..."
-          dotnet build ${{ env.PROJECT_FILE }} --configuration Release --no-restore
+          if [ -f "GuanajuatoAdminUsuarios.csproj" ]; then
+            dotnet build GuanajuatoAdminUsuarios.csproj --configuration Release --no-restore
+          elif [ -f "GuanajuatoAdminUsuarios.sln" ]; then
+            dotnet build GuanajuatoAdminUsuarios.sln --configuration Release --no-restore
+          fi
           echo "✅ Build completed successfully"
 
       - name: Run Unit Tests
@@ -70,12 +87,21 @@ jobs:
       - name: Publish Application
         run: |
           echo "📋 Publishing application..."
-          dotnet publish ${{ env.PROJECT_FILE }} \
-            --configuration Release \
-            --output ./publish \
-            --no-build \
-            --runtime linux-x64 \
-            --self-contained false
+          if [ -f "GuanajuatoAdminUsuarios.csproj" ]; then
+            dotnet publish GuanajuatoAdminUsuarios.csproj \
+              --configuration Release \
+              --output ./publish \
+              --no-build \
+              --runtime linux-x64 \
+              --self-contained false
+          elif [ -f "GuanajuatoAdminUsuarios.sln" ]; then
+            dotnet publish GuanajuatoAdminUsuarios.sln \
+              --configuration Release \
+              --output ./publish \
+              --no-build \
+              --runtime linux-x64 \
+              --self-contained false
+          fi
           echo "✅ Publish completed"
 
       - name: Upload Build Artifacts
